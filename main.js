@@ -5,7 +5,7 @@
 
 // ─── CONFIG ───
 const TOTAL_FRAMES = 240;
-const FRAME_PATH = './ezgif-40aa784ac6cfbb0c-jpg/ezgif-frame-';
+const FRAME_PATH = '/frames/ezgif-frame-';
 const BEATS = [
   { id: 'beat-1', start: 0.00, end: 0.15 },
   { id: 'beat-2', start: 0.15, end: 0.45 },
