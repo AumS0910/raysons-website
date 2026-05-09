@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Raysons Group — Precision Shell Moulded Castings & Resin Coated Sand | Kolhapur, India</title>
+  <meta name="description" content="Raysons Group is a leading manufacturer of precision shell moulded castings and resin coated sand, serving automobile, hydraulic, oil & gas, agriculture and machine tool industries from Kolhapur, Maharashtra, India. ISO 9001:2015 certified." />
+  <meta name="keywords" content="shell moulded castings, resin coated sand, SG Iron, Gray Iron, Alloy Steel, Kolhapur, foundry, precision casting" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- NAVBAR — Apple-style, ultra-minimal         -->
+  <!-- ═══════════════════════════════════════════ -->
+  <nav id="navbar" class="navbar">
+    <div class="navbar__inner">
+      <a href="#" class="navbar__logo" id="nav-logo">RAYSONS GROUP</a>
+      <ul class="navbar__links" id="nav-links">
+        <li><a href="#overview" class="navbar__link">Overview</a></li>
+        <li><a href="#technology" class="navbar__link">Technology</a></li>
+        <li><a href="#products" class="navbar__link">Products</a></li>
+        <li><a href="#specs" class="navbar__link">Specs</a></li>
+        <li><a href="#enquire" class="navbar__link">Enquire</a></li>
+      </ul>
+      <a href="#enquire" class="navbar__cta" id="nav-cta">Request a Quote</a>
+      <button class="navbar__hamburger" id="nav-hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <!-- Mobile menu -->
+    <div class="navbar__mobile-menu" id="mobile-menu">
+      <ul class="navbar__mobile-links">
+        <li><a href="#overview" class="navbar__link">Overview</a></li>
+        <li><a href="#technology" class="navbar__link">Technology</a></li>
+        <li><a href="#products" class="navbar__link">Products</a></li>
+        <li><a href="#specs" class="navbar__link">Specs</a></li>
+        <li><a href="#enquire" class="navbar__link">Enquire</a></li>
+        <li><a href="#enquire" class="navbar__cta navbar__cta--mobile">Request a Quote</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- HERO — Scroll-linked Image Sequence Canvas  -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="overview" class="hero-sequence" aria-label="Hero scroll sequence">
+    <div class="hero-sequence__sticky">
+      <!-- Main canvas for image sequence -->
+      <canvas id="hero-canvas" class="hero-sequence__canvas"></canvas>
+      <!-- Ember particle overlay canvas -->
+      <canvas id="ember-canvas" class="hero-sequence__embers"></canvas>
+      <!-- Ambient orange glow -->
+      <div class="hero-sequence__glow" id="hero-glow"></div>
+      <!-- Radial vignette to blend edges -->
+      <div class="hero-sequence__vignette"></div>
+      <div class="hero-sequence__edge-mask"></div>
+
+      <!-- ─── Beat 1: HERO / INTRO (0–15%) ─── -->
+      <div class="beat beat--hero" id="beat-1" data-beat="1">
+        <div class="beat__content beat__content--center">
+          <p class="beat__eyebrow">Precision Shell Moulded Castings</p>
+          <h1 class="beat__headline beat__headline--gradient">WHERE IRON IS BORN<br/>FROM FIRE</h1>
+          <p class="beat__subtitle">Precision shell moulded castings — engineered for the<br/>world's most demanding industries.</p>
+          <p class="beat__meta">ISO 9001:2015 · Kolhapur, Maharashtra · Est. 2001</p>
+          <div class="beat__scroll-hint" id="scroll-hint">
+            <span>Scroll to explore</span>
+            <div class="beat__scroll-arrow">
+              <svg width="16" height="24" viewBox="0 0 16 24" fill="none">
+                <path d="M8 0V20M8 20L1 13M8 20L15 13" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Beat 2: THE POUR (15–45%) ─── -->
+      <div class="beat beat--pour" id="beat-2" data-beat="2">
+        <div class="beat__content beat__content--left">
+          <p class="beat__eyebrow">The Pour</p>
+          <h2 class="beat__headline">Precision forged<br/>in tradition.</h2>
+          <p class="beat__body">A controlled pour into a precision shell mould — resin-bonded sand, no moisture, no compromise. Every kilogram of metal is spectrometer-verified before it leaves the furnace.</p>
+          <p class="beat__accent">500g to 500kg. SG Iron, Gray Iron, Alloy Steel.</p>
+        </div>
+      </div>
+
+      <!-- ─── Beat 3: THE FILL (45–65%) ─── -->
+      <div class="beat beat--fill" id="beat-3" data-beat="3">
+        <div class="beat__content beat__content--right">
+          <p class="beat__eyebrow">The Fill</p>
+          <h2 class="beat__headline">Shell moulding,<br/>redefined.</h2>
+          <ul class="beat__points">
+            <li>Resin-coated sand shell — zero moisture, clean shakeout.</li>
+            <li>Complex geometries machined to tight tolerance bands.</li>
+            <li>Superior surface finish. Reduced machining cost. Shorter lead time.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ─── Beat 4: THE SOLIDIFICATION (65–85%) ─── -->
+      <div class="beat beat--solid" id="beat-4" data-beat="4">
+        <div class="beat__content beat__content--left">
+          <p class="beat__eyebrow">Quality Assurance</p>
+          <h2 class="beat__headline">From molten metal to<br/>precision component.</h2>
+          <p class="beat__body">Heat treatment. Shot blasting. Hardness testing. Image analysis. Every casting passes through rigorous QC before it reaches your assembly line.</p>
+          <p class="beat__accent">Brücker Spectrometer · UTM · BHN Hardness · ISO 9001:2015</p>
+        </div>
+      </div>
+
+      <!-- ─── Beat 5: FINAL FRAME + CTA (85–100%) ─── -->
+      <div class="beat beat--cta" id="beat-5" data-beat="5">
+        <div class="beat__content beat__content--center">
+          <h2 class="beat__headline beat__headline--gradient">Built for industries that<br/>cannot afford failure.</h2>
+          <p class="beat__subtitle">Raysons Group. Shell Moulded Castings & Resin Coated Sand. Kolhapur, India.</p>
+          <div class="beat__cta-group">
+            <a href="#enquire" class="btn btn--primary" id="cta-quote">Request a Quote</a>
+            <a href="#technology" class="btn btn--ghost" id="cta-capabilities">See Full Capabilities <span class="btn__arrow">→</span></a>
+          </div>
+          <p class="beat__industries">Automobile · Hydraulic · Oil & Gas · Agriculture · Machine Tools</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- STATS BAND — Animated counters              -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="technology" class="stats" aria-label="Key statistics">
+    <div class="stats__inner">
+      <div class="stats__card" data-target="200" data-suffix="MT+" id="stat-volume">
+        <span class="stats__number">0</span>
+        <span class="stats__suffix">MT+</span>
+        <span class="stats__label">Annual Volume</span>
+      </div>
+      <div class="stats__card" data-target="25" data-suffix="+" id="stat-years">
+        <span class="stats__number">0</span>
+        <span class="stats__suffix">+</span>
+        <span class="stats__label">Years Experience</span>
+      </div>
+      <div class="stats__card" data-target="500" data-suffix="kg" id="stat-weight">
+        <span class="stats__number">0</span>
+        <span class="stats__suffix">kg</span>
+        <span class="stats__label">Max Casting Weight</span>
+      </div>
+      <div class="stats__card" data-target="6" data-suffix="" id="stat-industries">
+        <span class="stats__number">0</span>
+        <span class="stats__suffix"></span>
+        <span class="stats__label">Industries Served</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PROCESS TIMELINE                            -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="products" class="process" aria-label="Manufacturing process">
+    <div class="process__inner">
+      <p class="section__eyebrow">Our Process</p>
+      <h2 class="section__headline">From raw material to<br/>finished casting.</h2>
+      <div class="process__timeline">
+        <div class="process__connector"></div>
+        <div class="process__step" data-step="1" id="process-step-1">
+          <div class="process__dot"></div>
+          <div class="process__icon">
+            <svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="1.5"/><path d="M16 28c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="currentColor" stroke-width="1.5"/><circle cx="24" cy="16" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+          </div>
+          <h3 class="process__title">Sand Mixing</h3>
+          <p class="process__desc">Precision-grade silica sand coated with thermosetting resin binder.</p>
+        </div>
+        <div class="process__step" data-step="2" id="process-step-2">
+          <div class="process__dot"></div>
+          <div class="process__icon">
+            <svg viewBox="0 0 48 48" fill="none"><rect x="10" y="14" width="28" height="22" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M18 14V10h12v4" stroke="currentColor" stroke-width="1.5"/><path d="M10 24h28" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/></svg>
+          </div>
+          <h3 class="process__title">Shell Making</h3>
+          <p class="process__desc">Heated pattern plates form precision shell mould halves.</p>
+        </div>
+        <div class="process__step" data-step="3" id="process-step-3">
+          <div class="process__dot"></div>
+          <div class="process__icon">
+            <svg viewBox="0 0 48 48" fill="none"><path d="M14 36V16l10-6 10 6v20" stroke="currentColor" stroke-width="1.5"/><path d="M20 36v-8h8v8" stroke="currentColor" stroke-width="1.5"/><path d="M18 22h12" stroke="currentColor" stroke-width="1.5"/></svg>
+          </div>
+          <h3 class="process__title">Metal Melting</h3>
+          <p class="process__desc">Induction furnace melting with spectrometer-verified chemistry.</p>
+        </div>
+        <div class="process__step" data-step="4" id="process-step-4">
+          <div class="process__dot"></div>
+          <div class="process__icon">
+            <svg viewBox="0 0 48 48" fill="none"><path d="M20 10c0 0-4 8-4 14s4 14 8 14 8-8 8-14-4-14-4-14" stroke="currentColor" stroke-width="1.5"/><path d="M24 38v4" stroke="currentColor" stroke-width="1.5"/><path d="M18 42h12" stroke="currentColor" stroke-width="1.5"/></svg>
+          </div>
+          <h3 class="process__title">Pouring</h3>
+          <p class="process__desc">Controlled molten metal pour into assembled shell moulds.</p>
+        </div>
+        <div class="process__step" data-step="5" id="process-step-5">
+          <div class="process__dot"></div>
+          <div class="process__icon">
+            <svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="14" stroke="currentColor" stroke-width="1.5"/><path d="M18 18l12 12M30 18L18 30" stroke="currentColor" stroke-width="1.5"/></svg>
+          </div>
+          <h3 class="process__title">Shakeout</h3>
+          <p class="process__desc">Clean shell removal revealing the near-net-shape casting.</p>
+        </div>
+        <div class="process__step" data-step="6" id="process-step-6">
+          <div class="process__dot"></div>
+          <div class="process__icon">
+            <svg viewBox="0 0 48 48" fill="none"><path d="M12 36h24" stroke="currentColor" stroke-width="1.5"/><path d="M16 36V20l8-8 8 8v16" stroke="currentColor" stroke-width="1.5"/><path d="M22 36v-6h4v6" stroke="currentColor" stroke-width="1.5"/><circle cx="24" cy="22" r="2" fill="currentColor"/></svg>
+          </div>
+          <h3 class="process__title">Finishing</h3>
+          <p class="process__desc">Shot blasting, heat treatment, machining, and QC inspection.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SPECS / CAPABILITIES                        -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="specs" class="capabilities" aria-label="Capabilities and specifications">
+    <div class="capabilities__inner">
+      <p class="section__eyebrow">Capabilities</p>
+      <h2 class="section__headline">Engineering precision<br/>at every scale.</h2>
+      <div class="capabilities__grid">
+        <div class="capabilities__card" id="cap-materials">
+          <div class="capabilities__card-accent"></div>
+          <h3 class="capabilities__card-title">Materials</h3>
+          <ul class="capabilities__list">
+            <li>SG Iron (All Grades)</li>
+            <li>Gray Iron (FG 150–FG 350)</li>
+            <li>Alloy Steel</li>
+            <li>Carbon Steel</li>
+            <li>Austempered Ductile Iron</li>
+          </ul>
+        </div>
+        <div class="capabilities__card" id="cap-weight">
+          <div class="capabilities__card-accent"></div>
+          <h3 class="capabilities__card-title">Weight Range</h3>
+          <p class="capabilities__big-number">500g<span class="capabilities__to">to</span>500kg</p>
+          <p class="capabilities__note">Single piece casting weight</p>
+        </div>
+        <div class="capabilities__card" id="cap-industries">
+          <div class="capabilities__card-accent"></div>
+          <h3 class="capabilities__card-title">Industries</h3>
+          <ul class="capabilities__list">
+            <li>Automobile & Auto Ancillary</li>
+            <li>Hydraulic Equipment</li>
+            <li>Oil & Gas Components</li>
+            <li>Agricultural Machinery</li>
+            <li>Machine Tools</li>
+            <li>General Engineering</li>
+          </ul>
+        </div>
+        <div class="capabilities__card" id="cap-testing">
+          <div class="capabilities__card-accent"></div>
+          <h3 class="capabilities__card-title">Testing & QC</h3>
+          <ul class="capabilities__list">
+            <li>Brücker Spectrometer</li>
+            <li>Universal Testing Machine</li>
+            <li>BHN Hardness Tester</li>
+            <li>Image Analysis Microscope</li>
+            <li>Coordinate Measuring Machine</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- REVIEWS MARQUEE                             -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="marquee-section" aria-label="Industry trust">
+    <div class="marquee-section__inner">
+      <p class="section__eyebrow">Trusted By Industry</p>
+      <h2 class="section__headline">Partnerships built on<br/>precision and trust.</h2>
+    </div>
+    <div class="marquee" id="marquee">
+      <div class="marquee__track">
+        <div class="marquee__item">
+          <blockquote class="marquee__quote">"Consistent quality and on-time delivery across 500+ SKUs over 3 years."</blockquote>
+          <p class="marquee__source">— Leading Automobile OEM, Pune</p>
+        </div>
+        <div class="marquee__item">
+          <blockquote class="marquee__quote">"Their shell moulding capability gives us the surface finish we need without secondary operations."</blockquote>
+          <p class="marquee__source">— Hydraulic Systems Manufacturer</p>
+        </div>
+        <div class="marquee__item">
+          <blockquote class="marquee__quote">"Zero rejection rate on our last 200-ton order. That speaks for itself."</blockquote>
+          <p class="marquee__source">— Oil & Gas Equipment Exporter</p>
+        </div>
+        <div class="marquee__item">
+          <blockquote class="marquee__quote">"From prototype to production in 4 weeks. Raysons understands urgency."</blockquote>
+          <p class="marquee__source">— Agricultural Machinery Division, Maharashtra</p>
+        </div>
+        <div class="marquee__item">
+          <blockquote class="marquee__quote">"The best resin coated sand we've sourced in India. Clean moulds, every time."</blockquote>
+          <p class="marquee__source">— Foundry Supplies Buyer, Gujarat</p>
+        </div>
+        <div class="marquee__item">
+          <blockquote class="marquee__quote">"Raysons' spectrometer verification gives us full confidence in metallurgical integrity."</blockquote>
+          <p class="marquee__source">— Precision Engineering, Germany</p>
+        </div>
+        <!-- Duplicated for seamless loop -->
+        <div class="marquee__item">
+          <blockquote class="marquee__quote">"Consistent quality and on-time delivery across 500+ SKUs over 3 years."</blockquote>
+          <p class="marquee__source">— Leading Automobile OEM, Pune</p>
+        </div>
+        <div class="marquee__item">
+          <blockquote class="marquee__quote">"Their shell moulding capability gives us the surface finish we need without secondary operations."</blockquote>
+          <p class="marquee__source">— Hydraulic Systems Manufacturer</p>
+        </div>
+        <div class="marquee__item">
+          <blockquote class="marquee__quote">"Zero rejection rate on our last 200-ton order. That speaks for itself."</blockquote>
+          <p class="marquee__source">— Oil & Gas Equipment Exporter</p>
+        </div>
+        <div class="marquee__item">
+          <blockquote class="marquee__quote">"From prototype to production in 4 weeks. Raysons understands urgency."</blockquote>
+          <p class="marquee__source">— Agricultural Machinery Division, Maharashtra</p>
+        </div>
+        <div class="marquee__item">
+          <blockquote class="marquee__quote">"The best resin coated sand we've sourced in India. Clean moulds, every time."</blockquote>
+          <p class="marquee__source">— Foundry Supplies Buyer, Gujarat</p>
+        </div>
+        <div class="marquee__item">
+          <blockquote class="marquee__quote">"Raysons' spectrometer verification gives us full confidence in metallurgical integrity."</blockquote>
+          <p class="marquee__source">— Precision Engineering, Germany</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- ENQUIRY / CTA SECTION                       -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section id="enquire" class="enquiry" aria-label="Request a quote">
+    <div class="enquiry__inner">
+      <div class="enquiry__content">
+        <p class="section__eyebrow">Get Started</p>
+        <h2 class="section__headline">Ready to engineer<br/>your next component?</h2>
+        <p class="enquiry__body">Whether you need 10 pieces or 10,000 — our engineering team is ready to discuss your requirements, review your drawings, and deliver a competitive quote within 48 hours.</p>
+        <div class="enquiry__cta-group">
+          <a href="mailto:info@raysonsgroup.com" class="btn btn--primary btn--large" id="enquiry-cta">Request a Quote</a>
+          <div class="enquiry__contact">
+            <p class="enquiry__contact-line"><strong>Email:</strong> info@raysonsgroup.com</p>
+            <p class="enquiry__contact-line"><strong>Location:</strong> MIDC Shiroli, Kolhapur, Maharashtra 416122</p>
+          </div>
+        </div>
+      </div>
+      <div class="enquiry__visual">
+        <div class="enquiry__glow-orb"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- FOOTER                                      -->
+  <!-- ═══════════════════════════════════════════ -->
+  <footer class="footer" id="footer">
+    <div class="footer__accent-line"></div>
+    <div class="footer__inner">
+      <div class="footer__col footer__col--brand">
+        <h3 class="footer__logo">RAYSONS GROUP</h3>
+        <p class="footer__tagline">Precision Shell Moulded Castings<br/>& Resin Coated Sand</p>
+        <div class="footer__iso">
+          <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>ISO 9001:2015 Certified</span>
+        </div>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__col-title">Quick Links</h4>
+        <ul class="footer__links">
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#technology">Statistics</a></li>
+          <li><a href="#products">Process</a></li>
+          <li><a href="#specs">Capabilities</a></li>
+          <li><a href="#enquire">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__col-title">Group Companies</h4>
+        <ul class="footer__links">
+          <li><a href="#">Raysons Sand Chem Pvt. Ltd.</a></li>
+          <li><a href="#">Raysons Shell Cast</a></li>
+          <li><a href="#">Raysons Constructions</a></li>
+          <li><a href="#">Raysons Wind Power</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__col-title">Contact</h4>
+        <ul class="footer__links footer__links--contact">
+          <li>MIDC Shiroli, Kolhapur</li>
+          <li>Maharashtra 416122, India</li>
+          <li><a href="mailto:info@raysonsgroup.com">info@raysonsgroup.com</a></li>
+          <li><a href="https://raysonsgroup.com" target="_blank" rel="noopener">raysonsgroup.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p>&copy; 2001–2025 Raysons Group. All rights reserved.</p>
+      <p>Established 1974 · Kolhapur, Maharashtra, India</p>
+    </div>
+  </footer>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
