@@ -1,11 +1,13 @@
 /* ═══════════════════════════════════════════
-   RAYSONS GROUP — Core Logic v2
-   Contain-fit · Cross-fade · Lerp · Depth Ring
+   RAYSONS GROUP — Core v3
+   Split-screen · Cross-fade · Lerp · Depth
+   Watermark crop · Heat glow · Ground shadow
    ═══════════════════════════════════════════ */
 
 const TOTAL_FRAMES = 240;
 const FRAME_PATH = '/frames/ezgif-frame-';
-const LERP_FACTOR = 0.08;
+const LERP = 0.072;
+const CROP_BOTTOM = 0.10; // Crop bottom 10% to remove Veo watermark
 const BEATS = [
   { id: 'beat-1', start: 0.00, end: 0.15 },
   { id: 'beat-2', start: 0.15, end: 0.45 },
@@ -19,13 +21,14 @@ let frames = new Array(TOTAL_FRAMES).fill(null);
 let targetProgress = 0;
 let currentProgress = 0;
 let heroCanvas, heroCtx, emberCanvas, emberCtx;
-let offscreen, offCtx;
-let heroSection;
+let offCanvas, offCtx;
+let heroSection, canvasPanel;
 let beatElements = [];
 let embers = [];
-let logicalW = 0, logicalH = 0;
+let logW = 0, logH = 0;
 let isHeroVisible = true;
-let allFramesReady = false;
+let allReady = false;
+let prevBeatIdx = -1;
 
 // ─── INIT ───
 document.addEventListener('DOMContentLoaded', init);
@@ -36,13 +39,14 @@ function init() {
   emberCanvas = document.getElementById('ember-canvas');
   emberCtx = emberCanvas.getContext('2d', { alpha: true });
   heroSection = document.querySelector('.hero-sequence');
+  canvasPanel = document.querySelector('.hero-sequence__canvas-panel');
 
   BEATS.forEach(b => beatElements.push(document.getElementById(b.id)));
 
   resizeCanvases();
   window.addEventListener('resize', debounce(resizeCanvases, 150));
 
-  // Scroll handler — ONLY updates targetProgress
+  // Scroll — ONLY updates target. Zero DOM work.
   window.addEventListener('scroll', () => {
     const rect = heroSection.getBoundingClientRect();
     const max = heroSection.offsetHeight - window.innerHeight;
@@ -53,35 +57,38 @@ function init() {
     else nav.classList.remove('scrolled');
   }, { passive: true });
 
-  // Preload all frames then start
   preloadAllFrames();
   initNavbar();
   initStats();
   initProcess();
   initMobileMenu();
-  requestAnimationFrame(renderLoop);
 }
 
-// ─── CANVAS SIZING ───
+// ─── CANVAS SIZING — retina-aware ───
 function resizeCanvases() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  logicalW = window.innerWidth;
-  logicalH = window.innerHeight;
+  // Canvas fills the canvas-panel element, not the full viewport
+  const panel = canvasPanel || document.querySelector('.hero-sequence__canvas-panel');
+  logW = panel ? panel.offsetWidth : window.innerWidth;
+  logH = panel ? panel.offsetHeight : window.innerHeight;
+
   [heroCanvas, emberCanvas].forEach(c => {
-    c.width = logicalW * dpr;
-    c.height = logicalH * dpr;
-    c.style.width = logicalW + 'px';
-    c.style.height = logicalH + 'px';
+    c.width = logW * dpr;
+    c.height = logH * dpr;
+    c.style.width = logW + 'px';
+    c.style.height = logH + 'px';
   });
   heroCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   emberCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  // Offscreen double-buffer
-  try {
-    offscreen = new OffscreenCanvas(logicalW * dpr, logicalH * dpr);
-    offCtx = offscreen.getContext('2d');
-    offCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  } catch (e) { offscreen = null; offCtx = null; }
-  if (allFramesReady) drawBlendedFrame(currentProgress);
+
+  // Offscreen double-buffer (standard canvas fallback for Safari)
+  offCanvas = document.createElement('canvas');
+  offCanvas.width = logW * dpr;
+  offCanvas.height = logH * dpr;
+  offCtx = offCanvas.getContext('2d');
+  offCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  if (allReady) drawBlendedFrame(currentProgress);
 }
 
 // ─── PRELOAD ALL FRAMES ───
@@ -92,7 +99,8 @@ function getFramePath(i) {
 async function preloadAllFrames() {
   const bar = document.getElementById('frame-loader-bar');
   let loaded = 0;
-  // Load in batches of 40 to avoid connection overload
+  let firstDrawn = false;
+
   for (let batch = 0; batch < TOTAL_FRAMES; batch += 40) {
     const end = Math.min(batch + 40, TOTAL_FRAMES);
     const promises = [];
@@ -105,96 +113,111 @@ async function preloadAllFrames() {
             frames[i] = bmp;
             loaded++;
             if (bar) bar.style.width = `${(loaded / TOTAL_FRAMES) * 100}%`;
-            if (i === 0) { drawBlendedFrame(0); updateBeats(0); }
+            if (i === 0 && !firstDrawn) { firstDrawn = true; drawBlendedFrame(0); updateBeats(0); beatElements[0]?.classList.add('active'); }
           })
           .catch(() => { loaded++; })
       );
     }
     await Promise.all(promises);
   }
-  allFramesReady = true;
-  const loader = document.getElementById('frame-loader');
-  if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.remove(), 600); }
+
+  allReady = true;
+  const loader = document.getElementById('hero-loader');
+  if (loader) {
+    loader.classList.add('done');
+    setTimeout(() => loader.remove(), 700);
+  }
+  // Start render loop only after all frames ready
+  requestAnimationFrame(renderLoop);
 }
 
-// ─── CONTAIN-FIT CALCULATOR ───
-function calcContainDraw(img, cw, ch) {
-  const scale = Math.min(cw / img.width, (ch * 0.70) / img.height) * 1.15;
-  const dw = img.width * scale;
-  const dh = img.height * scale;
-  return { dx: (cw - dw) / 2, dy: (ch - dh) / 2, dw, dh };
+// ─── CONTAIN-FIT with watermark crop ───
+function calcDraw(img, cw, ch) {
+  const srcW = img.width;
+  const srcH = img.height * (1 - CROP_BOTTOM); // Crop bottom 8%
+  const scale = Math.min(cw / srcW, (ch * 0.72) / srcH) * 1.12;
+  const dw = srcW * scale;
+  const dh = srcH * scale;
+  return { srcW, srcH, dx: (cw - dw) / 2, dy: (ch - dh) / 2, dw, dh };
 }
 
-// ─── DRAW WITH CROSS-FADE + DEPTH RING + GROUND SHADOW ───
+// ─── DRAW — cross-fade + depth ring + ground shadow + heat glow ───
 function drawBlendedFrame(progress) {
-  const cw = logicalW, ch = logicalH;
+  const cw = logW, ch = logH;
   if (!cw || !ch) return;
 
-  // Fractional frame index for cross-fade
   const rawIdx = progress * (TOTAL_FRAMES - 1);
   const idxA = Math.floor(rawIdx);
   const idxB = Math.min(idxA + 1, TOTAL_FRAMES - 1);
   const blend = rawIdx - idxA;
-
   const imgA = frames[idxA];
   const imgB = frames[idxB];
   if (!imgA) return;
 
-  const ctx = offCtx || heroCtx;
+  const ctx = offCtx;
 
   // Clear
   ctx.globalAlpha = 1.0;
   ctx.fillStyle = '#0A0804';
   ctx.fillRect(0, 0, cw, ch);
 
-  // Draw frame A (full opacity)
-  const dA = calcContainDraw(imgA, cw, ch);
-  ctx.drawImage(imgA, dA.dx, dA.dy, dA.dw, dA.dh);
+  // Frame A — contain-fit with watermark crop
+  const dA = calcDraw(imgA, cw, ch);
+  ctx.drawImage(imgA, 0, 0, dA.srcW, dA.srcH, dA.dx, dA.dy, dA.dw, dA.dh);
 
   // Cross-fade frame B
   if (imgB && blend > 0.001) {
-    const dB = calcContainDraw(imgB, cw, ch);
+    const dB = calcDraw(imgB, cw, ch);
     ctx.globalAlpha = blend;
-    ctx.drawImage(imgB, dB.dx, dB.dy, dB.dw, dB.dh);
+    ctx.drawImage(imgB, 0, 0, dB.srcW, dB.srcH, dB.dx, dB.dy, dB.dw, dB.dh);
     ctx.globalAlpha = 1.0;
   }
 
-  // Depth isolation ring — radial spotlight vignette
-  const vigR = Math.min(cw, ch) * 0.55;
-  const vig = ctx.createRadialGradient(cw / 2, ch / 2, 0, cw / 2, ch / 2, vigR);
-  vig.addColorStop(0, 'rgba(10,8,4,0)');
-  vig.addColorStop(0.55, 'rgba(10,8,4,0)');
-  vig.addColorStop(1, 'rgba(10,8,4,0.75)');
-  ctx.fillStyle = vig;
+  // Layer 2 — Radial depth vignette (floating void)
+  const vigGrad = ctx.createRadialGradient(
+    cw / 2, ch / 2, ch * 0.22,
+    cw / 2, ch / 2, ch * 0.72
+  );
+  vigGrad.addColorStop(0, 'rgba(10,8,4,0)');
+  vigGrad.addColorStop(0.7, 'rgba(10,8,4,0.35)');
+  vigGrad.addColorStop(1, 'rgba(10,8,4,0.92)');
+  ctx.fillStyle = vigGrad;
   ctx.fillRect(0, 0, cw, ch);
 
-  // Ground shadow beneath casting
-  const sy = ch * 0.72, sw = cw * 0.15, sh = ch * 0.04;
-  const sg = ctx.createRadialGradient(cw / 2, sy, 0, cw / 2, sy, sw);
-  sg.addColorStop(0, 'rgba(255,107,0,0.08)');
-  sg.addColorStop(1, 'rgba(255,107,0,0)');
-  ctx.fillStyle = sg;
-  ctx.beginPath();
-  ctx.ellipse(cw / 2, sy, sw, sh, 0, 0, Math.PI * 2);
-  ctx.fill();
+  // Layer 3 — Ground shadow
+  const sy = ch * 0.74;
+  const sw = cw * 0.28;
+  const shadowAlpha = 0.06 + progress * 0.09;
+  const shadowGrad = ctx.createRadialGradient(cw / 2, sy, 0, cw / 2, sy, sw);
+  shadowGrad.addColorStop(0, `rgba(255,107,0,${shadowAlpha})`);
+  shadowGrad.addColorStop(1, 'rgba(10,8,4,0)');
+  ctx.fillStyle = shadowGrad;
+  ctx.fillRect(0, sy - ch * 0.06, cw, ch * 0.12);
 
-  // Blit offscreen → visible canvas
-  if (offscreen && offCtx) {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    heroCtx.setTransform(1, 0, 0, 1, 0, 0);
-    heroCtx.drawImage(offscreen, 0, 0);
-    heroCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // Layer 4 — Heat glow (peaks mid-scroll during pour)
+  const heatIntensity = Math.sin(progress * Math.PI) * 0.18;
+  if (heatIntensity > 0.01) {
+    const heatGrad = ctx.createRadialGradient(cw / 2, ch * 0.52, 0, cw / 2, ch * 0.52, cw * 0.38);
+    heatGrad.addColorStop(0, `rgba(255,140,0,${heatIntensity})`);
+    heatGrad.addColorStop(1, 'rgba(10,8,4,0)');
+    ctx.fillStyle = heatGrad;
+    ctx.fillRect(0, 0, cw, ch);
   }
+
+  // Blit offscreen → visible
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  heroCtx.setTransform(1, 0, 0, 1, 0, 0);
+  heroCtx.drawImage(offCanvas, 0, 0);
+  heroCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
 // ─── RENDER LOOP — lerp + draw ───
 function renderLoop() {
-  // Lerp with snap
   const diff = targetProgress - currentProgress;
   if (Math.abs(diff) < 0.0001) {
     currentProgress = targetProgress;
   } else {
-    currentProgress += diff * LERP_FACTOR;
+    currentProgress += diff * LERP;
   }
 
   if (isHeroVisible || Math.abs(diff) > 0.001) {
@@ -203,34 +226,36 @@ function renderLoop() {
     updateEmbers();
   }
 
-  // UI updates driven by lerped progress
   const hint = document.getElementById('scroll-hint');
   if (hint) hint.style.opacity = currentProgress > 0.05 ? '0' : '';
-  const glow = document.getElementById('hero-glow');
-  if (glow) glow.style.opacity = Math.min(currentProgress * 2, 1) * 0.8;
 
   requestAnimationFrame(renderLoop);
 }
 
-// ─── BEAT CONTROLLER ───
+// ─── BEAT CONTROLLER — one active at a time, 80ms gap ───
 function updateBeats(progress) {
+  let activeIdx = -1;
   BEATS.forEach((beat, i) => {
-    const el = beatElements[i];
-    if (!el) return;
     const { start, end } = beat;
-    const fadeZone = (end - start) * 0.2;
-    let opacity = 0;
-    if (progress >= start && progress <= end) {
-      if (progress < start + fadeZone) opacity = (progress - start) / fadeZone;
-      else if (progress < end - fadeZone) opacity = 1;
-      else if (i < BEATS.length - 1) opacity = (end - progress) / fadeZone;
-      else opacity = 1;
-    }
-    opacity = Math.max(0, Math.min(1, opacity));
-    el.style.opacity = opacity;
-    if (opacity > 0.05) el.classList.add('active');
-    else el.classList.remove('active');
+    if (progress >= start && progress <= end) activeIdx = i;
   });
+
+  // Only change if beat changed
+  if (activeIdx !== prevBeatIdx) {
+    // Deactivate previous
+    if (prevBeatIdx >= 0 && beatElements[prevBeatIdx]) {
+      beatElements[prevBeatIdx].classList.remove('active');
+      beatElements[prevBeatIdx].style.opacity = '0';
+    }
+    // Activate new after 80ms gap
+    if (activeIdx >= 0 && beatElements[activeIdx]) {
+      setTimeout(() => {
+        beatElements[activeIdx].classList.add('active');
+        beatElements[activeIdx].style.opacity = '1';
+      }, prevBeatIdx >= 0 ? 80 : 0);
+    }
+    prevBeatIdx = activeIdx;
+  }
 }
 
 // ─── EMBER PARTICLE SYSTEM ───
@@ -266,14 +291,14 @@ class Ember {
 }
 
 function updateEmbers() {
-  const w = logicalW, h = logicalH;
+  const w = logW, h = logH;
   if (embers.length === 0) { for (let i = 0; i < 35; i++) embers.push(new Ember(w, h)); }
   emberCtx.clearRect(0, 0, w, h);
   if (currentProgress < 0.01) return;
   embers.forEach(e => { e.update(w, h); e.draw(emberCtx); });
 }
 
-// ─── STATS COUNTER ───
+// ─── STATS ───
 function initStats() {
   const cards = document.querySelectorAll('.stats__card');
   const obs = new IntersectionObserver(entries => {
@@ -294,7 +319,7 @@ function animateCounter(card) {
   requestAnimationFrame(tick);
 }
 
-// ─── PROCESS TIMELINE ───
+// ─── PROCESS ───
 function initProcess() {
   const steps = document.querySelectorAll('.process__step');
   const obs = new IntersectionObserver(entries => {

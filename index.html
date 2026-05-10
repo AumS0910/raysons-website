@@ -13,9 +13,15 @@
 </head>
 <body>
 
-  <!-- Frame preload progress -->
-  <div class="frame-loader" id="frame-loader">
-    <div class="frame-loader__bar" id="frame-loader-bar"></div>
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- LOADING SCREEN — full-screen preloader     -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="hero-loader" id="hero-loader">
+    <div class="hero-loader__brand">RAYSONS GROUP</div>
+    <div class="hero-loader__track">
+      <div class="hero-loader__bar" id="frame-loader-bar"></div>
+    </div>
+    <p class="hero-loader__hint">Loading foundry sequence…</p>
   </div>
 
   <!-- ═══════════════════════════════════════════ -->
@@ -50,21 +56,69 @@
   </nav>
 
   <!-- ═══════════════════════════════════════════ -->
-  <!-- HERO — Scroll-linked Image Sequence Canvas  -->
+  <!-- HERO — Split-screen scrollytelling          -->
   <!-- ═══════════════════════════════════════════ -->
   <section id="overview" class="hero-sequence" aria-label="Hero scroll sequence">
     <div class="hero-sequence__sticky">
-      <!-- Main canvas for image sequence -->
-      <canvas id="hero-canvas" class="hero-sequence__canvas"></canvas>
-      <!-- Ember particle overlay canvas -->
-      <canvas id="ember-canvas" class="hero-sequence__embers"></canvas>
-      <!-- Ambient orange glow -->
-      <div class="hero-sequence__glow" id="hero-glow"></div>
-      <!-- Radial vignette to blend edges -->
-      <div class="hero-sequence__vignette"></div>
-      <div class="hero-sequence__edge-mask"></div>
 
-      <!-- ─── Beat 1: HERO / INTRO (0–15%) ─── -->
+      <!-- LEFT: Text beat panel (42%) -->
+      <div class="hero-sequence__text-panel" id="text-panel">
+        <div class="hero-sequence__text-fade"></div>
+
+        <!-- Beat 2: THE POUR (15–45%) -->
+        <div class="beat" id="beat-2" data-beat="2">
+          <div class="beat__content">
+            <p class="beat__eyebrow">The Pour</p>
+            <h2 class="beat__headline">Precision forged<br/>in tradition.</h2>
+            <p class="beat__body">A controlled pour into a precision shell mould — resin-bonded sand, no moisture, no compromise. Every kilogram of metal is spectrometer-verified before it leaves the furnace.</p>
+            <p class="beat__accent">500g to 500kg. SG Iron, Gray Iron, Alloy Steel.</p>
+          </div>
+        </div>
+
+        <!-- Beat 3: THE FILL (45–65%) -->
+        <div class="beat" id="beat-3" data-beat="3">
+          <div class="beat__content">
+            <p class="beat__eyebrow">The Fill</p>
+            <h2 class="beat__headline">Shell moulding,<br/>redefined.</h2>
+            <ul class="beat__points">
+              <li>Resin-coated sand shell — zero moisture, clean shakeout.</li>
+              <li>Complex geometries machined to tight tolerance bands.</li>
+              <li>Superior surface finish. Reduced machining cost. Shorter lead time.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Beat 4: SOLIDIFICATION (65–85%) -->
+        <div class="beat" id="beat-4" data-beat="4">
+          <div class="beat__content">
+            <p class="beat__eyebrow">Quality Assurance</p>
+            <h2 class="beat__headline">From molten metal to<br/>precision component.</h2>
+            <p class="beat__body">Heat treatment. Shot blasting. Hardness testing. Image analysis. Every casting passes through rigorous QC before it reaches your assembly line.</p>
+            <p class="beat__accent">Brücker Spectrometer · UTM · BHN Hardness · ISO 9001:2015</p>
+          </div>
+        </div>
+
+        <!-- Beat 5: FINAL CTA (85–100%) -->
+        <div class="beat" id="beat-5" data-beat="5">
+          <div class="beat__content">
+            <h2 class="beat__headline beat__headline--gradient">Built for industries that<br/>cannot afford failure.</h2>
+            <p class="beat__subtitle">Raysons Group. Shell Moulded Castings & Resin Coated Sand. Kolhapur, India.</p>
+            <div class="beat__cta-group">
+              <a href="#enquire" class="btn btn--primary" id="cta-quote">Request a Quote</a>
+              <a href="#technology" class="btn btn--ghost" id="cta-capabilities">See Full Capabilities <span class="btn__arrow">→</span></a>
+            </div>
+            <p class="beat__industries">Automobile · Hydraulic · Oil & Gas · Agriculture · Machine Tools</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Canvas panel (58%) -->
+      <div class="hero-sequence__canvas-panel">
+        <canvas id="hero-canvas" class="hero-sequence__canvas"></canvas>
+        <canvas id="ember-canvas" class="hero-sequence__embers"></canvas>
+      </div>
+
+      <!-- Beat 1: HERO INTRO (0–15%) — centered below canvas, spans full width -->
       <div class="beat beat--hero" id="beat-1" data-beat="1">
         <div class="beat__content beat__content--center">
           <p class="beat__eyebrow">Precision Shell Moulded Castings</p>
@@ -82,51 +136,6 @@
         </div>
       </div>
 
-      <!-- ─── Beat 2: THE POUR (15–45%) ─── -->
-      <div class="beat beat--pour" id="beat-2" data-beat="2">
-        <div class="beat__content beat__content--left">
-          <p class="beat__eyebrow">The Pour</p>
-          <h2 class="beat__headline">Precision forged<br/>in tradition.</h2>
-          <p class="beat__body">A controlled pour into a precision shell mould — resin-bonded sand, no moisture, no compromise. Every kilogram of metal is spectrometer-verified before it leaves the furnace.</p>
-          <p class="beat__accent">500g to 500kg. SG Iron, Gray Iron, Alloy Steel.</p>
-        </div>
-      </div>
-
-      <!-- ─── Beat 3: THE FILL (45–65%) ─── -->
-      <div class="beat beat--fill" id="beat-3" data-beat="3">
-        <div class="beat__content beat__content--right">
-          <p class="beat__eyebrow">The Fill</p>
-          <h2 class="beat__headline">Shell moulding,<br/>redefined.</h2>
-          <ul class="beat__points">
-            <li>Resin-coated sand shell — zero moisture, clean shakeout.</li>
-            <li>Complex geometries machined to tight tolerance bands.</li>
-            <li>Superior surface finish. Reduced machining cost. Shorter lead time.</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- ─── Beat 4: THE SOLIDIFICATION (65–85%) ─── -->
-      <div class="beat beat--solid" id="beat-4" data-beat="4">
-        <div class="beat__content beat__content--left">
-          <p class="beat__eyebrow">Quality Assurance</p>
-          <h2 class="beat__headline">From molten metal to<br/>precision component.</h2>
-          <p class="beat__body">Heat treatment. Shot blasting. Hardness testing. Image analysis. Every casting passes through rigorous QC before it reaches your assembly line.</p>
-          <p class="beat__accent">Brücker Spectrometer · UTM · BHN Hardness · ISO 9001:2015</p>
-        </div>
-      </div>
-
-      <!-- ─── Beat 5: FINAL FRAME + CTA (85–100%) ─── -->
-      <div class="beat beat--cta" id="beat-5" data-beat="5">
-        <div class="beat__content beat__content--center">
-          <h2 class="beat__headline beat__headline--gradient">Built for industries that<br/>cannot afford failure.</h2>
-          <p class="beat__subtitle">Raysons Group. Shell Moulded Castings & Resin Coated Sand. Kolhapur, India.</p>
-          <div class="beat__cta-group">
-            <a href="#enquire" class="btn btn--primary" id="cta-quote">Request a Quote</a>
-            <a href="#technology" class="btn btn--ghost" id="cta-capabilities">See Full Capabilities <span class="btn__arrow">→</span></a>
-          </div>
-          <p class="beat__industries">Automobile · Hydraulic · Oil & Gas · Agriculture · Machine Tools</p>
-        </div>
-      </div>
     </div>
   </section>
 
