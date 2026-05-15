@@ -1,7 +1,7 @@
 {
-  "name": "raysons-group",
+  "name": "raysons-shell-cast",
   "version": "1.0.0",
-  "description": "Raysons Group — Cinematic Scrollytelling Landing Page",
+  "description": "Raysons Shell Cast cinematic scrollytelling foundry website",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

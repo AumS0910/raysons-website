@@ -1,347 +1,387 @@
-/* ═══════════════════════════════════════════
-   RAYSONS GROUP — Core v3
-   Split-screen · Cross-fade · Lerp · Depth
-   Watermark crop · Heat glow · Ground shadow
-   ═══════════════════════════════════════════ */
+const TOTAL=240;
+const FRAME_PATH='/frames/ezgif-frame-';
+const CROP=0.10;
+const LERP=0.008;
+const BEAT_RANGES=[{id:'beat-1',s:0,e:.25},{id:'beat-2',s:.25,e:.5},{id:'beat-3',s:.5,e:.75},{id:'beat-4',s:.75,e:1}];
 
-const TOTAL_FRAMES = 240;
-const FRAME_PATH = '/frames/ezgif-frame-';
-const LERP = 0.072;
-const CROP_BOTTOM = 0.10; // Crop bottom 10% to remove Veo watermark
-const BEATS = [
-  { id: 'beat-1', start: 0.00, end: 0.15 },
-  { id: 'beat-2', start: 0.15, end: 0.45 },
-  { id: 'beat-3', start: 0.45, end: 0.65 },
-  { id: 'beat-4', start: 0.65, end: 0.85 },
-  { id: 'beat-5', start: 0.85, end: 1.00 },
-];
+const isMobile=()=>window.innerWidth<768;
+const motionScale=()=>isMobile()?.55:1;
+const clamp=(v,min=0,max=1)=>Math.max(min,Math.min(max,v));
 
-// ─── STATE ───
-let frames = new Array(TOTAL_FRAMES).fill(null);
-let targetProgress = 0;
-let currentProgress = 0;
-let heroCanvas, heroCtx, emberCanvas, emberCtx;
-let offCanvas, offCtx;
-let heroSection, canvasPanel;
-let beatElements = [];
-let embers = [];
-let logW = 0, logH = 0;
-let isHeroVisible = true;
-let allReady = false;
-let prevBeatIdx = -1;
+const state={heroTarget:0,heroCurrent:0,beatTarget:0,beatCurrent:0};
+let frames=new Array(TOTAL).fill(null);
+let allReady=false;
+let prevBeatIdx=-1;
+let heroCanvas,heroCtx,emberCanvas,emberCtx,offC,offX;
+let embers=[];
 
-// ─── INIT ───
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded',init);
 
-function init() {
-  heroCanvas = document.getElementById('hero-canvas');
-  heroCtx = heroCanvas.getContext('2d', { alpha: false });
-  emberCanvas = document.getElementById('ember-canvas');
-  emberCtx = emberCanvas.getContext('2d', { alpha: true });
-  heroSection = document.querySelector('.hero-sequence');
-  canvasPanel = document.querySelector('.hero-sequence__canvas-panel');
+function init(){
+  heroCanvas=document.getElementById('hero-canvas');
+  emberCanvas=document.getElementById('ember-canvas');
+  if(heroCanvas)heroCtx=heroCanvas.getContext('2d',{alpha:false});
+  if(emberCanvas)emberCtx=emberCanvas.getContext('2d',{alpha:true});
 
-  BEATS.forEach(b => beatElements.push(document.getElementById(b.id)));
+  sizeCanvases();
+  window.addEventListener('resize',debounce(sizeCanvases,150));
+  window.addEventListener('scroll',onScroll,{passive:true});
 
-  resizeCanvases();
-  window.addEventListener('resize', debounce(resizeCanvases, 150));
-
-  // Scroll — ONLY updates target. Zero DOM work.
-  window.addEventListener('scroll', () => {
-    const rect = heroSection.getBoundingClientRect();
-    const max = heroSection.offsetHeight - window.innerHeight;
-    targetProgress = Math.max(0, Math.min(1, -rect.top / max));
-    isHeroVisible = rect.top < window.innerHeight && rect.bottom > 0;
-    const nav = document.getElementById('navbar');
-    if (window.scrollY > 60) nav.classList.add('scrolled');
-    else nav.classList.remove('scrolled');
-  }, { passive: true });
-
-  preloadAllFrames();
-  initNavbar();
-  initStats();
-  initProcess();
-  initMobileMenu();
+  initNav();
+  initMobile();
+  initObservers();
+  onScroll();
+  preloadFrames();
 }
 
-// ─── CANVAS SIZING — retina-aware ───
-function resizeCanvases() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  // Canvas fills the canvas-panel element, not the full viewport
-  const panel = canvasPanel || document.querySelector('.hero-sequence__canvas-panel');
-  logW = panel ? panel.offsetWidth : window.innerWidth;
-  logH = panel ? panel.offsetHeight : window.innerHeight;
+function getFramePath(i){
+  return FRAME_PATH+String(i+1).padStart(3,'0')+'.jpg';
+}
 
-  [heroCanvas, emberCanvas].forEach(c => {
-    c.width = logW * dpr;
-    c.height = logH * dpr;
-    c.style.width = logW + 'px';
-    c.style.height = logH + 'px';
+async function preloadFrames(){
+  const bar=document.getElementById('preloader-bar');
+  let loaded=0;
+  const minEnd=performance.now()+900;
+  let started=false;
+
+  const loadFrame=i=>fetch(getFramePath(i))
+    .then(r=>r.blob())
+    .then(blob=>createImageBitmap(blob))
+    .then(bitmap=>{
+      frames[i]=bitmap;
+      loaded++;
+      if(bar)bar.style.width=(loaded/TOTAL*100)+'%';
+    })
+    .catch(()=>{
+      loaded++;
+      if(bar)bar.style.width=(loaded/TOTAL*100)+'%';
+    });
+
+  const reveal=async()=>{
+    if(started)return;
+    started=true;
+    allReady=true;
+    const remaining=minEnd-performance.now();
+    if(remaining>0)await new Promise(resolve=>setTimeout(resolve,remaining));
+    const preloader=document.getElementById('preloader');
+    if(preloader){
+      preloader.classList.add('done');
+      setTimeout(()=>preloader.remove(),900);
+    }
+    requestAnimationFrame(masterTick);
+  };
+
+  setTimeout(reveal,1800);
+
+  for(let batch=0;batch<TOTAL;batch+=32){
+    const end=Math.min(batch+32,TOTAL);
+    const proms=[];
+    for(let i=batch;i<end;i++){
+      proms.push(loadFrame(i));
+    }
+    await Promise.all(proms);
+    if(batch>=32)reveal();
+  }
+  reveal();
+}
+
+function sizeCanvases(){
+  if(!heroCanvas||!heroCtx||!emberCanvas||!emberCtx)return;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  sizeCanvasToEl(heroCanvas,heroCtx,dpr,document.querySelector('.hero__canvas-wrap'));
+  sizeCanvasFull(emberCanvas,emberCtx,dpr);
+
+  offC=document.createElement('canvas');
+  offC.width=heroCanvas.width;
+  offC.height=heroCanvas.height;
+  offX=offC.getContext('2d');
+  offX.setTransform(dpr,0,0,dpr,0,0);
+}
+
+function sizeCanvasToEl(canvas,ctx,dpr,el){
+  if(!el)return;
+  const w=el.offsetWidth;
+  const h=el.offsetHeight;
+  canvas.width=w*dpr;
+  canvas.height=h*dpr;
+  canvas.style.width=w+'px';
+  canvas.style.height=h+'px';
+  canvas._lw=w;
+  canvas._lh=h;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+function sizeCanvasFull(canvas,ctx,dpr){
+  const w=window.innerWidth;
+  const h=window.innerHeight;
+  canvas.width=w*dpr;
+  canvas.height=h*dpr;
+  canvas.style.width=w+'px';
+  canvas.style.height=h+'px';
+  canvas._lw=w;
+  canvas._lh=h;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+function onScroll(){
+  const sy=window.scrollY;
+  const hero=document.querySelector('.hero');
+  if(hero){
+    const start=hero.offsetTop||0;
+    const travel=Math.max(1,hero.offsetHeight-window.innerHeight);
+    state.heroTarget=clamp((sy-start)/travel);
+  }
+
+  const beats=document.getElementById('beats-section');
+  if(beats){
+    const r=beats.getBoundingClientRect();
+    const max=beats.offsetHeight-window.innerHeight;
+    state.beatTarget=clamp(-r.top/(max||1));
+  }
+
+  document.getElementById('navbar')?.classList.toggle('scrolled',sy>60);
+  document.getElementById('float-cta')?.classList.toggle('visible',hero?sy>hero.offsetHeight*.34&&sy<hero.offsetHeight*.9:sy>500);
+}
+
+function calcDraw(img,cw,ch){
+  const sw=img.width;
+  const sh=img.height*(1-CROP);
+  const sc=Math.min(cw/sw,(ch*.76)/sh)*1.16;
+  return{sw,sh,dx:(cw-sw*sc)/2,dy:(ch-sh*sc)/2,dw:sw*sc,dh:sh*sc};
+}
+
+function drawFrame(ctx,offCtx,offCan,cw,ch,progress){
+  if(!ctx||!offCtx||!offCan||!cw||!ch)return;
+  const ri=progress*(TOTAL-1);
+  const iA=Math.floor(ri);
+  const iB=Math.min(iA+1,TOTAL-1);
+  const blend=ri-iA;
+  const a=frames[iA]||nearestFrame(iA);
+  const b=frames[iB]||nearestFrame(iB);
+  if(!a)return;
+
+  offCtx.globalAlpha=1;
+  offCtx.fillStyle='#000';
+  offCtx.fillRect(0,0,cw,ch);
+
+  const dA=calcDraw(a,cw,ch);
+  offCtx.drawImage(a,0,0,dA.sw,dA.sh,dA.dx,dA.dy,dA.dw,dA.dh);
+  if(b&&blend>.001){
+    const dB=calcDraw(b,cw,ch);
+    offCtx.globalAlpha=blend;
+    offCtx.drawImage(b,0,0,dB.sw,dB.sh,dB.dx,dB.dy,dB.dw,dB.dh);
+    offCtx.globalAlpha=1;
+  }
+
+  const vg=offCtx.createRadialGradient(cw/2,ch/2,ch*.2,cw/2,ch/2,ch*.68);
+  vg.addColorStop(0,'rgba(0,0,0,0)');
+  vg.addColorStop(.68,'rgba(0,0,0,.28)');
+  vg.addColorStop(1,'rgba(0,0,0,.9)');
+  offCtx.fillStyle=vg;
+  offCtx.fillRect(0,0,cw,ch);
+
+  const glow=offCtx.createRadialGradient(cw/2,ch*.7,0,cw/2,ch*.7,cw*.34);
+  glow.addColorStop(0,`rgba(255,107,0,${.06+progress*.12})`);
+  glow.addColorStop(1,'rgba(0,0,0,0)');
+  offCtx.fillStyle=glow;
+  offCtx.fillRect(0,0,cw,ch);
+
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.drawImage(offCan,0,0);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+function nearestFrame(index){
+  for(let d=1;d<TOTAL;d++){
+    const prev=index-d;
+    const next=index+d;
+    if(prev>=0&&frames[prev])return frames[prev];
+    if(next<TOTAL&&frames[next])return frames[next];
+  }
+  return null;
+}
+
+function masterTick(){
+  state.heroCurrent+=Math.abs(state.heroTarget-state.heroCurrent)<.0001?state.heroTarget-state.heroCurrent:(state.heroTarget-state.heroCurrent)*LERP;
+  state.beatCurrent+=Math.abs(state.beatTarget-state.beatCurrent)<.0001?state.beatTarget-state.beatCurrent:(state.beatTarget-state.beatCurrent)*LERP;
+
+  updateParallax();
+  updateBeats(state.beatCurrent);
+  updateTextFills();
+
+  if(allReady){
+    drawFrame(heroCtx,offX,offC,heroCanvas?heroCanvas._lw||1:1,heroCanvas?heroCanvas._lh||1:1,state.heroCurrent);
+  }
+  updateEmbers(emberCtx,embers,emberCanvas?emberCanvas._lw||window.innerWidth:window.innerWidth,emberCanvas?emberCanvas._lh||window.innerHeight:window.innerHeight,state.heroCurrent);
+
+  const scrollInd=document.getElementById('scroll-ind');
+  if(scrollInd)scrollInd.style.opacity=state.heroCurrent>.08?'0':'1';
+  requestAnimationFrame(masterTick);
+}
+
+function updateParallax(){
+  const sy=window.scrollY;
+  const hero=document.querySelector('.hero');
+  const heroStart=hero?.offsetTop||0;
+  const heroScroll=Math.max(0,sy-heroStart);
+  const scale=motionScale();
+  const heroBg=document.getElementById('hero-bg-text');
+  const canvas=document.getElementById('layer-canvas');
+  const embersEl=document.getElementById('layer-embers');
+  const left=document.querySelector('.hero__left');
+  const right=document.querySelector('.hero__right');
+  const beatsSchematic=document.getElementById('beats-schematic');
+  const beatsBg=document.querySelector('.beats__bg-text');
+
+  if(heroBg)heroBg.style.transform=`translate(-50%,calc(-50% + ${heroScroll*.035*scale}px))`;
+  if(canvas)canvas.style.transform=`translateX(-50%) translateY(${heroScroll*.055*scale}px) translateZ(0)`;
+  if(embersEl)embersEl.style.transform=`translateY(${-heroScroll*.045*scale}px) translateZ(0)`;
+  if(left&&!isMobile())left.style.transform=`translateY(calc(-50% + ${heroScroll*.08*scale}px))`;
+  if(right&&!isMobile())right.style.transform=`translateY(calc(-50% + ${heroScroll*.12*scale}px))`;
+
+  const beats=document.getElementById('beats-section');
+  if(beats&&beatsSchematic){
+    const r=beats.getBoundingClientRect();
+    const p=clamp(-r.top/(beats.offsetHeight-window.innerHeight||1));
+    beatsSchematic.style.transform=`translateY(${(p-.5)*-70*scale}px) rotate(${(p-.5)*8}deg) scale(${1.02+p*.04})`;
+    if(beatsBg)beatsBg.style.transform=`translate(-50%,calc(-50% + ${(p-.5)*42*scale}px))`;
+  }
+}
+
+function updateBeats(progress){
+  let active=BEAT_RANGES.length-1;
+  BEAT_RANGES.forEach((beat,i)=>{
+    if(progress>=beat.s&&progress<=beat.e)active=i;
   });
-  heroCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  emberCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  // Offscreen double-buffer (standard canvas fallback for Safari)
-  offCanvas = document.createElement('canvas');
-  offCanvas.width = logW * dpr;
-  offCanvas.height = logH * dpr;
-  offCtx = offCanvas.getContext('2d');
-  offCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  if (allReady) drawBlendedFrame(currentProgress);
-}
-
-// ─── PRELOAD ALL FRAMES ───
-function getFramePath(i) {
-  return FRAME_PATH + String(i + 1).padStart(3, '0') + '.jpg';
-}
-
-async function preloadAllFrames() {
-  const bar = document.getElementById('frame-loader-bar');
-  let loaded = 0;
-  let firstDrawn = false;
-
-  for (let batch = 0; batch < TOTAL_FRAMES; batch += 40) {
-    const end = Math.min(batch + 40, TOTAL_FRAMES);
-    const promises = [];
-    for (let i = batch; i < end; i++) {
-      promises.push(
-        fetch(getFramePath(i))
-          .then(r => r.blob())
-          .then(blob => createImageBitmap(blob))
-          .then(bmp => {
-            frames[i] = bmp;
-            loaded++;
-            if (bar) bar.style.width = `${(loaded / TOTAL_FRAMES) * 100}%`;
-            if (i === 0 && !firstDrawn) { firstDrawn = true; drawBlendedFrame(0); updateBeats(0); beatElements[0]?.classList.add('active'); }
-          })
-          .catch(() => { loaded++; })
-      );
-    }
-    await Promise.all(promises);
-  }
-
-  allReady = true;
-  const loader = document.getElementById('hero-loader');
-  if (loader) {
-    loader.classList.add('done');
-    setTimeout(() => loader.remove(), 700);
-  }
-  // Start render loop only after all frames ready
-  requestAnimationFrame(renderLoop);
-}
-
-// ─── CONTAIN-FIT with watermark crop ───
-function calcDraw(img, cw, ch) {
-  const srcW = img.width;
-  const srcH = img.height * (1 - CROP_BOTTOM); // Crop bottom 8%
-  const scale = Math.min(cw / srcW, (ch * 0.72) / srcH) * 1.12;
-  const dw = srcW * scale;
-  const dh = srcH * scale;
-  return { srcW, srcH, dx: (cw - dw) / 2, dy: (ch - dh) / 2, dw, dh };
-}
-
-// ─── DRAW — cross-fade + depth ring + ground shadow + heat glow ───
-function drawBlendedFrame(progress) {
-  const cw = logW, ch = logH;
-  if (!cw || !ch) return;
-
-  const rawIdx = progress * (TOTAL_FRAMES - 1);
-  const idxA = Math.floor(rawIdx);
-  const idxB = Math.min(idxA + 1, TOTAL_FRAMES - 1);
-  const blend = rawIdx - idxA;
-  const imgA = frames[idxA];
-  const imgB = frames[idxB];
-  if (!imgA) return;
-
-  const ctx = offCtx;
-
-  // Clear
-  ctx.globalAlpha = 1.0;
-  ctx.fillStyle = '#0A0804';
-  ctx.fillRect(0, 0, cw, ch);
-
-  // Frame A — contain-fit with watermark crop
-  const dA = calcDraw(imgA, cw, ch);
-  ctx.drawImage(imgA, 0, 0, dA.srcW, dA.srcH, dA.dx, dA.dy, dA.dw, dA.dh);
-
-  // Cross-fade frame B
-  if (imgB && blend > 0.001) {
-    const dB = calcDraw(imgB, cw, ch);
-    ctx.globalAlpha = blend;
-    ctx.drawImage(imgB, 0, 0, dB.srcW, dB.srcH, dB.dx, dB.dy, dB.dw, dB.dh);
-    ctx.globalAlpha = 1.0;
-  }
-
-  // Layer 2 — Radial depth vignette (floating void)
-  const vigGrad = ctx.createRadialGradient(
-    cw / 2, ch / 2, ch * 0.22,
-    cw / 2, ch / 2, ch * 0.72
-  );
-  vigGrad.addColorStop(0, 'rgba(10,8,4,0)');
-  vigGrad.addColorStop(0.7, 'rgba(10,8,4,0.35)');
-  vigGrad.addColorStop(1, 'rgba(10,8,4,0.92)');
-  ctx.fillStyle = vigGrad;
-  ctx.fillRect(0, 0, cw, ch);
-
-  // Layer 3 — Ground shadow
-  const sy = ch * 0.74;
-  const sw = cw * 0.28;
-  const shadowAlpha = 0.06 + progress * 0.09;
-  const shadowGrad = ctx.createRadialGradient(cw / 2, sy, 0, cw / 2, sy, sw);
-  shadowGrad.addColorStop(0, `rgba(255,107,0,${shadowAlpha})`);
-  shadowGrad.addColorStop(1, 'rgba(10,8,4,0)');
-  ctx.fillStyle = shadowGrad;
-  ctx.fillRect(0, sy - ch * 0.06, cw, ch * 0.12);
-
-  // Layer 4 — Heat glow (peaks mid-scroll during pour)
-  const heatIntensity = Math.sin(progress * Math.PI) * 0.18;
-  if (heatIntensity > 0.01) {
-    const heatGrad = ctx.createRadialGradient(cw / 2, ch * 0.52, 0, cw / 2, ch * 0.52, cw * 0.38);
-    heatGrad.addColorStop(0, `rgba(255,140,0,${heatIntensity})`);
-    heatGrad.addColorStop(1, 'rgba(10,8,4,0)');
-    ctx.fillStyle = heatGrad;
-    ctx.fillRect(0, 0, cw, ch);
-  }
-
-  // Blit offscreen → visible
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  heroCtx.setTransform(1, 0, 0, 1, 0, 0);
-  heroCtx.drawImage(offCanvas, 0, 0);
-  heroCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-}
-
-// ─── RENDER LOOP — lerp + draw ───
-function renderLoop() {
-  const diff = targetProgress - currentProgress;
-  if (Math.abs(diff) < 0.0001) {
-    currentProgress = targetProgress;
-  } else {
-    currentProgress += diff * LERP;
-  }
-
-  if (isHeroVisible || Math.abs(diff) > 0.001) {
-    drawBlendedFrame(currentProgress);
-    updateBeats(currentProgress);
-    updateEmbers();
-  }
-
-  const hint = document.getElementById('scroll-hint');
-  if (hint) hint.style.opacity = currentProgress > 0.05 ? '0' : '';
-
-  requestAnimationFrame(renderLoop);
-}
-
-// ─── BEAT CONTROLLER — one active at a time, 80ms gap ───
-function updateBeats(progress) {
-  let activeIdx = -1;
-  BEATS.forEach((beat, i) => {
-    const { start, end } = beat;
-    if (progress >= start && progress <= end) activeIdx = i;
+  if(active===prevBeatIdx)return;
+  BEAT_RANGES.forEach((beat,i)=>{
+    document.getElementById(beat.id)?.classList.toggle('active',i===active);
   });
-
-  // Only change if beat changed
-  if (activeIdx !== prevBeatIdx) {
-    // Deactivate previous
-    if (prevBeatIdx >= 0 && beatElements[prevBeatIdx]) {
-      beatElements[prevBeatIdx].classList.remove('active');
-      beatElements[prevBeatIdx].style.opacity = '0';
-    }
-    // Activate new after 80ms gap
-    if (activeIdx >= 0 && beatElements[activeIdx]) {
-      setTimeout(() => {
-        beatElements[activeIdx].classList.add('active');
-        beatElements[activeIdx].style.opacity = '1';
-      }, prevBeatIdx >= 0 ? 80 : 0);
-    }
-    prevBeatIdx = activeIdx;
-  }
+  prevBeatIdx=active;
 }
 
-// ─── EMBER PARTICLE SYSTEM ───
-class Ember {
-  constructor(w, h) { this.reset(w, h, true); }
-  reset(w, h, initial = false) {
-    this.x = Math.random() * w;
-    this.y = initial ? Math.random() * h : h + 10;
-    this.size = 1.5 + Math.random() * 3.5;
-    this.speedY = -(0.3 + Math.random() * 1.2);
-    this.speedX = (Math.random() - 0.5) * 0.4;
-    this.opacity = 0.2 + Math.random() * 0.6;
-    this.life = 0;
-    this.maxLife = 120 + Math.random() * 180;
-    this.color = `255,${107 + Math.floor(Math.random() * 108)},${Math.floor(Math.random() * 30)}`;
+function updateTextFills(){
+  fillByViewport(document.getElementById('about-text'),.1,.85);
+  fillByViewport(document.querySelector('.industries__statement'),.15,.82);
+}
+
+function fillByViewport(el,start,end){
+  if(!el)return;
+  const r=el.getBoundingClientRect();
+  const vh=window.innerHeight||1;
+  const raw=(vh*end-r.top)/(vh*(end-start));
+  el.style.setProperty('--fill',(clamp(raw)*100).toFixed(1)+'%');
+}
+
+class Ember{
+  constructor(w,h,init){this.reset(w,h,init)}
+  reset(w,h,init=false){
+    this.x=Math.random()*w;
+    this.y=init?Math.random()*h:h+20;
+    this.sz=1.2+Math.random()*4.8;
+    this.vy=-(.25+Math.random()*1.1);
+    this.phase=Math.random()*Math.PI*2;
+    this.op=.18+Math.random()*.55;
+    this.life=0;
+    this.maxLife=120+Math.random()*180;
+    this.r=255;
+    this.g=105+Math.floor(Math.random()*110);
+    this.b=Math.floor(Math.random()*28);
   }
-  update(w, h) {
-    this.x += this.speedX; this.y += this.speedY; this.life++;
-    this.speedX += (Math.random() - 0.5) * 0.05;
-    if (this.life > this.maxLife || this.y < -20) this.reset(w, h);
+  update(w,h){
+    this.life++;
+    this.x+=Math.sin(this.life*.035+this.phase)*.55;
+    this.y+=this.vy;
+    if(this.life>this.maxLife||this.y<-20||this.x<-30||this.x>w+30)this.reset(w,h);
   }
-  draw(ctx) {
-    const alpha = this.opacity * Math.min(this.life / 20, 1) * Math.max(0, 1 - this.life / this.maxLife) * currentProgress;
-    if (alpha < 0.01) return;
+  draw(ctx,intensity){
+    const life=this.life/this.maxLife;
+    const fade=Math.min(this.life/22,1)*Math.max(0,1-life);
+    const a=this.op*fade*intensity;
+    if(a<.01)return;
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${this.color},${alpha})`;
-    ctx.shadowBlur = this.size * 3;
-    ctx.shadowColor = `rgba(${this.color},${alpha * 0.5})`;
+    ctx.arc(this.x,this.y,this.sz,0,Math.PI*2);
+    ctx.fillStyle=`rgba(${this.r},${this.g},${this.b},${a})`;
+    ctx.shadowBlur=this.sz*3;
+    ctx.shadowColor=`rgba(${this.r},${this.g},${this.b},${a*.5})`;
     ctx.fill();
-    ctx.shadowBlur = 0;
+    ctx.shadowBlur=0;
   }
 }
 
-function updateEmbers() {
-  const w = logW, h = logH;
-  if (embers.length === 0) { for (let i = 0; i < 35; i++) embers.push(new Ember(w, h)); }
-  emberCtx.clearRect(0, 0, w, h);
-  if (currentProgress < 0.01) return;
-  embers.forEach(e => { e.update(w, h); e.draw(emberCtx); });
+function updateEmbers(ctx,arr,w,h,progress){
+  if(!ctx||!w||!h)return;
+  if(arr.length===0)for(let i=0;i<60;i++)arr.push(new Ember(w,h,true));
+  ctx.clearRect(0,0,w,h);
+  if(progress<.01)return;
+  arr.forEach(ember=>{
+    ember.update(w,h);
+    ember.draw(ctx,progress);
+  });
 }
 
-// ─── STATS ───
-function initStats() {
-  const cards = document.querySelectorAll('.stats__card');
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { animateCounter(e.target); obs.unobserve(e.target); } });
-  }, { threshold: 0.3 });
-  cards.forEach(c => obs.observe(c));
+function initNav(){
+  document.querySelectorAll('a[href^="#"]').forEach(anchor=>{
+    anchor.addEventListener('click',event=>{
+      const target=document.querySelector(anchor.getAttribute('href'));
+      if(!target)return;
+      event.preventDefault();
+      target.scrollIntoView({behavior:'smooth',block:'start'});
+      document.getElementById('mobile-menu')?.classList.remove('open');
+    });
+  });
 }
-function animateCounter(card) {
-  const target = parseInt(card.dataset.target);
-  const numEl = card.querySelector('.stats__number');
-  const start = performance.now();
-  card.classList.add('counted');
-  function tick(now) {
-    const t = Math.min((now - start) / 2000, 1);
-    numEl.textContent = Math.round((1 - Math.pow(1 - t, 3)) * target);
-    if (t < 1) requestAnimationFrame(tick);
+
+function initMobile(){
+  const button=document.getElementById('nav-hamburger');
+  const menu=document.getElementById('mobile-menu');
+  if(button&&menu)button.addEventListener('click',()=>menu.classList.toggle('open'));
+}
+
+function initObservers(){
+  const statsObs=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting)return;
+      document.getElementById('stats-line')?.classList.add('drawn');
+      document.querySelectorAll('.stats__item').forEach(card=>animateCount(card));
+      statsObs.disconnect();
+    });
+  },{threshold:.3});
+  const stats=document.getElementById('stats');
+  if(stats)statsObs.observe(stats);
+
+  const procObs=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting)return;
+      document.querySelectorAll('.process__step').forEach(step=>step.classList.remove('active'));
+      entry.target.classList.add('active');
+      const ghost=document.getElementById('process-ghost');
+      if(ghost)ghost.textContent=String(parseInt(entry.target.dataset.step,10)+1).padStart(2,'0');
+    });
+  },{threshold:.5,rootMargin:'0px 0px -30% 0px'});
+  document.querySelectorAll('.process__step').forEach(step=>procObs.observe(step));
+}
+
+function animateCount(card){
+  if(card.dataset.counted)return;
+  card.dataset.counted='true';
+  const target=parseInt(card.dataset.target,10);
+  const numEl=card.querySelector('.stats__num');
+  if(!numEl)return;
+  const start=performance.now();
+  function tick(now){
+    const t=clamp((now-start)/1800);
+    numEl.textContent=Math.round((1-Math.pow(1-t,3))*target);
+    if(t<1)requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
 }
 
-// ─── PROCESS ───
-function initProcess() {
-  const steps = document.querySelectorAll('.process__step');
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); });
-  }, { threshold: 0.2, rootMargin: '0px 0px -10% 0px' });
-  steps.forEach((s, i) => { s.style.transitionDelay = `${i * 0.1}s`; obs.observe(s); });
+function debounce(fn,ms){
+  let timer;
+  return(...args)=>{
+    clearTimeout(timer);
+    timer=setTimeout(()=>fn(...args),ms);
+  };
 }
-
-// ─── NAVBAR ───
-function initNavbar() {
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const t = document.querySelector(a.getAttribute('href'));
-      if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); document.getElementById('mobile-menu')?.classList.remove('open'); }
-    });
-  });
-}
-function initMobileMenu() {
-  const btn = document.getElementById('nav-hamburger');
-  const menu = document.getElementById('mobile-menu');
-  if (btn && menu) btn.addEventListener('click', () => menu.classList.toggle('open'));
-}
-
-// ─── UTILITIES ───
-function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
