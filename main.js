@@ -1,3 +1,5 @@
+import "./threeScene";
+
 const TOTAL=240;
 const FRAME_PATH='/frames/ezgif-frame-';
 const CROP=0.10;
@@ -14,6 +16,7 @@ let allReady=false;
 let prevBeatIdx=-1;
 let heroCanvas,heroCtx,emberCanvas,emberCtx,offC,offX;
 let embers=[];
+let filmScenes=[];
 
 document.addEventListener('DOMContentLoaded',init);
 
@@ -29,6 +32,7 @@ function init(){
 
   initNav();
   initMobile();
+  initCinematicSections();
   initObservers();
   onScroll();
   preloadFrames();
@@ -206,6 +210,7 @@ function masterTick(){
   state.heroCurrent+=Math.abs(state.heroTarget-state.heroCurrent)<.0001?state.heroTarget-state.heroCurrent:(state.heroTarget-state.heroCurrent)*LERP;
   state.beatCurrent+=Math.abs(state.beatTarget-state.beatCurrent)<.0001?state.beatTarget-state.beatCurrent:(state.beatTarget-state.beatCurrent)*LERP;
 
+  updateCinematicPage();
   updateParallax();
   updateBeats(state.beatCurrent);
   updateTextFills();
@@ -337,6 +342,90 @@ function initMobile(){
   const button=document.getElementById('nav-hamburger');
   const menu=document.getElementById('mobile-menu');
   if(button&&menu)button.addEventListener('click',()=>menu.classList.toggle('open'));
+}
+
+function initCinematicSections(){
+  document.querySelectorAll('.hero .film-reveal,.hero .film-scene').forEach(el=>{
+    el.classList.remove('film-reveal','film-scene','is-visible');
+    el.style.removeProperty('--reveal-delay');
+  });
+
+  const sceneConfigs=[
+    ['about','scene--bridge'],
+    ['stats','scene--measure'],
+    ['specs-section','scene--precision'],
+    ['process','scene--rhythm'],
+    ['capabilities','scene--control'],
+    ['industries','scene--global'],
+    ['enquire','scene--resolve']
+  ];
+
+  filmScenes=sceneConfigs
+    .map(([id,tone])=>document.getElementById(id)?{el:document.getElementById(id),tone}:null)
+    .filter(Boolean);
+
+  filmScenes.forEach(({el,tone})=>{
+    el.classList.add('film-scene',tone);
+    getRevealTargets(el).forEach((target,i)=>{
+      target.classList.add('film-reveal');
+      target.style.setProperty('--reveal-delay',`${Math.min(i,8)*70}ms`);
+    });
+  });
+
+  const sceneObs=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      entry.target.classList.toggle('is-visible',entry.isIntersecting);
+    });
+  },{threshold:.18,rootMargin:'-8% 0px -14% 0px'});
+
+  filmScenes.forEach(({el})=>sceneObs.observe(el));
+}
+
+function getRevealTargets(root){
+  const selectors=[
+    '.about__label','.about__kicker','.about__statement','.about__body','.about__facts span',
+    '.stats__item',
+    '.specs__eyebrow','.specs__lede','.specs__headline','.specs__card',
+    '.process__eyebrow','.process__headline','.process__step','.process__frame',
+    '.caps__eyebrow','.caps__headline','.caps__col',
+    '.industries__statement','.industries__item','.industries__contact',
+    '.cta__eyebrow','.cta__headline','.cta__rule','.cta__body','.cta__buttons','.cta__contact-block'
+  ];
+  return [...root.querySelectorAll(selectors.join(','))]
+    .filter(target=>!target.closest('.hero')&&!target.closest('.beats__schematic')&&!target.closest('.beat'));
+}
+
+function updateCinematicPage(){
+  const doc=document.documentElement;
+  const sy=window.scrollY;
+  const hero=document.querySelector('.hero');
+  const heroHeight=hero?.offsetHeight||window.innerHeight;
+  const afterHero=clamp((sy-heroHeight*.55)/(Math.max(1,document.body.scrollHeight-window.innerHeight-heroHeight*.55)));
+  const heat=1-afterHero;
+  const calm=smoothstep(.18,1,afterHero);
+
+  doc.style.setProperty('--forge-heat',(heat).toFixed(3));
+  doc.style.setProperty('--forge-calm',(calm).toFixed(3));
+  doc.style.setProperty('--atmo-opacity',(0.16*heat+0.035).toFixed(3));
+  doc.style.setProperty('--atmo-warmth',(0.11*heat).toFixed(3));
+
+  filmScenes.forEach(({el},index)=>{
+    const r=el.getBoundingClientRect();
+    const vh=window.innerHeight||1;
+    const center=(r.top+r.height*.5)/vh;
+    const progress=clamp((vh-r.top)/(vh+r.height));
+    const focus=1-clamp(Math.abs(center-.5)*1.7);
+    const drift=(center-.5)*-34*motionScale();
+    el.style.setProperty('--scene-progress',progress.toFixed(3));
+    el.style.setProperty('--scene-focus',focus.toFixed(3));
+    el.style.setProperty('--scene-drift',`${drift.toFixed(2)}px`);
+    el.style.setProperty('--scene-index',index);
+  });
+}
+
+function smoothstep(edge0,edge1,value){
+  const t=clamp((value-edge0)/(edge1-edge0));
+  return t*t*(3-2*t);
 }
 
 function initObservers(){
