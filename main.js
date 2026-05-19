@@ -49,7 +49,22 @@ function initCursor() {
   if (!el || window.matchMedia('(hover:none)').matches) return;
   let cx = window.innerWidth / 2, cy = window.innerHeight / 2;
   let tx = cx, ty = cy;
-  document.addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; }, { passive: true });
+  let revealed = false;
+
+  document.addEventListener('pointermove', e => {
+    tx = e.clientX;
+    ty = e.clientY;
+    // Snap to exact position on first move so it doesn't slide in from corner
+    if (!revealed) {
+      cx = tx;
+      cy = ty;
+      el.style.left = cx + 'px';
+      el.style.top  = cy + 'px';
+      el.style.opacity = '1';
+      revealed = true;
+    }
+  }, { passive: true });
+
   // Expand cursor on interactive elements
   const targets = 'a, button, .btn, .stats__item, .specs__card, .caps__col, .industries__item, .ticker__item';
   document.querySelectorAll(targets).forEach(node => {
