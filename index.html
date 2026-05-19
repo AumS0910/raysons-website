@@ -23,7 +23,13 @@
 
 <nav id="navbar" class="nav">
   <div class="nav__inner">
-    <a href="#" class="nav__logo" id="nav-logo">Raysons <span class="nav__logo-accent">Shell Cast</span></a>
+    <a href="#" class="nav__logo" id="nav-logo">
+      <img src="/images/WhatsApp_Image_2026-05-14_at_10.22.47_PM-removebg-preview.png"
+           alt="Raysons Group Logo"
+           class="nav__logo-img"
+           width="32" height="32">
+      Raysons <span class="nav__logo-accent">Shell Cast</span>
+    </a>
     <ul class="nav__links" id="nav-links">
       <li><a href="#overview" class="nav__link">Overview</a></li>
       <li><a href="#process" class="nav__link">Technology</a></li>
@@ -103,6 +109,40 @@
   </div>
   </div>
 </section>
+
+<!-- ═══════════════ MARQUEE TICKER ═══════════════ -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker__track" id="ticker-track">
+    <span class="ticker__item">Shell Moulding</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">ISO 9001:2015</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">Ductile Iron</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">500 MT Capacity</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">No-Bake Casting</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">Kolhapur, India</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">Gray Iron</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">In-House Machining</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">Export Ready</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">HMC · VMC · CNC</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">0.5 kg to 500 kg</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">40+ Years Legacy</span><span class="ticker__sep">·</span>
+    <!-- Duplicate for seamless loop -->
+    <span class="ticker__item">Shell Moulding</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">ISO 9001:2015</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">Ductile Iron</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">500 MT Capacity</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">No-Bake Casting</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">Kolhapur, India</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">Gray Iron</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">In-House Machining</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">Export Ready</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">HMC · VMC · CNC</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">0.5 kg to 500 kg</span><span class="ticker__sep">·</span>
+    <span class="ticker__item">40+ Years Legacy</span><span class="ticker__sep">·</span>
+  </div>
+</div>
+
+<!-- Custom cursor -->
+<div class="cursor" id="custom-cursor" aria-hidden="true"></div>
 
 <!-- ═══════════════ ABOUT REVEAL ═══════════════ -->
 <section class="about" id="about">
@@ -386,5 +426,9 @@
 </footer>
 
 <script type="module" src="./main.js"></script>
+
+<!-- Custom cursor — must be last child of body, outside all sections
+     so mix-blend-mode:difference is NOT clipped by hero isolation -->
+<div class="cursor" id="custom-cursor" aria-hidden="true"></div>
 </body>
 </html>

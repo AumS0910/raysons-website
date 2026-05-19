@@ -185,6 +185,7 @@ class ForgeHeroAtmosphere {
   constructor(canvasEl) {
     this.canvas = canvasEl;
     this.stage = canvasEl.closest(".hero__stage") || canvasEl.parentElement;
+    this.hero = this.stage?.parentElement?.closest(".hero") || this.stage;
     this.scene = new THREE.Scene();
     this.clock = new THREE.Clock();
     this.mouse = new THREE.Vector2();
@@ -336,7 +337,7 @@ class ForgeHeroAtmosphere {
 
   addParticles() {
     const isSmall = window.innerWidth < 768;
-    this.particleCount = isSmall ? 520 : 980;
+    this.particleCount = isSmall ? 300 : 600;
     const positions = new Float32Array(this.particleCount * 3);
     const seeds = new Float32Array(this.particleCount);
     const sizes = new Float32Array(this.particleCount);
@@ -488,10 +489,10 @@ class ForgeHeroAtmosphere {
   addPostProcessing() {
     this.renderPass = new RenderPass(this.scene, this.camera);
 
-    this.bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.18, 0.42, 0.78);
-    this.bloomPass.threshold = 0.82;
-    this.bloomPass.strength = 0.16;
-    this.bloomPass.radius = 0.36;
+    this.bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.08, 0.25, 0.4);
+    this.bloomPass.threshold = 0.91;
+    this.bloomPass.strength = 0.08;
+    this.bloomPass.radius = 0.22;
 
     this.lensPass = new ShaderPass(ForgeLensShader);
 
@@ -628,8 +629,8 @@ class ForgeHeroAtmosphere {
     const guidedY = mix(mix(0.62, -0.08, story.streamFocus), -0.42, story.impactPriority);
     const guidedZ = mix(9.15, 8.62, story.impactPriority) + story.typeFocus * 0.18;
 
-    this.mouse.x += (this.pointer.x - this.mouse.x) * 0.014;
-    this.mouse.y += (this.pointer.y - this.mouse.y) * 0.014;
+this.mouse.x += (this.pointer.x - this.mouse.x) * 0.004;
+this.mouse.y += (this.pointer.y - this.mouse.y) * 0.004;
 
     this.camera.position.x = guidedX + this.mouse.x * 0.08 + microDriftX + analogDriftX * 0.012;
     this.camera.position.y = guidedY - this.mouse.y * 0.055 + microDriftY + analogDriftY * 0.008;
@@ -685,8 +686,11 @@ class ForgeHeroAtmosphere {
     this.lensPass.uniforms.uGrain.value = story.grain;
     this.lensPass.uniforms.uDrift.value.set(analogDriftX, analogDriftY);
 
-    this.stage.style.setProperty("--hero-focus-x", `${story.focusX.toFixed(1)}%`);
-    this.stage.style.setProperty("--hero-focus-y", `${story.focusY.toFixed(1)}%`);
+    // Use smoothed mouse position for the orange circle
+    const mouseXPercent = ((this.mouse.x + 1) / 2) * 100;
+    const mouseYPercent = ((this.mouse.y + 1) / 2) * 100;
+    this.stage.style.setProperty("--hero-focus-x", `${mouseXPercent.toFixed(1)}%`);
+    this.stage.style.setProperty("--hero-focus-y", `${mouseYPercent.toFixed(1)}%`);
     this.stage.style.setProperty("--hero-focus-strength", (0.18 + story.impactPriority * 0.18 + story.typeFocus * 0.08).toFixed(3));
 
     this.composer.render();
