@@ -1,5 +1,3 @@
-import "./threeScene";
-
 const TOTAL = 240;
 const FRAME_PATH = '/frames2/ezgif-frame-';
 const CROP = 0.10;
@@ -23,12 +21,25 @@ const perfTier = (() => {
 })();
 const isLowPerf = () => perfTier === "low" || document.documentElement.dataset.perfTier === "low";
 const isMidPerf = () => perfTier === "mid";
+const frameStep = () => {
+  if (!isMobile()) return 1;
+  if (isLowPerf()) return 4;
+  if (isMidPerf()) return 3;
+  return 2;
+};
+const maxInitialFrame = () => {
+  if (!isMobile()) return 96;
+  if (isLowPerf()) return 76;
+  if (isMidPerf()) return 104;
+  return 132;
+};
 
 const state = { heroTarget: 0, heroCurrent: 0, beatTarget: 0, beatCurrent: 0 };
 let frames = new Array(TOTAL).fill(null);
 let allReady = false;
 let prevBeatIdx = -1;
 let heroCanvas, heroCtx, emberCanvas, emberCtx, offC, offX;
+let heroVideo, heroVideoReady = false, videoScrubCurrent = 0, lastVideoTime = -1;
 let embers = [];
 let filmScenes = [];
 let lastDrawnMobileFrame = -1;
@@ -39,10 +50,12 @@ document.addEventListener('DOMContentLoaded', init);
 function init() {
   document.documentElement.dataset.perfTier = perfTier;
   monitorMobileSmoothness();
+  initAtmosphereLayer();
   heroCanvas = document.getElementById('hero-canvas');
   emberCanvas = document.getElementById('ember-canvas');
   if (heroCanvas) heroCtx = heroCanvas.getContext('2d', { alpha: false, desynchronized: true });
   if (emberCanvas) emberCtx = emberCanvas.getContext('2d', { alpha: true, desynchronized: true });
+  heroVideo = document.getElementById('hero-video-scrub');
 
   sizeCanvases();
   window.addEventListener('resize', debounce(sizeCanvases, 150));
@@ -54,7 +67,21 @@ function init() {
   initCinematicSections();
   initObservers();
   onScroll();
-  preloadFrames();
+  if (!initHeroVideoScrub()) preloadFrames();
+}
+
+function initAtmosphereLayer() {
+  if (!document.getElementById('webgl-canvas')) return;
+
+  const delay = isMobile()
+    ? (isLowPerf() ? 900 : 420)
+    : 120;
+
+  window.setTimeout(() => {
+    import("./threeScene").catch(() => {
+      document.documentElement.dataset.perfTier = "low";
+    });
+  }, delay);
 }
 
 function monitorMobileSmoothness() {
@@ -131,6 +158,7 @@ function getFramePath(i) {
 async function preloadFrames() {
   const bar = document.getElementById('preloader-bar');
   let loaded = 0;
+  const initialTotal = maxInitialFrame();
   const minEnd = performance.now() + 900;
   let started = false;
 
@@ -147,17 +175,18 @@ async function preloadFrames() {
     .then(bitmap => {
       frames[i] = bitmap;
       loaded++;
-      if (bar) bar.style.width = (loaded / TOTAL * 100) + '%';
+      if (bar) bar.style.width = (Math.min(loaded, initialTotal) / initialTotal * 100) + '%';
     })
     .catch(() => {
       loaded++;
-      if (bar) bar.style.width = (loaded / TOTAL * 100) + '%';
+      if (bar) bar.style.width = (Math.min(loaded, initialTotal) / initialTotal * 100) + '%';
     });
 
   const reveal = async () => {
     if (started) return;
     started = true;
     allReady = true;
+    if (bar) bar.style.width = '100%';
     const remaining = minEnd - performance.now();
     if (remaining > 0) await new Promise(resolve => setTimeout(resolve, remaining));
     const preloader = document.getElementById('preloader');
@@ -168,18 +197,73 @@ async function preloadFrames() {
     requestAnimationFrame(masterTick);
   };
 
-  setTimeout(reveal, 1800);
+  setTimeout(reveal, isMobile() ? 1050 : 1800);
 
-  for (let batch = 0; batch < TOTAL; batch += 32) {
-    const end = Math.min(batch + 32, TOTAL);
-    const proms = [];
-    for (let i = batch; i < end; i++) {
-      proms.push(loadFrame(i));
-    }
-    await Promise.all(proms);
-    if (batch >= 32) reveal();
+  const step = frameStep();
+  const priorityFrames = [];
+  for (let i = 0; i < TOTAL; i += step) priorityFrames.push(i);
+  if (!priorityFrames.includes(TOTAL - 1)) priorityFrames.push(TOTAL - 1);
+
+  const batchSize = isMobile() ? (isLowPerf() ? 8 : 12) : 32;
+  for (let batch = 0; batch < priorityFrames.length; batch += batchSize) {
+    const chunk = priorityFrames.slice(batch, batch + batchSize);
+    await Promise.all(chunk.map(loadFrame));
+    if (loaded >= Math.min(initialTotal, priorityFrames.length)) reveal();
   }
   reveal();
+
+  if (!isMobile()) {
+    const missing = [];
+    for (let i = 0; i < TOTAL; i++) {
+      if (!frames[i]) missing.push(i);
+    }
+    for (let batch = 0; batch < missing.length; batch += 24) {
+      await Promise.all(missing.slice(batch, batch + 24).map(loadFrame));
+    }
+  }
+}
+
+function initHeroVideoScrub() {
+  if (!heroVideo || !heroVideo.querySelector('source')) return false;
+
+  const bar = document.getElementById('preloader-bar');
+  const preloader = document.getElementById('preloader');
+  let fallbackStarted = false;
+
+  const fallback = () => {
+    if (fallbackStarted || heroVideoReady) return;
+    fallbackStarted = true;
+    document.documentElement.classList.remove('hero-video-enabled');
+    preloadFrames();
+  };
+
+  heroVideo.muted = true;
+  heroVideo.playsInline = true;
+  heroVideo.preload = isMobile() ? 'metadata' : 'auto';
+  heroVideo.pause();
+
+  heroVideo.addEventListener('loadedmetadata', () => {
+    if (!heroVideo.duration || Number.isNaN(heroVideo.duration)) {
+      fallback();
+      return;
+    }
+    heroVideoReady = true;
+    allReady = true;
+    document.documentElement.classList.add('hero-video-enabled');
+    if (bar) bar.style.width = '100%';
+    setTimeout(() => {
+      if (preloader) {
+        preloader.classList.add('done');
+        setTimeout(() => preloader.remove(), 900);
+      }
+      requestAnimationFrame(masterTick);
+    }, isMobile() ? 320 : 650);
+  }, { once: true });
+
+  heroVideo.addEventListener('error', fallback, { once: true });
+  setTimeout(fallback, 2200);
+  heroVideo.load();
+  return true;
 }
 
 function sizeCanvases() {
@@ -393,7 +477,9 @@ function masterTick() {
 
 
   if (allReady) {
-    if (isMobile()) {
+    if (heroVideoReady) {
+      updateHeroVideoScrub();
+    } else if (isMobile()) {
       const mobileFrame = Math.floor(state.heroCurrent * (TOTAL - 1));
       const drawThreshold = isLowPerf() ? .0035 : .0012;
       if (mobileFrame !== lastDrawnMobileFrame || Math.abs(state.heroCurrent - lastDrawnMobileProgress) > drawThreshold) {
@@ -410,6 +496,26 @@ function masterTick() {
   const scrollInd = document.getElementById('scroll-ind');
   if (scrollInd) scrollInd.style.opacity = state.heroCurrent > .08 ? '0' : '1';
   requestAnimationFrame(masterTick);
+}
+
+function updateHeroVideoScrub() {
+  if (!heroVideoReady || !heroVideo || !heroVideo.duration) return;
+
+  const delta = state.heroCurrent - videoScrubCurrent;
+  const ease = isMobile()
+    ? (isLowPerf() ? 0.32 : isMidPerf() ? 0.24 : 0.2)
+    : 0.12;
+  videoScrubCurrent += Math.abs(delta) < .0008 ? delta : delta * ease;
+
+  const nextTime = clamp(videoScrubCurrent) * Math.max(0, heroVideo.duration - 0.035);
+  const threshold = isMobile()
+    ? (isLowPerf() ? 0.06 : isMidPerf() ? 0.042 : 0.03)
+    : 0.016;
+
+  if (Math.abs(nextTime - lastVideoTime) >= threshold && !heroVideo.seeking) {
+    heroVideo.currentTime = nextTime;
+    lastVideoTime = nextTime;
+  }
 }
 
 function updateParallax() {
