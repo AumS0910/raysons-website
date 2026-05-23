@@ -18,6 +18,7 @@ let heroCanvas, heroCtx, emberCanvas, emberCtx, offC, offX;
 let embers = [];
 let filmScenes = [];
 let lastDrawnMobileFrame = -1;
+let lastDrawnMobileProgress = -1;
 
 document.addEventListener('DOMContentLoaded', init);
 
@@ -150,6 +151,7 @@ function sizeCanvases() {
   offX = offC.getContext('2d', { alpha: false, desynchronized: true });
   offX.setTransform(heroDpr, 0, 0, heroDpr, 0, 0);
   lastDrawnMobileFrame = -1;
+  lastDrawnMobileProgress = -1;
 }
 
 function sizeCanvasToEl(canvas, ctx, dpr, el) {
@@ -214,11 +216,11 @@ function drawFrame(ctx, offCtx, offCan, cw, ch, progress) {
   if (!ctx || !offCtx || !offCan || !cw || !ch) return;
   const mobile = isMobile();
   const ri = progress * (TOTAL - 1);
-  const iA = mobile ? Math.round(ri) : Math.floor(ri);
+  const iA = Math.floor(ri);
   const iB = Math.min(iA + 1, TOTAL - 1);
   const blend = ri - iA;
   const a = frames[iA] || nearestFrame(iA);
-  const b = mobile ? null : (frames[iB] || nearestFrame(iB));
+  const b = frames[iB] || nearestFrame(iB);
   if (!a) return;
 
   if (mobile) {
@@ -231,6 +233,12 @@ function drawFrame(ctx, offCtx, offCan, cw, ch, progress) {
 
     const dA = calcDraw(a, cw, ch);
     ctx.drawImage(a, 0, 0, dA.sw, dA.sh, dA.dx, dA.dy, dA.dw, dA.dh);
+    if (b && blend > .001) {
+      const dB = calcDraw(b, cw, ch);
+      ctx.globalAlpha = blend;
+      ctx.drawImage(b, 0, 0, dB.sw, dB.sh, dB.dx, dB.dy, dB.dw, dB.dh);
+      ctx.globalAlpha = 1;
+    }
 
     const fade = ctx.createLinearGradient(0, ch, 0, ch * 0.52);
     fade.addColorStop(0, 'rgba(10,8,4,1)');
@@ -320,10 +328,9 @@ function nearestFrame(index) {
 
 function masterTick() {
   if (isMobile()) {
-    // Snap directly — no lerp on mobile.
-    // Touch scroll already has native momentum smoothing from the OS;
-    // adding JS easing on top creates visible lag between finger and frame.
-    state.heroCurrent = state.heroTarget;
+    const delta = state.heroTarget - state.heroCurrent;
+    const ease = Math.min(0.32, 0.14 + Math.abs(delta) * 1.35);
+    state.heroCurrent += Math.abs(delta) < .001 ? delta : delta * ease;
   } else {
     state.heroCurrent += Math.abs(state.heroTarget - state.heroCurrent) < .0001 ? state.heroTarget - state.heroCurrent : (state.heroTarget - state.heroCurrent) * LERP;
   }
@@ -339,10 +346,11 @@ function masterTick() {
 
   if (allReady) {
     if (isMobile()) {
-      const mobileFrame = Math.round(state.heroCurrent * (TOTAL - 1));
-      if (mobileFrame !== lastDrawnMobileFrame) {
+      const mobileFrame = Math.floor(state.heroCurrent * (TOTAL - 1));
+      if (mobileFrame !== lastDrawnMobileFrame || Math.abs(state.heroCurrent - lastDrawnMobileProgress) > .0012) {
         drawFrame(heroCtx, offX, offC, heroCanvas ? heroCanvas._lw || 1 : 1, heroCanvas ? heroCanvas._lh || 1 : 1, state.heroCurrent);
         lastDrawnMobileFrame = mobileFrame;
+        lastDrawnMobileProgress = state.heroCurrent;
       }
     } else {
       drawFrame(heroCtx, offX, offC, heroCanvas ? heroCanvas._lw || 1 : 1, heroCanvas ? heroCanvas._lh || 1 : 1, state.heroCurrent);
