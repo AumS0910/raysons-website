@@ -761,10 +761,22 @@ a {
   align-items: center;
   padding: 0 clamp(3rem, 6vw, 7rem);
   opacity: 0;
-  transform: translateY(40px);
-  filter: blur(8px);
-  transition: opacity .6s cubic-bezier(.16, 1, .3, 1), transform .6s cubic-bezier(.16, 1, .3, 1), filter .6s cubic-bezier(.16, 1, .3, 1);
+  /* Default: enter from below. JS sets --beat-exit-dir on the
+     outgoing beat (-1 = slide up / exit forward, 1 = slide down / exit back) */
+  transform: translateY(var(--beat-enter-y, 48px));
+  filter: blur(6px);
+  transition:
+    opacity .85s cubic-bezier(.22, 1, .36, 1),
+    transform .85s cubic-bezier(.22, 1, .36, 1),
+    filter .7s cubic-bezier(.22, 1, .36, 1);
   pointer-events: none
+}
+
+/* Outgoing state — set by JS via --beat-exit-y before class is removed */
+.beat.exiting {
+  opacity: 0;
+  transform: translateY(var(--beat-exit-y, -36px));
+  filter: blur(4px)
 }
 
 .beat.active {
@@ -772,6 +784,48 @@ a {
   transform: translateY(0);
   filter: blur(0);
   pointer-events: auto
+}
+
+/* Staggered children — scoped strictly to .beat so shared class names
+   (process__headline, caps__headline, etc.) are NOT made invisible */
+.beat .beat__eyebrow,
+.beat .beat__headline,
+.beat .beat__body,
+.beat .beat__rows,
+.beat .beat__sub,
+.beat .beat__pills,
+.beat .beat__spec-strip,
+.beat .beat__cta-stack {
+  transition:
+    opacity .65s cubic-bezier(.22, 1, .36, 1),
+    transform .65s cubic-bezier(.22, 1, .36, 1),
+    filter .55s cubic-bezier(.22, 1, .36, 1);
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(2px)
+}
+
+/* Active delays — cascade from eyebrow → headline → body → pills */
+.beat.active .beat__eyebrow   { transition-delay: 0ms }
+.beat.active .beat__headline  { transition-delay: 60ms }
+.beat.active .beat__body      { transition-delay: 120ms }
+.beat.active .beat__rows      { transition-delay: 140ms }
+.beat.active .beat__sub       { transition-delay: 120ms }
+.beat.active .beat__pills     { transition-delay: 190ms }
+.beat.active .beat__spec-strip{ transition-delay: 170ms }
+.beat.active .beat__cta-stack { transition-delay: 190ms }
+
+.beat.active .beat__eyebrow,
+.beat.active .beat__headline,
+.beat.active .beat__body,
+.beat.active .beat__rows,
+.beat.active .beat__sub,
+.beat.active .beat__pills,
+.beat.active .beat__spec-strip,
+.beat.active .beat__cta-stack {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0)
 }
 
 .beat__content {
@@ -1251,12 +1305,24 @@ a {
 }
 
 .process {
-  background: linear-gradient(180deg, var(--bg), var(--bg3))
+  background: linear-gradient(180deg, var(--bg), var(--bg3));
+  /* Extra bottom space so step 06 can scroll into the center
+     of the viewport — without this the last 2 steps are unreachable */
+  padding-bottom: 50vh
 }
 
 .process__inner {
   max-width: 1180px;
-  margin: 0 auto;
+  margin: 0 auto
+}
+
+/* Eyebrow + headline above the two-column body */
+.process__header {
+  margin-bottom: 3rem
+}
+
+/* Two-col grid: steps list left, sticky image right */
+.process__body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 5rem;
@@ -1323,7 +1389,12 @@ a {
   letter-spacing: .045em;
   text-transform: uppercase;
   display: inline;
-  transition: color .4s
+  transition: color .4s;
+  cursor: pointer
+}
+
+.process__title:hover {
+  color: rgba(255, 255, 255, .6)
 }
 
 .process__step.active .process__title {
@@ -1337,36 +1408,66 @@ a {
   max-height: 0;
   overflow: hidden;
   opacity: 0;
-  transition: all .5s
+  /* Slower, smoother accordion — 0.5s was too abrupt */
+  transition: max-height .75s cubic-bezier(.22, 1, .36, 1),
+              opacity .6s cubic-bezier(.22, 1, .36, 1)
 }
 
 .process__step.active .process__desc {
-  max-height: 90px;
+  max-height: 120px;
   opacity: 1
 }
 
 .process__right {
   position: sticky;
-  top: 8rem
+  /* Stick just below the navbar so the image starts level with step 01 */
+  top: calc(72px + 2.5rem)
 }
 
+/* ── Pillar image frame ──────────────────────────────────────────
+   The ghost number is replaced by actual process photos.
+   Images crossfade (opacity transition) as the active step changes. */
 .process__frame {
+  position: relative;
   width: 100%;
-  aspect-ratio: 1/1;
-  max-width: 500px;
-  border: 1px solid rgba(255, 107, 0, .14);
-  display: grid;
-  place-items: center;
-  margin-left: auto;
-  background: radial-gradient(circle, rgba(255, 107, 0, .06), transparent 62%)
+  /* Landscape ratio so horizontal images aren't cropped */
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 107, 0, .18);
+  background: #0d0a06
 }
 
-.process__ghost {
-  font-family: var(--fd);
-  font-size: 8rem;
-  font-weight: 800;
-  color: rgba(255, 107, 0, .08);
-  letter-spacing: .04em
+.process__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* contain = full image always visible, no cropping */
+  object-fit: contain;
+  object-position: center;
+  opacity: 0;
+  transition: opacity .85s cubic-bezier(.22, 1, .36, 1);
+  will-change: opacity
+}
+
+.process__img.active {
+  opacity: 1
+}
+
+/* Subtle bottom gradient so any caption text over image stays readable */
+.process__frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(10, 8, 4, .55) 0%,
+    rgba(10, 8, 4, .12) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 2
 }
 
 .caps {
@@ -2886,9 +2987,12 @@ body::before {
   overflow: visible
 }
 
-#beats-section .beat,
-#beats-section .beat__content {
-  transition: opacity .6s cubic-bezier(.16, 1, .3, 1), transform .6s cubic-bezier(.16, 1, .3, 1), filter .6s cubic-bezier(.16, 1, .3, 1)
+#beats-section .beat {
+  /* Keep in sync with the .beat base rule */
+  transition:
+    opacity .85s cubic-bezier(.22, 1, .36, 1),
+    transform .85s cubic-bezier(.22, 1, .36, 1),
+    filter .7s cubic-bezier(.22, 1, .36, 1)
 }
 
 #beats-section .beats__inner {
@@ -3239,4 +3343,48 @@ body::before {
 
 .beats__visual-sticky {
   background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255, 107, 0, .045), #000 72%)
+}
+
+/* ── Pillar navigation dots ───────────────────────────────
+   Vertical strip on the left edge of the right visual panel.
+   Click any to jump to that pillar. Active = orange ring + lit. */
+.beats__nav {
+  position: absolute;
+  left: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: .85rem;
+  z-index: 20
+}
+
+.beats__nav-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 107, 0, .28);
+  background: transparent;
+  color: rgba(255, 255, 255, .3);
+  font-family: var(--fd);
+  font-size: .6rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color .35s, color .35s, background .35s, box-shadow .35s;
+  outline: none
+}
+
+.beats__nav-dot:hover {
+  border-color: rgba(255, 107, 0, .65);
+  color: rgba(255, 255, 255, .7)
+}
+
+.beats__nav-dot.active {
+  border-color: var(--o);
+  background: rgba(255, 107, 0, .12);
+  color: var(--o);
+  box-shadow: 0 0 14px rgba(255, 107, 0, .22)
 }

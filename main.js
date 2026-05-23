@@ -282,12 +282,15 @@ function nearestFrame(index) {
 
 function masterTick() {
   state.heroCurrent += Math.abs(state.heroTarget - state.heroCurrent) < .0001 ? state.heroTarget - state.heroCurrent : (state.heroTarget - state.heroCurrent) * LERP;
-  state.beatCurrent += Math.abs(state.beatTarget - state.beatCurrent) < .0001 ? state.beatTarget - state.beatCurrent : (state.beatTarget - state.beatCurrent) * LERP;
+  // Beats use target directly — LERP caused pillars 3 & 4 to be skipped as
+  // the lagged current value fired all missed beats in rapid succession on catch-up
+  state.beatCurrent = state.beatTarget;
 
   updateCinematicPage();
   updateParallax();
   updateBeats(state.beatCurrent);
   updateTextFills();
+
 
   if (allReady) {
     drawFrame(heroCtx, offX, offC, heroCanvas ? heroCanvas._lw || 1 : 1, heroCanvas ? heroCanvas._lh || 1 : 1, state.heroCurrent);
@@ -328,17 +331,69 @@ function updateParallax() {
   }
 }
 
+let beatTransitionTimer = null;
+
 function updateBeats(progress) {
   let active = BEAT_RANGES.length - 1;
   BEAT_RANGES.forEach((beat, i) => {
     if (progress >= beat.s && progress <= beat.e) active = i;
   });
   if (active === prevBeatIdx) return;
+
+  const forward = prevBeatIdx < 0 || active > prevBeatIdx;
+  const enterY  = forward ? '28px' : '-28px';
+
+  // ── Cancel in-flight timer and reset all non-active beats immediately ──
+  if (beatTransitionTimer) {
+    clearTimeout(beatTransitionTimer);
+    beatTransitionTimer = null;
+  }
   BEAT_RANGES.forEach((beat, i) => {
-    document.getElementById(beat.id)?.classList.toggle('active', i === active);
+    if (i === active) return;
+    const el = document.getElementById(beat.id);
+    if (el) { el.style.cssText = ''; el.classList.remove('active'); }
   });
+
+  // ── Animate the incoming beat in ──
+  const inEl = document.getElementById(BEAT_RANGES[active].id);
+  if (inEl) {
+    inEl.style.cssText = `opacity:0;transform:translateY(${enterY});filter:blur(5px);transition:none;pointer-events:none`;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      inEl.style.transition = 'opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1), filter .55s cubic-bezier(.22,1,.36,1)';
+      inEl.style.opacity    = '1';
+      inEl.style.transform  = 'translateY(0)';
+      inEl.style.filter     = 'blur(0)';
+      inEl.style.pointerEvents = 'auto';
+      inEl.classList.add('active');
+      beatTransitionTimer = setTimeout(() => {
+        inEl.style.cssText = '';
+        inEl.classList.add('active');
+        beatTransitionTimer = null;
+      }, 680);
+    }));
+  }
+
   prevBeatIdx = active;
+
+  // Keep nav dots in sync
+  document.querySelectorAll('.beats__nav-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === active);
+  });
 }
+
+/* Scroll the page so the beats section is showing pillar at index (0-3) */
+function scrollToPillar(idx) {
+  const beats = document.getElementById('beats-section');
+  if (!beats) return;
+  const max = beats.offsetHeight - window.innerHeight;
+  const ratio = BEAT_RANGES[idx]?.s ?? 0;
+  // Add a small offset (15% of one pillar's travel) to land in the middle of that range
+  const targetScroll = beats.offsetTop + max * (ratio + 0.12);
+  window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+}
+// Expose globally so inline onclick attributes in HTML can call this from module scope
+window.scrollToPillar = scrollToPillar;
+
 
 function updateTextFills() {
   fillByViewport(document.getElementById('about-text'), .1, .85);
@@ -541,16 +596,52 @@ function initObservers() {
   const stats = document.getElementById('stats');
   if (stats) statsObs.observe(stats);
 
-  const procObs = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      document.querySelectorAll('.process__step').forEach(step => step.classList.remove('active'));
-      entry.target.classList.add('active');
-      const ghost = document.getElementById('process-ghost');
-      if (ghost) ghost.textContent = String(parseInt(entry.target.dataset.step, 10) + 1).padStart(2, '0');
+  // ── Process step activation ─────────────────────────────────────
+  // activateStep: deactivates all, activates one, crossfades image.
+  function activateStep(stepEl) {
+    if (!stepEl) return;
+    const stepIdx = parseInt(stepEl.dataset.step, 10);
+    document.querySelectorAll('.process__step').forEach(s => s.classList.remove('active'));
+    stepEl.classList.add('active');
+    document.querySelectorAll('.process__img').forEach(img => {
+      img.classList.toggle('active', parseInt(img.dataset.stepImg, 10) === stepIdx);
     });
-  }, { threshold: .5, rootMargin: '0px 0px -30% 0px' });
-  document.querySelectorAll('.process__step').forEach(step => procObs.observe(step));
+  }
+
+  // On scroll: find whichever step's top is closest to 40% down the viewport.
+  // This works for ALL 6 steps even when steps 5 & 6 can't reach true center.
+  const steps = Array.from(document.querySelectorAll('.process__step'));
+  const TRIGGER_Y = 0.40; // 40% from top of viewport
+
+  function updateActiveStepOnScroll() {
+    const trigger = window.innerHeight * TRIGGER_Y;
+    let closest = null;
+    let closestDist = Infinity;
+    steps.forEach(step => {
+      const rect = step.getBoundingClientRect();
+      const dist = Math.abs(rect.top - trigger);
+      if (dist < closestDist) { closestDist = dist; closest = step; }
+    });
+    if (closest && !closest.classList.contains('active')) activateStep(closest);
+  }
+
+  window.addEventListener('scroll', updateActiveStepOnScroll, { passive: true });
+  updateActiveStepOnScroll(); // run once on load
+
+  // Click navigation: scroll so the step lands at the 40% trigger point.
+  steps.forEach(step => {
+    const goToStep = () => {
+      activateStep(step); // immediate visual change
+      const rect = step.getBoundingClientRect();
+      const targetScroll = window.scrollY + rect.top - (window.innerHeight * TRIGGER_Y);
+      window.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+    };
+
+    const dot   = step.querySelector('.process__dot');
+    const title = step.querySelector('.process__title');
+    if (dot)   { dot.style.cursor = 'pointer'; dot.addEventListener('click', goToStep); }
+    if (title) { title.addEventListener('click', goToStep); }
+  });
 }
 
 function animateCount(card) {
