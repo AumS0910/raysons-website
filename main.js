@@ -282,7 +282,8 @@ function nearestFrame(index) {
 
 function masterTick() {
   if (isMobile()) {
-    state.heroCurrent = state.heroTarget;
+    const mobileEase = 0.16;
+    state.heroCurrent += Math.abs(state.heroTarget - state.heroCurrent) < .002 ? state.heroTarget - state.heroCurrent : (state.heroTarget - state.heroCurrent) * mobileEase;
   } else {
     state.heroCurrent += Math.abs(state.heroTarget - state.heroCurrent) < .0001 ? state.heroTarget - state.heroCurrent : (state.heroTarget - state.heroCurrent) * LERP;
   }
@@ -612,19 +613,35 @@ function initObservers() {
 
   // ── Process step activation ─────────────────────────────────────
   // activateStep: deactivates all, activates one, crossfades image.
+  const processSteps = Array.from(document.querySelectorAll('.process__step'));
+  const processImages = Array.from(document.querySelectorAll('.process__img'));
+
+  processSteps.forEach(step => {
+    const stepIdx = parseInt(step.dataset.step, 10);
+    const source = processImages.find(img => parseInt(img.dataset.stepImg, 10) === stepIdx);
+    if (!source || step.querySelector('.process__mobile-frame')) return;
+
+    const frame = document.createElement('div');
+    frame.className = 'process__mobile-frame';
+    const img = source.cloneNode(false);
+    img.className = 'process__mobile-img';
+    frame.appendChild(img);
+    step.appendChild(frame);
+  });
+
   function activateStep(stepEl) {
     if (!stepEl) return;
     const stepIdx = parseInt(stepEl.dataset.step, 10);
     document.querySelectorAll('.process__step').forEach(s => s.classList.remove('active'));
     stepEl.classList.add('active');
-    document.querySelectorAll('.process__img').forEach(img => {
+    processImages.forEach(img => {
       img.classList.toggle('active', parseInt(img.dataset.stepImg, 10) === stepIdx);
     });
   }
 
   // On scroll: find whichever step's top is closest to 40% down the viewport.
   // This works for ALL 6 steps even when steps 5 & 6 can't reach true center.
-  const steps = Array.from(document.querySelectorAll('.process__step'));
+  const steps = processSteps;
   const TRIGGER_Y = 0.40; // 40% from top of viewport
 
   function updateActiveStepOnScroll() {
