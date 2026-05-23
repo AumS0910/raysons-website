@@ -281,7 +281,11 @@ function nearestFrame(index) {
 }
 
 function masterTick() {
-  state.heroCurrent += Math.abs(state.heroTarget - state.heroCurrent) < .0001 ? state.heroTarget - state.heroCurrent : (state.heroTarget - state.heroCurrent) * LERP;
+  if (isMobile()) {
+    state.heroCurrent = state.heroTarget;
+  } else {
+    state.heroCurrent += Math.abs(state.heroTarget - state.heroCurrent) < .0001 ? state.heroTarget - state.heroCurrent : (state.heroTarget - state.heroCurrent) * LERP;
+  }
   // Beats use target directly — LERP caused pillars 3 & 4 to be skipped as
   // the lagged current value fired all missed beats in rapid succession on catch-up
   state.beatCurrent = state.beatTarget;
@@ -357,6 +361,16 @@ function updateBeats(progress) {
   // ── Animate the incoming beat in ──
   const inEl = document.getElementById(BEAT_RANGES[active].id);
   if (inEl) {
+    if (isMobile()) {
+      inEl.style.cssText = '';
+      inEl.classList.add('active');
+      prevBeatIdx = active;
+      document.querySelectorAll('.beats__nav-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === active);
+      });
+      return;
+    }
+
     inEl.style.cssText = `opacity:0;transform:translateY(${enterY});filter:blur(5px);transition:none;pointer-events:none`;
     requestAnimationFrame(() => requestAnimationFrame(() => {
       inEl.style.transition = 'opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1), filter .55s cubic-bezier(.22,1,.36,1)';

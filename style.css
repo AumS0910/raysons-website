@@ -4096,3 +4096,240 @@ body::before {
     font-size: clamp(1.7rem, 8.2vw, 2.45rem) !important;
   }
 }
+
+/* Mobile scroll repair: preserve the cinematic object without long empty sticky pauses.
+   Desktop remains untouched. */
+@media (max-width: 900px) {
+  .nav__inner {
+    height: 62px !important;
+    padding-inline: .8rem !important;
+    gap: .75rem;
+  }
+
+  .nav__logo {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: calc(100vw - 86px) !important;
+    gap: .42rem;
+    font-size: clamp(.78rem, 3.45vw, .98rem) !important;
+    letter-spacing: .045em;
+  }
+
+  .nav__logo-img {
+    width: 27px;
+    height: 27px;
+  }
+
+  .nav__hamburger {
+    flex: 0 0 auto;
+  }
+
+  .hero {
+    height: 118svh !important;
+    min-height: 980px !important;
+    overflow: visible !important;
+  }
+
+  .hero__stage {
+    position: sticky !important;
+    top: 0 !important;
+    height: 100svh !important;
+    min-height: 620px !important;
+    overflow: hidden !important;
+  }
+
+  .hero__stage .hero__canvas-wrap {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+    z-index: 4 !important;
+    top: 13svh !important;
+    left: 50% !important;
+    width: min(118vw, 610px) !important;
+    height: 52svh !important;
+    max-height: 520px !important;
+    transform: translateX(-50%) translateZ(0) !important;
+  }
+
+  .hero__stage .hero__webgl-wrap {
+    visibility: visible !important;
+    opacity: .68 !important;
+    display: block !important;
+  }
+
+  .hero__stage .hero__ember-wrap {
+    visibility: visible !important;
+    opacity: .22 !important;
+    display: block !important;
+  }
+
+  .hero__left {
+    left: .85rem !important;
+    right: .85rem !important;
+    bottom: 3.05rem !important;
+    max-width: calc(100vw - 1.7rem) !important;
+    max-height: none;
+    padding: .85rem !important;
+    overflow: hidden;
+  }
+
+  .hero__right {
+    top: 5.25rem !important;
+    right: .72rem !important;
+    max-width: min(35vw, 150px) !important;
+    padding: .45rem !important;
+    opacity: .42 !important;
+  }
+
+  .hero__headline-r {
+    font-size: clamp(.72rem, 4.05vw, 1.18rem) !important;
+    line-height: 1.04 !important;
+    letter-spacing: .02em !important;
+  }
+
+  .hero__headline-l {
+    font-size: clamp(1.48rem, 7.35vw, 2.12rem) !important;
+    line-height: 1.02 !important;
+  }
+
+  .hero__sub {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .about,
+  .stats,
+  .specs,
+  .process,
+  .caps,
+  .industries,
+  .cta {
+    padding-top: clamp(3.6rem, 7svh, 5rem) !important;
+    padding-bottom: clamp(3.6rem, 7svh, 5rem) !important;
+    min-height: auto !important;
+  }
+
+  .process {
+    padding-bottom: clamp(3.6rem, 7svh, 5rem) !important;
+  }
+
+  .beats {
+    height: auto !important;
+    min-height: 0 !important;
+    padding: clamp(3.8rem, 8svh, 5.5rem) 0 !important;
+  }
+
+  .beats__inner {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  .beats__text-panel {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+  }
+
+  .beat {
+    position: relative !important;
+    inset: auto !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    pointer-events: auto !important;
+    min-height: auto !important;
+    padding: clamp(1.25rem, 5vw, 2rem) !important;
+    margin: 0 0 clamp(2.8rem, 8svh, 4.8rem) !important;
+  }
+
+  .beat:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  .beat .beat__eyebrow,
+  .beat .beat__headline,
+  .beat .beat__body,
+  .beat .beat__rows,
+  .beat .beat__sub,
+  .beat .beat__pills,
+  .beat .beat__spec-strip,
+  .beat .beat__cta-stack {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+
+  .beat__headline {
+    font-size: clamp(2rem, 13vw, 4.35rem) !important;
+    line-height: 1.02 !important;
+  }
+
+  .beat__body,
+  .beat__sub,
+  .beat__rows {
+    font-size: clamp(.9rem, 3.9vw, 1.08rem) !important;
+    line-height: 1.55 !important;
+  }
+
+  .process__right {
+    display: block !important;
+  }
+
+  .process__frame {
+    min-height: 220px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero {
+    height: 116svh !important;
+    min-height: 940px !important;
+  }
+
+  .hero__stage .hero__canvas-wrap {
+    top: 12.5svh !important;
+    width: 124vw !important;
+    height: 50svh !important;
+  }
+
+  .hero__left {
+    bottom: 3rem !important;
+    padding: .78rem !important;
+  }
+
+  .hero__right {
+    top: 5rem !important;
+    right: .62rem !important;
+    max-width: 33vw !important;
+  }
+
+  .nav__logo {
+    font-size: clamp(.72rem, 3.25vw, .88rem) !important;
+  }
+
+  .hero__headline-l {
+    font-size: clamp(1.42rem, 7.1vw, 1.95rem) !important;
+  }
+
+  .hero__sub {
+    font-size: .72rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .beats {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .beats__inner {
+    min-height: 0 !important;
+  }
+}
