@@ -5,7 +5,8 @@ const LERP = 0.008;
 const BEAT_RANGES = [{ id: 'beat-1', s: 0, e: .25 }, { id: 'beat-2', s: .25, e: .5 }, { id: 'beat-3', s: .5, e: .75 }, { id: 'beat-4', s: .75, e: 1 }];
 
 const isMobile = () => window.innerWidth < 768;
-const motionScale = () => isMobile() ? .55 : 1;
+const isAndroid = () => /Android/i.test(navigator.userAgent || "");
+const motionScale = () => isMobile() ? (isAndroid() ? .46 : .55) : 1;
 const clamp = (v, min = 0, max = 1) => Math.max(min, Math.min(max, v));
 const perfTier = (() => {
   const nav = navigator || {};
@@ -15,12 +16,16 @@ const perfTier = (() => {
   const saveData = !!nav.connection?.saveData;
   const coarse = window.matchMedia("(pointer: coarse)").matches;
   if (!coarse && window.innerWidth >= 768) return "desktop";
-  if (saveData || memory <= 2 || cores <= 4 || dpr > 2.75) return "low";
+  if (saveData || memory <= 2 || cores <= 4 || dpr > 2.85) return "low";
+  if (isAndroid()) {
+    if (memory <= 3 || cores <= 6 || dpr >= 2.75) return "low";
+    return "mid";
+  }
   if (memory <= 4 || cores <= 6 || dpr > 2.25) return "mid";
   return "high";
 })();
 const isLowPerf = () => perfTier === "low" || document.documentElement.dataset.perfTier === "low";
-const isMidPerf = () => perfTier === "mid";
+const isMidPerf = () => perfTier === "mid" || document.documentElement.dataset.perfTier === "mid";
 const frameStep = () => {
   if (!isMobile()) return 1;
   if (isLowPerf()) return 4;
@@ -30,7 +35,7 @@ const frameStep = () => {
 const maxInitialFrame = () => {
   if (!isMobile()) return 96;
   if (isLowPerf()) return 76;
-  if (isMidPerf()) return 104;
+  if (isMidPerf()) return isAndroid() ? 88 : 104;
   return 132;
 };
 
@@ -102,7 +107,8 @@ function monitorMobileSmoothness() {
       return;
     }
 
-    if (framesSeen > 30 && slowFrames / framesSeen > 0.34) {
+    const limit = isAndroid() ? 0.24 : 0.34;
+    if (framesSeen > 30 && slowFrames / framesSeen > limit) {
       document.documentElement.dataset.perfTier = "low";
     }
   }
@@ -268,8 +274,8 @@ function initHeroVideoScrub() {
 
 function sizeCanvases() {
   if (!heroCanvas || !heroCtx || !emberCanvas || !emberCtx) return;
-  const heroDpr = isMobile() ? (isLowPerf() ? 0.82 : 1) : Math.min(window.devicePixelRatio || 1, 2);
-  const emberDpr = isMobile() ? 1 : heroDpr;
+  const heroDpr = isMobile() ? (isLowPerf() ? 0.72 : isMidPerf() ? 0.86 : 0.96) : Math.min(window.devicePixelRatio || 1, 2);
+  const emberDpr = isMobile() ? (isLowPerf() ? 0.74 : isMidPerf() ? 0.84 : 0.95) : heroDpr;
   sizeCanvasToEl(heroCanvas, heroCtx, heroDpr, document.querySelector('.hero__canvas-wrap'));
   sizeCanvasFull(emberCanvas, emberCtx, emberDpr);
 
@@ -459,8 +465,8 @@ function nearestFrame(index) {
 function masterTick() {
   if (isMobile()) {
     const delta = state.heroTarget - state.heroCurrent;
-    const baseEase = isLowPerf() ? 0.22 : 0.14;
-    const maxEase = isLowPerf() ? 0.42 : 0.32;
+    const baseEase = isLowPerf() ? 0.24 : isAndroid() ? 0.18 : 0.14;
+    const maxEase = isLowPerf() ? 0.44 : isAndroid() ? 0.38 : 0.32;
     const ease = Math.min(maxEase, baseEase + Math.abs(delta) * 1.35);
     state.heroCurrent += Math.abs(delta) < .001 ? delta : delta * ease;
   } else {
