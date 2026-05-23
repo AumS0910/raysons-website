@@ -3388,3 +3388,711 @@ body::before {
   color: var(--o);
   box-shadow: 0 0 14px rgba(255, 107, 0, .22)
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE  —  max-width: 768px
+   Covers: beats, process, nav, hero, stats, caps, specs, footer
+════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── Beats / 4 Pillars ──────────────────────────────────────── */
+
+  /* Full-width single column: text fills the screen, visual panel hidden */
+  .beats__inner {
+    grid-template-columns: 1fr !important;
+    height: calc(100vh - 72px)
+  }
+
+  .beats__visual-panel {
+    display: none !important
+  }
+
+  .beats__text-panel {
+    width: 100%;
+    padding: 0 1.5rem;
+    align-items: center;
+    justify-content: flex-start
+  }
+
+  .beat {
+    padding: 0 1.5rem
+  }
+
+  .beat__content {
+    max-width: 100%
+  }
+
+  .beat__headline {
+    font-size: clamp(2rem, 9vw, 3rem);
+    line-height: 1.08
+  }
+
+  .beat__body,
+  .beat__sub,
+  .beat__row {
+    font-size: .9rem;
+    line-height: 1.6
+  }
+
+  /* Nav dots: move from left-edge of visual panel to a horizontal
+     strip at the bottom of the beats text panel */
+  .beats__nav {
+    position: fixed;
+    bottom: 1.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: row;
+    gap: .6rem;
+    z-index: 120;
+    background: rgba(10, 8, 4, .7);
+    backdrop-filter: blur(8px);
+    padding: .45rem .75rem;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 107, 0, .15)
+  }
+
+  .beats__nav-dot {
+    width: 30px;
+    height: 30px;
+    font-size: .55rem
+  }
+
+  /* ── Process Section ────────────────────────────────────────── */
+
+  .process {
+    padding-bottom: 20vh  /* reduce the 50vh desktop padding */
+  }
+
+  /* Stack header full-width */
+  .process__header {
+    margin-bottom: 2rem
+  }
+
+  .process__headline {
+    font-size: clamp(1.9rem, 8.5vw, 2.8rem) !important
+  }
+
+  /* Single column: image stacks above steps */
+  .process__body {
+    grid-template-columns: 1fr !important;
+    gap: 2rem
+  }
+
+  /* Image appears first (above steps) via order */
+  .process__right {
+    order: -1;
+    position: static !important;  /* remove sticky on mobile */
+    top: auto !important
+  }
+
+  .process__frame {
+    aspect-ratio: 16 / 9;  /* wider on mobile, less height */
+    border-radius: 4px
+  }
+
+  .process__left {
+    order: 1
+  }
+
+  /* Expand the description on mobile (no need to limit height) */
+  .process__step.active .process__desc {
+    max-height: 200px
+  }
+
+  /* Bigger tap targets for dots and titles */
+  .process__dot {
+    width: 16px;
+    height: 16px;
+    left: -2.2rem
+  }
+
+  .process__title {
+    font-size: 1rem
+  }
+
+  /* ── Specs section ──────────────────────────────────────────── */
+  .specs {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem
+  }
+
+  /* ── Ticker ─────────────────────────────────────────────────── */
+  .ticker__item {
+    font-size: .7rem;
+    letter-spacing: .12em
+  }
+
+  /* ── About ──────────────────────────────────────────────────── */
+  .about__inner {
+    padding: 0 1.25rem
+  }
+
+  /* ── CTA ────────────────────────────────────────────────────── */
+  .cta__inner {
+    padding: 0 1.25rem
+  }
+
+  .cta__headline {
+    font-size: clamp(1.9rem, 8.5vw, 2.8rem) !important
+  }
+
+  .cta__buttons {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%
+  }
+
+  .btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center
+  }
+
+  /* ── Footer ─────────────────────────────────────────────────── */
+  .footer__mid {
+    grid-template-columns: 1fr 1fr
+  }
+
+  /* ── Cursor: hide on touch ──────────────────────────────────── */
+  #custom-cursor {
+    display: none
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SMALL PHONES  —  max-width: 480px
+════════════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  /* Beats */
+  .beats__inner {
+    height: calc(100svh - 72px)  /* use svh on small phones */
+  }
+
+  .beat__headline {
+    font-size: clamp(1.75rem, 9.5vw, 2.4rem)
+  }
+
+  .beat__eyebrow {
+    font-size: .65rem
+  }
+
+  .beat__pills {
+    flex-wrap: wrap;
+    gap: .5rem
+  }
+
+  .beat__pill {
+    font-size: .58rem;
+    padding: .3rem .65rem
+  }
+
+  /* Process */
+  .process__frame {
+    aspect-ratio: 4 / 3
+  }
+
+  .process__headline {
+    font-size: clamp(1.7rem, 9vw, 2.4rem) !important
+  }
+
+  .process__title {
+    font-size: .92rem
+  }
+
+  /* Nav dots smaller */
+  .beats__nav-dot {
+    width: 26px;
+    height: 26px;
+    font-size: .5rem
+  }
+
+  /* Footer */
+  .footer__mid {
+    grid-template-columns: 1fr
+  }
+
+  .footer__top {
+    flex-direction: column;
+    gap: 1.2rem;
+    text-align: center
+  }
+
+  /* Caps section headline */
+  .caps__headline {
+    font-size: clamp(1.7rem, 9vw, 2.5rem) !important
+  }
+
+  /* Stats: full width stacked */
+  .stats__inner {
+    grid-template-columns: 1fr 1fr
+  }
+
+  /* Industries: single column */
+  .industries__inner {
+    grid-template-columns: 1fr
+  }
+}
+
+/* Mobile cinematic polish: responsive-only final cascade.
+   Desktop composition remains untouched. */
+@media (max-width: 900px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    cursor: auto;
+  }
+
+  body {
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  #custom-cursor {
+    display: none !important;
+  }
+
+  .nav__inner {
+    height: 64px;
+    padding-inline: clamp(1rem, 4vw, 1.5rem);
+  }
+
+  .nav__logo {
+    font-size: clamp(.9rem, 4vw, 1.05rem);
+    max-width: 68vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav__mobile {
+    top: 64px;
+    padding: 1.6rem 1rem 1.8rem;
+    border-bottom: 1px solid rgba(255,107,0,.14);
+  }
+
+  .nav__mobile-links {
+    gap: 1.15rem;
+  }
+
+  .hero {
+    height: 185svh;
+    min-height: 1040px;
+  }
+
+  .hero__stage {
+    height: 100svh;
+    min-height: 660px;
+  }
+
+  .hero__bg-text {
+    font-size: 30vw;
+    opacity: .65;
+  }
+
+  .hero__video-scene,
+  .hero__video,
+  .hero__canvas-wrap,
+  .hero__webgl-wrap,
+  .hero__ember-wrap {
+    max-width: 100vw;
+  }
+
+  .hero__video {
+    inset: -4svh -44vw;
+    width: 188vw;
+    height: 112svh;
+    object-fit: cover;
+    object-position: 50% 48%;
+  }
+
+  .hero__video--back {
+    opacity: .3;
+    filter: brightness(.34) contrast(1.06) saturate(.72) blur(2px);
+    transform: translate3d(calc(var(--mx,0)*-4px), calc(var(--my,0)*-3px + var(--hp,0)*-10px), 0) scale(1.04);
+  }
+
+  .hero__video--mid {
+    opacity: .94;
+    clip-path: ellipse(62% 58% at 50% 48%);
+    transform: translate3d(calc(var(--mx,0)*7px), calc(var(--my,0)*4px + var(--hp,0)*-18px), 0) scale(calc(1.02 + var(--hp,0)*.025));
+  }
+
+  .hero__video--front {
+    opacity: .28;
+    clip-path: ellipse(34% 44% at 50% 56%);
+    transform: translate3d(calc(var(--mx,0)*12px), calc(var(--my,0)*7px + var(--hp,0)*-26px), 0) scale(calc(1.035 + var(--hp,0)*.03));
+  }
+
+  .hero__video-depth--smoke {
+    opacity: .5;
+  }
+
+  .hero__video-depth--heat {
+    opacity: .26;
+    filter: blur(14px);
+  }
+
+  .hero__webgl-wrap {
+    opacity: .26 !important;
+  }
+
+  .hero__stage .hero__ember-wrap {
+    opacity: .12 !important;
+  }
+
+  .hero__stage .hero__canvas-wrap {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none;
+  }
+
+  .hero__text {
+    pointer-events: none;
+  }
+
+  .hero__left {
+    left: 1rem !important;
+    right: 1rem;
+    bottom: clamp(4.8rem, 10svh, 6.2rem) !important;
+    top: auto !important;
+    max-width: min(390px, calc(100vw - 2rem)) !important;
+    padding: 1rem !important;
+    transform: none !important;
+    background: linear-gradient(90deg, rgba(0,0,0,.64), rgba(0,0,0,.2)) !important;
+  }
+
+  .hero__right {
+    top: clamp(5.8rem, 11svh, 7rem) !important;
+    right: 1rem !important;
+    max-width: min(56vw, 270px) !important;
+    padding: .85rem !important;
+    transform: none !important;
+    background: linear-gradient(270deg, rgba(0,0,0,.4), rgba(0,0,0,.1)) !important;
+  }
+
+  .hero__label {
+    font-size: .58rem;
+    letter-spacing: .18em;
+    line-height: 1.35;
+  }
+
+  .hero__headline-l {
+    font-size: clamp(2.15rem, 10.5vw, 3.55rem) !important;
+    line-height: .98;
+  }
+
+  .hero__headline-r {
+    font-size: clamp(1.38rem, 6.8vw, 2.35rem) !important;
+    line-height: 1;
+  }
+
+  .hero__sub {
+    max-width: 310px;
+    font-size: .82rem;
+    line-height: 1.55;
+  }
+
+  .hero__meta {
+    font-size: .56rem;
+    letter-spacing: .13em;
+  }
+
+  .hero__scroll-ind {
+    bottom: 1.2rem;
+  }
+
+  .about,
+  .stats,
+  .specs,
+  .process,
+  .caps,
+  .industries,
+  .cta {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .about__inner,
+  .stats__inner,
+  .specs__inner,
+  .process__inner,
+  .caps__inner,
+  .industries__inner,
+  .cta__inner,
+  .footer__top,
+  .footer__mid,
+  .footer__bottom {
+    width: 100% !important;
+  }
+
+  .about__inner,
+  .specs__header,
+  .process__inner,
+  .industries__inner,
+  .cta__inner {
+    grid-template-columns: 1fr !important;
+    gap: clamp(1.6rem, 6vw, 2.6rem) !important;
+  }
+
+  .about__statement,
+  .specs__headline,
+  .process__headline,
+  .caps__headline,
+  .industries__statement,
+  .cta__headline {
+    font-size: clamp(1.85rem, 8.4vw, 3rem) !important;
+    line-height: 1.08 !important;
+    letter-spacing: .015em !important;
+  }
+
+  .about__body,
+  .specs__lede,
+  .process__desc,
+  .cta__body {
+    font-size: .93rem !important;
+    line-height: 1.68 !important;
+  }
+
+  .stats__inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 2rem 1rem !important;
+  }
+
+  .stats__item {
+    min-width: 0;
+  }
+
+  .stats__num {
+    font-size: clamp(2.7rem, 12vw, 4.4rem) !important;
+  }
+
+  .specs__grid,
+  .caps__grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .specs__card,
+  .caps__col {
+    min-height: auto !important;
+    padding: 1.35rem !important;
+    border-right: 0 !important;
+  }
+
+  .process__right {
+    position: static !important;
+    order: -1;
+  }
+
+  .process__frame {
+    max-width: none;
+    aspect-ratio: 16 / 10;
+  }
+
+  .industries__right {
+    width: 100%;
+  }
+
+  .industries__item {
+    padding: .9rem 0;
+  }
+
+  .industries__name {
+    font-size: .88rem !important;
+    letter-spacing: .055em;
+  }
+
+  .cta {
+    min-height: auto !important;
+  }
+
+  .cta__inner {
+    padding: 0 !important;
+  }
+
+  .cta__divider {
+    width: 100% !important;
+    height: 1px !important;
+  }
+
+  .cta__buttons {
+    width: 100%;
+  }
+
+  .cta .btn,
+  .beat__cta-stack .btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .footer {
+    padding-inline: 1rem;
+  }
+
+  .footer__top,
+  .footer__bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer__mid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1.8rem 1.2rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero {
+    height: 175svh;
+    min-height: 980px;
+  }
+
+  .hero__video {
+    inset: -3svh -58vw;
+    width: 216vw;
+    height: 108svh;
+    object-position: 50% 46%;
+  }
+
+  .hero__right {
+    opacity: .66;
+    max-width: 54vw !important;
+  }
+
+  .hero__left {
+    bottom: 5rem !important;
+  }
+
+  .stats__inner,
+  .footer__mid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .about__facts span {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* Mobile hero restoration: keep the original cinematic centerpiece visible.
+   This only corrects phone/tablet layout and does not alter desktop. */
+@media (max-width: 900px) {
+  .hero {
+    height: 190svh;
+    min-height: 1080px;
+  }
+
+  .hero__stage {
+    height: 100svh;
+    min-height: 680px;
+  }
+
+  .hero__stage .hero__canvas-wrap {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none;
+    z-index: 4 !important;
+    top: 12svh !important;
+    left: 50% !important;
+    width: min(116vw, 680px) !important;
+    height: 58svh !important;
+    max-height: 560px !important;
+    background: transparent !important;
+    filter: saturate(.92) contrast(1.04) !important;
+    mix-blend-mode: normal !important;
+    transform: translateX(-50%) translateZ(0);
+  }
+
+  .hero__canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .hero__stage .hero__webgl-wrap {
+    visibility: visible !important;
+    opacity: .78 !important;
+    z-index: 5 !important;
+    mix-blend-mode: screen;
+    filter: saturate(.9) contrast(1.04);
+  }
+
+  .hero__stage .hero__ember-wrap {
+    visibility: visible !important;
+    opacity: .34 !important;
+    z-index: 6 !important;
+  }
+
+  .hero__vignette {
+    z-index: 7 !important;
+  }
+
+  .hero__text {
+    z-index: 12 !important;
+  }
+
+  .hero__right {
+    top: 6.6rem !important;
+    right: .9rem !important;
+    max-width: min(42vw, 190px) !important;
+    padding: .6rem !important;
+    opacity: .58 !important;
+    background: linear-gradient(270deg, rgba(0,0,0,.34), rgba(0,0,0,.06)) !important;
+  }
+
+  .hero__headline-r {
+    font-size: clamp(1.05rem, 5.5vw, 1.85rem) !important;
+    line-height: 1.02 !important;
+    letter-spacing: .015em !important;
+  }
+
+  .hero__left {
+    left: .9rem !important;
+    right: .9rem !important;
+    bottom: 3.7rem !important;
+    max-width: calc(100vw - 1.8rem) !important;
+    padding: .95rem !important;
+    overflow: hidden;
+  }
+
+  .hero__headline-l {
+    font-size: clamp(1.8rem, 8.8vw, 2.75rem) !important;
+    line-height: 1 !important;
+    max-width: 100%;
+    overflow-wrap: normal;
+  }
+
+  .hero__sub {
+    max-width: 100%;
+    font-size: .78rem !important;
+    line-height: 1.5 !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero__stage .hero__canvas-wrap {
+    top: 13svh !important;
+    width: 128vw !important;
+    height: 54svh !important;
+  }
+
+  .hero__right {
+    top: 6.25rem !important;
+    max-width: 40vw !important;
+    opacity: .5 !important;
+  }
+
+  .hero__headline-r {
+    font-size: clamp(.95rem, 5.1vw, 1.55rem) !important;
+  }
+
+  .hero__left {
+    bottom: 3.2rem !important;
+  }
+
+  .hero__headline-l {
+    font-size: clamp(1.7rem, 8.2vw, 2.45rem) !important;
+  }
+}
