@@ -9,6 +9,20 @@ const BEAT_RANGES = [{ id: 'beat-1', s: 0, e: .25 }, { id: 'beat-2', s: .25, e: 
 const isMobile = () => window.innerWidth < 768;
 const motionScale = () => isMobile() ? .55 : 1;
 const clamp = (v, min = 0, max = 1) => Math.max(min, Math.min(max, v));
+const perfTier = (() => {
+  const nav = navigator || {};
+  const memory = nav.deviceMemory || 4;
+  const cores = nav.hardwareConcurrency || 4;
+  const dpr = window.devicePixelRatio || 1;
+  const saveData = !!nav.connection?.saveData;
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  if (!coarse && window.innerWidth >= 768) return "desktop";
+  if (saveData || memory <= 2 || cores <= 4 || dpr > 2.75) return "low";
+  if (memory <= 4 || cores <= 6 || dpr > 2.25) return "mid";
+  return "high";
+})();
+const isLowPerf = () => perfTier === "low" || document.documentElement.dataset.perfTier === "low";
+const isMidPerf = () => perfTier === "mid";
 
 const state = { heroTarget: 0, heroCurrent: 0, beatTarget: 0, beatCurrent: 0 };
 let frames = new Array(TOTAL).fill(null);
@@ -23,6 +37,8 @@ let lastDrawnMobileProgress = -1;
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
+  document.documentElement.dataset.perfTier = perfTier;
+  monitorMobileSmoothness();
   heroCanvas = document.getElementById('hero-canvas');
   emberCanvas = document.getElementById('ember-canvas');
   if (heroCanvas) heroCtx = heroCanvas.getContext('2d', { alpha: false, desynchronized: true });
@@ -39,6 +55,32 @@ function init() {
   initObservers();
   onScroll();
   preloadFrames();
+}
+
+function monitorMobileSmoothness() {
+  if (!isMobile() || isLowPerf()) return;
+  let framesSeen = 0;
+  let slowFrames = 0;
+  let last = performance.now();
+  const start = last;
+
+  function sample(now) {
+    const delta = now - last;
+    last = now;
+    framesSeen++;
+    if (delta > 38) slowFrames++;
+
+    if (now - start < 4200 && framesSeen < 220) {
+      requestAnimationFrame(sample);
+      return;
+    }
+
+    if (framesSeen > 30 && slowFrames / framesSeen > 0.34) {
+      document.documentElement.dataset.perfTier = "low";
+    }
+  }
+
+  requestAnimationFrame(sample);
 }
 
 /* ── Magnetic cursor (orange ring) ──────────────────────────────
@@ -92,7 +134,9 @@ async function preloadFrames() {
   const minEnd = performance.now() + 900;
   let started = false;
 
-  const bitmapOptions = isMobile() ? { resizeWidth: 760, resizeQuality: 'medium' } : null;
+  const bitmapOptions = isMobile()
+    ? { resizeWidth: isLowPerf() ? 560 : isMidPerf() ? 680 : 760, resizeQuality: isLowPerf() ? 'low' : 'medium' }
+    : null;
   const decodeFrame = blob => bitmapOptions
     ? createImageBitmap(blob, bitmapOptions).catch(() => createImageBitmap(blob))
     : createImageBitmap(blob);
@@ -140,7 +184,7 @@ async function preloadFrames() {
 
 function sizeCanvases() {
   if (!heroCanvas || !heroCtx || !emberCanvas || !emberCtx) return;
-  const heroDpr = isMobile() ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+  const heroDpr = isMobile() ? (isLowPerf() ? 0.82 : 1) : Math.min(window.devicePixelRatio || 1, 2);
   const emberDpr = isMobile() ? 1 : heroDpr;
   sizeCanvasToEl(heroCanvas, heroCtx, heroDpr, document.querySelector('.hero__canvas-wrap'));
   sizeCanvasFull(emberCanvas, emberCtx, emberDpr);
@@ -227,24 +271,26 @@ function drawFrame(ctx, offCtx, offCan, cw, ch, progress) {
     ctx.setTransform(ctx.canvas?._dpr || 1, 0, 0, ctx.canvas?._dpr || 1, 0, 0);
     ctx.globalAlpha = 1;
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'low';
+    ctx.imageSmoothingQuality = isLowPerf() ? 'low' : 'medium';
     ctx.fillStyle = '#0A0804';
     ctx.fillRect(0, 0, cw, ch);
 
     const dA = calcDraw(a, cw, ch);
     ctx.drawImage(a, 0, 0, dA.sw, dA.sh, dA.dx, dA.dy, dA.dw, dA.dh);
-    if (b && blend > .001) {
+    if (!isLowPerf() && b && blend > .001) {
       const dB = calcDraw(b, cw, ch);
       ctx.globalAlpha = blend;
       ctx.drawImage(b, 0, 0, dB.sw, dB.sh, dB.dx, dB.dy, dB.dw, dB.dh);
       ctx.globalAlpha = 1;
     }
 
-    const fade = ctx.createLinearGradient(0, ch, 0, ch * 0.52);
-    fade.addColorStop(0, 'rgba(10,8,4,1)');
-    fade.addColorStop(1, 'rgba(10,8,4,0)');
-    ctx.fillStyle = fade;
-    ctx.fillRect(0, ch * 0.52, cw, ch * 0.48);
+    if (!isLowPerf()) {
+      const fade = ctx.createLinearGradient(0, ch, 0, ch * 0.52);
+      fade.addColorStop(0, 'rgba(10,8,4,1)');
+      fade.addColorStop(1, 'rgba(10,8,4,0)');
+      ctx.fillStyle = fade;
+      ctx.fillRect(0, ch * 0.52, cw, ch * 0.48);
+    }
     return;
   }
 
@@ -329,7 +375,9 @@ function nearestFrame(index) {
 function masterTick() {
   if (isMobile()) {
     const delta = state.heroTarget - state.heroCurrent;
-    const ease = Math.min(0.32, 0.14 + Math.abs(delta) * 1.35);
+    const baseEase = isLowPerf() ? 0.22 : 0.14;
+    const maxEase = isLowPerf() ? 0.42 : 0.32;
+    const ease = Math.min(maxEase, baseEase + Math.abs(delta) * 1.35);
     state.heroCurrent += Math.abs(delta) < .001 ? delta : delta * ease;
   } else {
     state.heroCurrent += Math.abs(state.heroTarget - state.heroCurrent) < .0001 ? state.heroTarget - state.heroCurrent : (state.heroTarget - state.heroCurrent) * LERP;
@@ -347,7 +395,8 @@ function masterTick() {
   if (allReady) {
     if (isMobile()) {
       const mobileFrame = Math.floor(state.heroCurrent * (TOTAL - 1));
-      if (mobileFrame !== lastDrawnMobileFrame || Math.abs(state.heroCurrent - lastDrawnMobileProgress) > .0012) {
+      const drawThreshold = isLowPerf() ? .0035 : .0012;
+      if (mobileFrame !== lastDrawnMobileFrame || Math.abs(state.heroCurrent - lastDrawnMobileProgress) > drawThreshold) {
         drawFrame(heroCtx, offX, offC, heroCanvas ? heroCanvas._lw || 1 : 1, heroCanvas ? heroCanvas._lh || 1 : 1, state.heroCurrent);
         lastDrawnMobileFrame = mobileFrame;
         lastDrawnMobileProgress = state.heroCurrent;
@@ -517,7 +566,7 @@ class Ember {
 
 function updateEmbers(ctx, arr, w, h, progress) {
   if (!ctx || !w || !h) return;
-  if (arr.length === 0) for (let i = 0; i < (isMobile() ? 32 : 60); i++)arr.push(new Ember(w, h, true));
+  if (arr.length === 0) for (let i = 0; i < (isMobile() ? (isLowPerf() ? 14 : 32) : 60); i++)arr.push(new Ember(w, h, true));
   ctx.clearRect(0, 0, w, h);
   if (progress < .01) return;
   arr.forEach(ember => {

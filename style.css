@@ -4619,3 +4619,26 @@ body::before {
     line-height: 1.38 !important;
   }
 }
+
+@media (max-width: 768px) {
+  html[data-perf-tier="low"] .hero__stage .hero__webgl-wrap,
+  html[data-perf-tier="low"] .hero__stage .hero__ember-wrap {
+    opacity: .16 !important;
+  }
+
+  html[data-perf-tier="low"] .hero__heat,
+  html[data-perf-tier="low"] .hero__video-depth--heat,
+  html[data-perf-tier="low"] .hero__video-depth--smoke {
+    filter: none !important;
+  }
+
+  html[data-perf-tier="low"] .film-reveal,
+  html[data-perf-tier="mid"] .film-reveal {
+    transition-duration: .28s !important;
+    filter: none !important;
+  }
+
+  html[data-perf-tier="low"] .ticker__track {
+    animation-duration: 46s !important;
+  }
+}

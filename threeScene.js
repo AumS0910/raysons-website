@@ -8,6 +8,19 @@ const canvas = document.querySelector("#webgl-canvas");
 const hero = document.querySelector(".hero");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const isMobileDevice = () => window.innerWidth < 768 || window.matchMedia("(pointer: coarse)").matches;
+const getPerfTier = () => {
+  const assigned = document.documentElement?.dataset.perfTier;
+  if (assigned === "low" || assigned === "mid" || assigned === "high") return assigned;
+  const nav = navigator || {};
+  const memory = nav.deviceMemory || 4;
+  const cores = nav.hardwareConcurrency || 4;
+  const dpr = window.devicePixelRatio || 1;
+  const saveData = !!nav.connection?.saveData;
+  if (!isMobileDevice()) return "desktop";
+  if (saveData || memory <= 2 || cores <= 4 || dpr > 2.75) return "low";
+  if (memory <= 4 || cores <= 6 || dpr > 2.25) return "mid";
+  return "high";
+};
 
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const mix = (a, b, t) => a + (b - a) * t;
@@ -195,6 +208,7 @@ class ForgeHeroAtmosphere {
     this.isRunning = true;
     this.isHeroNear = true;
     this.isMobile = isMobileDevice();
+    this.perfTier = getPerfTier();
     this.useBloom = !this.isMobile;
     this.frameId = null;
     this.lastRenderTime = 0;
@@ -343,7 +357,7 @@ class ForgeHeroAtmosphere {
 
   addParticles() {
     const isSmall = this.isMobile;
-    this.particleCount = isSmall ? 120 : 600;
+    this.particleCount = isSmall ? (this.perfTier === "low" ? 48 : this.perfTier === "mid" ? 90 : 140) : 600;
     const positions = new Float32Array(this.particleCount * 3);
     const seeds = new Float32Array(this.particleCount);
     const sizes = new Float32Array(this.particleCount);
@@ -589,7 +603,9 @@ class ForgeHeroAtmosphere {
     const width = Math.max(1, Math.floor(rect.width));
     const height = Math.max(1, Math.floor(rect.height));
     this.isMobile = isMobileDevice();
-    const dpr = this.isMobile ? Math.min(window.devicePixelRatio || 1, 0.95) : Math.min(window.devicePixelRatio || 1, 1.65);
+    this.perfTier = getPerfTier();
+    const mobileDpr = this.perfTier === "low" ? 0.62 : this.perfTier === "mid" ? 0.78 : 0.95;
+    const dpr = this.isMobile ? Math.min(window.devicePixelRatio || 1, mobileDpr) : Math.min(window.devicePixelRatio || 1, 1.65);
 
     this.camera.aspect = width / height;
     this.camera.fov = this.isMobile ? 50 : 42;
@@ -625,7 +641,9 @@ class ForgeHeroAtmosphere {
       return;
     }
     this.frameId = requestAnimationFrame(this.animate);
-    if (this.isMobile && now - this.lastRenderTime < 33) return;
+    if (this.isMobile) this.perfTier = getPerfTier();
+    const mobileFrameMs = this.perfTier === "low" ? 50 : this.perfTier === "mid" ? 40 : 33;
+    if (this.isMobile && now - this.lastRenderTime < mobileFrameMs) return;
     this.lastRenderTime = now;
 
     const elapsed = this.clock.getElapsedTime();
