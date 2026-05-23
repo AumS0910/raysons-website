@@ -17,6 +17,7 @@ let prevBeatIdx = -1;
 let heroCanvas, heroCtx, emberCanvas, emberCtx, offC, offX;
 let embers = [];
 let filmScenes = [];
+let lastDrawnMobileFrame = -1;
 
 document.addEventListener('DOMContentLoaded', init);
 
@@ -148,6 +149,7 @@ function sizeCanvases() {
   offC.height = heroCanvas.height;
   offX = offC.getContext('2d', { alpha: false, desynchronized: true });
   offX.setTransform(heroDpr, 0, 0, heroDpr, 0, 0);
+  lastDrawnMobileFrame = -1;
 }
 
 function sizeCanvasToEl(canvas, ctx, dpr, el) {
@@ -295,8 +297,10 @@ function nearestFrame(index) {
 
 function masterTick() {
   if (isMobile()) {
-    const mobileEase = 0.16;
-    state.heroCurrent += Math.abs(state.heroTarget - state.heroCurrent) < .002 ? state.heroTarget - state.heroCurrent : (state.heroTarget - state.heroCurrent) * mobileEase;
+    // Snap directly — no lerp on mobile.
+    // Touch scroll already has native momentum smoothing from the OS;
+    // adding JS easing on top creates visible lag between finger and frame.
+    state.heroCurrent = state.heroTarget;
   } else {
     state.heroCurrent += Math.abs(state.heroTarget - state.heroCurrent) < .0001 ? state.heroTarget - state.heroCurrent : (state.heroTarget - state.heroCurrent) * LERP;
   }
@@ -311,7 +315,15 @@ function masterTick() {
 
 
   if (allReady) {
-    drawFrame(heroCtx, offX, offC, heroCanvas ? heroCanvas._lw || 1 : 1, heroCanvas ? heroCanvas._lh || 1 : 1, state.heroCurrent);
+    if (isMobile()) {
+      const mobileFrame = Math.round(state.heroCurrent * (TOTAL - 1));
+      if (mobileFrame !== lastDrawnMobileFrame) {
+        drawFrame(heroCtx, offX, offC, heroCanvas ? heroCanvas._lw || 1 : 1, heroCanvas ? heroCanvas._lh || 1 : 1, state.heroCurrent);
+        lastDrawnMobileFrame = mobileFrame;
+      }
+    } else {
+      drawFrame(heroCtx, offX, offC, heroCanvas ? heroCanvas._lw || 1 : 1, heroCanvas ? heroCanvas._lh || 1 : 1, state.heroCurrent);
+    }
   }
   updateEmbers(emberCtx, embers, emberCanvas ? emberCanvas._lw || window.innerWidth : window.innerWidth, emberCanvas ? emberCanvas._lh || window.innerHeight : window.innerHeight, state.heroCurrent);
 
@@ -474,7 +486,7 @@ class Ember {
 
 function updateEmbers(ctx, arr, w, h, progress) {
   if (!ctx || !w || !h) return;
-  if (arr.length === 0) for (let i = 0; i < 60; i++)arr.push(new Ember(w, h, true));
+  if (arr.length === 0) for (let i = 0; i < (isMobile() ? 32 : 60); i++)arr.push(new Ember(w, h, true));
   ctx.clearRect(0, 0, w, h);
   if (progress < .01) return;
   arr.forEach(ember => {

@@ -7,6 +7,7 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 const canvas = document.querySelector("#webgl-canvas");
 const hero = document.querySelector(".hero");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isMobileDevice = () => window.innerWidth < 768 || window.matchMedia("(pointer: coarse)").matches;
 
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const mix = (a, b, t) => a + (b - a) * t;
@@ -192,6 +193,9 @@ class ForgeHeroAtmosphere {
     this.pointer = new THREE.Vector2();
     this.scrollProgress = 0;
     this.isRunning = true;
+    this.isHeroNear = true;
+    this.isMobile = isMobileDevice();
+    this.useBloom = !this.isMobile;
     this.frameId = null;
 
     this.camera = new THREE.PerspectiveCamera(42, 1, 0.1, 70);
@@ -206,6 +210,7 @@ class ForgeHeroAtmosphere {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.autoClear = true;
+    if (this.isMobile) this.renderer.setAnimationLoop(null);
     this.scene.fog = new THREE.FogExp2(0x170b05, 0.038);
 
     this.resizeObserver = new ResizeObserver(() => this.resize());
@@ -336,8 +341,8 @@ class ForgeHeroAtmosphere {
   }
 
   addParticles() {
-    const isSmall = window.innerWidth < 768;
-    this.particleCount = isSmall ? 300 : 600;
+    const isSmall = this.isMobile;
+    this.particleCount = isSmall ? 220 : 600;
     const positions = new Float32Array(this.particleCount * 3);
     const seeds = new Float32Array(this.particleCount);
     const sizes = new Float32Array(this.particleCount);
@@ -489,16 +494,17 @@ class ForgeHeroAtmosphere {
   addPostProcessing() {
     this.renderPass = new RenderPass(this.scene, this.camera);
 
-    this.bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.08, 0.25, 0.4);
-    this.bloomPass.threshold = 0.91;
-    this.bloomPass.strength = 0.08;
-    this.bloomPass.radius = 0.22;
-
     this.lensPass = new ShaderPass(ForgeLensShader);
 
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass(this.renderPass);
-    this.composer.addPass(this.bloomPass);
+    if (this.useBloom) {
+      this.bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.08, 0.25, 0.4);
+      this.bloomPass.threshold = 0.91;
+      this.bloomPass.strength = 0.08;
+      this.bloomPass.radius = 0.22;
+      this.composer.addPass(this.bloomPass);
+    }
     this.composer.addPass(this.lensPass);
   }
 
@@ -532,6 +538,9 @@ class ForgeHeroAtmosphere {
     if (!hero) return;
     const travel = Math.max(1, hero.offsetHeight - window.innerHeight);
     this.scrollProgress = clamp((window.scrollY - hero.offsetTop) / travel);
+    const rect = hero.getBoundingClientRect();
+    this.isHeroNear = rect.bottom > -120 && rect.top < window.innerHeight + 120;
+    if (this.isHeroNear && this.isRunning && !prefersReducedMotion && !this.frameId) this.animate();
   }
 
   getCinematicState(elapsed) {
@@ -577,10 +586,11 @@ class ForgeHeroAtmosphere {
     const rect = this.stage.getBoundingClientRect();
     const width = Math.max(1, Math.floor(rect.width));
     const height = Math.max(1, Math.floor(rect.height));
-    const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.35 : 1.65);
+    this.isMobile = isMobileDevice();
+    const dpr = this.isMobile ? Math.min(window.devicePixelRatio || 1, 0.95) : Math.min(window.devicePixelRatio || 1, 1.65);
 
     this.camera.aspect = width / height;
-    this.camera.fov = width < 768 ? 50 : 42;
+    this.camera.fov = this.isMobile ? 50 : 42;
     this.camera.updateProjectionMatrix();
     this.renderer.setPixelRatio(dpr);
     this.renderer.setSize(width, height, false);
@@ -596,7 +606,7 @@ class ForgeHeroAtmosphere {
     this.hazeMaterial.uniforms.uMoltenEnergy.value = 0.34;
     this.thermalMaterial.uniforms.uEnergy.value = 0.22;
     this.thermalMaterial.uniforms.uImpact.value = 0.18;
-    this.bloomPass.strength = 0.08;
+    if (this.bloomPass) this.bloomPass.strength = 0.08;
     this.lensPass.uniforms.uHeat.value = 0.18;
     this.lensPass.uniforms.uImpact.value = 0.14;
     this.lensPass.uniforms.uSoftness.value = 0.12;
@@ -608,6 +618,10 @@ class ForgeHeroAtmosphere {
 
   animate() {
     if (!this.isRunning) return;
+    if (!this.isHeroNear) {
+      this.frameId = null;
+      return;
+    }
     this.frameId = requestAnimationFrame(this.animate);
 
     const elapsed = this.clock.getElapsedTime();
@@ -675,9 +689,11 @@ this.mouse.y += (this.pointer.y - this.mouse.y) * 0.004;
     this.bounceMaterial.opacity = heroVisibility * mix(0.032, 0.085, moltenEnergy) * mix(1, 0.74, story.cooldown);
     this.bouncePlate.position.x = -guidedX * 0.08 - this.mouse.x * 0.035;
 
-    this.bloomPass.threshold = mix(0.89, 0.82, impactEnergy * mix(0.85, 1.15, story.impactPriority));
-    this.bloomPass.strength = heroVisibility * (mix(0.04, 0.11, materialEnergy) + impactEnergy * 0.04 * mix(0.75, 1.25, story.impactPriority)) * mix(0.96, 1.025, story.slowNoise) * mix(1, 0.86, story.silence);
-    this.bloomPass.radius = mix(0.22, 0.36, impactEnergy);
+    if (this.bloomPass) {
+      this.bloomPass.threshold = mix(0.89, 0.82, impactEnergy * mix(0.85, 1.15, story.impactPriority));
+      this.bloomPass.strength = heroVisibility * (mix(0.04, 0.11, materialEnergy) + impactEnergy * 0.04 * mix(0.75, 1.25, story.impactPriority)) * mix(0.96, 1.025, story.slowNoise) * mix(1, 0.86, story.silence);
+      this.bloomPass.radius = mix(0.22, 0.36, impactEnergy);
+    }
     this.lensPass.uniforms.uTime.value = elapsed;
     this.lensPass.uniforms.uHeat.value = heroVisibility * mix(0.16, 0.5, materialEnergy) * mix(1, 0.74, story.cooldown);
     this.lensPass.uniforms.uImpact.value = heroVisibility * mix(0.1, 0.48, impactEnergy) * mix(0.9, 1.16, story.impactPriority);
