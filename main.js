@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', init);
 function init() {
   heroCanvas = document.getElementById('hero-canvas');
   emberCanvas = document.getElementById('ember-canvas');
-  if (heroCanvas) heroCtx = heroCanvas.getContext('2d', { alpha: false });
-  if (emberCanvas) emberCtx = emberCanvas.getContext('2d', { alpha: true });
+  if (heroCanvas) heroCtx = heroCanvas.getContext('2d', { alpha: false, desynchronized: true });
+  if (emberCanvas) emberCtx = emberCanvas.getContext('2d', { alpha: true, desynchronized: true });
 
   sizeCanvases();
   window.addEventListener('resize', debounce(sizeCanvases, 150));
@@ -90,9 +90,14 @@ async function preloadFrames() {
   const minEnd = performance.now() + 900;
   let started = false;
 
+  const bitmapOptions = isMobile() ? { resizeWidth: 960, resizeQuality: 'medium' } : null;
+  const decodeFrame = blob => bitmapOptions
+    ? createImageBitmap(blob, bitmapOptions).catch(() => createImageBitmap(blob))
+    : createImageBitmap(blob);
+
   const loadFrame = i => fetch(getFramePath(i))
     .then(r => r.blob())
-    .then(blob => createImageBitmap(blob))
+    .then(decodeFrame)
     .then(bitmap => {
       frames[i] = bitmap;
       loaded++;
@@ -133,15 +138,16 @@ async function preloadFrames() {
 
 function sizeCanvases() {
   if (!heroCanvas || !heroCtx || !emberCanvas || !emberCtx) return;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  sizeCanvasToEl(heroCanvas, heroCtx, dpr, document.querySelector('.hero__canvas-wrap'));
-  sizeCanvasFull(emberCanvas, emberCtx, dpr);
+  const heroDpr = isMobile() ? Math.min(window.devicePixelRatio || 1, 1.15) : Math.min(window.devicePixelRatio || 1, 2);
+  const emberDpr = isMobile() ? 1 : heroDpr;
+  sizeCanvasToEl(heroCanvas, heroCtx, heroDpr, document.querySelector('.hero__canvas-wrap'));
+  sizeCanvasFull(emberCanvas, emberCtx, emberDpr);
 
   offC = document.createElement('canvas');
   offC.width = heroCanvas.width;
   offC.height = heroCanvas.height;
-  offX = offC.getContext('2d');
-  offX.setTransform(dpr, 0, 0, dpr, 0, 0);
+  offX = offC.getContext('2d', { alpha: false, desynchronized: true });
+  offX.setTransform(heroDpr, 0, 0, heroDpr, 0, 0);
 }
 
 function sizeCanvasToEl(canvas, ctx, dpr, el) {
@@ -154,6 +160,7 @@ function sizeCanvasToEl(canvas, ctx, dpr, el) {
   canvas.style.height = h + 'px';
   canvas._lw = w;
   canvas._lh = h;
+  canvas._dpr = dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
@@ -166,6 +173,7 @@ function sizeCanvasFull(canvas, ctx, dpr) {
   canvas.style.height = h + 'px';
   canvas._lw = w;
   canvas._lh = h;
+  canvas._dpr = dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
@@ -198,16 +206,19 @@ function calcDraw(img, cw, ch) {
 
 function drawFrame(ctx, offCtx, offCan, cw, ch, progress) {
   if (!ctx || !offCtx || !offCan || !cw || !ch) return;
+  const mobile = isMobile();
   const ri = progress * (TOTAL - 1);
-  const iA = Math.floor(ri);
+  const iA = mobile ? Math.round(ri) : Math.floor(ri);
   const iB = Math.min(iA + 1, TOTAL - 1);
   const blend = ri - iA;
   const a = frames[iA] || nearestFrame(iA);
-  const b = frames[iB] || nearestFrame(iB);
+  const b = mobile ? null : (frames[iB] || nearestFrame(iB));
   if (!a) return;
 
   // Fill with site background colour — not pure black
   offCtx.globalAlpha = 1;
+  offCtx.imageSmoothingEnabled = true;
+  offCtx.imageSmoothingQuality = mobile ? 'low' : 'high';
   offCtx.fillStyle = '#0A0804';
   offCtx.fillRect(0, 0, cw, ch);
 
@@ -264,8 +275,10 @@ function drawFrame(ctx, offCtx, offCan, cw, ch, progress) {
   offCtx.fillStyle = vC;
   offCtx.fillRect(0, 0, cw, ch);
 
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const dpr = ctx.canvas?._dpr || (mobile ? Math.min(window.devicePixelRatio || 1, 1.15) : Math.min(window.devicePixelRatio || 1, 2));
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = mobile ? 'low' : 'high';
   ctx.drawImage(offCan, 0, 0);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }

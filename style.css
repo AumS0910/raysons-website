@@ -4146,8 +4146,8 @@ body::before {
   }
 
   .hero {
-    height: 118svh !important;
-    min-height: 980px !important;
+    height: 155svh !important;
+    min-height: 1180px !important;
     overflow: visible !important;
   }
 
@@ -4397,8 +4397,8 @@ body::before {
 
 @media (max-width: 560px) {
   .hero {
-    height: 116svh !important;
-    min-height: 940px !important;
+    height: 148svh !important;
+    min-height: 1120px !important;
   }
 
   .hero__stage .hero__canvas-wrap {
