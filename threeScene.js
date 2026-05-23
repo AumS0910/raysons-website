@@ -439,6 +439,7 @@ class ForgeHeroAtmosphere {
         }
       `,
       fragmentShader: `
+        uniform float uThermalPulse;
         varying float vType;
         varying float vAlpha;
         varying float vFlicker;
@@ -625,7 +626,7 @@ class ForgeHeroAtmosphere {
     this.frameId = requestAnimationFrame(this.animate);
 
     const elapsed = this.clock.getElapsedTime();
-    const heroVisibility = 1 - smoothstep(0.72, 1, this.scrollProgress);
+    const heroVisibility = 1 - smoothstep(this.isMobile ? 0.92 : 0.72, 1, this.scrollProgress);
     const pourIntensity = 0.42 + Math.sin(this.scrollProgress * Math.PI) * 0.46;
     const heatBreath = 0.5 + 0.5 * Math.sin(elapsed * 0.72 + Math.sin(elapsed * 0.19) * 0.7);
     const impactPulse = 0.5 + 0.5 * Math.sin(elapsed * 1.14 + Math.sin(elapsed * 0.37) * 0.45);

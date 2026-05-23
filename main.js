@@ -185,7 +185,11 @@ function onScroll() {
   if (hero) {
     const start = hero.offsetTop || 0;
     const travel = Math.max(1, hero.offsetHeight - window.innerHeight);
-    state.heroTarget = clamp((sy - start) / travel);
+    const rawHeroProgress = clamp((sy - start) / travel);
+    state.heroTarget = rawHeroProgress;
+    const shouldPinHero = isMobile() && sy >= start && rawHeroProgress < 1;
+    hero.classList.toggle('hero--fixed', shouldPinHero);
+    hero.classList.toggle('hero--released', isMobile() && rawHeroProgress >= 1);
   }
 
   const beats = document.getElementById('beats-section');
