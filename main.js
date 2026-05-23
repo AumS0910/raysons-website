@@ -91,7 +91,7 @@ async function preloadFrames() {
   const minEnd = performance.now() + 900;
   let started = false;
 
-  const bitmapOptions = isMobile() ? { resizeWidth: 960, resizeQuality: 'medium' } : null;
+  const bitmapOptions = isMobile() ? { resizeWidth: 760, resizeQuality: 'medium' } : null;
   const decodeFrame = blob => bitmapOptions
     ? createImageBitmap(blob, bitmapOptions).catch(() => createImageBitmap(blob))
     : createImageBitmap(blob);
@@ -139,7 +139,7 @@ async function preloadFrames() {
 
 function sizeCanvases() {
   if (!heroCanvas || !heroCtx || !emberCanvas || !emberCtx) return;
-  const heroDpr = isMobile() ? Math.min(window.devicePixelRatio || 1, 1.15) : Math.min(window.devicePixelRatio || 1, 2);
+  const heroDpr = isMobile() ? 1 : Math.min(window.devicePixelRatio || 1, 2);
   const emberDpr = isMobile() ? 1 : heroDpr;
   sizeCanvasToEl(heroCanvas, heroCtx, heroDpr, document.querySelector('.hero__canvas-wrap'));
   sizeCanvasFull(emberCanvas, emberCtx, emberDpr);
@@ -220,6 +220,25 @@ function drawFrame(ctx, offCtx, offCan, cw, ch, progress) {
   const a = frames[iA] || nearestFrame(iA);
   const b = mobile ? null : (frames[iB] || nearestFrame(iB));
   if (!a) return;
+
+  if (mobile) {
+    ctx.setTransform(ctx.canvas?._dpr || 1, 0, 0, ctx.canvas?._dpr || 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'low';
+    ctx.fillStyle = '#0A0804';
+    ctx.fillRect(0, 0, cw, ch);
+
+    const dA = calcDraw(a, cw, ch);
+    ctx.drawImage(a, 0, 0, dA.sw, dA.sh, dA.dx, dA.dy, dA.dw, dA.dh);
+
+    const fade = ctx.createLinearGradient(0, ch, 0, ch * 0.52);
+    fade.addColorStop(0, 'rgba(10,8,4,1)');
+    fade.addColorStop(1, 'rgba(10,8,4,0)');
+    ctx.fillStyle = fade;
+    ctx.fillRect(0, ch * 0.52, cw, ch * 0.48);
+    return;
+  }
 
   // Fill with site background colour — not pure black
   offCtx.globalAlpha = 1;

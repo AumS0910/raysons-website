@@ -197,6 +197,7 @@ class ForgeHeroAtmosphere {
     this.isMobile = isMobileDevice();
     this.useBloom = !this.isMobile;
     this.frameId = null;
+    this.lastRenderTime = 0;
 
     this.camera = new THREE.PerspectiveCamera(42, 1, 0.1, 70);
     this.camera.position.set(0, 0.35, 8.8);
@@ -342,7 +343,7 @@ class ForgeHeroAtmosphere {
 
   addParticles() {
     const isSmall = this.isMobile;
-    this.particleCount = isSmall ? 220 : 600;
+    this.particleCount = isSmall ? 120 : 600;
     const positions = new Float32Array(this.particleCount * 3);
     const seeds = new Float32Array(this.particleCount);
     const sizes = new Float32Array(this.particleCount);
@@ -617,13 +618,15 @@ class ForgeHeroAtmosphere {
     this.composer.render();
   }
 
-  animate() {
+  animate(now = 0) {
     if (!this.isRunning) return;
     if (!this.isHeroNear) {
       this.frameId = null;
       return;
     }
     this.frameId = requestAnimationFrame(this.animate);
+    if (this.isMobile && now - this.lastRenderTime < 33) return;
+    this.lastRenderTime = now;
 
     const elapsed = this.clock.getElapsedTime();
     const heroVisibility = 1 - smoothstep(this.isMobile ? 0.92 : 0.72, 1, this.scrollProgress);
