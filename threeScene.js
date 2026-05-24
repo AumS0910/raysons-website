@@ -362,7 +362,7 @@ class ForgeHeroAtmosphere {
 
   addParticles() {
     const isSmall = this.isMobile;
-    this.particleCount = isSmall ? (this.perfTier === "low" ? 36 : this.perfTier === "mid" ? 72 : 120) : 600;
+    this.particleCount = isSmall ? (this.perfTier === "low" ? 28 : this.perfTier === "mid" ? 48 : 96) : 600;
     const positions = new Float32Array(this.particleCount * 3);
     const seeds = new Float32Array(this.particleCount);
     const sizes = new Float32Array(this.particleCount);
@@ -609,7 +609,7 @@ class ForgeHeroAtmosphere {
     const height = Math.max(1, Math.floor(rect.height));
     this.isMobile = isMobileDevice();
     this.perfTier = getPerfTier();
-    const mobileDpr = this.perfTier === "low" ? 0.56 : this.perfTier === "mid" ? 0.72 : 0.92;
+    const mobileDpr = this.perfTier === "low" ? 0.48 : this.perfTier === "mid" ? 0.58 : 0.86;
     const dpr = this.isMobile ? Math.min(window.devicePixelRatio || 1, mobileDpr) : Math.min(window.devicePixelRatio || 1, 1.65);
 
     this.camera.aspect = width / height;

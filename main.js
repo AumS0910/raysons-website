@@ -29,13 +29,13 @@ const isMidPerf = () => perfTier === "mid" || document.documentElement.dataset.p
 const frameStep = () => {
   if (!isMobile()) return 1;
   if (isLowPerf()) return 4;
-  if (isMidPerf()) return 3;
+  if (isMidPerf()) return isAndroid() ? 2 : 3;
   return 2;
 };
 const maxInitialFrame = () => {
   if (!isMobile()) return 96;
   if (isLowPerf()) return 76;
-  if (isMidPerf()) return isAndroid() ? 88 : 104;
+  if (isMidPerf()) return isAndroid() ? 120 : 104;
   return 132;
 };
 
@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', init);
 
 function init() {
   document.documentElement.dataset.perfTier = perfTier;
+  document.documentElement.dataset.platform = isAndroid() ? "android" : "default";
   monitorMobileSmoothness();
   initAtmosphereLayer();
   heroCanvas = document.getElementById('hero-canvas');
@@ -168,8 +169,9 @@ async function preloadFrames() {
   const minEnd = performance.now() + 900;
   let started = false;
 
+  const mobileDecodeWidth = isLowPerf() ? 620 : isMidPerf() ? (isAndroid() ? 860 : 720) : 820;
   const bitmapOptions = isMobile()
-    ? { resizeWidth: isLowPerf() ? 560 : isMidPerf() ? 680 : 760, resizeQuality: isLowPerf() ? 'low' : 'medium' }
+    ? { resizeWidth: mobileDecodeWidth, resizeQuality: isLowPerf() ? 'low' : 'medium' }
     : null;
   const decodeFrame = blob => bitmapOptions
     ? createImageBitmap(blob, bitmapOptions).catch(() => createImageBitmap(blob))
@@ -274,8 +276,8 @@ function initHeroVideoScrub() {
 
 function sizeCanvases() {
   if (!heroCanvas || !heroCtx || !emberCanvas || !emberCtx) return;
-  const heroDpr = isMobile() ? (isLowPerf() ? 0.72 : isMidPerf() ? 0.86 : 0.96) : Math.min(window.devicePixelRatio || 1, 2);
-  const emberDpr = isMobile() ? (isLowPerf() ? 0.74 : isMidPerf() ? 0.84 : 0.95) : heroDpr;
+  const heroDpr = isMobile() ? (isLowPerf() ? 0.82 : isMidPerf() ? (isAndroid() ? 1 : 0.9) : 1.05) : Math.min(window.devicePixelRatio || 1, 2);
+  const emberDpr = isMobile() ? (isLowPerf() ? 0.66 : isMidPerf() ? 0.72 : 0.9) : heroDpr;
   sizeCanvasToEl(heroCanvas, heroCtx, heroDpr, document.querySelector('.hero__canvas-wrap'));
   sizeCanvasFull(emberCanvas, emberCtx, emberDpr);
 

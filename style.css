@@ -4621,6 +4621,18 @@ body::before {
 }
 
 @media (max-width: 768px) {
+  html[data-platform="android"] .hero__stage .hero__canvas-wrap {
+    filter: contrast(1.06) saturate(1.06) brightness(1.03) !important;
+  }
+
+  html[data-platform="android"] .hero__stage .hero__webgl-wrap {
+    opacity: .38 !important;
+  }
+
+  html[data-platform="android"] .hero__stage .hero__ember-wrap {
+    opacity: .42 !important;
+  }
+
   html[data-perf-tier="low"] .hero__stage .hero__webgl-wrap,
   html[data-perf-tier="low"] .hero__stage .hero__ember-wrap {
     opacity: .16 !important;
