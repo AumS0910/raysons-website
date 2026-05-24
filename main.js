@@ -249,9 +249,8 @@ function initHeroVideoScrub() {
 
   heroVideo.muted = true;
   heroVideo.playsInline = true;
-  heroVideo.loop = true;
+  heroVideo.loop = false;
   heroVideo.preload = 'auto';
-  heroVideo.playbackRate = isLowPerf() ? 0.72 : 0.82;
   heroVideo.pause();
 
   heroVideo.addEventListener('loadedmetadata', () => {
@@ -262,8 +261,10 @@ function initHeroVideoScrub() {
     heroVideoReady = true;
     allReady = true;
     document.documentElement.classList.add('hero-video-enabled', 'hero-video-ready');
-    heroVideo.currentTime = Math.min(heroVideo.duration * 0.08, 1.2);
-    heroVideo.play().catch(() => {});
+    videoScrubCurrent = 0;
+    lastVideoTime = -1;
+    heroVideo.currentTime = 0.001;
+    heroVideo.pause();
     if (bar) bar.style.width = '100%';
     setTimeout(() => {
       if (preloader) {
@@ -516,23 +517,20 @@ function masterTick() {
 
 function updateHeroVideoScrub() {
   if (!heroVideoReady || !heroVideo || !heroVideo.duration) return;
-  if (isMobile()) {
-    if (heroVideo.paused) heroVideo.play().catch(() => {});
-    return;
-  }
 
   const delta = state.heroCurrent - videoScrubCurrent;
   const ease = isMobile()
-    ? (isLowPerf() ? 0.32 : isMidPerf() ? 0.24 : 0.2)
+    ? (isLowPerf() ? 0.42 : isMidPerf() ? 0.34 : 0.28)
     : 0.12;
   videoScrubCurrent += Math.abs(delta) < .0008 ? delta : delta * ease;
 
-  const nextTime = clamp(videoScrubCurrent) * Math.max(0, heroVideo.duration - 0.035);
+  const nextTime = clamp(videoScrubCurrent) * Math.max(0, heroVideo.duration - 0.045);
   const threshold = isMobile()
-    ? (isLowPerf() ? 0.06 : isMidPerf() ? 0.042 : 0.03)
+    ? (isLowPerf() ? 0.075 : isMidPerf() ? 0.052 : 0.038)
     : 0.016;
 
   if (Math.abs(nextTime - lastVideoTime) >= threshold && !heroVideo.seeking) {
+    heroVideo.pause();
     heroVideo.currentTime = nextTime;
     lastVideoTime = nextTime;
   }
