@@ -4348,6 +4348,8 @@ body::before {
 
   .process__step {
     padding: 1rem 0 1rem 2.2rem !important;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   .process__title {
@@ -4361,8 +4363,8 @@ body::before {
     font-size: .86rem !important;
     line-height: 1.55 !important;
     transition:
-      max-height .44s cubic-bezier(.22, 1, .36, 1),
-      opacity .34s cubic-bezier(.22, 1, .36, 1) !important;
+      max-height .58s cubic-bezier(.22, 1, .36, 1),
+      opacity .42s cubic-bezier(.22, 1, .36, 1) !important;
   }
 
   .process__mobile-frame {
@@ -4371,10 +4373,10 @@ body::before {
     opacity: 0;
     transform: translate3d(0, 8px, 0);
     transition:
-      max-height .46s cubic-bezier(.22, 1, .36, 1),
-      opacity .34s cubic-bezier(.22, 1, .36, 1),
-      transform .46s cubic-bezier(.22, 1, .36, 1),
-      margin-top .46s cubic-bezier(.22, 1, .36, 1);
+      max-height .62s cubic-bezier(.22, 1, .36, 1),
+      opacity .42s cubic-bezier(.22, 1, .36, 1),
+      transform .62s cubic-bezier(.22, 1, .36, 1),
+      margin-top .62s cubic-bezier(.22, 1, .36, 1);
     overflow: hidden;
     margin-top: 0;
     contain: layout paint;
