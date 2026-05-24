@@ -926,7 +926,12 @@ function initObservers() {
   // On scroll: find whichever step's top is closest to 40% down the viewport.
   // This works for ALL 6 steps even when steps 5 & 6 can't reach true center.
   const steps = processSteps;
-  const TRIGGER_Y = 0.40; // 40% from top of viewport
+  const TRIGGER_Y = isMobile() ? 0.52 : 0.40; // lower mobile trigger slows step changes
+  const mobileStepHold = () => window.innerHeight * 0.46;
+  const mobileProcessStart = () => {
+    if (!processSection) return 0;
+    return processSection.offsetTop + window.innerHeight * 0.18;
+  };
 
   function updateActiveStepOnScroll() {
     processScrollRaf = 0;
@@ -934,14 +939,19 @@ function initObservers() {
       const sectionRect = processSection.getBoundingClientRect();
       if (sectionRect.bottom < 0 || sectionRect.top > window.innerHeight) return;
     }
-    const trigger = window.innerHeight * TRIGGER_Y;
     let closest = null;
-    let closestDist = Infinity;
-    steps.forEach(step => {
-      const rect = step.getBoundingClientRect();
-      const dist = Math.abs(rect.top - trigger);
-      if (dist < closestDist) { closestDist = dist; closest = step; }
-    });
+    if (isMobile() && processSection) {
+      const idx = clamp(Math.floor((window.scrollY - mobileProcessStart()) / mobileStepHold()), 0, steps.length - 1);
+      closest = steps[idx];
+    } else {
+      const trigger = window.innerHeight * TRIGGER_Y;
+      let closestDist = Infinity;
+      steps.forEach(step => {
+        const rect = step.getBoundingClientRect();
+        const dist = Math.abs(rect.top - trigger);
+        if (dist < closestDist) { closestDist = dist; closest = step; }
+      });
+    }
     if (closest && !closest.classList.contains('active')) activateStep(closest);
   }
 
@@ -958,7 +968,10 @@ function initObservers() {
     const goToStep = () => {
       activateStep(step); // immediate visual change
       const rect = step.getBoundingClientRect();
-      const targetScroll = window.scrollY + rect.top - (window.innerHeight * TRIGGER_Y);
+      const idx = parseInt(step.dataset.step, 10) || 0;
+      const targetScroll = isMobile() && processSection
+        ? mobileProcessStart() + idx * mobileStepHold()
+        : window.scrollY + rect.top - (window.innerHeight * TRIGGER_Y);
       window.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
     };
 
