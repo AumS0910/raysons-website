@@ -834,6 +834,9 @@ function initObservers() {
   // activateStep: deactivates all, activates one, crossfades image.
   const processSteps = Array.from(document.querySelectorAll('.process__step'));
   const processImages = Array.from(document.querySelectorAll('.process__img'));
+  const processSection = document.getElementById('process');
+  let activeProcessIdx = -1;
+  let processScrollRaf = 0;
 
   processSteps.forEach(step => {
     const stepIdx = parseInt(step.dataset.step, 10);
@@ -844,6 +847,10 @@ function initObservers() {
     frame.className = 'process__mobile-frame';
     const img = source.cloneNode(false);
     img.className = 'process__mobile-img';
+    img.loading = 'eager';
+    img.decoding = 'async';
+    img.fetchPriority = stepIdx < 2 ? 'high' : 'low';
+    if (typeof img.decode === 'function') img.decode().catch(() => {});
     frame.appendChild(img);
     step.appendChild(frame);
   });
@@ -851,7 +858,9 @@ function initObservers() {
   function activateStep(stepEl) {
     if (!stepEl) return;
     const stepIdx = parseInt(stepEl.dataset.step, 10);
-    document.querySelectorAll('.process__step').forEach(s => s.classList.remove('active'));
+    if (stepIdx === activeProcessIdx) return;
+    activeProcessIdx = stepIdx;
+    processSteps.forEach(s => s.classList.remove('active'));
     stepEl.classList.add('active');
     processImages.forEach(img => {
       img.classList.toggle('active', parseInt(img.dataset.stepImg, 10) === stepIdx);
@@ -864,6 +873,11 @@ function initObservers() {
   const TRIGGER_Y = 0.40; // 40% from top of viewport
 
   function updateActiveStepOnScroll() {
+    processScrollRaf = 0;
+    if (processSection) {
+      const sectionRect = processSection.getBoundingClientRect();
+      if (sectionRect.bottom < 0 || sectionRect.top > window.innerHeight) return;
+    }
     const trigger = window.innerHeight * TRIGGER_Y;
     let closest = null;
     let closestDist = Infinity;
@@ -875,7 +889,12 @@ function initObservers() {
     if (closest && !closest.classList.contains('active')) activateStep(closest);
   }
 
-  window.addEventListener('scroll', updateActiveStepOnScroll, { passive: true });
+  const requestProcessUpdate = () => {
+    if (processScrollRaf) return;
+    processScrollRaf = requestAnimationFrame(updateActiveStepOnScroll);
+  };
+
+  window.addEventListener('scroll', requestProcessUpdate, { passive: true });
   updateActiveStepOnScroll(); // run once on load
 
   // Click navigation: scroll so the step lands at the 40% trigger point.

@@ -4360,18 +4360,25 @@ body::before {
     max-width: none !important;
     font-size: .86rem !important;
     line-height: 1.55 !important;
+    transition:
+      max-height .44s cubic-bezier(.22, 1, .36, 1),
+      opacity .34s cubic-bezier(.22, 1, .36, 1) !important;
   }
 
   .process__mobile-frame {
-    display: grid;
-    grid-template-rows: 0fr;
+    display: block;
+    max-height: 0;
     opacity: 0;
-    transform: translateY(8px);
+    transform: translate3d(0, 8px, 0);
     transition:
-      grid-template-rows .52s cubic-bezier(.22, 1, .36, 1),
-      opacity .42s ease,
-      transform .52s cubic-bezier(.22, 1, .36, 1);
+      max-height .46s cubic-bezier(.22, 1, .36, 1),
+      opacity .34s cubic-bezier(.22, 1, .36, 1),
+      transform .46s cubic-bezier(.22, 1, .36, 1),
+      margin-top .46s cubic-bezier(.22, 1, .36, 1);
     overflow: hidden;
+    margin-top: 0;
+    contain: layout paint;
+    will-change: max-height, opacity, transform;
   }
 
   .process__mobile-frame > .process__mobile-img {
@@ -4379,19 +4386,22 @@ body::before {
   }
 
   .process__step.active .process__mobile-frame {
-    grid-template-rows: 1fr;
+    max-height: min(58vw, 270px);
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
     margin-top: .9rem;
   }
 
   .process__mobile-img {
     width: 100%;
+    display: block;
     aspect-ratio: 16 / 10;
     object-fit: contain;
     background: rgba(0, 0, 0, .42);
     border: 1px solid rgba(255, 107, 0, .18);
     filter: saturate(.9) contrast(1.08) brightness(.82);
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 }
 
