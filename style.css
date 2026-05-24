@@ -442,10 +442,6 @@ a {
   display: block
 }
 
-.hero__mobile-video {
-  display: none;
-}
-
 .hero__ember-wrap {
   z-index: 3;
   pointer-events: none;
@@ -4474,48 +4470,6 @@ body::before {
 
 /* Final mobile timing/composition pass: keep the ladle sequence pinned long enough to complete. */
 @media (max-width: 768px) {
-  html.hero-video-enabled .hero__stage .hero__canvas-wrap {
-    background: #0A0804 !important;
-  }
-
-  html.hero-video-enabled .hero__mobile-video {
-    display: block !important;
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: 50% 50%;
-    opacity: 0;
-    filter: contrast(1.12) saturate(1.12) brightness(.88);
-    transform: translateZ(0) scale(1.015);
-    transition: opacity .7s cubic-bezier(.22, 1, .36, 1);
-    backface-visibility: hidden;
-  }
-
-  html.hero-video-ready .hero__mobile-video {
-    opacity: 1;
-  }
-
-  html.hero-video-ready .hero__canvas {
-    opacity: 0 !important;
-    visibility: hidden !important;
-  }
-
-  html.mobile-cinematic-lite .hero__stage .hero__webgl-wrap,
-  html.hero-video-ready .hero__stage .hero__ember-wrap {
-    display: none !important;
-  }
-
-  html.hero-video-ready .hero__heat {
-    opacity: .58 !important;
-    filter: blur(36px) !important;
-  }
-
-  html.hero-video-ready .hero__vignette {
-    opacity: .82 !important;
-  }
-
   .preloader__center {
     width: min(86vw, 360px) !important;
   }

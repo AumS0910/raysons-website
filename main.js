@@ -79,12 +79,10 @@ function init() {
 
 function initAtmosphereLayer() {
   if (!document.getElementById('webgl-canvas')) return;
-  if (isMobile()) {
-    document.documentElement.classList.add('mobile-cinematic-lite');
-    return;
-  }
 
-  const delay = 120;
+  const delay = isMobile()
+    ? (isLowPerf() ? 900 : 420)
+    : 120;
 
   window.setTimeout(() => {
     import("./threeScene").catch(() => {
