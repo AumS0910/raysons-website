@@ -6,6 +6,7 @@ const BEAT_RANGES = [{ id: 'beat-1', s: 0, e: .25 }, { id: 'beat-2', s: .25, e: 
 
 const isMobile = () => window.innerWidth < 768;
 const isAndroid = () => /Android/i.test(navigator.userAgent || "");
+const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent || "") || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const motionScale = () => isMobile() ? (isAndroid() ? .46 : .55) : 1;
 const clamp = (v, min = 0, max = 1) => Math.max(min, Math.min(max, v));
 const perfTier = (() => {
@@ -17,6 +18,10 @@ const perfTier = (() => {
   const coarse = window.matchMedia("(pointer: coarse)").matches;
   if (!coarse && window.innerWidth >= 768) return "desktop";
   if (saveData || memory <= 2 || cores <= 4 || dpr > 2.85) return "low";
+  if (isIOS()) {
+    if (saveData || memory <= 3) return "mid";
+    return "high";
+  }
   if (isAndroid()) {
     if (memory <= 3 || cores <= 6 || dpr >= 2.75) return "low";
     return "mid";
@@ -30,13 +35,13 @@ const frameStep = () => {
   if (!isMobile()) return 1;
   if (isLowPerf()) return 4;
   if (isMidPerf()) return isAndroid() ? 2 : 3;
-  return 2;
+  return isIOS() ? 1 : 2;
 };
 const maxInitialFrame = () => {
   if (!isMobile()) return 96;
   if (isLowPerf()) return 76;
   if (isMidPerf()) return isAndroid() ? 120 : 104;
-  return 132;
+  return isIOS() ? 160 : 132;
 };
 
 const state = { heroTarget: 0, heroCurrent: 0, beatTarget: 0, beatCurrent: 0 };
@@ -55,7 +60,7 @@ document.addEventListener('DOMContentLoaded', init);
 
 function init() {
   document.documentElement.dataset.perfTier = perfTier;
-  document.documentElement.dataset.platform = isAndroid() ? "android" : "default";
+  document.documentElement.dataset.platform = isAndroid() ? "android" : isIOS() ? "ios" : "default";
   monitorMobileSmoothness();
   initAtmosphereLayer();
   heroCanvas = document.getElementById('hero-canvas');
@@ -170,7 +175,7 @@ async function preloadFrames() {
   const minEnd = performance.now() + 900;
   let started = false;
 
-  const mobileDecodeWidth = isLowPerf() ? 620 : isMidPerf() ? (isAndroid() ? 860 : 720) : 820;
+  const mobileDecodeWidth = isLowPerf() ? 620 : isMidPerf() ? (isAndroid() ? 860 : isIOS() ? 980 : 720) : isIOS() ? 1120 : 820;
   const bitmapOptions = isMobile()
     ? { resizeWidth: mobileDecodeWidth, resizeQuality: isLowPerf() ? 'low' : 'medium' }
     : null;
@@ -285,8 +290,8 @@ function initHeroVideoScrub() {
 
 function sizeCanvases() {
   if (!heroCanvas || !heroCtx || !emberCanvas || !emberCtx) return;
-  const heroDpr = isMobile() ? (isLowPerf() ? 0.82 : isMidPerf() ? (isAndroid() ? 1 : 0.9) : 1.05) : Math.min(window.devicePixelRatio || 1, 2);
-  const emberDpr = isMobile() ? (isLowPerf() ? 0.66 : isMidPerf() ? 0.72 : 0.9) : heroDpr;
+  const heroDpr = isMobile() ? (isLowPerf() ? 0.82 : isMidPerf() ? (isAndroid() ? 1 : isIOS() ? 1.18 : 0.9) : isIOS() ? 1.35 : 1.05) : Math.min(window.devicePixelRatio || 1, 2);
+  const emberDpr = isMobile() ? (isLowPerf() ? 0.66 : isMidPerf() ? 0.72 : isIOS() ? 1 : 0.9) : heroDpr;
   sizeCanvasToEl(heroCanvas, heroCtx, heroDpr, document.querySelector('.hero__canvas-wrap'));
   sizeCanvasFull(emberCanvas, emberCtx, emberDpr);
 
@@ -372,7 +377,7 @@ function drawFrame(ctx, offCtx, offCan, cw, ch, progress) {
     ctx.setTransform(ctx.canvas?._dpr || 1, 0, 0, ctx.canvas?._dpr || 1, 0, 0);
     ctx.globalAlpha = 1;
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = isLowPerf() ? 'low' : 'medium';
+    ctx.imageSmoothingQuality = isIOS() && !isLowPerf() ? 'high' : isLowPerf() ? 'low' : 'medium';
     ctx.fillStyle = '#0A0804';
     ctx.fillRect(0, 0, cw, ch);
 
@@ -398,7 +403,7 @@ function drawFrame(ctx, offCtx, offCan, cw, ch, progress) {
   // Fill with site background colour — not pure black
   offCtx.globalAlpha = 1;
   offCtx.imageSmoothingEnabled = true;
-  offCtx.imageSmoothingQuality = mobile ? 'low' : 'high';
+  offCtx.imageSmoothingQuality = mobile && !isIOS() ? 'low' : 'high';
   offCtx.fillStyle = '#0A0804';
   offCtx.fillRect(0, 0, cw, ch);
 
@@ -458,7 +463,7 @@ function drawFrame(ctx, offCtx, offCan, cw, ch, progress) {
   const dpr = ctx.canvas?._dpr || (mobile ? Math.min(window.devicePixelRatio || 1, 1.15) : Math.min(window.devicePixelRatio || 1, 2));
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = mobile ? 'low' : 'high';
+  ctx.imageSmoothingQuality = mobile && !isIOS() ? 'low' : 'high';
   ctx.drawImage(offCan, 0, 0);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
@@ -507,7 +512,7 @@ function masterTick() {
       updateHeroVideoScrub();
     } else if (isMobile()) {
       const mobileFrame = Math.floor(state.heroCurrent * (TOTAL - 1));
-      const drawThreshold = isLowPerf() ? .0035 : .0012;
+      const drawThreshold = isLowPerf() ? .0035 : isIOS() ? .0008 : .0012;
       if (mobileFrame !== lastDrawnMobileFrame || Math.abs(state.heroCurrent - lastDrawnMobileProgress) > drawThreshold) {
         drawFrame(heroCtx, offX, offC, heroCanvas ? heroCanvas._lw || 1 : 1, heroCanvas ? heroCanvas._lh || 1 : 1, state.heroCurrent);
         lastDrawnMobileFrame = mobileFrame;
