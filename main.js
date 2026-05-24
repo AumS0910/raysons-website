@@ -45,6 +45,7 @@ let allReady = false;
 let prevBeatIdx = -1;
 let heroCanvas, heroCtx, emberCanvas, emberCtx, offC, offX;
 let heroVideo, heroVideoReady = false, videoScrubCurrent = 0, lastVideoTime = -1;
+let pendingVideoTime = null, lastVideoSeekAt = 0, lastMobileSceneUpdate = 0;
 let embers = [];
 let filmScenes = [];
 let lastDrawnMobileFrame = -1;
@@ -263,6 +264,8 @@ function initHeroVideoScrub() {
     document.documentElement.classList.add('hero-video-enabled', 'hero-video-ready');
     videoScrubCurrent = 0;
     lastVideoTime = -1;
+    pendingVideoTime = null;
+    lastVideoSeekAt = 0;
     heroVideo.currentTime = 0.001;
     heroVideo.pause();
     if (bar) bar.style.width = '100%';
@@ -276,6 +279,7 @@ function initHeroVideoScrub() {
   }, { once: true });
 
   heroVideo.addEventListener('error', fallback, { once: true });
+  heroVideo.addEventListener('seeked', flushPendingVideoSeek);
   setTimeout(fallback, 2200);
   heroVideo.load();
   return true;
@@ -485,10 +489,19 @@ function masterTick() {
   // the lagged current value fired all missed beats in rapid succession on catch-up
   state.beatCurrent = state.beatTarget;
 
-  updateCinematicPage();
+  const now = performance.now();
+  const mobileVideoMode = isMobile() && heroVideoReady;
+  const shouldUpdateScene = !mobileVideoMode || now - lastMobileSceneUpdate > 140;
+
+  if (shouldUpdateScene) {
+    updateCinematicPage();
+  }
   updateParallax();
-  updateBeats(state.beatCurrent);
-  updateTextFills();
+  if (shouldUpdateScene) {
+    updateBeats(state.beatCurrent);
+    updateTextFills();
+    lastMobileSceneUpdate = now;
+  }
 
 
   if (allReady) {
@@ -520,20 +533,42 @@ function updateHeroVideoScrub() {
 
   const delta = state.heroCurrent - videoScrubCurrent;
   const ease = isMobile()
-    ? (isLowPerf() ? 0.42 : isMidPerf() ? 0.34 : 0.28)
+    ? (isLowPerf() ? 0.5 : isMidPerf() ? 0.42 : 0.36)
     : 0.12;
   videoScrubCurrent += Math.abs(delta) < .0008 ? delta : delta * ease;
 
   const nextTime = clamp(videoScrubCurrent) * Math.max(0, heroVideo.duration - 0.045);
   const threshold = isMobile()
-    ? (isLowPerf() ? 0.075 : isMidPerf() ? 0.052 : 0.038)
+    ? (isLowPerf() ? 0.18 : isMidPerf() ? 0.14 : 0.1)
     : 0.016;
+  const minSeekGap = isMobile()
+    ? (isLowPerf() ? 180 : isMidPerf() ? 140 : 110)
+    : 32;
 
-  if (Math.abs(nextTime - lastVideoTime) >= threshold && !heroVideo.seeking) {
-    heroVideo.pause();
-    heroVideo.currentTime = nextTime;
-    lastVideoTime = nextTime;
+  if (Math.abs(nextTime - lastVideoTime) < threshold) return;
+
+  pendingVideoTime = nextTime;
+  if (!heroVideo.seeking && performance.now() - lastVideoSeekAt >= minSeekGap) {
+    flushPendingVideoSeek();
   }
+}
+
+function flushPendingVideoSeek() {
+  if (!heroVideoReady || !heroVideo || pendingVideoTime == null || heroVideo.seeking) return;
+  const target = pendingVideoTime;
+  pendingVideoTime = null;
+  lastVideoSeekAt = performance.now();
+  lastVideoTime = target;
+  heroVideo.pause();
+  if (typeof heroVideo.fastSeek === 'function') {
+    try {
+      heroVideo.fastSeek(target);
+      return;
+    } catch (_) {
+      // Fall back to currentTime below when fastSeek is not usable.
+    }
+  }
+  heroVideo.currentTime = target;
 }
 
 function updateParallax() {
