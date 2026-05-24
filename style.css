@@ -4632,7 +4632,7 @@ body::before {
 
 @media (max-width: 768px) {
   html[data-platform="ios"] .hero__stage .hero__canvas-wrap {
-    filter: contrast(1.04) saturate(1.04) brightness(1.02) !important;
+    filter: none !important;
   }
 
   html[data-platform="android"] .hero__stage .hero__canvas-wrap {

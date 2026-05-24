@@ -19,7 +19,7 @@ const perfTier = (() => {
   if (!coarse && window.innerWidth >= 768) return "desktop";
   if (saveData || memory <= 2 || cores <= 4 || dpr > 2.85) return "low";
   if (isIOS()) {
-    if (saveData || memory <= 3) return "mid";
+    if (saveData) return "mid";
     return "high";
   }
   if (isAndroid()) {
@@ -41,7 +41,7 @@ const maxInitialFrame = () => {
   if (!isMobile()) return 96;
   if (isLowPerf()) return 76;
   if (isMidPerf()) return isAndroid() ? 120 : 104;
-  return isIOS() ? 160 : 132;
+  return isIOS() ? 200 : 132;
 };
 
 const state = { heroTarget: 0, heroCurrent: 0, beatTarget: 0, beatCurrent: 0 };
@@ -175,7 +175,7 @@ async function preloadFrames() {
   const minEnd = performance.now() + 900;
   let started = false;
 
-  const mobileDecodeWidth = isLowPerf() ? 620 : isMidPerf() ? (isAndroid() ? 860 : isIOS() ? 980 : 720) : isIOS() ? 1120 : 820;
+  const mobileDecodeWidth = isLowPerf() ? 620 : isMidPerf() ? (isAndroid() ? 860 : isIOS() ? 1180 : 720) : isIOS() ? 1560 : 820;
   const bitmapOptions = isMobile()
     ? { resizeWidth: mobileDecodeWidth, resizeQuality: isLowPerf() ? 'low' : 'medium' }
     : null;
@@ -290,7 +290,7 @@ function initHeroVideoScrub() {
 
 function sizeCanvases() {
   if (!heroCanvas || !heroCtx || !emberCanvas || !emberCtx) return;
-  const heroDpr = isMobile() ? (isLowPerf() ? 0.82 : isMidPerf() ? (isAndroid() ? 1 : isIOS() ? 1.18 : 0.9) : isIOS() ? 1.35 : 1.05) : Math.min(window.devicePixelRatio || 1, 2);
+  const heroDpr = isMobile() ? (isLowPerf() ? 0.82 : isMidPerf() ? (isAndroid() ? 1 : isIOS() ? 1.55 : 0.9) : isIOS() ? Math.min(window.devicePixelRatio || 1, 2.15) : 1.05) : Math.min(window.devicePixelRatio || 1, 2);
   const emberDpr = isMobile() ? (isLowPerf() ? 0.66 : isMidPerf() ? 0.72 : isIOS() ? 1 : 0.9) : heroDpr;
   sizeCanvasToEl(heroCanvas, heroCtx, heroDpr, document.querySelector('.hero__canvas-wrap'));
   sizeCanvasFull(emberCanvas, emberCtx, emberDpr);
