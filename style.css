@@ -4632,7 +4632,11 @@ body::before {
 
 @media (max-width: 768px) {
   html[data-platform="ios"] .hero__stage .hero__canvas-wrap {
-    filter: none !important;
+    filter: contrast(1.04) saturate(1.04) brightness(1.02) !important;
+  }
+
+  html[data-platform="ios"] .hero__stage .hero__ember-wrap {
+    opacity: .52 !important;
   }
 
   html[data-platform="android"] .hero__stage .hero__canvas-wrap {
@@ -4649,7 +4653,7 @@ body::before {
 
   html[data-perf-tier="low"] .hero__stage .hero__webgl-wrap,
   html[data-perf-tier="low"] .hero__stage .hero__ember-wrap {
-    opacity: .16 !important;
+    opacity: .28 !important;
   }
 
   html[data-perf-tier="low"] .hero__heat,
