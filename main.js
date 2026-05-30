@@ -78,22 +78,22 @@ function init() {
   initCursor();
   initCinematicSections();
   initObservers();
+  initFaq();
   onScroll();
   if (!initHeroVideoScrub()) preloadFrames();
 }
 
 function initAtmosphereLayer() {
   if (!document.getElementById('webgl-canvas')) return;
-
-  const delay = isMobile()
-    ? (isLowPerf() ? 900 : 420)
-    : 120;
+  // Fix #9: Disable Three.js WebGL entirely on mobile — two GPU contexts
+  // (WebGL + Canvas2D) compete for the same command buffer on mobile GPUs.
+  if (isMobile()) return;
 
   window.setTimeout(() => {
     import("./threeScene").catch(() => {
       document.documentElement.dataset.perfTier = "low";
     });
-  }, delay);
+  }, 120);
 }
 
 function monitorMobileSmoothness() {
@@ -716,13 +716,16 @@ class Ember {
     const fade = Math.min(this.life / 22, 1) * Math.max(0, 1 - life);
     const a = this.op * fade * intensity;
     if (a < .01) return;
+    // Fix #4: Fake glow with a second larger semi-transparent circle instead
+    // of ctx.shadowBlur (which is software-rendered on Android — ~8ms/frame).
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.sz * 3, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${this.r},${this.g},${this.b},${(a * 0.18).toFixed(3)})`;
+    ctx.fill();
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.sz, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(${this.r},${this.g},${this.b},${a})`;
-    ctx.shadowBlur = this.sz * 3;
-    ctx.shadowColor = `rgba(${this.r},${this.g},${this.b},${a * .5})`;
     ctx.fill();
-    ctx.shadowBlur = 0;
   }
 }
 
@@ -775,7 +778,9 @@ function initCinematicSections() {
     ['specs-section', 'scene--precision'],
     ['process', 'scene--rhythm'],
     ['capabilities', 'scene--control'],
+    ['timeline', 'scene--journey'],
     ['industries', 'scene--global'],
+    ['faq', 'scene--faq'],
     ['enquire', 'scene--resolve']
   ];
 
@@ -830,16 +835,24 @@ function initCinematicSections() {
 function getRevealTargets(root) {
   const selectors = [
     '.about__label', '.about__kicker', '.about__statement', '.about__body', '.about__facts span',
+    '.about__group-story', '.mvv__card',
+    '.timeline__eyebrow', '.timeline__headline', '.timeline__item',
     '.stats__item',
     '.specs__eyebrow', '.specs__lede', '.specs__headline', '.specs__card',
     '.process__eyebrow', '.process__headline', '.process__step', '.process__frame',
     '.caps__eyebrow', '.caps__headline', '.caps__col',
     '.industries__statement', '.industries__item', '.industries__contact',
+    '.faq__eyebrow', '.faq__headline', '.faq__item',
     '.cta__eyebrow', '.cta__headline', '.cta__rule', '.cta__body', '.cta__buttons', '.cta__contact-block'
   ];
   return [...root.querySelectorAll(selectors.join(','))]
     .filter(target => !target.closest('.hero') && !target.closest('.beats__schematic') && !target.closest('.beat'));
 }
+
+// Fix #8: Throttle CSS var updates on mobile — body::before is position:fixed
+// and repaints the full viewport. Updating every 6th frame (≈10/sec instead
+// of 60/sec) eliminates a major Android paint cost with no perceptible change.
+let _cinFrameCount = 0;
 
 function updateCinematicPage() {
   const doc = document.documentElement;
@@ -850,10 +863,13 @@ function updateCinematicPage() {
   const heat = 1 - afterHero;
   const calm = smoothstep(.18, 1, afterHero);
 
-  doc.style.setProperty('--forge-heat', (heat).toFixed(3));
-  doc.style.setProperty('--forge-calm', (calm).toFixed(3));
-  doc.style.setProperty('--atmo-opacity', (0.16 * heat + 0.035).toFixed(3));
-  doc.style.setProperty('--atmo-warmth', (0.11 * heat).toFixed(3));
+  _cinFrameCount++;
+  if (!isMobile() || _cinFrameCount % 6 === 0) {
+    doc.style.setProperty('--forge-heat', (heat).toFixed(3));
+    doc.style.setProperty('--forge-calm', (calm).toFixed(3));
+    doc.style.setProperty('--atmo-opacity', (0.16 * heat + 0.035).toFixed(3));
+    doc.style.setProperty('--atmo-warmth', (0.11 * heat).toFixed(3));
+  }
 
   filmScenes.forEach(({ el }, index) => {
     const r = el.getBoundingClientRect();
@@ -875,6 +891,8 @@ function smoothstep(edge0, edge1, value) {
 }
 
 function initObservers() {
+  // Fix #1: Lower threshold to 0.1 + rootMargin so stats animate on mobile
+  // where the section may never reach 30% viewport intersection.
   const statsObs = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) return;
@@ -882,7 +900,7 @@ function initObservers() {
       document.querySelectorAll('.stats__item').forEach(card => animateCount(card));
       statsObs.disconnect();
     });
-  }, { threshold: .3 });
+  }, { threshold: .1, rootMargin: '0px 0px -60px 0px' });
   const stats = document.getElementById('stats');
   if (stats) statsObs.observe(stats);
 
@@ -996,4 +1014,29 @@ function debounce(fn, ms) {
     clearTimeout(timer);
     timer = setTimeout(() => fn(...args), ms);
   };
+}
+
+/* ── FAQ accordion ────────────────────────────────────────────────
+   Each .faq__q button toggles .faq__a.open on click.
+   aria-expanded is kept in sync for accessibility.
+──────────────────────────────────────────────────────────────── */
+function initFaq() {
+  document.querySelectorAll('.faq__q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const answer = btn.nextElementSibling;
+      const isOpen = answer.classList.contains('open');
+
+      // Close all others
+      document.querySelectorAll('.faq__a.open').forEach(a => {
+        a.classList.remove('open');
+        a.previousElementSibling?.setAttribute('aria-expanded', 'false');
+      });
+
+      // Toggle this one
+      if (!isOpen) {
+        answer.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
 }

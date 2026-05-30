@@ -726,6 +726,318 @@ a {
   color: transparent
 }
 
+/* ── Group story paragraph ───────────────────────────────────────── */
+.about__group-story {
+  margin-top: 2.4rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255,255,255,.07)
+}
+
+.about__group-story p {
+  font-size: .95rem;
+  line-height: 1.75;
+  color: var(--t);
+  max-width: 720px
+}
+
+/* ── Mission / Vision / Values cards ────────────────────────────── */
+.mvv {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.4rem;
+  margin-top: 3rem
+}
+
+.mvv__card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,107,0,.14);
+  border-radius: 10px;
+  padding: 1.8rem;
+  transition: border-color .3s, background .3s
+}
+
+.mvv__card:hover {
+  background: rgba(255,107,0,.05);
+  border-color: rgba(255,107,0,.3)
+}
+
+.mvv__label {
+  font-family: var(--fd);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--o);
+  margin-bottom: .9rem
+}
+
+.mvv__text {
+  font-size: .88rem;
+  line-height: 1.7;
+  color: var(--t)
+}
+
+.mvv__values {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: .55rem
+}
+
+.mvv__values li {
+  font-size: .85rem;
+  line-height: 1.55;
+  color: var(--t);
+  padding-left: .6rem;
+  border-left: 2px solid rgba(255,107,0,.25)
+}
+
+.mvv__val-name {
+  color: var(--w);
+  font-weight: 600
+}
+
+@media (max-width: 900px) {
+  .mvv {
+    grid-template-columns: 1fr 1fr
+  }
+}
+
+@media (max-width: 600px) {
+  .mvv {
+    grid-template-columns: 1fr
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TIMELINE
+══════════════════════════════════════════════════════════════ */
+.timeline {
+  padding: clamp(6rem, 12vh, 10rem) 2rem;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg3) 60%, var(--bg) 100%);
+  border-top: 1px solid rgba(255,255,255,.05);
+  border-bottom: 1px solid rgba(255,255,255,.05)
+}
+
+.timeline__inner {
+  max-width: 880px;
+  margin: 0 auto
+}
+
+.timeline__eyebrow {
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .26em;
+  color: var(--o);
+  text-transform: uppercase;
+  margin-bottom: .8rem
+}
+
+.timeline__headline {
+  font-family: var(--fd);
+  font-size: clamp(2rem, 4.5vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.08;
+  color: var(--w);
+  margin-bottom: 3.5rem
+}
+
+.timeline__track {
+  position: relative;
+  padding-left: 2.4rem
+}
+
+/* Vertical running line */
+.timeline__track::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--o), rgba(255,107,0,.1))
+}
+
+.timeline__item {
+  position: relative;
+  padding: 0 0 2.8rem 2.2rem;
+  display: grid;
+  grid-template-columns: 4rem 1fr;
+  gap: 1.4rem;
+  align-items: start
+}
+
+.timeline__item::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 6px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--bg3);
+  border: 2px solid rgba(255,107,0,.35);
+  transition: all .4s
+}
+
+.timeline__item--highlight::before {
+  background: var(--o);
+  border-color: var(--o);
+  box-shadow: 0 0 18px rgba(255,107,0,.5)
+}
+
+.timeline__item--future::before {
+  background: var(--bg3);
+  border-color: rgba(255,107,0,.2);
+  border-style: dashed
+}
+
+.timeline__year {
+  font-family: var(--fd);
+  font-size: .82rem;
+  font-weight: 800;
+  color: var(--o);
+  letter-spacing: .08em;
+  padding-top: .2rem;
+  white-space: nowrap
+}
+
+.timeline__item--future .timeline__year {
+  opacity: .55
+}
+
+.timeline__title {
+  font-family: var(--fd);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--w);
+  letter-spacing: .03em;
+  margin-bottom: .4rem
+}
+
+.timeline__item--future .timeline__title {
+  color: rgba(255,255,255,.55)
+}
+
+.timeline__desc {
+  font-size: .84rem;
+  line-height: 1.65;
+  color: var(--t2)
+}
+
+.timeline__item--future .timeline__desc {
+  opacity: .7
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FAQ ACCORDION
+══════════════════════════════════════════════════════════════ */
+.faq {
+  padding: clamp(6rem, 12vh, 10rem) 2rem;
+  background: linear-gradient(180deg, var(--bg3), var(--bg));
+  border-top: 1px solid rgba(255,255,255,.05)
+}
+
+.faq__inner {
+  max-width: 780px;
+  margin: 0 auto
+}
+
+.faq__eyebrow {
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .26em;
+  color: var(--o);
+  text-transform: uppercase;
+  margin-bottom: .8rem
+}
+
+.faq__headline {
+  font-family: var(--fd);
+  font-size: clamp(2rem, 4.2vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--w);
+  margin-bottom: 3rem
+}
+
+.faq__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0
+}
+
+.faq__item {
+  border-bottom: 1px solid rgba(255,255,255,.07)
+}
+
+.faq__item:first-child {
+  border-top: 1px solid rgba(255,255,255,.07)
+}
+
+.faq__q {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 1.35rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  font-family: var(--fd);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--w);
+  cursor: pointer;
+  transition: color .3s
+}
+
+.faq__q:hover {
+  color: var(--o)
+}
+
+.faq__q::after {
+  content: '+';
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: var(--o);
+  flex-shrink: 0;
+  transition: transform .35s cubic-bezier(.22,1,.36,1)
+}
+
+.faq__q[aria-expanded="true"] {
+  color: var(--o)
+}
+
+.faq__q[aria-expanded="true"]::after {
+  transform: rotate(45deg)
+}
+
+.faq__a {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height .5s cubic-bezier(.22,1,.36,1), padding .4s
+}
+
+.faq__a.open {
+  max-height: 300px
+}
+
+.faq__a p {
+  font-size: .9rem;
+  line-height: 1.72;
+  color: var(--t);
+  padding-bottom: 1.4rem
+}
+
+.faq__a a {
+  color: var(--o);
+  text-decoration: underline;
+  text-underline-offset: 3px
+}
+
+
 .beats {
   position: relative;
   height: 500vh;
@@ -1306,9 +1618,11 @@ a {
 
 .process {
   background: linear-gradient(180deg, var(--bg), var(--bg3));
-  /* Extra bottom space so step 06 can scroll into the center
-     of the viewport — without this the last 2 steps are unreachable */
-  padding-bottom: 50vh
+  /* 70vh gives each of the 6 steps ~100–120px of dedicated scroll travel
+     while keeping the section from creating an empty wasteland after step 6.
+     Calculation: step-list ~900px + 70vh. Max scroll = content - vh.
+     Step 6 at y≈850 reaches 40% trigger with ~440px scroll → 70vh ✓ */
+  padding-bottom: 70vh
 }
 
 .process__inner {
@@ -1420,8 +1734,11 @@ a {
 
 .process__right {
   position: sticky;
-  /* Stick just below the navbar so the image starts level with step 01 */
-  top: calc(72px + 2.5rem)
+  /* Center the image panel at the 40%-from-top trigger point so the image
+     and the active step text are at the same vertical level in the viewport.
+     40vh = trigger point; 190px = ~half of a 16:10 frame at ~600px col width.
+     max(80px…) prevents it going behind the navbar on short viewports. */
+  top: max(80px, calc(40vh - 190px))
 }
 
 /* ── Pillar image frame ──────────────────────────────────────────
@@ -2022,10 +2339,16 @@ a.cta__contact-value:hover {
     font-size: 23vw
   }
 
+  /* Fix #2: 100vw prevents horizontal overflow on all mobile browsers */
   .hero__canvas-wrap {
     top: 9vh;
-    width: 112vw;
+    width: 100vw;
     height: 50vh
+  }
+
+  /* Fix #3: Hide right headline — it overlaps the canvas on narrow screens */
+  .hero__right {
+    display: none
   }
 
   .hero__scroll-ind {
@@ -2077,23 +2400,25 @@ a.cta__contact-value:hover {
     letter-spacing: .14em
   }
 
+  /* Fix #13: Hide schematic on mobile — 112vw + 0.42 opacity burns GPU
+     compositing resources with no visual value; beat text is the hero here */
   .beats__schematic {
-    width: 112vw;
-    opacity: .42
+    display: none
   }
 
   .schematic__metric {
     display: none
   }
 
+  /* Fix #7: 2x2 grid halves the section height vs 1-col stacked layout */
   .stats__inner {
-    flex-direction: column;
-    gap: 2rem
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem
   }
 
   .stats__sep {
-    width: 70px;
-    height: 1px
+    display: none
   }
 
   .stats__num {
@@ -2121,9 +2446,10 @@ a.cta__contact-value:hover {
     line-height: 1.08
   }
 
+  /* Fix #14: 2x2 grid halves section scroll height vs single column */
   .specs__grid,
   .caps__grid {
-    grid-template-columns: 1fr
+    grid-template-columns: repeat(2, 1fr)
   }
 
   .specs__card,
@@ -2201,8 +2527,21 @@ a.cta__contact-value:hover {
     text-align: center
   }
 
+  /* Fix #6: Keep float CTA visible on mobile — it's the only persistent
+     conversion trigger. Shrink to be less intrusive. */
   .float-cta {
-    bottom: .7rem
+    bottom: .7rem;
+    font-size: .6rem;
+    padding: .5rem .72rem .5rem 1rem
+  }
+
+  .float-cta__link {
+    font-size: .6rem
+  }
+
+  .float-cta__icon {
+    width: 24px;
+    height: 24px
   }
 }
 
@@ -2665,24 +3004,33 @@ a.cta__contact-value:hover {
 }
 
 @media(max-width:768px) {
+  /* Fix #10: 160vh is enough for the 240-frame sequence while stopping the
+     hero from feeling like an endless void before users reach real content */
   .hero {
-    height: 220vh;
-    min-height: 1320px
+    height: 160vh;
+    min-height: 1050px
   }
 
   .hero__stage {
     min-height: 720px
   }
 
+  /* Fix #2: 100vw (in this block too) — belt + suspenders */
   .hero__stage .hero__canvas-wrap {
     top: 9vh;
-    width: 112vw;
+    width: 100vw;
     height: 50vh
   }
 
+  /* Fix #3: Also hide in this rule-set */
+  .hero__right {
+    display: none
+  }
+
   .stats__inner {
-    grid-template-columns: 1fr;
-    gap: 2.4rem
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem
   }
 
   .stats__num {
@@ -2714,8 +3062,10 @@ a.cta__contact-value:hover {
     font-size: clamp(2rem, 8vw, 3rem)
   }
 
+  /* Fix #6 (second block): Float CTA must stay visible — already handled
+     by base block above; ensure display:none is NOT set here */
   .float-cta {
-    display: none
+    bottom: .7rem
   }
 }
 

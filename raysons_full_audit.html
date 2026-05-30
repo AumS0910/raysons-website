@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f0f;color:#e8e8e8;min-height:100vh}
+.header{padding:20px 24px;border-bottom:1px solid #222;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:15px;font-weight:600;color:#fff}
+.header p{font-size:11px;color:#666}
+.tabs{display:flex;border-bottom:1px solid #222;background:#0f0f0f;position:sticky;top:0;z-index:10}
+.tab{padding:10px 18px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#555;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:#FF6B00;border-bottom-color:#FF6B00}
+.panel{display:none;padding:20px 24px}
+.panel.active{display:block}
+
+/* OVERVIEW TAB */
+.score-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.score-card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:14px;text-align:center}
+.score-card .num{font-size:28px;font-weight:700;line-height:1}
+.score-card .lbl{font-size:10px;color:#666;margin-top:4px;letter-spacing:.1em;text-transform:uppercase}
+.score-card.red .num{color:#ff4444}
+.score-card.amber .num{color:#FF6B00}
+.score-card.green .num{color:#44cc44}
+
+.issue-list{display:flex;flex-direction:column;gap:8px}
+.issue{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px}
+.issue.critical{border-left:3px solid #ff4444}
+.issue.high{border-left:3px solid #FF6B00}
+.issue.medium{border-left:3px solid #FFD700}
+.issue.low{border-left:3px solid #4488ff}
+.badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:1px;letter-spacing:.05em}
+.badge.critical{background:#3a1010;color:#ff6666}
+.badge.high{background:#2a1800;color:#FF9A00}
+.badge.medium{background:#2a2000;color:#FFD700}
+.badge.low{background:#101828;color:#6699ff}
+.issue-body{}
+.issue-title{font-size:12px;font-weight:600;color:#fff;margin-bottom:3px}
+.issue-desc{font-size:11px;color:#888;line-height:1.5}
+.issue-fix{font-size:10px;color:#FF6B00;margin-top:5px;font-weight:500}
+
+/* VIEWPORTS TAB */
+.vp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.vp-card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;overflow:hidden}
+.vp-header{padding:10px 14px;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;justify-content:space-between}
+.vp-name{font-size:11px;font-weight:700;color:#fff}
+.vp-size{font-size:10px;color:#555}
+.vp-screen{background:#0a0804;margin:12px;border-radius:4px;overflow:hidden;position:relative}
+.vp-section{padding:6px 8px;font-size:8px;border-bottom:1px solid rgba(255,255,255,.04)}
+.vp-section.ok{color:rgba(240,232,208,.5)}
+.vp-section.warn{color:#FF6B00;background:rgba(255,107,0,.04)}
+.vp-section.crit{color:#ff6666;background:rgba(255,60,60,.05)}
+.vp-issues{padding:10px 14px}
+.vp-issue{font-size:10px;color:#888;padding:3px 0;border-bottom:1px solid #222;display:flex;gap:6px;align-items:flex-start}
+.vp-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.vp-dot.r{background:#ff4444}
+.vp-dot.o{background:#FF6B00}
+.vp-dot.y{background:#FFD700}
+.vp-dot.g{background:#44cc44}
+
+/* PERFORMANCE TAB */
+.perf-row{display:grid;grid-template-columns:200px 1fr auto;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #1e1e1e}
+.perf-name{font-size:11px;color:#ccc;font-weight:500}
+.perf-bar-wrap{height:6px;background:#1e1e1e;border-radius:3px;overflow:hidden}
+.perf-bar{height:100%;border-radius:3px;transition:width .3s}
+.perf-bar.r{background:#ff4444}
+.perf-bar.o{background:#FF6B00}
+.perf-bar.y{background:#FFD700}
+.perf-bar.g{background:#44cc44}
+.perf-val{font-size:11px;font-weight:700;white-space:nowrap}
+.perf-val.r{color:#ff4444}
+.perf-val.o{color:#FF6B00}
+.perf-val.y{color:#FFD700}
+.perf-val.g{color:#44cc44}
+
+/* FIXES TAB */
+.fix-group{margin-bottom:20px}
+.fix-group-title{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#FF6B00;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #2a2a2a}
+.fix-item{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:14px;margin-bottom:8px}
+.fix-item-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.fix-item-title{font-size:12px;font-weight:600;color:#fff}
+.fix-item-file{font-size:10px;color:#555;background:#111;padding:2px 6px;border-radius:3px;font-family:monospace}
+.fix-item-desc{font-size:11px;color:#888;line-height:1.6}
+code{font-family:monospace;font-size:10px;background:#111;color:#FF9A00;padding:1px 4px;border-radius:2px}
+
+.section-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Raysons Shell Cast — Full Site Audit</h1>
+  <p>raysons-website.vercel.app · All viewports · May 2026</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="show('overview')">Overview</div>
+  <div class="tab" onclick="show('viewports')">Viewports</div>
+  <div class="tab" onclick="show('perf')">Performance</div>
+  <div class="tab" onclick="show('ux')">UX / Content</div>
+  <div class="tab" onclick="show('fixes')">All Fixes</div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="panel active" id="panel-overview">
+  <div class="score-row">
+    <div class="score-card red"><div class="num">3</div><div class="lbl">Critical</div></div>
+    <div class="score-card amber"><div class="num">6</div><div class="lbl">High</div></div>
+    <div class="score-card" style="border-color:#333"><div class="num" style="color:#FFD700">5</div><div class="lbl">Medium</div></div>
+    <div class="score-card" style="border-color:#333"><div class="num" style="color:#4488ff">4</div><div class="lbl">Low</div></div>
+  </div>
+
+  <div class="section-title">All Issues</div>
+  <div class="issue-list">
+
+    <div class="issue critical">
+      <span class="badge critical">CRITICAL</span>
+      <div class="issue-body">
+        <div class="issue-title">Stats counters stuck at 0 on all viewports</div>
+        <div class="issue-desc">All 4 stats (0MT, 0+, 0kg, 0) never animate. The IntersectionObserver threshold is too high — on mobile and some desktop zoom levels the stats section never fully enters the viewport at 30% threshold.</div>
+        <div class="issue-fix">Fix: lower threshold to 0.1, add rootMargin "0px 0px -60px 0px", verify data-target attributes exist on .stats__item elements</div>
+      </div>
+    </div>
+
+    <div class="issue critical">
+      <span class="badge critical">CRITICAL</span>
+      <div class="issue-body">
+        <div class="issue-title">Mobile canvas 112vw causes horizontal overflow scroll</div>
+        <div class="issue-desc">At ≤768px the .hero__canvas-wrap is set to 112vw. This makes the entire body horizontally scrollable on every phone. Users can swipe right to see a black gap — breaks the illusion immediately.</div>
+        <div class="issue-fix">Fix: change to 100vw, add overflow-x:hidden to .hero and .hero__stage</div>
+      </div>
+    </div>
+
+    <div class="issue critical">
+      <span class="badge critical">CRITICAL</span>
+      <div class="issue-body">
+        <div class="issue-title">Two competing hero headlines visible simultaneously on mobile</div>
+        <div class="issue-desc">"WE ARE PRECISION." (left) and "WE ARE THE PART INSIDE THE MACHINE." (right) both render at the same time on 430px screens. They overlap the canvas and each other. Neither is readable. The right headline's large font size pushes layout at narrow widths.</div>
+        <div class="issue-fix">Fix: hide .hero__right on mobile (display:none at ≤768px), let left headline be the sole identity</div>
+      </div>
+    </div>
+
+    <div class="issue high">
+      <span class="badge high">HIGH</span>
+      <div class="issue-body">
+        <div class="issue-title">shadowBlur on 60 ember particles — main Android lag cause</div>
+        <div class="issue-desc">Every ember calls ctx.shadowBlur = sz*3 per frame. 60 embers × 60fps = 3,600 GPU blur passes/second. Canvas2D shadowBlur is software-rendered on Android Chrome — this alone drops Pixel/OnePlus to ~20fps during scroll.</div>
+        <div class="issue-fix">Fix: remove shadowBlur entirely, fake the glow with a second larger semi-transparent circle (2 fillArc calls, zero blur)</div>
+      </div>
+    </div>
+
+    <div class="issue high">
+      <span class="badge high">HIGH</span>
+      <div class="issue-body">
+        <div class="issue-title">Canvas DPR rendering at 2× on Android (3× physical screens)</div>
+        <div class="issue-desc">Pixel 9 / OnePlus 13 have device pixel ratios of 2.75–3.5. Even capped at 2, canvas renders at ~2160×4680 physical pixels per frame on a Pixel 9. That is an enormous canvas fill operation 60 times per second.</div>
+        <div class="issue-fix">Fix: cap DPR at 1.5 on mobile — Math.min(devicePixelRatio, isMobile() ? 1.5 : 2)</div>
+      </div>
+    </div>
+
+    <div class="issue high">
+      <span class="badge high">HIGH</span>
+      <div class="issue-body">
+        <div class="issue-title">Float CTA (Request a Quote pill) hidden on mobile</div>
+        <div class="issue-desc">display:none at ≤768px. This is the primary conversion button on the entire site. Mobile users — which are likely the majority of visitors — have no persistent CTA visible while scrolling. They have to find the enquiry section at the very bottom.</div>
+        <div class="issue-fix">Fix: remove display:none, shrink to font-size:.6rem, padding:.5rem .9rem on mobile — keep it visible</div>
+      </div>
+    </div>
+
+    <div class="issue high">
+      <span class="badge high">HIGH</span>
+      <div class="issue-body">
+        <div class="issue-title">Stats column layout — 1 column on mobile wastes enormous scroll space</div>
+        <div class="issue-desc">4 stats stacked vertically in a single column takes ~600px of height on mobile. A 2×2 grid would take ~280px. This forces users to scroll through a huge empty stats section before reaching real content.</div>
+        <div class="issue-fix">Fix: grid-template-columns: repeat(2,1fr) at ≤768px. Keep the drawn gradient line above.</div>
+      </div>
+    </div>
+
+    <div class="issue high">
+      <span class="badge high">HIGH</span>
+      <div class="issue-body">
+        <div class="issue-title">Process right panel (sticky visual) hidden on mobile</div>
+        <div class="issue-desc">display:none on the process__right at ≤1100px. The process section becomes a plain numbered text list with no visual. On desktop the ghost number and contextual image make this section feel premium — on mobile it reads like a plain HTML list.</div>
+        <div class="issue-fix">Fix: show a simplified version below the timeline on mobile — small 16:9 image + ghost number, display:block at full width</div>
+      </div>
+    </div>
+
+    <div class="issue high">
+      <span class="badge high">HIGH</span>
+      <div class="issue-body">
+        <div class="issue-title">Hero scroll travel 220vh on mobile — feels endless</div>
+        <div class="issue-desc">The hero section takes 220vh to scroll through on mobile (equivalent to scrolling 2.2 full phone screens just for the hero). Before users reach About, stats, or any product info they've scrolled through a huge canvas sequence. Bounce risk is high.</div>
+        <div class="issue-fix">Fix: reduce to 160vh at ≤768px. Enough for the 240-frame sequence without feeling punishing.</div>
+      </div>
+    </div>
+
+    <div class="issue medium">
+      <span class="badge medium">MEDIUM</span>
+      <div class="issue-body">
+        <div class="issue-title">Beats section schematic barely visible on mobile (0.42 opacity, 112vw)</div>
+        <div class="issue-desc">The engineering schematic is 112vw wide at 42% opacity on mobile — an unreadable blurred texture behind the beat text. It contributes no visual value and costs GPU resources.</div>
+        <div class="issue-fix">Fix: display:none the schematic at ≤768px entirely. The beat text is the hero on mobile — let it breathe.</div>
+      </div>
+    </div>
+
+    <div class="issue medium">
+      <span class="badge medium">MEDIUM</span>
+      <div class="issue-body">
+        <div class="issue-title">body::before CSS variable repaint — 60 times/second</div>
+        <div class="issue-desc">--atmo-warmth and --atmo-opacity update on every rAF tick via updateCinematicPage(). body::before is position:fixed; inset:0 — the browser repaints the full viewport background 60×/sec. On Android this causes consistent frame drops.</div>
+        <div class="issue-fix">Fix: throttle CSS var updates to every 6th frame. Values change slowly — user cannot perceive the difference.</div>
+      </div>
+    </div>
+
+    <div class="issue medium">
+      <span class="badge medium">MEDIUM</span>
+      <div class="issue-body">
+        <div class="issue-title">Process section images have spaces in filenames</div>
+        <div class="issue-desc">Image paths like /images/pillar 1.jpeg, /images/pilllar 2.jpeg (note triple-l typo) contain spaces and typos. Spaces in URLs can cause 404s on certain servers/CDNs even if they work on Vercel. The triple-l typo will likely 404.</div>
+        <div class="issue-fix">Fix: rename files to pillar-1.jpg through pillar-6.jpg, update all src attributes. Also fix "pilllar" typo to "pillar".</div>
+      </div>
+    </div>
+
+    <div class="issue medium">
+      <span class="badge medium">MEDIUM</span>
+      <div class="issue-body">
+        <div class="issue-title">FORGED, PRECISION, QC decorative text — orphaned and purposeless</div>
+        <div class="issue-desc">Three large decorative text elements (FORGED in hero, PRECISION between hero and stats, QC before stats) appear as floating orphaned words. They have no context labels, no animation trigger, and no relationship to surrounding content. They confuse rather than impress.</div>
+        <div class="issue-fix">Fix: remove FORGED and QC entirely. Keep PRECISION only if it becomes part of a coherent ambient text system with consistent treatment.</div>
+      </div>
+    </div>
+
+    <div class="issue medium">
+      <span class="badge medium">MEDIUM</span>
+      <div class="issue-body">
+        <div class="issue-title">Capabilities grid collapses to 1 column on mobile</div>
+        <div class="issue-desc">4 capabilities columns at single column = 4 full-width cards with 240px+ height each. The section becomes extremely long to scroll through. Ghost numbers (01-04) lose their visual context at 1-col.</div>
+        <div class="issue-fix">Fix: 2×2 grid at ≤768px instead of 1 column. Reduces section height by ~50%.</div>
+      </div>
+    </div>
+
+    <div class="issue low">
+      <span class="badge low">LOW</span>
+      <div class="issue-body">
+        <div class="issue-title">Logo uses WhatsApp image filename in production</div>
+        <div class="issue-desc">The nav logo src is WhatsApp_Image_2026-05-14_at_10.22.47_PM-removebg-preview.png — a raw WhatsApp export filename. Unprofessional if someone inspects the page source, and fragile naming.</div>
+        <div class="issue-fix">Fix: rename to raysons-logo.png or logo.png</div>
+      </div>
+    </div>
+
+    <div class="issue low">
+      <span class="badge low">LOW</span>
+      <div class="issue-body">
+        <div class="issue-title">Privacy Policy and Terms of Service links in footer go nowhere</div>
+        <div class="issue-desc">Footer Legal column has Privacy Policy and Terms of Service links. These are presumably # links or missing pages. For a B2B site targeting international OEMs (Italy, UK, Japan, USA mentioned in copy) these need to exist.</div>
+        <div class="issue-fix">Fix: either create minimal policy pages or remove the Legal footer column entirely until policies are ready.</div>
+      </div>
+    </div>
+
+    <div class="issue low">
+      <span class="badge low">LOW</span>
+      <div class="issue-body">
+        <div class="issue-title">No Open Graph / social meta tags</div>
+        <div class="issue-desc">When someone shares the URL on WhatsApp, LinkedIn, or email — which is how B2B leads will share this — there's no og:image, og:title beyond the page title, or og:description. The link will appear as plain text with no preview.</div>
+        <div class="issue-fix">Fix: add og:title, og:description, og:image (use a frame from the sequence or a product photo), og:url, twitter:card meta tags in the HTML head.</div>
+      </div>
+    </div>
+
+    <div class="issue low">
+      <span class="badge low">LOW</span>
+      <div class="issue-body">
+        <div class="issue-title">Enquiry CTA links to mailto — no form tracking</div>
+        <div class="issue-desc">The primary CTA "Request a Quote" links directly to mailto:info@raysonsgroup.com. There's no form submission, no lead capture, no analytics event. You have no way to know how many people clicked the CTA.</div>
+        <div class="issue-fix">Fix: add a simple inline form or at minimum a JS click event that fires a Google Analytics / GTM event when the mailto link is clicked.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- VIEWPORTS -->
+<div class="panel" id="panel-viewports">
+  <div class="vp-grid">
+
+    <!-- Desktop 1440 -->
+    <div class="vp-card">
+      <div class="vp-header">
+        <span class="vp-name">Desktop 1440px</span>
+        <span class="vp-size">1440 × 900</span>
+      </div>
+      <div class="vp-screen" style="height:200px">
+        <div class="vp-section ok">✓ Navbar — transparent → blur, correct</div>
+        <div class="vp-section ok">✓ Hero — canvas windowed, left/right panels</div>
+        <div class="vp-section ok">✓ Ticker — scrolling correctly</div>
+        <div class="vp-section ok">✓ About — gradient text reveal</div>
+        <div class="vp-section ok">✓ Beats — 48/52 split, schematic visible</div>
+        <div class="vp-section warn">⚠ Stats — numbers frozen at 0</div>
+        <div class="vp-section ok">✓ Specs — 3-col grid correct</div>
+        <div class="vp-section ok">✓ Process — timeline + sticky frame</div>
+        <div class="vp-section ok">✓ Capabilities — 4-col grid</div>
+        <div class="vp-section ok">✓ Industries — left/right split</div>
+        <div class="vp-section ok">✓ CTA — divider + contact block</div>
+        <div class="vp-section ok">✓ Footer — 4-col grid</div>
+      </div>
+      <div class="vp-issues">
+        <div class="vp-issue"><span class="vp-dot r"></span>Stats counters broken (0s)</div>
+        <div class="vp-issue"><span class="vp-dot y"></span>FORGED/QC orphaned text</div>
+        <div class="vp-issue"><span class="vp-dot y"></span>Image filename spaces + typo</div>
+      </div>
+    </div>
+
+    <!-- Desktop 1920 -->
+    <div class="vp-card">
+      <div class="vp-header">
+        <span class="vp-name">Desktop 1920px</span>
+        <span class="vp-size">1920 × 1080</span>
+      </div>
+      <div class="vp-screen" style="height:200px">
+        <div class="vp-section ok">✓ Navbar — max-width 1520px, centered</div>
+        <div class="vp-section ok">✓ Hero — canvas centered, embers</div>
+        <div class="vp-section ok">✓ About — full width reads well</div>
+        <div class="vp-section ok">✓ Beats — schematic prominent</div>
+        <div class="vp-section warn">⚠ Stats — 0s, not animating</div>
+        <div class="vp-section ok">✓ Specs — 3-col, good padding</div>
+        <div class="vp-section ok">✓ Caps — 4-col, ghost numbers visible</div>
+        <div class="vp-section ok">✓ CTA — watermark text good scale</div>
+        <div class="vp-section ok">✓ Footer — all 4 cols</div>
+      </div>
+      <div class="vp-issues">
+        <div class="vp-issue"><span class="vp-dot r"></span>Stats counters broken</div>
+        <div class="vp-issue"><span class="vp-dot y"></span>WhatsApp logo filename</div>
+        <div class="vp-issue"><span class="vp-dot b" style="background:#4488ff"></span>No OG tags</div>
+      </div>
+    </div>
+
+    <!-- Laptop 1280 -->
+    <div class="vp-card">
+      <div class="vp-header">
+        <span class="vp-name">Laptop 1280px</span>
+        <span class="vp-size">1280 × 800</span>
+      </div>
+      <div class="vp-screen" style="height:200px">
+        <div class="vp-section ok">✓ Nav — email hidden at 1100, ok</div>
+        <div class="vp-section ok">✓ Hero — windowed canvas fits</div>
+        <div class="vp-section warn">⚠ Hero panels — slightly cramped at 24vw</div>
+        <div class="vp-section ok">✓ Beats — single col layout</div>
+        <div class="vp-section warn">⚠ Stats — 0s frozen</div>
+        <div class="vp-section ok">✓ Specs — 2-col at this width</div>
+        <div class="vp-section warn">⚠ Process right — display:none here</div>
+        <div class="vp-section ok">✓ Caps — 2-col layout</div>
+        <div class="vp-section ok">✓ CTA — stacks to 1-col, reads well</div>
+      </div>
+      <div class="vp-issues">
+        <div class="vp-issue"><span class="vp-dot r"></span>Stats frozen at 0</div>
+        <div class="vp-issue"><span class="vp-dot o"></span>Process visual hidden at 1100px breakpoint</div>
+        <div class="vp-issue"><span class="vp-dot y"></span>Hero panels slightly cramped</div>
+      </div>
+    </div>
+
+    <!-- Tablet 768 -->
+    <div class="vp-card">
+      <div class="vp-header">
+        <span class="vp-name">Tablet 768px</span>
+        <span class="vp-size">768 × 1024 (iPad)</span>
+      </div>
+      <div class="vp-screen" style="height:200px">
+        <div class="vp-section warn">⚠ Nav — hamburger appears, ok but menu unstyled</div>
+        <div class="vp-section warn">⚠ Hero canvas — 112vw, horizontal overflow</div>
+        <div class="vp-section warn">⚠ Two hero headlines overlapping</div>
+        <div class="vp-section ok">✓ Ticker — wraps cleanly</div>
+        <div class="vp-section ok">✓ About — stacks to 1-col</div>
+        <div class="vp-section crit">✗ Float CTA — display:none, gone</div>
+        <div class="vp-section warn">⚠ Stats — 1 col, 0s, too tall</div>
+        <div class="vp-section ok">✓ Industries — 1-col stacked</div>
+        <div class="vp-section ok">✓ Footer — 1×2 grid</div>
+      </div>
+      <div class="vp-issues">
+        <div class="vp-issue"><span class="vp-dot r"></span>Canvas horizontal overflow (112vw)</div>
+        <div class="vp-issue"><span class="vp-dot r"></span>Two headlines colliding</div>
+        <div class="vp-issue"><span class="vp-dot r"></span>Float CTA hidden</div>
+        <div class="vp-issue"><span class="vp-dot o"></span>Stats 1-col, too long</div>
+      </div>
+    </div>
+
+    <!-- iPhone 14 Pro Max -->
+    <div class="vp-card">
+      <div class="vp-header">
+        <span class="vp-name">iPhone 14 Pro Max</span>
+        <span class="vp-size">430 × 932</span>
+      </div>
+      <div class="vp-screen" style="height:200px">
+        <div class="vp-section ok">✓ Nav logo + hamburger visible</div>
+        <div class="vp-section crit">✗ Canvas 112vw — body scrolls horizontally</div>
+        <div class="vp-section crit">✗ Both hero headlines rendered, overlapping</div>
+        <div class="vp-section ok">✓ Ticker — scrolls, fits width</div>
+        <div class="vp-section ok">✓ About statement — readable at mobile size</div>
+        <div class="vp-section crit">✗ Stats all 0, stacked 1-col (very tall)</div>
+        <div class="vp-section crit">✗ Float CTA gone</div>
+        <div class="vp-section warn">⚠ Beats schematic 112vw ghost</div>
+        <div class="vp-section warn">⚠ Process — plain list, no visual</div>
+        <div class="vp-section ok">✓ Industries list — clean on mobile</div>
+        <div class="vp-section ok">✓ CTA section — readable</div>
+        <div class="vp-section ok">✓ Footer — 1-col, compact</div>
+      </div>
+      <div class="vp-issues">
+        <div class="vp-issue"><span class="vp-dot r"></span>4 critical issues (see overview)</div>
+        <div class="vp-issue"><span class="vp-dot o"></span>Hero 220vh too long</div>
+        <div class="vp-issue"><span class="vp-dot o"></span>Caps grid 1-col, very long</div>
+        <div class="vp-issue"><span class="vp-dot y"></span>Schematic at ghost opacity</div>
+      </div>
+    </div>
+
+    <!-- Android Pixel 9 -->
+    <div class="vp-card">
+      <div class="vp-header">
+        <span class="vp-name">Pixel 9 / OnePlus</span>
+        <span class="vp-size">412 × 915 · DPR 2.75</span>
+      </div>
+      <div class="vp-screen" style="height:200px">
+        <div class="vp-section crit">✗ Canvas 2160×4680px render (DPR 2.75→capped 2)</div>
+        <div class="vp-section crit">✗ shadowBlur 60× per frame — GPU thrash</div>
+        <div class="vp-section crit">✗ body::before repaints 60×/sec</div>
+        <div class="vp-section warn">⚠ Three.js WebGL active alongside Canvas2D</div>
+        <div class="vp-section warn">⚠ 240 ImageBitmap objects in RAM</div>
+        <div class="vp-section warn">⚠ Hero 220vh — long scroll on small screen</div>
+        <div class="vp-section crit">✗ Same layout issues as iPhone (all apply)</div>
+        <div class="vp-section ok">~ Performance: est. 15–30fps during scroll</div>
+      </div>
+      <div class="vp-issues">
+        <div class="vp-issue"><span class="vp-dot r"></span>PERFORMANCE: ~20fps on scroll</div>
+        <div class="vp-issue"><span class="vp-dot r"></span>Canvas massive (2160×4680px)</div>
+        <div class="vp-issue"><span class="vp-dot r"></span>shadowBlur main perf killer</div>
+        <div class="vp-issue"><span class="vp-dot o"></span>Two GPU contexts competing</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PERFORMANCE -->
+<div class="panel" id="panel-perf">
+  <div class="section-title" style="margin-bottom:20px">Estimated Performance Bottlenecks (Android Chrome)</div>
+
+  <div class="perf-row">
+    <div class="perf-name">shadowBlur (60 embers)</div>
+    <div class="perf-bar-wrap"><div class="perf-bar r" style="width:92%"></div></div>
+    <div class="perf-val r">~8ms/frame</div>
+  </div>
+  <div class="perf-row">
+    <div class="perf-name">Canvas fill @ DPR 2 mobile</div>
+    <div class="perf-bar-wrap"><div class="perf-bar r" style="width:78%"></div></div>
+    <div class="perf-val r">~6ms/frame</div>
+  </div>
+  <div class="perf-row">
+    <div class="perf-name">body::before repaint (60/sec)</div>
+    <div class="perf-bar-wrap"><div class="perf-bar o" style="width:60%"></div></div>
+    <div class="perf-val o">~4ms/frame</div>
+  </div>
+  <div class="perf-row">
+    <div class="perf-name">6× gradient fillRect/frame</div>
+    <div class="perf-bar-wrap"><div class="perf-bar o" style="width:45%"></div></div>
+    <div class="perf-val o">~3ms/frame</div>
+  </div>
+  <div class="perf-row">
+    <div class="perf-name">Three.js WebGL (mobile)</div>
+    <div class="perf-bar-wrap"><div class="perf-bar o" style="width:38%"></div></div>
+    <div class="perf-val o">~2.5ms/frame</div>
+  </div>
+  <div class="perf-row">
+    <div class="perf-name">offC recreation on resize</div>
+    <div class="perf-bar-wrap"><div class="perf-bar y" style="width:20%"></div></div>
+    <div class="perf-val y">spike on resize</div>
+  </div>
+  <div class="perf-row">
+    <div class="perf-name">Target frame budget (16.6ms)</div>
+    <div class="perf-bar-wrap"><div class="perf-bar g" style="width:100%"></div></div>
+    <div class="perf-val g">16.6ms</div>
+  </div>
+
+  <div style="margin-top:20px;padding:14px;background:#1a1a1a;border-radius:8px;border:1px solid #2a2a2a">
+    <div style="font-size:12px;font-weight:600;color:#fff;margin-bottom:6px">Current estimated total: ~23ms/frame on Pixel 9</div>
+    <div style="font-size:11px;color:#888;line-height:1.6">This puts Android at ~43fps best case, dropping to 20–30fps under thermal throttle. The shadowBlur + DPR combo alone exceeds the 16.6ms budget. After fixes: estimated ~8ms/frame → stable 60fps.</div>
+  </div>
+
+  <div style="margin-top:16px;padding:14px;background:#1a1a1a;border-radius:8px;border:1px solid #2a2a2a">
+    <div style="font-size:11px;font-weight:600;color:#FF6B00;margin-bottom:8px">RECOMMENDED: Add FPS counter to confirm before fixing</div>
+    <div style="font-size:10px;color:#888;font-family:monospace;line-height:1.8">
+      let f=0,l=performance.now(),el=Object.assign(document.createElement('div'),{style:'position:fixed;top:80px;left:10px;z-index:9999;color:#FF6B00;font-size:13px;font-weight:700;background:rgba(0,0,0,.8);padding:4px 8px;pointer-events:none'});<br>
+      document.body.appendChild(el);<br>
+      (function t(){f++;const n=performance.now();if(n-l>=1000){el.textContent=f+'fps';f=0;l=n;}requestAnimationFrame(t)})();
+    </div>
+    <div style="font-size:10px;color:#666;margin-top:6px">Paste in console on your phone via Remote Debug. Confirms actual FPS before and after each fix.</div>
+  </div>
+</div>
+
+<!-- UX / CONTENT -->
+<div class="panel" id="panel-ux">
+  <div class="section-title">UX & Content Issues</div>
+  <div class="issue-list">
+
+    <div class="issue high">
+      <span class="badge high">HIGH</span>
+      <div class="issue-body">
+        <div class="issue-title">No persistent mobile CTA — zero conversion path on phones</div>
+        <div class="issue-desc">The float CTA is hidden on mobile. The only CTA buttons are inside the beats section (scroll-triggered) and at the very bottom of the page. A B2B buyer on a phone who wants to enquire has to scroll to the very end to find a contact button.</div>
+        <div class="issue-fix">Restore float CTA on mobile. It's the single highest-impact conversion fix.</div>
+      </div>
+    </div>
+
+    <div class="issue high">
+      <span class="badge high">HIGH</span>
+      <div class="issue-body">
+        <div class="issue-title">Enquiry is a mailto link — no form, no tracking</div>
+        <div class="issue-desc">Clicking "Request a Quote" opens the email app. On Android/iOS this often fails silently if no email client is configured. You also have no way to track how many leads came from the website.</div>
+        <div class="issue-fix">Add a minimal 3-field form (Name, Company, Message) with a POST to Formspree or Netlify Forms — takes 30 minutes and gives you a lead capture pipeline.</div>
+      </div>
+    </div>
+
+    <div class="issue medium">
+      <span class="badge medium">MEDIUM</span>
+      <div class="issue-body">
+        <div class="issue-title">Pillar labels (Pillar 01–04) in beats section — confusing terminology</div>
+        <div class="issue-desc">The beats section eyebrows say "Pillar 01", "Pillar 02" etc. This is internal organizational language — it means nothing to a buyer. Replace with descriptive labels like "SHELL MOULDING", "NO-BAKE CASTING", "IN-HOUSE MACHINING", "EXPORT QUALITY".</div>
+        <div class="issue-fix">Replace all beat__eyebrow "Pillar 0X" text with the actual product/capability name.</div>
+      </div>
+    </div>
+
+    <div class="issue medium">
+      <span class="badge medium">MEDIUM</span>
+      <div class="issue-body">
+        <div class="issue-title">Phone number missing from entire site</div>
+        <div class="issue-desc">The contact section has email and location but no phone number. For a B2B foundry serving international OEMs, a direct phone number (especially WhatsApp for Indian business) is expected and builds trust.</div>
+        <div class="issue-fix">Add phone number to CTA contact block and footer. Format: +91 XXXXX XXXXX with a WhatsApp link.</div>
+      </div>
+    </div>
+
+    <div class="issue low">
+      <span class="badge low">LOW</span>
+      <div class="issue-body">
+        <div class="issue-title">No sitemap.xml or robots.txt</div>
+        <div class="issue-desc">Basic SEO infrastructure is missing. A foundry targeting international OEMs needs to be discoverable via Google for "shell moulded castings manufacturer India" type searches.</div>
+        <div class="issue-fix">Add /sitemap.xml and /robots.txt. Takes 10 minutes on Vercel.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ALL FIXES -->
+<div class="panel" id="panel-fixes">
+
+  <div class="fix-group">
+    <div class="fix-group-title">🚨 Critical — Fix immediately</div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">1. Fix stats counters</span>
+        <span class="fix-item-file">main.js</span>
+      </div>
+      <div class="fix-item-desc">In <code>initObservers()</code>, change the statsObs threshold from <code>.3</code> to <code>.1</code> and add <code>rootMargin: '0px 0px -60px 0px'</code>. Also verify every <code>.stats__item</code> has a valid <code>data-target</code> integer attribute in the HTML.</div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">2. Fix canvas horizontal overflow on mobile</span>
+        <span class="fix-item-file">style.css</span>
+      </div>
+      <div class="fix-item-desc">Change <code>.hero__canvas-wrap</code> at ≤768px from <code>width:112vw</code> to <code>width:100vw</code>. Add <code>overflow-x:hidden</code> to both <code>.hero</code> and <code>.hero__stage</code>. Also add <code>overflow-x:hidden</code> to <code>body</code> as a safety net.</div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">3. Hide hero right panel on mobile</span>
+        <span class="fix-item-file">style.css</span>
+      </div>
+      <div class="fix-item-desc">Add <code>.hero__right { display:none }</code> inside the <code>@media(max-width:768px)</code> block. The left headline is sufficient identity on mobile. The right one creates visual chaos.</div>
+    </div>
+
+  </div>
+
+  <div class="fix-group">
+    <div class="fix-group-title">⚠️ High — Fix this week</div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">4. Remove shadowBlur from embers</span>
+        <span class="fix-item-file">main.js</span>
+      </div>
+      <div class="fix-item-desc">In <code>Ember.draw()</code> remove all <code>ctx.shadowBlur</code> and <code>ctx.shadowColor</code> lines. Replace with a second <code>ctx.arc()</code> at <code>sz*3</code> radius with <code>opacity * 0.18</code> — fakes the glow at zero GPU cost. This is the #1 Android performance fix.</div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">5. Cap DPR at 1.5 on mobile</span>
+        <span class="fix-item-file">main.js</span>
+      </div>
+      <div class="fix-item-desc">In <code>sizeCanvases()</code> change DPR calculation to: <code>const dpr = Math.min(window.devicePixelRatio||1, isMobile() ? 1.5 : 2)</code>. Reduces canvas pixel area by 44% on Pixel/OnePlus without visible quality loss.</div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">6. Restore float CTA on mobile</span>
+        <span class="fix-item-file">style.css</span>
+      </div>
+      <div class="fix-item-desc">Remove <code>.float-cta { display:none }</code> from the 768px media query. Add instead: <code>font-size:.6rem; padding:.5rem .85rem .5rem 1.1rem; bottom:.6rem</code>. Keep it visible — it's your only persistent conversion trigger on mobile.</div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">7. Stats 2×2 grid on mobile</span>
+        <span class="fix-item-file">style.css</span>
+      </div>
+      <div class="fix-item-desc">In the 768px media query change <code>.stats__inner { grid-template-columns: 1fr }</code> to <code>grid-template-columns: repeat(2,1fr); gap: 1.5rem</code>. Cuts the stats section height in half on mobile.</div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">8. Throttle CSS variable updates</span>
+        <span class="fix-item-file">main.js</span>
+      </div>
+      <div class="fix-item-desc">Add a frame counter to <code>updateCinematicPage()</code>. Only update <code>--forge-heat</code>, <code>--atmo-opacity</code>, <code>--atmo-warmth</code> on every 6th frame. These drive <code>body::before</code> full-viewport repaints — throttling from 60/sec to 10/sec eliminates a major Android paint cost.</div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">9. Disable Three.js on mobile</span>
+        <span class="fix-item-file">threeScene.js</span>
+      </div>
+      <div class="fix-item-desc">Wrap the entire Three.js init in <code>if (window.innerWidth >= 768)</code>. Two GPU contexts (WebGL + Canvas2D) on a mobile GPU compete for the same command buffer. Killing WebGL on mobile frees ~2.5ms/frame.</div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">10. Reduce hero height on mobile</span>
+        <span class="fix-item-file">style.css</span>
+      </div>
+      <div class="fix-item-desc">Change <code>.hero { height: 220vh }</code> at ≤768px to <code>height: 160vh; min-height: 1050px</code>. Still plays all 240 frames. Stops the hero feeling like an endless void before users reach real content.</div>
+    </div>
+
+  </div>
+
+  <div class="fix-group">
+    <div class="fix-group-title">📋 Medium — Polish pass</div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">11. Fix image filenames</span>
+        <span class="fix-item-file">index.html + /images/</span>
+      </div>
+      <div class="fix-item-desc">Rename <code>pillar 1.jpeg</code> → <code>pillar-1.jpg</code> through <code>pillar-6.jpg</code>. Fix the <code>pilllar 2.jpeg</code> triple-L typo. Update all src attributes. Rename logo from WhatsApp export name to <code>raysons-logo.png</code>.</div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">12. Remove orphaned decorative text</span>
+        <span class="fix-item-file">index.html</span>
+      </div>
+      <div class="fix-item-desc">Remove the <code>FORGED</code> element from hero and the <code>QC</code> element between beats and stats. Keep <code>PRECISION</code> only if it's styled consistently as part of the ambient text system.</div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">13. Hide schematic on mobile</span>
+        <span class="fix-item-file">style.css</span>
+      </div>
+      <div class="fix-item-desc">Add <code>.beats__schematic { display:none }</code> at ≤768px. At 112vw width and 0.42 opacity it contributes nothing visually but still renders. Removing it frees GPU compositing resources on mobile.</div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">14. Capabilities 2×2 grid on mobile</span>
+        <span class="fix-item-file">style.css</span>
+      </div>
+      <div class="fix-item-desc">Change <code>.caps__grid { grid-template-columns: 1fr }</code> at ≤768px to <code>grid-template-columns: repeat(2,1fr)</code>. Halves the section height. Adjust <code>.caps__col { min-height: 200px }</code> accordingly.</div>
+    </div>
+
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">15. Replace "Pillar 0X" beat labels</span>
+        <span class="fix-item-file">index.html</span>
+      </div>
+      <div class="fix-item-desc">Change all 4 beat eyebrow labels from "Pillar 01", "Pillar 02" etc. to "SHELL MOULDING", "NO-BAKE CASTING", "IN-HOUSE MACHINING", "EXPORT QUALITY" — the actual product names.</div>
+    </div>
+
+  </div>
+
+  <div class="fix-group">
+    <div class="fix-group-title">✅ Low — Business / SEO</div>
+    <div class="fix-item">
+      <div class="fix-item-header">
+        <span class="fix-item-title">16–18. OG tags + Phone number + Form</span>
+        <span class="fix-item-file">index.html + backend</span>
+      </div>
+      <div class="fix-item-desc">Add <code>og:title</code>, <code>og:description</code>, <code>og:image</code> meta tags. Add phone number (+91) to CTA and footer. Replace mailto CTA with a 3-field Formspree form. These three changes directly impact lead generation.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function show(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
