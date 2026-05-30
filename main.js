@@ -941,10 +941,10 @@ function initObservers() {
     });
   }
 
-  // On scroll: find whichever step's top is closest to 40% down the viewport.
-  // This works for ALL 6 steps even when steps 5 & 6 can't reach true center.
+  // Desktop keeps the visual panel synced to the nearest step. Mobile shows
+  // stable process cards instead of scroll-driven activation.
   const steps = processSteps;
-  const TRIGGER_Y = 0.40; // 40% from top of viewport
+  const TRIGGER_Y = 0.42;
 
   function updateActiveStepOnScroll() {
     processScrollRaf = 0;
@@ -952,15 +952,19 @@ function initObservers() {
       const sectionRect = processSection.getBoundingClientRect();
       if (sectionRect.bottom < 0 || sectionRect.top > window.innerHeight) return;
     }
-    let closest = null;
+
     const trigger = window.innerHeight * TRIGGER_Y;
+    let closest = null;
     let closestDist = Infinity;
     steps.forEach(step => {
       const rect = step.getBoundingClientRect();
       const dist = Math.abs(rect.top - trigger);
-      if (dist < closestDist) { closestDist = dist; closest = step; }
+      if (dist < closestDist) {
+        closestDist = dist;
+        closest = step;
+      }
     });
-    if (closest && !closest.classList.contains('active')) activateStep(closest);
+    if (closest) activateStep(closest);
   }
 
   const requestProcessUpdate = () => {
@@ -969,7 +973,7 @@ function initObservers() {
   };
 
   if (isMobile()) {
-    activateStep(steps.find(step => step.classList.contains('active')) || steps[0]);
+    processImages[0]?.classList.add('active');
   } else {
     window.addEventListener('scroll', requestProcessUpdate, { passive: true });
     updateActiveStepOnScroll(); // run once on load
@@ -979,8 +983,8 @@ function initObservers() {
   steps.forEach(step => {
     const goToStep = () => {
       activateStep(step); // immediate visual change
-      const rect = step.getBoundingClientRect();
       if (isMobile()) return;
+      const rect = step.getBoundingClientRect();
       const targetScroll = window.scrollY + rect.top - (window.innerHeight * TRIGGER_Y);
       window.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
     };
