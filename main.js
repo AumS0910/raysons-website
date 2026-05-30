@@ -774,11 +774,11 @@ function initCinematicSections() {
 
   const sceneConfigs = [
     ['about', 'scene--bridge'],
+    ['about-us', 'scene--journey'],
     ['stats', 'scene--measure'],
     ['specs-section', 'scene--precision'],
     ['process', 'scene--rhythm'],
     ['capabilities', 'scene--control'],
-    ['timeline', 'scene--journey'],
     ['industries', 'scene--global'],
     ['faq', 'scene--faq'],
     ['enquire', 'scene--resolve']
@@ -835,8 +835,9 @@ function initCinematicSections() {
 function getRevealTargets(root) {
   const selectors = [
     '.about__label', '.about__kicker', '.about__statement', '.about__body', '.about__facts span',
-    '.about__group-story', '.mvv__card',
+    '.about-us__eyebrow', '.about-us__headline', '.about__group-story', '.mvv__card',
     '.timeline__eyebrow', '.timeline__headline', '.timeline__item',
+    '.about-us__section-head', '.about-us__people-copy p', '.about-us__team-photo', '.about-us__standard', '.about-us__logo',
     '.stats__item',
     '.specs__eyebrow', '.specs__lede', '.specs__headline', '.specs__card',
     '.process__eyebrow', '.process__headline', '.process__step', '.process__frame',
