@@ -16,7 +16,6 @@ export default defineConfig({
         about: resolve(__dirname, 'about.html'),
         technology: resolve(__dirname, 'technology.html'),
         products: resolve(__dirname, 'products.html'),
-        industries: resolve(__dirname, 'industries.html'),
         enquire: resolve(__dirname, 'enquire.html'),
       },
     },
