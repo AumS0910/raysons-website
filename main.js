@@ -74,13 +74,21 @@ function init() {
   window.addEventListener('scroll', onScroll, { passive: true });
 
   initNav();
+  initThemeToggle();
   initMobile();
   initCursor();
   initCinematicSections();
   initObservers();
   initFaq();
   onScroll();
-  if (!initHeroVideoScrub()) preloadFrames();
+  if (heroCanvas && heroCtx) {
+    if (!initHeroVideoScrub()) preloadFrames();
+  } else {
+    const preloader = document.getElementById('preloader');
+    preloader?.classList.add('done');
+    setTimeout(() => preloader?.remove(), 450);
+    requestAnimationFrame(masterTick);
+  }
 }
 
 function initAtmosphereLayer() {
@@ -749,6 +757,13 @@ function updateEmbers(ctx, arr, w, h, progress) {
 }
 
 function initNav() {
+  const path = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav__link').forEach(link => {
+    const href = link.getAttribute('href') || '';
+    const target = href.split('/').pop() || 'index.html';
+    link.classList.toggle('is-active', target === path);
+  });
+
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', event => {
       const target = document.querySelector(anchor.getAttribute('href'));
@@ -757,6 +772,25 @@ function initNav() {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       document.getElementById('mobile-menu')?.classList.remove('open');
     });
+  });
+}
+
+function initThemeToggle() {
+  const button = document.getElementById('theme-toggle');
+  if (!button) return;
+
+  const setTheme = theme => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('raysons-theme', theme);
+    const isLight = theme === 'light';
+    button.setAttribute('aria-pressed', String(isLight));
+    button.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
+    button.querySelector('.theme-toggle__text').textContent = isLight ? 'Light' : 'Dark';
+  };
+
+  setTheme(localStorage.getItem('raysons-theme') || document.documentElement.dataset.theme || 'dark');
+  button.addEventListener('click', () => {
+    setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
   });
 }
 

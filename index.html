@@ -19,9 +19,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script>
+    document.documentElement.dataset.theme = localStorage.getItem('raysons-theme') || 'dark';
+  </script>
   <link rel="stylesheet" href="./style.css"/>
 </head>
-<body>
+<body class="page page--home">
 
 <div class="preloader" id="preloader">
   <div class="preloader__center">
@@ -34,7 +37,7 @@
 
 <nav id="navbar" class="nav">
   <div class="nav__inner">
-    <a href="#" class="nav__logo" id="nav-logo">
+    <a href="./index.html" class="nav__logo" id="nav-logo">
       <img src="/images/raysons-logo.png"
            alt="Raysons Group Logo"
            class="nav__logo-img"
@@ -42,39 +45,44 @@
       Raysons <span class="nav__logo-accent">Shell Cast</span>
     </a>
     <ul class="nav__links" id="nav-links">
-      <li><a href="#overview" class="nav__link">Overview</a></li>
-      <li><a href="#about-us" class="nav__link">About Us</a></li>
-      <li><a href="#process" class="nav__link">Technology</a></li>
-      <li><a href="#capabilities" class="nav__link">Products</a></li>
-      <li><a href="#industries" class="nav__link">Industries</a></li>
-      <li><a href="#enquire" class="nav__link">Enquire</a></li>
+      <li><a href="./index.html" class="nav__link">Overview</a></li>
+      <li><a href="./about.html" class="nav__link">About Us</a></li>
+      <li><a href="./technology.html" class="nav__link">Technology</a></li>
+      <li><a href="./products.html" class="nav__link">Products</a></li>
+      <li><a href="./industries.html" class="nav__link">Industries</a></li>
+      <li><a href="./enquire.html" class="nav__link">Enquire</a></li>
     </ul>
     <div class="nav__contact">
       <a href="mailto:info@raysonsgroup.com" class="nav__email">info@raysonsgroup.com</a>
     </div>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <span class="theme-toggle__track"><span class="theme-toggle__thumb"></span></span>
+      <span class="theme-toggle__text">Light</span>
+    </button>
     <button class="nav__hamburger" id="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
   <div class="nav__mobile" id="mobile-menu">
     <ul class="nav__mobile-links">
-      <li><a href="#overview" class="nav__link">Overview</a></li>
-      <li><a href="#about-us" class="nav__link">About Us</a></li>
-      <li><a href="#process" class="nav__link">Technology</a></li>
-      <li><a href="#capabilities" class="nav__link">Products</a></li>
-      <li><a href="#industries" class="nav__link">Industries</a></li>
-      <li><a href="#enquire" class="nav__link">Enquire</a></li>
+      <li><a href="./index.html" class="nav__link">Overview</a></li>
+      <li><a href="./about.html" class="nav__link">About Us</a></li>
+      <li><a href="./technology.html" class="nav__link">Technology</a></li>
+      <li><a href="./products.html" class="nav__link">Products</a></li>
+      <li><a href="./industries.html" class="nav__link">Industries</a></li>
+      <li><a href="./enquire.html" class="nav__link">Enquire</a></li>
     </ul>
   </div>
 </nav>
 
 <!-- Floating CTA Pill — always visible after hero -->
 <div class="float-cta" id="float-cta">
-  <a href="#enquire" class="float-cta__link">Request a Quote</a>
+  <a href="./enquire.html" class="float-cta__link">Request a Quote</a>
   <span class="float-cta__icon">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
   </span>
 </div>
 
 <!-- ═══════════════ HERO ═══════════════ -->
+
 <section class="hero" id="overview">
   <div class="hero__stage">
   <!-- Depth layer 0: massive background word -->
@@ -124,6 +132,7 @@
 </section>
 
 <!-- ═══════════════ MARQUEE TICKER ═══════════════ -->
+
 <div class="ticker" aria-hidden="true">
   <div class="ticker__track" id="ticker-track">
     <span class="ticker__item">Shell Moulding</span><span class="ticker__sep">·</span>
@@ -154,10 +163,7 @@
   </div>
 </div>
 
-<!-- Custom cursor -->
-<div class="cursor" id="custom-cursor" aria-hidden="true"></div>
 
-<!-- ═══════════════ ABOUT REVEAL ═══════════════ -->
 <section class="about" id="about">
   <div class="about__inner">
     <div class="about__label">
@@ -179,318 +185,7 @@
 </section>
 
 <!-- ═══════════════ ABOUT US ═══════════════ -->
-<section class="about-us" id="about-us">
-  <div class="about-us__inner">
-    <div class="about-us__header">
-      <p class="about-us__eyebrow">About Us</p>
-      <h2 class="about-us__headline">Part of Something Bigger</h2>
-    </div>
 
-    <div class="about-us__lead-grid">
-      <div class="about-us__copy">
-        <ul class="about-us__points">
-          <li>Raysons Group founded in the 1980s in Kolhapur.</li>
-          <li>Diversified industrial group across Foundry, Real Estate, Hospitality, Retail, and Renewable Energy.</li>
-          <li>Four group companies: Raysons Shell Cast · Raysons Sandchem Pvt Ltd · Raysons Industries · Raysons Marketing Pvt Ltd.</li>
-          <li>Partnered brands: REGENTA Place · Westside · Neora · Sky Zone.</li>
-          <li>Raysons Shell Cast established in 2021 as the group’s precision manufacturing vertical.</li>
-          <li>Strong foundation in Resin Coated Sand and casting technologies.</li>
-        </ul>
-      </div>
-
-      <div class="about-us__photo-grid" aria-label="Raysons Group businesses">
-        <figure class="about-us__photo-card">
-          <img src="public/images/raysons-sandchem.jpeg" alt="Raysons Sandchem Pvt Ltd facility">
-          <figcaption>Raysons Sandchem Pvt Ltd</figcaption>
-        </figure>
-        <figure class="about-us__photo-card">
-          <img src="public/images/raysons-shellcast.jpeg" alt="Raysons Shell Cast facility">
-          <figcaption>Raysons Shell Cast</figcaption>
-        </figure>
-        <figure class="about-us__photo-card">
-          <img src="public/images/raysons-real-estate-retail.jpeg" alt="Raysons real estate and retail development">
-          <figcaption>Real Estate · Retail</figcaption>
-        </figure>
-        <figure class="about-us__photo-card">
-          <img src="public/images/regenta-place.jpeg" alt="REGENTA Place hospitality property">
-          <figcaption>REGENTA Place</figcaption>
-        </figure>
-      </div>
-    </div>
-
-    <div class="about-us__section-head about-us__section-head--mvv">
-      <p class="about-us__eyebrow">Purpose</p>
-      <h2 class="about-us__subheadline">Our Mission, Vision &amp; Values</h2>
-    </div>
-
-    <div class="mvv">
-      <div class="mvv__card">
-        <p class="mvv__label">Our Mission</p>
-        <p class="mvv__text">To design, manufacture, and supply precision-engineered shell moulded and no-bake castings with unmatched quality and reliability — delivering value through technological excellence, continuous innovation, and sustainable practices.</p>
-      </div>
-      <div class="mvv__card">
-        <p class="mvv__label">Our Vision</p>
-        <p class="mvv__text">To be recognised globally as a trusted and innovative casting solutions partner, setting industry benchmarks in quality, sustainability, and customer service — driven by advanced technology, integrity, and a passion for excellence.</p>
-      </div>
-      <div class="mvv__card mvv__card--values">
-        <p class="mvv__label">Our Values</p>
-        <ul class="mvv__values">
-          <li><span class="mvv__val-name">Innovation</span> — Continuously adopting new technologies and smarter processes.</li>
-          <li><span class="mvv__val-name">Quality</span> — Ensuring zero-defect manufacturing and superior performance.</li>
-          <li><span class="mvv__val-name">Sustainability</span> — Promoting an eco-friendly and safe workplace.</li>
-          <li><span class="mvv__val-name">Integrity</span> — Building transparent, long-term relationships with customers and partners.</li>
-          <li><span class="mvv__val-name">Teamwork</span> — Empowering people to grow and achieve excellence together.</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="timeline" id="timeline">
-      <div class="timeline__inner">
-        <p class="timeline__eyebrow">Our Journey</p>
-        <h2 class="timeline__headline">Growth &amp; Innovation<br>since 1987.</h2>
-    <div class="timeline__track">
-
-      <div class="timeline__item">
-        <div class="timeline__year">1987</div>
-        <div class="timeline__content">
-          <h3 class="timeline__title">Foundation of Raysons Industries</h3>
-          <p class="timeline__desc">Raysons Industries was established, becoming the first manufacturer of Resin Coated Sand (RCS) in Maharashtra — pioneering a new era of quality foundry materials in the region.</p>
-        </div>
-      </div>
-
-      <div class="timeline__item">
-        <div class="timeline__year">1992</div>
-        <div class="timeline__content">
-          <h3 class="timeline__title">Expansion with SBR Unit</h3>
-          <p class="timeline__desc">To meet growing demand, we set up our second manufacturing unit under SBR, expanding production capacity and customer reach.</p>
-        </div>
-      </div>
-
-      <div class="timeline__item">
-        <div class="timeline__year">1995</div>
-        <div class="timeline__content">
-          <h3 class="timeline__title">ISO Certification</h3>
-          <p class="timeline__desc">Raysons SBR achieved ISO certification — marking our commitment to international quality standards and consistent process excellence.</p>
-        </div>
-      </div>
-
-      <div class="timeline__item">
-        <div class="timeline__year">1997</div>
-        <div class="timeline__content">
-          <h3 class="timeline__title">Inception of SRI Durga Mata</h3>
-          <p class="timeline__desc">We diversified operations by establishing SRI Durga Mata, further strengthening our position in the foundry and allied industries.</p>
-        </div>
-      </div>
-
-      <div class="timeline__item">
-        <div class="timeline__year">2002</div>
-        <div class="timeline__content">
-          <h3 class="timeline__title">Launch of RR Sand Industries</h3>
-          <p class="timeline__desc">Founded RR Sand Industries to support growing requirements for bonding and coating materials — adding another specialised division under the Raysons Group umbrella.</p>
-        </div>
-      </div>
-
-      <div class="timeline__item">
-        <div class="timeline__year">2005</div>
-        <div class="timeline__content">
-          <h3 class="timeline__title">Raysons Sand Chem Pvt. Ltd.</h3>
-          <p class="timeline__desc">Commissioned a state-of-the-art manufacturing plant with 3,000 tons/month capacity, enabling us to serve larger domestic and export markets.</p>
-        </div>
-      </div>
-
-      <div class="timeline__item timeline__item--highlight">
-        <div class="timeline__year">2021</div>
-        <div class="timeline__content">
-          <h3 class="timeline__title">Establishment of Raysons Shell Cast</h3>
-          <p class="timeline__desc">Raysons Shell Cast was founded with a 450-ton monthly melting capacity — marking our entry into precision shell moulded casting manufacturing for leading global industries.</p>
-        </div>
-      </div>
-
-      <div class="timeline__item timeline__item--highlight">
-        <div class="timeline__year">2022</div>
-        <div class="timeline__content">
-          <h3 class="timeline__title">No-Bake Foundry Line Commissioned</h3>
-          <p class="timeline__desc">To meet growing demand for larger and complex castings, we commissioned a modern No-Bake foundry line — expanding technical capabilities and production flexibility.</p>
-        </div>
-      </div>
-
-      <div class="timeline__item timeline__item--future">
-        <div class="timeline__year">2026</div>
-        <div class="timeline__content">
-          <h3 class="timeline__title">Advanced Machine Shop &amp; Heat Treatment</h3>
-          <p class="timeline__desc">A dedicated CNC/VMC machine shop and in-house heat treatment facility — enabling fully machined, ready-to-assemble casting deliveries.</p>
-        </div>
-      </div>
-
-      <div class="timeline__item timeline__item--future">
-        <div class="timeline__year">2027</div>
-        <div class="timeline__content">
-          <h3 class="timeline__title">New HMC &amp; VMC Machine Additions</h3>
-          <p class="timeline__desc">Further expansion of machining capabilities with additional HMC and VMC machines — cementing Raysons as a full-service precision casting partner.</p>
-        </div>
-      </div>
-
-    </div>
-  </div>
-    </div>
-
-    <div class="about-us__people">
-      <div class="about-us__section-head">
-        <p class="about-us__eyebrow">Our People</p>
-        <h2 class="about-us__subheadline">The Foundry is the Team</h2>
-      </div>
-      <div class="about-us__people-grid">
-        <div class="about-us__people-copy">
-          <p>Raysons Shell Cast is led by ownership with a clear vision: to build a precision foundry from Kolhapur that global OEM buyers can trust for consistency, transparency, and engineering discipline.</p>
-          <p>Our technical team brings together metallurgical control, quality leadership, and experienced foundry supervision across moulding, melting, pouring, fettling, machining, and dispatch.</p>
-          <p>Operators are trained through process discipline, shop-floor supervision, inspection feedback, and repeatable work standards so every casting is handled with accountability from raw material to shipment.</p>
-        </div>
-        <figure class="about-us__team-photo">
-          <div class="about-us__image-placeholder">Team photo on shop floor</div>
-          <figcaption>Shop-floor team image to be added</figcaption>
-        </figure>
-      </div>
-    </div>
-
-    <div class="about-us__standards">
-      <div class="about-us__section-head">
-        <p class="about-us__eyebrow">Certifications &amp; Standards</p>
-        <h2 class="about-us__subheadline">Standards buyers can verify.</h2>
-      </div>
-      <div class="about-us__standards-grid">
-        <div class="about-us__standard"><span>ISO 9001:2015</span><p>Quality Management System</p></div>
-        <div class="about-us__standard"><span>JDT 17015</span><p>Casting Soundness (Deere standard)</p></div>
-        <div class="about-us__standard"><span>CT9 / CT10</span><p>Casting Tolerance Grades per JDM B15</p></div>
-        <div class="about-us__standard"><span>ASTM A802</span><p>Surface Quality Standard</p></div>
-        <div class="about-us__standard"><span>ISPM 15</span><p>Fumigated export packaging</p></div>
-      </div>
-    </div>
-
-    <div class="about-us__customers">
-      <div class="about-us__section-head">
-        <p class="about-us__eyebrow">Global Customers</p>
-        <h2 class="about-us__subheadline">Trusted by companies that don't compromise on quality.</h2>
-      </div>
-      <div class="about-us__logo-grid" aria-label="Global customer logos">
-        <div class="about-us__logo">Tata Hendrikson</div>
-        <div class="about-us__logo">Schwing Stetter</div>
-        <div class="about-us__logo">Caterpillar</div>
-        <div class="about-us__logo">Halliburton</div>
-        <div class="about-us__logo">Faster Hydraulics<br><span>Italy</span></div>
-        <div class="about-us__logo">Wikov<br><span>Czech Republic</span></div>
-        <div class="about-us__logo">SAS Sanwa<br><span>Japan</span></div>
-        <div class="about-us__logo">Vanaz Engineering</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════ BEATS (Static Image + Text) ═══════════════ -->
-<section class="beats" id="beats-section">
-  <div class="beats__inner">
-    <div class="beats__text-panel" id="beats-text">
-
-      <!-- PILLAR 01 -->
-      <div class="beat" id="beat-1">
-        <div class="beat__content">
-          <p class="beat__eyebrow">Shell Moulding</p>
-          <h2 class="beat__headline">Shell Moulded<br>Precision.</h2>
-          <p class="beat__body">In-house resin-coated sand plant. Heated metal patterns. Shells that hold tolerances conventional foundries cannot match. Surface finish that your machinists will thank you for. Parts from 500 grams to 150 kilograms are made in our foundry.</p>
-          <p class="beat__body" style="margin-top:1rem;font-style:italic;opacity:.7">Shell moulding is a precision casting process widely preferred for components requiring superior surface finish, dimensional consistency, and repeatability — compared to conventional green sand moulding.</p>
-          <div class="beat__rows" style="margin-top:1.2rem">
-            <div class="beat__row"><span class="beat__dot"></span><span>Superior surface finish</span></div>
-            <div class="beat__row"><span class="beat__dot"></span><span>Better dimensional accuracy</span></div>
-            <div class="beat__row"><span class="beat__dot"></span><span>Reduced machining requirements</span></div>
-            <div class="beat__row"><span class="beat__dot"></span><span>Excellent repeatability for OEM production</span></div>
-            <div class="beat__row"><span class="beat__dot"></span><span>Suitable for complex and precision components</span></div>
-          </div>
-          <div class="beat__pills">
-            <span class="beat__pill">Grey Cast Iron</span>
-            <span class="beat__pill">SG Iron</span>
-            <span class="beat__pill">SiMo Ductile Iron</span>
-            <span class="beat__pill">ADI</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- PILLAR 02 -->
-      <div class="beat" id="beat-2">
-        <div class="beat__content">
-          <p class="beat__eyebrow">No-Bake Casting</p>
-          <h2 class="beat__headline">No-Bake<br>Strength.</h2>
-          <p class="beat__body">When your casting weighs 50 kilograms — or 500 — our No-Bake line takes over. Structural components. Complex internal geometries. Heavy-walled housings. The same standard. A bigger scale.</p>
-          <p class="beat__body" style="margin-top:1rem;font-style:italic;opacity:.7">No-bake casting is preferred for medium to large-sized castings where strength, flexibility, and dimensional stability are essential.</p>
-          <div class="beat__rows" style="margin-top:1.2rem">
-            <div class="beat__row"><span class="beat__dot"></span><span>Ideal for large and heavy castings</span></div>
-            <div class="beat__row"><span class="beat__dot"></span><span>Better dimensional stability</span></div>
-            <div class="beat__row"><span class="beat__dot"></span><span>Flexible for complex geometries</span></div>
-            <div class="beat__row"><span class="beat__dot"></span><span>Improved mould strength and casting quality</span></div>
-            <div class="beat__row"><span class="beat__dot"></span><span>Suitable for customised industrial components</span></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PILLAR 03 -->
-      <div class="beat" id="beat-3">
-        <div class="beat__content">
-          <p class="beat__eyebrow">In-House Machining</p>
-          <h2 class="beat__headline">In-House<br>Machining.</h2>
-          <p class="beat__body">HMC. VMC. CNC Lathe. On-site. Your casting doesn’t leave our facility until it’s machined, dimensionally verified, and ready for your assembly line. One partner. One responsibility. Zero gaps.</p>
-          <div class="beat__spec-strip">
-            <span>HMC</span>
-            <span class="beat__spec-sep"></span>
-            <span>VMC</span>
-            <span class="beat__spec-sep"></span>
-            <span>CNC Lathe</span>
-            <span class="beat__spec-sep"></span>
-            <span>ISO 9001:2015</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- PILLAR 04 -->
-      <div class="beat" id="beat-4">
-        <div class="beat__content">
-          <p class="beat__eyebrow">Export Quality</p>
-          <h2 class="beat__headline beat__headline--grad">Export-Ready<br>Quality.</h2>
-          <p class="beat__sub">ASTM A802. JDM B15. JDT 17015. ISO 9001. We speak the language of international quality standards — because our customers demand it, and because we’ve earned it.</p>
-          <div class="beat__cta-stack">
-            <a href="#enquire" class="btn btn--fill" id="cta-main">Request a Quote</a>
-            <a href="#capabilities" class="btn btn--text" id="cta-caps">See Full Capabilities <span class="btn__arrow">→</span></a>
-          </div>
-        </div>
-      </div>
-
-    </div>
-    <div class="beats__visual-panel">
-      <div class="beats__visual-sticky">
-        <div class="beats__bg-text" aria-hidden="true">PRECISION</div>
-        <div class="beats__schematic" id="beats-schematic" aria-hidden="true">
-          <div class="schematic__ring schematic__ring--outer"></div>
-          <div class="schematic__ring schematic__ring--mid"></div>
-          <div class="schematic__ring schematic__ring--inner"></div>
-          <div class="schematic__axis schematic__axis--x"></div>
-          <div class="schematic__axis schematic__axis--y"></div>
-          <div class="schematic__core">QC</div>
-          <div class="schematic__metric schematic__metric--a"><span>500 kg</span><small>single pour</small></div>
-          <div class="schematic__metric schematic__metric--b"><span>500 MT</span><small>annual capacity</small></div>
-          <div class="schematic__metric schematic__metric--c"><span>ISO</span><small>9001:2015</small></div>
-        </div>
-        <div class="beats__vignette"></div>
-
-        <!-- Pillar navigation dots — clicking jumps to that pillar -->
-        <nav class="beats__nav" aria-label="Pillar navigation">
-          <button class="beats__nav-dot active" onclick="scrollToPillar(0)" aria-label="Pillar 1"><span>01</span></button>
-          <button class="beats__nav-dot" onclick="scrollToPillar(1)" aria-label="Pillar 2"><span>02</span></button>
-          <button class="beats__nav-dot" onclick="scrollToPillar(2)" aria-label="Pillar 3"><span>03</span></button>
-          <button class="beats__nav-dot" onclick="scrollToPillar(3)" aria-label="Pillar 4"><span>04</span></button>
-        </nav>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════ STATS ═══════════════ -->
 <section class="stats" id="stats">
   <div class="stats__line" id="stats-line"></div>
   <div class="stats__inner">
@@ -517,273 +212,18 @@
 </section>
 
 <!-- ═══════════════ FLEET / SPECIFICATIONS ═══════════════ -->
-<section class="specs" id="specs-section">
-  <div class="specs__inner">
-    <div class="specs__header">
-      <div class="specs__intro">
-        <p class="specs__eyebrow">Specifications</p>
-        <p class="specs__lede">Clean, spec-driven capability across shell moulding, no-bake casting, machining, melting, finishing, and quality.</p>
-      </div>
-      <h2 class="specs__headline">Casting<br>programs</h2>
-    </div>
-    <div class="specs__grid">
-      <div class="specs__card">
-        <span class="specs__card-label">Shell Moulding</span>
-        <span class="specs__card-value">500 gm — 150 kg</span>
-        <span class="specs__card-detail">CT8 — CT10 · Ra 6.3 or better</span>
-      </div>
-      <div class="specs__card">
-        <span class="specs__card-label">No-Bake Casting</span>
-        <span class="specs__card-value">50 kg — 500 kg</span>
-        <span class="specs__card-detail">CT9 — CT11 · multi-core capability</span>
-      </div>
-      <div class="specs__card">
-        <span class="specs__card-label">Annual Capacity</span>
-        <span class="specs__card-value">500 MT</span>
-        <span class="specs__card-detail">Expanding to 700 MT</span>
-      </div>
-      <div class="specs__card">
-        <span class="specs__card-label">Melting</span>
-        <span class="specs__card-value">500 kg</span>
-        <span class="specs__card-detail">Medium-frequency induction furnace</span>
-      </div>
-      <div class="specs__card">
-        <span class="specs__card-label">Materials</span>
-        <span class="specs__card-value">CI · DI · SiMo</span>
-        <span class="specs__card-detail">IS210 · IS1865 · export grades</span>
-      </div>
-      <div class="specs__card">
-        <span class="specs__card-label">Testing</span>
-        <span class="specs__card-value">Full QC Suite</span>
-        <span class="specs__card-detail">Spectrometer · UTM · BHN · UT</span>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- ═══════════════ PROCESS ═══════════════ -->
-<section class="process" id="process">
-  <div class="process__inner">
-
-    <!-- Header above the 2-col grid so the image starts level with step 01 -->
-    <div class="process__header">
-      <p class="process__eyebrow">Our Process</p>
-      <h2 class="process__headline">From raw material to<br>finished casting.</h2>
-    </div>
-
-    <div class="process__body">
-      <div class="process__left">
-        <div class="process__timeline">
-          <div class="process__line-bg"></div>
-          <div class="process__step active" data-step="0">
-            <span class="process__dot"></span>
-            <span class="process__num">01</span>
-            <h3 class="process__title">Raw Material Inspection</h3>
-            <p class="process__desc">Careful inspection and testing of incoming raw materials to ensure consistent casting quality from the very beginning.</p>
-          </div>
-          <div class="process__step" data-step="1">
-            <span class="process__dot"></span>
-            <span class="process__num">02</span>
-            <h3 class="process__title">Sand Preparation &amp; Shell Formation</h3>
-            <p class="process__desc">Controlled sand properties and precise shell formation for superior mould strength and dimensional accuracy.</p>
-          </div>
-          <div class="process__step" data-step="2">
-            <span class="process__dot"></span>
-            <span class="process__num">03</span>
-            <h3 class="process__title">Melting &amp; Metallurgical Control</h3>
-            <p class="process__desc">Monitored melting practices and metallurgical control to achieve the required chemical and mechanical properties.</p>
-          </div>
-          <div class="process__step" data-step="3">
-            <span class="process__dot"></span>
-            <span class="process__num">04</span>
-            <h3 class="process__title">Precision Pouring Process</h3>
-            <p class="process__desc">Optimised pouring parameters and process discipline to ensure defect-free and reliable castings.</p>
-          </div>
-          <div class="process__step" data-step="4">
-            <span class="process__dot"></span>
-            <span class="process__num">05</span>
-            <h3 class="process__title">Fettling &amp; Surface Finishing</h3>
-            <p class="process__desc">Controlled fettling and finishing operations for clean surfaces, improved appearance, and dimensional consistency.</p>
-          </div>
-          <div class="process__step" data-step="5">
-            <span class="process__dot"></span>
-            <span class="process__num">06</span>
-            <h3 class="process__title">Machining, Inspection &amp; Dispatch</h3>
-            <p class="process__desc">Final machining, quality inspection, and dispatch carried out to meet customer specifications and delivery requirements.</p>
-          </div>
-        </div>
-      </div>
-      <div class="process__right">
-        <div class="process__frame">
-          <img class="process__img active" src="/images/pillar-1.jpg"  alt="Raw Material Inspection"            data-step-img="0">
-          <img class="process__img"        src="/images/pillar-6.jpg"  alt="Sand Preparation"                   data-step-img="1">
-          <img class="process__img"        src="/images/pillar-5.jpg"  alt="Melting and Metallurgical Control"  data-step-img="2">
-          <img class="process__img"        src="/images/pillar-4.jpg"  alt="Precision Pouring"                  data-step-img="3">
-          <img class="process__img"        src="/images/pillar-3.jpg"  alt="Fettling and Surface Finishing"     data-step-img="4">
-          <img class="process__img"        src="/images/pillar-2.jpg" alt="Machining, Inspection and Dispatch" data-step-img="5">
-
-
-        </div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-
-<!-- ═══════════════ CAPABILITIES ═══════════════ -->
-<section class="caps" id="capabilities">
-  <div class="caps__inner">
-    <p class="caps__eyebrow">Production scope</p>
-    <h2 class="caps__headline">Everything required<br>to ship assembly-ready<br>castings.</h2>
-    <div class="caps__grid">
-      <div class="caps__col"><span class="caps__ghost">01</span><p class="caps__col-label">Moulding</p><ul class="caps__list"><li>Shell shooter machines</li><li>Dump box shell moulding</li><li>No-bake mixing line</li><li>Continuous sand reclamation</li></ul></div>
-      <div class="caps__col"><span class="caps__ghost">02</span><p class="caps__col-label">Finishing</p><ul class="caps__list"><li>700 kg tumble shot blasting</li><li>Fettling section</li><li>In-house grinding</li><li>Surface dressing</li></ul></div>
-      <div class="caps__col"><span class="caps__ghost">03</span><p class="caps__col-label">Machining</p><ul class="caps__list"><li>HMC</li><li>VMC</li><li>CNC lathe</li><li>Dimensional verification</li></ul></div>
-      <div class="caps__col"><span class="caps__ghost">04</span><p class="caps__col-label">Testing & QC</p><ul class="caps__list"><li>Bruker Q2 ION spectrometer</li><li>Metal Soft image analyser</li><li>UTM HGFL digital</li><li>Hardness · Sand · UT testing</li></ul></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════ INDUSTRIES (Globe-style) ═══════════════ -->
-<section class="industries" id="industries">
-  <div class="industries__bg-text" aria-hidden="true">Global</div>
-  <div class="industries__inner">
-    <div class="industries__left">
-      <h3 class="industries__statement">Made in Kolhapur.<br>Trusted by OEMs<br>across the world.</h3>
-    </div>
-    <div class="industries__right">
-      <div class="industries__list">
-        <div class="industries__item"><span class="industries__dot"></span><span class="industries__name">Automotive</span></div>
-        <div class="industries__item"><span class="industries__dot"></span><span class="industries__name">Hydraulics</span></div>
-        <div class="industries__item"><span class="industries__dot"></span><span class="industries__name">Oil & Gas</span></div>
-        <div class="industries__item"><span class="industries__dot"></span><span class="industries__name">Agriculture</span></div>
-        <div class="industries__item"><span class="industries__dot"></span><span class="industries__name">Railway</span></div>
-        <div class="industries__item"><span class="industries__dot"></span><span class="industries__name">Construction Equipment</span></div>
-      </div>
-      <div class="industries__contact">
-        <a href="mailto:info@raysonsgroup.com" class="industries__email">info@raysonsgroup.com</a>
-        <p class="industries__loc">MIDC Shiroli, Kolhapur<br>Maharashtra, India</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════ FAQ ═══════════════ -->
-<section class="faq" id="faq">
-  <div class="faq__inner">
-    <p class="faq__eyebrow">Questions &amp; Answers</p>
-    <h2 class="faq__headline">Common questions<br>from OEM buyers.</h2>
-    <div class="faq__list">
-
-      <div class="faq__item">
-        <button class="faq__q" aria-expanded="false">What casting processes do you offer?</button>
-        <div class="faq__a">
-          <p>We offer Shell Moulded Casting (500 gm – 150 kg) and No-Bake Casting (50 kg – 500 kg). Shell moulding uses resin-coated sand on heated metal patterns for superior surface finish and tight tolerances. No-Bake handles larger, complex structural components. Both processes are run in-house at our Kolhapur facility.</p>
-        </div>
-      </div>
-
-      <div class="faq__item">
-        <button class="faq__q" aria-expanded="false">What materials can you cast?</button>
-        <div class="faq__a">
-          <p>We cast Grey Cast Iron (IS210), SG / Ductile Iron (IS1865), SiMo Ductile Iron, and ADI (Austempered Ductile Iron). Every heat is spectrometer-verified (Bruker Q2 ION) before pouring to confirm chemistry compliance.</p>
-        </div>
-      </div>
-
-      <div class="faq__item">
-        <button class="faq__q" aria-expanded="false">What is your annual capacity?</button>
-        <div class="faq__a">
-          <p>Current capacity is 500 MT per year across shell moulding and no-bake lines. We are actively expanding to 700 MT. Our 500 kg medium-frequency induction furnace allows precise temperature control and consistent metallurgical output.</p>
-        </div>
-      </div>
-
-      <div class="faq__item">
-        <button class="faq__q" aria-expanded="false">Do you offer machining services?</button>
-        <div class="faq__a">
-          <p>Yes. We have in-house HMC, VMC, and CNC Lathe capability. Your casting does not leave our facility until it is machined, dimensionally verified, and ready for your assembly line. One partner. Zero gaps.</p>
-        </div>
-      </div>
-
-      <div class="faq__item">
-        <button class="faq__q" aria-expanded="false">Which international quality standards do you comply with?</button>
-        <div class="faq__a">
-          <p>We are ISO 9001:2015 certified. Our castings are produced and tested to ASTM A802 (visual inspection), JDM B15, JDT 17015, and other customer-specific standards. Full QC documentation including spectro reports, hardness certificates, and mechanical test results are provided per shipment.</p>
-        </div>
-      </div>
-
-      <div class="faq__item">
-        <button class="faq__q" aria-expanded="false">Do you export? Which countries have you supplied to?</button>
-        <div class="faq__a">
-          <p>Yes, we are export-ready. Our castings have been supplied to customers in Italy, the United Kingdom, Japan, and the United States. We have experience with export packing, documentation, and compliance with international shipping requirements.</p>
-        </div>
-      </div>
-
-      <div class="faq__item">
-        <button class="faq__q" aria-expanded="false">How long does it take from order to delivery?</button>
-        <div class="faq__a">
-          <p>Lead times depend on casting complexity and volume. Typically 4–8 weeks for new parts (including pattern/tooling), and 2–4 weeks for repeat orders. We respond to all RFQs within 48 hours of receiving drawings and specifications.</p>
-        </div>
-      </div>
-
-      <div class="faq__item">
-        <button class="faq__q" aria-expanded="false">How do I get a quote?</button>
-        <div class="faq__a">
-          <p>Send us your drawing (PDF or DXF), material grade, weight range, and annual requirement to <a href="mailto:info@raysonsgroup.com">info@raysonsgroup.com</a>. Our engineering team will respond within 48 hours with a detailed quotation.</p>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════ CTA ═══════════════ -->
-<section class="cta" id="enquire">
-  <div class="cta__watermark">RAYSONS</div>
-  <div class="cta__inner">
-    <div class="cta__left">
-      <p class="cta__eyebrow">For inquiries</p>
-      <h2 class="cta__headline">Let us build<br>the casting brief.</h2>
-      <div class="cta__rule"></div>
-      <p class="cta__body">Share your drawing, material grade, weight range, and annual requirement. Our engineering team responds within 48 hours.</p>
-      <div class="cta__buttons">
-        <a href="mailto:info@raysonsgroup.com" class="btn btn--fill btn--lg" id="cta-quote">Request a Quote →</a>
-        <a href="#capabilities" class="btn btn--text" id="cta-see-caps">See Capabilities <span class="btn__arrow">→</span></a>
-      </div>
-    </div>
-    <div class="cta__divider"></div>
-    <div class="cta__right">
-      <div class="cta__contact-block">
-        <p class="cta__contact-label">Email</p>
-        <a href="mailto:info@raysonsgroup.com" class="cta__contact-value">info@raysonsgroup.com</a>
-      </div>
-      <div class="cta__contact-block">
-        <p class="cta__contact-label">Phone / WhatsApp</p>
-        <a href="tel:+919999999999" class="cta__contact-value">+91 XXXXX XXXXX</a>
-      </div>
-      <div class="cta__contact-block">
-        <p class="cta__contact-label">Location</p>
-        <p class="cta__contact-value">MIDC Shiroli, Kolhapur<br>Maharashtra 416122, India</p>
-      </div>
-      <div class="cta__contact-block">
-        <p class="cta__contact-label">Response Time</p>
-        <p class="cta__contact-value">Within 48 hours</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════ FOOTER ═══════════════ -->
 <footer class="footer" id="footer">
   <div class="footer__top">
     <span class="footer__logo">Raysons <span class="footer__logo-accent">Shell Cast</span></span>
     <nav class="footer__nav">
-      <a href="#overview">Overview</a><a href="#process">Technology</a><a href="#capabilities">Products</a><a href="#industries">Industries</a><a href="#enquire">Enquire</a>
+      <a href="./index.html">Overview</a><a href="./technology.html">Technology</a><a href="./products.html">Products</a><a href="./industries.html">Industries</a><a href="./enquire.html">Enquire</a>
     </nav>
     <span class="footer__iso">ISO 9001:2015</span>
   </div>
   <div class="footer__mid">
     <div class="footer__col"><h4 class="footer__col-title">Programs</h4><ul><li>Shell Moulding</li><li>No-Bake Casting</li><li>In-House Machining</li><li>Export-Ready Quality</li></ul></div>
-    <div class="footer__col"><h4 class="footer__col-title">Quick Links</h4><ul><li><a href="#overview">Overview</a></li><li><a href="#process">Process</a></li><li><a href="#capabilities">Capabilities</a></li><li><a href="#enquire">Contact</a></li></ul></div>
+    <div class="footer__col"><h4 class="footer__col-title">Quick Links</h4><ul><li><a href="./index.html">Overview</a></li><li><a href="./technology.html">Process</a></li><li><a href="./products.html">Capabilities</a></li><li><a href="./enquire.html">Contact</a></li></ul></div>
     <div class="footer__col"><h4 class="footer__col-title">Contact</h4><ul><li>MIDC Shiroli, Kolhapur</li><li>Maharashtra 416122</li><li><a href="mailto:info@raysonsgroup.com">info@raysonsgroup.com</a></li><li><a href="tel:+919999999999">+91 XXXXX XXXXX</a></li></ul></div>
   </div>
   <div class="footer__bottom">
