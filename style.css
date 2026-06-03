@@ -5921,3 +5921,220 @@ html[data-theme="light"] .page--technology .schematic__metric small {
     max-height: 130px !important;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   WAVE 1 — MOTION SYSTEM  (added 2026-06)
+══════════════════════════════════════════════════════════════ */
+
+/* ── Scroll progress bar ─────────────────────────────────────── */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background: linear-gradient(90deg, var(--o), var(--g), var(--o));
+  background-size: 200% 100%;
+  z-index: 1002;
+  pointer-events: none;
+  /* No CSS transition — JS updates directly each scroll tick for accuracy */
+  transform-origin: left center;
+  will-change: width
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #scroll-progress { display: none }
+}
+
+/* ── Hero split-text reveal ──────────────────────────────────── */
+/* Each word is wrapped: .hero-word > .hero-word__inner
+   JS adds .revealed after the preloader finishes.            */
+.hero-word {
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: bottom;
+  /* 0.14 em accommodates descenders in 'p', 'y', 'g' etc. */
+  padding-bottom: 0.14em
+}
+
+.hero-word__inner {
+  display: inline-block;
+  /* Start below the clip boundary */
+  transform: translateY(110%);
+  transition: transform 0.88s cubic-bezier(0.16, 1, 0.3, 1)
+}
+
+.hero-word__inner.revealed {
+  transform: translateY(0)
+}
+
+/* hero__label above the headline: fade in (no clip needed — it's smaller) */
+.hero__label {
+  opacity: 0;
+  transition: opacity 0.6s ease
+}
+
+.hero__label.revealed {
+  opacity: 1
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-word__inner,
+  .hero__label {
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important
+  }
+}
+
+/* ── Stat weight entry ───────────────────────────────────────── */
+/* JS adds .stats--counting to .stats__inner when observer fires;
+   each .stats__item gets a staggered translate+scale entry.    */
+.stats__item {
+  /* Transition so the entry feels weighty, not floaty */
+  transition:
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity   0.55s cubic-bezier(0.16, 1, 0.3, 1)
+}
+
+.stats__item.stat-entering {
+  transform: translateY(20px) scale(0.94);
+  opacity: 0
+}
+
+/* Once JS removes .stat-entering, element snaps to final state via transition */
+
+@media (prefers-reduced-motion: reduce) {
+  .stats__item.stat-entering {
+    transform: none !important;
+    opacity: 1 !important
+  }
+}
+
+/* ── Float CTA: static glow on hover ────────────────────────── */
+/* Keep existing ctaPulse animation; pause it on hover and
+   apply a heavier static glow instead.                         */
+.float-cta {
+  /* Add box-shadow to transition list (was only transform+opacity) */
+  transition:
+    transform .45s cubic-bezier(.16, 1, .3, 1),
+    opacity .35s,
+    box-shadow .3s ease
+}
+
+.float-cta:hover {
+  /* Pause pulse so static glow is clean */
+  animation-play-state: paused;
+  box-shadow:
+    0 18px 60px rgba(255, 107, 0, .52),
+    0 0 0 2px rgba(255, 215, 0, .3),
+    0 0 32px rgba(255, 107, 0, .22)
+}
+
+/* ── Global reach arcs ───────────────────────────────────────── */
+.reach__wrap {
+  width: 100%;
+  max-width: 900px;
+  margin: 3.5rem auto 0;
+  padding: 0 clamp(1.5rem, 4vw, 3rem);
+  opacity: 0;
+  transition: opacity 0.6s ease
+}
+
+.reach__wrap.visible {
+  opacity: 1
+}
+
+.reach__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible
+}
+
+/* Arc paths — drawn via stroke-dashoffset in JS */
+.reach__arc {
+  fill: none;
+  stroke: var(--o);
+  stroke-width: 1;
+  stroke-linecap: round;
+  opacity: 0.55;
+  /* stroke-dasharray and stroke-dashoffset set by JS per path length */
+  transition: stroke-dashoffset 1.4s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.3s ease
+}
+
+/* Destination dots */
+.reach__dest {
+  fill: var(--w);
+  opacity: 0;
+  transition: opacity 0.4s ease,
+              r 0.4s cubic-bezier(0.16, 1, 0.3, 1)
+}
+
+.reach__dest.arrived {
+  opacity: 0.82
+}
+
+/* City labels */
+.reach__city {
+  font-family: var(--fb);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  fill: var(--t2);
+  text-anchor: middle;
+  opacity: 0;
+  transition: opacity 0.4s ease
+}
+
+.reach__city.arrived {
+  opacity: 1
+}
+
+.reach__city--left {
+  text-anchor: start
+}
+
+.reach__city--origin {
+  fill: var(--o);
+  font-size: 8px;
+  opacity: 1
+}
+
+/* Origin ring — pulsing */
+.reach__origin-ring {
+  fill: none;
+  stroke: var(--o);
+  stroke-width: 1;
+  opacity: 0.45;
+  transform-origin: 565px 106px;
+  animation: reachPulse 2.2s ease-out infinite
+}
+
+.reach__origin {
+  fill: var(--o);
+  opacity: 0.9;
+  filter: drop-shadow(0 0 4px rgba(255, 107, 0, .7))
+}
+
+@keyframes reachPulse {
+  0%   { r: 4;  opacity: 0.55 }
+  60%  { r: 14; opacity: 0 }
+  100% { r: 14; opacity: 0 }
+}
+
+/* Light mode: arcs keep the orange but with slightly less opacity */
+html[data-theme="light"] .reach__arc { opacity: 0.45 }
+html[data-theme="light"] .reach__city { fill: var(--t) }
+
+/* Mobile: hide arcs on very small screens, they don't read well */
+@media (max-width: 480px) {
+  .reach__wrap { display: none }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reach__origin-ring { animation: none }
+  .reach__arc { transition: none }
+}

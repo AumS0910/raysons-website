@@ -80,8 +80,13 @@ function init() {
   initCinematicSections();
   initObservers();
   initFaq();
+  initScrollProgress();
+  initReachArcs();
+  initLenisGated();      // Lenis: excluded from canvas-hero page, active on others
   onScroll();
   if (heroCanvas && heroCtx) {
+    // Hero text reveal wired to preloader completion via MutationObserver
+    watchPreloaderForReveal();
     if (!initHeroVideoScrub()) preloadFrames();
   } else {
     const preloader = document.getElementById('preloader');
@@ -340,6 +345,7 @@ function sizeCanvasFull(canvas, ctx, dpr) {
 }
 
 function onScroll() {
+  updateScrollProgress();
   const sy = window.scrollY;
   const hero = document.querySelector('.hero');
   if (hero) {
@@ -1038,11 +1044,26 @@ function animateCount(card) {
   const target = parseInt(card.dataset.target, 10);
   const numEl = card.querySelector('.stats__num');
   if (!numEl) return;
+
+  // Weight entry: land the card down from a slight offset.
+  // stat-entering sets translateY(20px) + opacity(0); removing it triggers the CSS transition.
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    card.classList.add('stat-entering');
+    requestAnimationFrame(() => {
+      // Two rAF to ensure the entering class painted before we remove it
+      requestAnimationFrame(() => card.classList.remove('stat-entering'));
+    });
+  }
+
+  // Reset to 0 (markup shows end-state for no-JS; JS counts up from 0)
+  numEl.textContent = '0';
+
   const start = performance.now();
   function tick(now) {
     const t = clamp((now - start) / 1800);
     numEl.textContent = Math.round((1 - Math.pow(1 - t, 3)) * target);
     if (t < 1) requestAnimationFrame(tick);
+    else numEl.textContent = target; // guarantee exact final value
   }
   requestAnimationFrame(tick);
 }
@@ -1053,6 +1074,227 @@ function debounce(fn, ms) {
     clearTimeout(timer);
     timer = setTimeout(() => fn(...args), ms);
   };
+}
+
+/* ══════════════════════════════════════════════════════════════
+   WAVE 1 — MOTION ADDITIONS
+══════════════════════════════════════════════════════════════ */
+
+/* ── Scroll progress bar ────────────────────────────────────── */
+function initScrollProgress() {
+  const bar = document.getElementById('scroll-progress');
+  if (!bar) return;
+  // Already wired into onScroll() via updateScrollProgress() below
+}
+
+function updateScrollProgress() {
+  const bar = document.getElementById('scroll-progress');
+  if (!bar) return;
+  const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+  bar.style.width = ((window.scrollY / max) * 100).toFixed(2) + '%';
+}
+
+/* ── Hero split-text reveal ─────────────────────────────────── */
+/* Wraps every word in .hero__headline-l and .hero__headline-r
+   in  <span class="hero-word"><span class="hero-word__inner">…</span></span>
+   while preserving <br> elements.
+   Returns the array of inner spans so they can be stagger-revealed. */
+function splitHeroHeadlines() {
+  const selectors = ['.hero__headline-l', '.hero__headline-r'];
+  const wordInners = [];
+
+  selectors.forEach(sel => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+
+    const fragment = document.createDocumentFragment();
+    el.childNodes.forEach(node => {
+      if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'BR') {
+        fragment.appendChild(document.createElement('br'));
+        return;
+      }
+      if (node.nodeType !== Node.TEXT_NODE) {
+        fragment.appendChild(node.cloneNode(true));
+        return;
+      }
+      // Split text node into word tokens, preserve spacing
+      const parts = node.textContent.split(/(\s+)/);
+      parts.forEach(part => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) {
+          // Preserve a single space between words
+          fragment.appendChild(document.createTextNode(' '));
+          return;
+        }
+        const outer = document.createElement('span');
+        outer.className = 'hero-word';
+        const inner = document.createElement('span');
+        inner.className = 'hero-word__inner';
+        inner.textContent = part;
+        outer.appendChild(inner);
+        fragment.appendChild(outer);
+        wordInners.push(inner);
+      });
+    });
+
+    el.innerHTML = '';
+    el.appendChild(fragment);
+  });
+
+  return wordInners;
+}
+
+/* Stagger-reveal the hero words and label. Called after preloader fades. */
+function revealHeroWords(wordInners) {
+  if (!wordInners || !wordInners.length) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    wordInners.forEach(el => el.classList.add('revealed'));
+    const label = document.querySelector('.hero__label');
+    if (label) label.classList.add('revealed');
+    return;
+  }
+
+  // Reveal the eyebrow label first
+  const label = document.querySelector('.hero__label');
+  if (label) setTimeout(() => label.classList.add('revealed'), 0);
+
+  // Stagger words: 65 ms per word, starting 60 ms after label
+  wordInners.forEach((el, i) => {
+    setTimeout(() => el.classList.add('revealed'), 60 + i * 65);
+  });
+}
+
+/* Watch for preloader 'done' class, then trigger text reveal */
+let _heroWordInners = null;
+
+function watchPreloaderForReveal() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  _heroWordInners = splitHeroHeadlines();
+
+  const preloader = document.getElementById('preloader');
+  if (!preloader) {
+    // Preloader already gone (rare) — reveal immediately
+    revealHeroWords(_heroWordInners);
+    return;
+  }
+
+  const mo = new MutationObserver(() => {
+    if (preloader.classList.contains('done')) {
+      mo.disconnect();
+      // Small delay so preloader fade and text reveal overlap nicely
+      setTimeout(() => revealHeroWords(_heroWordInners), 120);
+    }
+  });
+  mo.observe(preloader, { attributes: true, attributeFilter: ['class'] });
+}
+
+/* ── Global reach arcs ───────────────────────────────────────── */
+/* Uses SVG getTotalLength() + stroke-dashoffset to draw arcs on
+   scroll-in. Falls back gracefully if SVG isn't present.       */
+function initReachArcs() {
+  const wrap = document.getElementById('reach-wrap');
+  if (!wrap) return;
+
+  // Measure each arc path length and set dasharray/dashoffset to hide it
+  const arcs = wrap.querySelectorAll('.reach__arc');
+  arcs.forEach(path => {
+    const len = path.getTotalLength ? Math.ceil(path.getTotalLength()) : 300;
+    path.style.strokeDasharray  = len;
+    path.style.strokeDashoffset = len;   // fully hidden
+  });
+
+  // Map arc id → destination ids for staggered dot reveal
+  const ARC_DEST = {
+    'arc-uk':    ['dest-uk',    '#UK'   ],
+    'arc-italy': ['dest-italy', '#Italy'],
+    'arc-japan': ['dest-japan', '#Japan'],
+    'arc-usa':   ['dest-usa',   '#USA'  ],
+  };
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const obs = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) return;
+    obs.disconnect();
+
+    wrap.classList.add('visible');
+
+    if (reducedMotion) {
+      // Instantly reveal everything — no animation
+      arcs.forEach(p => { p.style.strokeDashoffset = 0; });
+      wrap.querySelectorAll('.reach__dest, .reach__city:not(.reach__city--origin)')
+          .forEach(el => el.classList.add('arrived'));
+      return;
+    }
+
+    // Stagger arcs in order: UK, Italy, Japan, USA
+    const arcOrder = ['arc-uk', 'arc-italy', 'arc-japan', 'arc-usa'];
+    arcOrder.forEach((id, i) => {
+      const path = document.getElementById(id);
+      if (!path) return;
+
+      const delay = 200 + i * 220;  // stagger start per arc
+
+      setTimeout(() => {
+        path.style.strokeDashoffset = 0;  // CSS transition animates this
+
+        // Reveal destination dot + label after the arc would finish
+        // Arc transition is 1.4 s; offset dot reveal 200 ms before end
+        const arcDuration = 1400;
+        setTimeout(() => {
+          const [destId] = ARC_DEST[id] || [];
+          if (destId) {
+            document.getElementById(destId)?.classList.add('arrived');
+          }
+          // Reveal city label paired with this arc
+          const labelMap = { 'arc-uk': 'reach__city', 'arc-italy': 'reach__city', 'arc-japan': 'reach__city', 'arc-usa': 'reach__city' };
+          // Reveal all city labels whose dest just arrived
+          wrap.querySelectorAll('.reach__city:not(.reach__city--origin)').forEach((label, li) => {
+            if (li === i) label.classList.add('arrived');
+          });
+        }, arcDuration - 150);
+      }, delay);
+    });
+  }, { threshold: 0.25 });
+
+  obs.observe(wrap);
+}
+
+/* ── Lenis smooth scroll (gated) ────────────────────────────── */
+/* DECISION: Excluded from canvas-hero pages (index.html has
+   #hero-canvas). On those pages the hero scrub has its own LERP
+   (0.008) which would double-smooth with Lenis and make frame
+   tracking mushy. Lenis is activated on technology / about /
+   products / enquire where no canvas-hero exists.
+   Remove the guard once the hero sequence is replaced.        */
+function initLenisGated() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // Check: if this page has a canvas hero, skip Lenis entirely for Wave 1
+  if (document.getElementById('hero-canvas')) return;
+
+  import('lenis').then(({ default: Lenis }) => {
+    const lenis = new Lenis({
+      lerp: 0.1,
+      smoothTouch: false,   // keep native momentum on iOS
+      syncTouch: false,
+    });
+
+    // Wire Lenis scroll so existing IntersectionObserver + onScroll logic
+    // still reads correct values (lenis.scroll = the animated position)
+    lenis.on('scroll', () => {
+      // The existing onScroll() reads window.scrollY which Lenis keeps in sync
+      updateScrollProgress();
+    });
+
+    function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+    requestAnimationFrame(raf);
+
+    // Expose for debugging
+    window.__lenis = lenis;
+  }).catch(() => {
+    // Lenis failed to load — silent fallback to native scroll
+  });
 }
 
 /* ── FAQ accordion ────────────────────────────────────────────────

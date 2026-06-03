@@ -26,6 +26,9 @@
 </head>
 <body class="page page--home">
 
+<!-- Scroll progress line — 2 px orange bar at top of viewport -->
+<div id="scroll-progress" aria-hidden="true"></div>
+
 <div class="preloader" id="preloader">
   <div class="preloader__center">
     <div class="preloader__brand">RAYSONS</div>
@@ -188,22 +191,22 @@
   <div class="stats__line" id="stats-line"></div>
   <div class="stats__inner">
     <div class="stats__item" data-target="500" data-suffix="MT">
-      <span class="stats__num" id="stat-0">0</span><span class="stats__suffix">MT</span>
+      <span class="stats__num" id="stat-0">500</span><span class="stats__suffix">MT</span>
       <span class="stats__label">Annual Capacity</span>
     </div>
     <div class="stats__sep"></div>
     <div class="stats__item" data-target="40" data-suffix="+">
-      <span class="stats__num" id="stat-1">0</span><span class="stats__suffix">+</span>
+      <span class="stats__num" id="stat-1">40</span><span class="stats__suffix">+</span>
       <span class="stats__label">Industrial Legacy</span>
     </div>
     <div class="stats__sep"></div>
     <div class="stats__item" data-target="500" data-suffix="kg">
-      <span class="stats__num" id="stat-2">0</span><span class="stats__suffix">kg</span>
+      <span class="stats__num" id="stat-2">500</span><span class="stats__suffix">kg</span>
       <span class="stats__label">No-Bake Casting</span>
     </div>
     <div class="stats__sep"></div>
     <div class="stats__item" data-target="6" data-suffix="">
-      <span class="stats__num" id="stat-3">0</span><span class="stats__suffix"></span>
+      <span class="stats__num" id="stat-3">6</span><span class="stats__suffix"></span>
       <span class="stats__label">OEM Sectors</span>
     </div>
   </div>
@@ -233,6 +236,43 @@
     </div>
   </div>
 </section>
+
+<!-- ═══════════════ REACH ARCS ═══════════════ -->
+<!-- JS sets stroke-dasharray/dashoffset on each .reach__arc to animate on scroll-in -->
+<div class="reach__wrap" id="reach-wrap" aria-hidden="true">
+  <svg class="reach__svg" viewBox="0 0 800 160" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <radialGradient id="reach-origin-glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#FF6B00" stop-opacity="0.9"/>
+        <stop offset="60%" stop-color="#FF6B00" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#FF6B00" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- Arcs: Kolhapur (565,106) → destinations, drawn via stroke-dashoffset in JS -->
+    <path class="reach__arc" id="arc-uk"     d="M 565,106 Q 483,18 400,54"/>
+    <path class="reach__arc" id="arc-italy"  d="M 565,106 Q 496,26 427,63"/>
+    <path class="reach__arc" id="arc-japan"  d="M 565,106 Q 637,42 710,76"/>
+    <path class="reach__arc" id="arc-usa"    d="M 565,106 Q 385,8  205,68"/>
+
+    <!-- Destination dots (initially hidden, JS reveals on arc complete) -->
+    <circle class="reach__dest" id="dest-uk"    cx="400" cy="54"  r="2.5"/>
+    <circle class="reach__dest" id="dest-italy" cx="427" cy="63"  r="2.5"/>
+    <circle class="reach__dest" id="dest-japan" cx="710" cy="76"  r="2.5"/>
+    <circle class="reach__dest" id="dest-usa"   cx="205" cy="68"  r="2.5"/>
+
+    <!-- Labels -->
+    <text class="reach__city" x="396" y="44">UK</text>
+    <text class="reach__city" x="423" y="53">Italy</text>
+    <text class="reach__city" x="706" y="66">Japan</text>
+    <text class="reach__city reach__city--left" x="209" y="58">USA</text>
+
+    <!-- Kolhapur origin: pulsing ring + solid dot -->
+    <circle class="reach__origin-ring" cx="565" cy="106" r="8"/>
+    <circle class="reach__origin"      cx="565" cy="106" r="4"/>
+    <text class="reach__city reach__city--origin" x="565" y="120">Kolhapur</text>
+  </svg>
+</div>
 
 <!-- ═══════════════ FAQ ═══════════════ -->
 
