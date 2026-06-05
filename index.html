@@ -237,9 +237,68 @@
   </div>
 </section>
 
+<!-- ═══════════════ HUB REALM — pinned scroll cinematic (v2 addition) ═══════════════ -->
+<!-- Tall section drives the pinned scroll. Inside, a sticky stage holds the
+     full-screen 3D canvas + text overlays. Scroll progress (0→1) is computed
+     in hubScene.js and drives camera dolly-in, hub H→V rotation, and beats.
+     All text is real semantic HTML for SEO/crawlability. -->
+<section class="hub-realm" id="hub-realm" aria-label="Precision casting — the part inside the machine">
+  <div class="hub-realm__sticky">
+    <!-- Full-screen 3D canvas -->
+    <canvas id="hub-scene-canvas" class="hub-realm__canvas" aria-hidden="true"></canvas>
+
+    <!-- Realm vignette — intensifies as you "enter" -->
+    <div class="hub-realm__vignette" id="hub-realm-vignette" aria-hidden="true"></div>
+
+    <!-- Text overlays — opacity driven by scroll progress in JS -->
+    <div class="hub-realm__overlay">
+      <!-- Intro label (top) — visible at entry, fades as you go deeper -->
+      <p class="hub-realm__intro" id="hub-intro">
+        <span class="hub-realm__intro-dot"></span>Precision Casting
+      </p>
+
+      <!-- Title — the realm headline -->
+      <div class="hub-realm__title-wrap" id="hub-title">
+        <h2 class="hub-realm__title">The part<br>inside the machine.</h2>
+        <p class="hub-realm__sub">Every casting leaves our facility dimensionally certified, spectrometer-verified, and assembly-ready — shell moulded to ±0.3 mm, machined to drawing on HMC, VMC &amp; CNC.</p>
+      </div>
+
+      <!-- Spec captions — appear during the orbit beats -->
+      <div class="hub-realm__caption hub-realm__caption--1" id="hub-cap-1" aria-hidden="true">
+        <span class="hub-realm__caption-num">01</span>
+        <span class="hub-realm__caption-text">8-spline precision bore</span>
+      </div>
+      <div class="hub-realm__caption hub-realm__caption--2" id="hub-cap-2" aria-hidden="true">
+        <span class="hub-realm__caption-num">02</span>
+        <span class="hub-realm__caption-text">Machined flange mating face</span>
+      </div>
+      <div class="hub-realm__caption hub-realm__caption--3" id="hub-cap-3" aria-hidden="true">
+        <span class="hub-realm__caption-num">03</span>
+        <span class="hub-realm__caption-text">4-bolt mounting pattern</span>
+      </div>
+
+      <!-- Material spec pills (bottom) -->
+      <div class="hub-realm__specs" id="hub-specs">
+        <span>Grey CI · IS 210</span>
+        <span>SG / Ductile · IS 1865</span>
+        <span>SiMo Ductile</span>
+        <span>ADI</span>
+      </div>
+
+      <!-- Scroll hint at entry -->
+      <div class="hub-realm__scroll-hint" id="hub-scroll-hint" aria-hidden="true">
+        <span>Scroll to enter</span>
+        <span class="hub-realm__scroll-line"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ═══════════════ REACH ARCS ═══════════════ -->
 <!-- JS sets stroke-dasharray/dashoffset on each .reach__arc to animate on scroll-in -->
 <div class="reach__wrap" id="reach-wrap" aria-hidden="true">
+  <!-- Three.js globe (v2 addition) — overlays the SVG arcs below -->
+  <canvas id="reach-globe-canvas" class="reach__globe-canvas" aria-label="Interactive 3D globe showing global shipping routes"></canvas>
   <svg class="reach__svg" viewBox="0 0 800 160" preserveAspectRatio="xMidYMid meet">
     <defs>
       <radialGradient id="reach-origin-glow" cx="50%" cy="50%" r="50%">
@@ -366,6 +425,222 @@
 </footer>
 
 <script type="module" src="./main.js"></script>
+
+<!-- ── v2 additions: hub showcase + real globe ─────────────────────────── -->
+<style>
+/* ═══ HUB REALM — pinned scroll cinematic ═══ */
+.hub-realm {
+  position: relative;
+  /* Tall section = scroll runway for the pinned cinematic.
+     400vh desktop gives 5 camera beats room to breathe. */
+  height: 420vh;
+  background: #050506;
+}
+.hub-realm__sticky {
+  /* Fixed overlay (not sticky) — robust across all devices regardless of
+     ancestor overflow. JS drives opacity/visibility from scroll progress.
+     No ancestor has transform/filter/contain, so fixed pins to viewport. */
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 5;            /* above page sections, below V1 nav/cursor */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;  /* purely visual — never blocks page interaction */
+  will-change: opacity;
+  isolation: isolate;
+}
+.hub-realm__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  z-index: 1;
+}
+.hub-realm__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  /* Radial: transparent center → dark edges. opacity driven by JS. */
+  background: radial-gradient(ellipse 70% 70% at 50% 50%,
+              rgba(5,5,6,0) 35%, rgba(5,5,6,0.55) 75%, rgba(5,5,6,0.9) 100%);
+  opacity: 0;
+  transition: opacity 0.1s linear;
+}
+.hub-realm__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.hub-realm__overlay > * { pointer-events: none; }
+
+/* Intro label (top-left) */
+.hub-realm__intro {
+  position: absolute;
+  top: clamp(80px, 12vh, 140px);
+  left: clamp(24px, 5vw, 80px);
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: #ff6a1a;
+  opacity: 0;
+}
+.hub-realm__intro-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #ff6a1a;
+  box-shadow: 0 0 12px rgba(255,106,26,0.8);
+}
+
+/* Title block (left-center) */
+.hub-realm__title-wrap {
+  position: absolute;
+  left: clamp(24px, 5vw, 80px);
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: min(540px, 46vw);
+  opacity: 0;
+}
+.hub-realm__title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(40px, 6vw, 96px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: #efe9e0;
+  margin-bottom: 24px;
+}
+.hub-realm__sub {
+  font-size: clamp(14px, 1.4vw, 17px);
+  line-height: 1.7;
+  color: rgba(239,233,224,0.65);
+  max-width: 420px;
+}
+
+/* Numbered captions (right side, during orbit) */
+.hub-realm__caption {
+  position: absolute;
+  right: clamp(24px, 6vw, 100px);
+  display: flex; align-items: baseline; gap: 14px;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.hub-realm__caption--1 { top: 34%; }
+.hub-realm__caption--2 { top: 50%; }
+.hub-realm__caption--3 { top: 66%; }
+.hub-realm__caption.visible { opacity: 1; transform: translateX(0); }
+.hub-realm__caption-num {
+  font-family: 'Syne', monospace;
+  font-size: 13px; color: #ff6a1a; letter-spacing: 0.1em;
+}
+.hub-realm__caption-text {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(14px, 1.5vw, 18px);
+  color: #efe9e0;
+}
+
+/* Material spec pills (bottom-left) */
+.hub-realm__specs {
+  position: absolute;
+  bottom: clamp(40px, 6vh, 70px);
+  left: clamp(24px, 5vw, 80px);
+  display: flex; flex-wrap: wrap; gap: 8px 12px;
+  max-width: 70vw;
+  opacity: 0;
+}
+.hub-realm__specs span {
+  font-family: 'Syne', monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(239,233,224,0.5);
+  border: 1px solid rgba(239,233,224,0.12);
+  padding: 5px 12px; border-radius: 2px;
+  background: rgba(11,11,12,0.4);
+  backdrop-filter: blur(4px);
+}
+
+/* Scroll hint (bottom-center, entry only) */
+.hub-realm__scroll-hint {
+  position: absolute;
+  bottom: clamp(28px, 4vh, 48px);
+  left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  font-family: 'Syne', monospace;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(239,233,224,0.5);
+  opacity: 0;
+}
+.hub-realm__scroll-line {
+  width: 1px; height: 40px;
+  background: linear-gradient(to bottom, rgba(255,106,26,0.8), transparent);
+}
+
+/* Responsive — tablet */
+@media (max-width: 1024px) {
+  .hub-realm { height: 360vh; }
+  .hub-realm__title-wrap { max-width: 60vw; }
+}
+
+/* Responsive — mobile */
+@media (max-width: 768px) {
+  .hub-realm { height: 320vh; }
+  .hub-realm__title-wrap {
+    max-width: 88vw;
+    top: auto; bottom: 22vh; transform: none;
+  }
+  .hub-realm__title { font-size: clamp(34px, 11vw, 56px); }
+  .hub-realm__caption { display: none; } /* avoid clutter on small screens */
+  .hub-realm__specs { max-width: 90vw; bottom: clamp(24px,4vh,40px); }
+}
+
+/* Reduced motion — static in-flow panel, no fixed takeover */
+@media (prefers-reduced-motion: reduce) {
+  .hub-realm { height: auto; min-height: 100vh; }
+  .hub-realm__sticky {
+    position: relative;
+    height: auto; min-height: 100vh;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 1;
+  }
+  .hub-realm__vignette { opacity: 0.4 !important; }
+  .hub-realm__intro,
+  .hub-realm__title-wrap,
+  .hub-realm__specs { opacity: 1 !important; }
+}
+
+/* Globe canvas overlay */
+.reach__globe-canvas {
+  display: block;
+  width: 100%;
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  z-index: 2;
+}
+/* Give reach__wrap enough height for the 3D globe; hide flat SVG since globe replaces it */
+.reach__wrap {
+  position: relative;
+  min-height: 500px;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* The flat SVG arcs are superseded by the 3D globe */
+.reach__svg { display: none !important; }
+.reach__dest, .reach__city, .reach__origin, .reach__origin-ring { display: none !important; }
+
+/* Globe mobile sizing */
+@media (max-width: 768px) {
+  .reach__wrap { min-height: 360px; }
+}
+</style>
+<script type="module" src="./hubScene.js"></script>
+<script type="module" src="./globeScene.js"></script>
 
 <!-- Custom cursor — must be last child of body, outside all sections
      so mix-blend-mode:difference is NOT clipped by hero isolation -->
