@@ -137,37 +137,96 @@ async function loadEnv() {
   }
 }
 
-/* ── Procedural textures ─────────────────────────────────────── */
-function noiseTex(size, base, v) {
-  const c = document.createElement('canvas'); c.width = c.height = size;
-  const x = c.getContext('2d'), im = x.createImageData(size, size), d = im.data;
-  for (let i = 0; i < d.length; i += 4) {
-    const val = Math.round(clamp(base + (Math.random() * 2 - 1) * v) * 255);
-    d[i] = d[i+1] = d[i+2] = val; d[i+3] = 255;
+/* ── High-fidelity procedural maps (1024², multi-octave) ──────
+   Builds a shared heightfield, then derives a normal map + roughness
+   map from it. `bands` adds horizontal turning marks (lathe grooves) —
+   the visual signature of machined/turned metal. */
+function valueNoise2D(size, octaves, bandFreq) {
+  const h = new Float32Array(size * size);
+  // hashed value-noise lattice, summed over octaves
+  const rnd = (x, y) => {
+    const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s);
+  };
+  for (let oc = 0; oc < octaves; oc++) {
+    const freq = Math.pow(2, oc) * 6;
+    const amp = Math.pow(0.5, oc);
+    const cell = size / freq;
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const fx = x / cell, fy = y / cell;
+        const ix = Math.floor(fx), iy = Math.floor(fy);
+        const tx = fx - ix, ty = fy - iy;
+        const a = rnd(ix, iy), b = rnd(ix + 1, iy), cc = rnd(ix, iy + 1), dd = rnd(ix + 1, iy + 1);
+        const ux = tx * tx * (3 - 2 * tx), uy = ty * ty * (3 - 2 * ty);
+        const v = a * (1 - ux) * (1 - uy) + b * ux * (1 - uy) + cc * (1 - ux) * uy + dd * ux * uy;
+        h[y * size + x] += v * amp;
+      }
+    }
   }
-  x.putImageData(im, 0, 0);
-  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(5, 5); return t;
-}
-function normalTex(size, amp) {
-  const c = document.createElement('canvas'); c.width = c.height = size;
-  const x = c.getContext('2d'), im = x.createImageData(size, size), d = im.data;
-  for (let i = 0; i < d.length; i += 4) {
-    d[i]   = Math.round((0.5 + (Math.random()*2-1)*amp)*255);
-    d[i+1] = Math.round((0.5 + (Math.random()*2-1)*amp)*255);
-    d[i+2] = 255; d[i+3] = 255;
+  // normalise + add horizontal turning bands
+  let mn = Infinity, mx = -Infinity;
+  for (let i = 0; i < h.length; i++) { if (h[i] < mn) mn = h[i]; if (h[i] > mx) mx = h[i]; }
+  for (let y = 0; y < size; y++) {
+    const band = bandFreq ? Math.sin(y / size * Math.PI * 2 * bandFreq) * 0.12 : 0;
+    for (let x = 0; x < size; x++) {
+      h[y * size + x] = (h[y * size + x] - mn) / (mx - mn) * 0.8 + band + 0.1;
+    }
   }
-  x.putImageData(im, 0, 0);
-  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(7, 7); return t;
+  return h;
 }
 
-/* ── Materials ───────────────────────────────────────────────── */
-const bodyMat = new THREE.MeshStandardMaterial({
-  color: 0x7e7870, roughness: 0.28, metalness: 0.78, envMapIntensity: 1.5,
-  roughnessMap: noiseTex(256, 0.28, 0.08), normalMap: normalTex(256, 0.09),
-  normalScale: new THREE.Vector2(0.25, 0.25), transparent: true, opacity: 0,
+function mapsFromHeight(h, size, normalStrength, roughBase, roughVar) {
+  const nC = document.createElement('canvas'); nC.width = nC.height = size;
+  const rC = document.createElement('canvas'); rC.width = rC.height = size;
+  const nx = nC.getContext('2d'), rx = rC.getContext('2d');
+  const nIm = nx.createImageData(size, size), rIm = rx.createImageData(size, size);
+  const nd = nIm.data, rd = rIm.data;
+  const at = (x, y) => h[((y + size) % size) * size + ((x + size) % size)];
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const dx = (at(x + 1, y) - at(x - 1, y)) * normalStrength;
+      const dy = (at(x, y + 1) - at(x, y - 1)) * normalStrength;
+      let nxv = -dx, nyv = -dy, nzv = 1;
+      const len = Math.hypot(nxv, nyv, nzv);
+      const i = (y * size + x) * 4;
+      nd[i] = ((nxv / len) * 0.5 + 0.5) * 255;
+      nd[i+1] = ((nyv / len) * 0.5 + 0.5) * 255;
+      nd[i+2] = ((nzv / len) * 0.5 + 0.5) * 255;
+      nd[i+3] = 255;
+      const r = clamp(roughBase + (at(x, y) - 0.5) * roughVar) * 255;
+      rd[i] = rd[i+1] = rd[i+2] = r; rd[i+3] = 255;
+    }
+  }
+  nx.putImageData(nIm, 0, 0); rx.putImageData(rIm, 0, 0);
+  const nt = new THREE.CanvasTexture(nC), rt = new THREE.CanvasTexture(rC);
+  nt.wrapS = nt.wrapT = rt.wrapS = rt.wrapT = THREE.RepeatWrapping;
+  return { normal: nt, rough: rt };
+}
+
+const TEX = 1024;
+// Cast/turned body: fine grain + strong horizontal turning bands
+const bodyH = valueNoise2D(TEX, 4, 26);
+const bodyMaps = mapsFromHeight(bodyH, TEX, 2.2, 0.30, 0.22);
+bodyMaps.normal.repeat.set(3, 3); bodyMaps.rough.repeat.set(3, 3);
+// Machined faces: very fine grain + dense turning grooves (near-mirror)
+const machH = valueNoise2D(TEX, 3, 70);
+const machMaps = mapsFromHeight(machH, TEX, 1.1, 0.07, 0.06);
+machMaps.normal.repeat.set(2, 2); machMaps.rough.repeat.set(2, 2);
+
+/* ── Materials (physical, clearcoat for premium metal sheen) ─── */
+const bodyMat = new THREE.MeshPhysicalMaterial({
+  color: 0x8a847b, roughness: 0.30, metalness: 0.82, envMapIntensity: 1.7,
+  roughnessMap: bodyMaps.rough, normalMap: bodyMaps.normal,
+  normalScale: new THREE.Vector2(0.5, 0.5),
+  clearcoat: 0.35, clearcoatRoughness: 0.4,
+  transparent: true, opacity: 0,
 });
-const machinedMat = new THREE.MeshStandardMaterial({
-  color: 0x9a9288, roughness: 0.07, metalness: 0.92, envMapIntensity: 2.2, transparent: true, opacity: 0,
+const machinedMat = new THREE.MeshPhysicalMaterial({
+  color: 0xa8a098, roughness: 0.06, metalness: 0.95, envMapIntensity: 2.4,
+  roughnessMap: machMaps.rough, normalMap: machMaps.normal,
+  normalScale: new THREE.Vector2(0.12, 0.12),
+  clearcoat: 0.25, clearcoatRoughness: 0.12,
+  transparent: true, opacity: 0,
 });
 const boreMat = new THREE.MeshStandardMaterial({
   color: 0x1c1916, roughness: 0.55, metalness: 0.60, side: THREE.BackSide, envMapIntensity: 0.4, transparent: true, opacity: 0,

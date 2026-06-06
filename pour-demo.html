@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Molten Pour — Real-Time WebGL Prototype | Raysons</title>
+  <meta name="robots" content="noindex"/>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html,body { height:100%; background:#07060a; overflow:hidden; font-family:system-ui,sans-serif; }
+    #pour-canvas { display:block; width:100vw; height:100vh; cursor:grab; }
+    #pour-canvas:active { cursor:grabbing; }
+    .ui { position:fixed; left:28px; bottom:24px; color:#efe9e0; pointer-events:none; }
+    .ui h1 { font-size:13px; letter-spacing:0.22em; text-transform:uppercase; color:#ff6a1a; font-weight:700; }
+    .ui p  { font-size:12px; color:rgba(239,233,224,0.55); margin-top:6px; letter-spacing:0.04em; }
+    .tag { position:fixed; top:24px; left:28px; font-size:11px; letter-spacing:0.2em;
+           text-transform:uppercase; color:rgba(239,233,224,0.4); }
+  </style>
+</head>
+<body>
+  <canvas id="pour-canvas"></canvas>
+  <div class="tag">Real-time WebGL · not a video · drag to orbit</div>
+  <div class="ui">
+    <h1>Molten Pour — Prototype</h1>
+    <p>Ladle tilt · molten stream · sparks · steam · glowing mould · HDR bloom.<br>
+       Every frame computed live on the GPU. This is the technique your scrollytelling would use.</p>
+  </div>
+  <script type="module" src="./pourDemo.js"></script>
+</body>
+</html>

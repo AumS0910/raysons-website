@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemap — update the domain when the production domain goes live
+Sitemap: https://raysons-website.vercel.app/sitemap.xml

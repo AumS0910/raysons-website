@@ -1,19 +1,13 @@
 /**
- * globeScene.js — Real photographic Earth globe for V1 reach section.
+ * globeScene.js — Realistic Earth + molten India + trade routes (V1 reach).
  *
- * Texture: NASA Blue Marble (land_ocean_ice_cloud_2048.jpg)
- * Served from three.js examples CDN. For production, download and serve locally:
- *   https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg
- *   → place at /images/earth-2k.jpg in the raysons-website directory
- *
- * Features:
- *   - Photographic 2048×1024 NASA Earth texture
- *   - Specular ocean shininess (dedicated specular texture)
- *   - Atmosphere / limb glow shader (additive blending)
- *   - Shipping routes: Kolhapur → Italy, UK, Japan, USA (animated great-circle arcs)
- *   - Pulsing orange origin marker (Kolhapur)
- *   - Slow auto-rotation, starts with India facing camera
- *   - IntersectionObserver pause, arc animation on scroll-in
+ *  - Proper photographic day Earth (earth-2k.jpg)
+ *  - INDIA rendered as its real country shape, glowing molten orange with a
+ *    radiating burst (equirectangular overlay shell, aligned to the texture)
+ *  - Orange great-circle arcs from Kolhapur + travelling molten drop
+ *  - Lava pool flare where each arc lands
+ *  - Interactive: click/touch-drag to rotate, inertia, auto-spin resumes
+ *  - Framed with margin (no top/bottom crop). One texture, no CDN dependency.
  */
 
 import * as THREE from 'three';
@@ -28,131 +22,143 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.setClearColor(0x000000, 0);
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene  = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-camera.position.set(0, 0.15, 2.6);
+// Pull the camera back so the globe + arcs sit with margin (no crop).
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+camera.position.set(0, 0, 3.5);
 camera.lookAt(0, 0, 0);
 
 function resize() {
-  const w = container.clientWidth  || window.innerWidth;
-  const h = Math.min(Math.round(w * 0.58), 520);
+  const w = container.clientWidth || window.innerWidth;
+  // Taller aspect so the sphere is never clipped top/bottom.
+  const h = Math.min(Math.round(w * 0.62), 600);
   renderer.setSize(w, h);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
-  canvas.style.width  = w + 'px';
+  canvas.style.width = w + 'px';
   canvas.style.height = h + 'px';
 }
 resize();
 window.addEventListener('resize', resize);
 
-/* ── Lighting ───────────────────────────────────────────────── */
-// Sun — warm directional from upper-right (Pacific side)
-const sun = new THREE.DirectionalLight(0xfff4e0, 2.2);
-sun.position.set(5, 3, 5);
+/* ── Lighting (realistic day Earth) ─────────────────────────── */
+scene.add(new THREE.AmbientLight(0x445566, 0.6));
+const sun = new THREE.DirectionalLight(0xfff4e0, 2.3);
+sun.position.set(2.5, 1.2, 3.0);
 scene.add(sun);
-
-// Subtle cool fill from opposite (space side)
-const fill = new THREE.DirectionalLight(0x2244aa, 0.18);
-fill.position.set(-5, -2, -3);
+const fill = new THREE.DirectionalLight(0x88aaff, 0.28);
+fill.position.set(-3, -1, -2);
 scene.add(fill);
 
-// Low ambient so dark side isn't fully black
-scene.add(new THREE.AmbientLight(0x111828, 0.6));
+/* ── The rotatable group (globe + all overlays) ─────────────── */
+const earth = new THREE.Group();
+const INIT_ROT  = -(74.2 + 90) * (Math.PI / 180); // India faces camera at start
+const INIT_TILT = 0.32;                            // tilt so India sits centred
+earth.rotation.y = INIT_ROT;
+earth.rotation.x = INIT_TILT;
+scene.add(earth);
 
-/* ── Earth textures ─────────────────────────────────────────── */
-const loader  = new THREE.TextureLoader();
+/* ── Realistic Earth sphere ─────────────────────────────────── */
+const globeMat = new THREE.MeshPhongMaterial({
+  color: 0x2a3a4a, specular: new THREE.Color(0x335577), shininess: 15,
+});
+const globe = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 96), globeMat);
+earth.add(globe);
+new THREE.TextureLoader().load('/images/earth-2k.jpg', (t) => {
+  t.colorSpace = THREE.SRGBColorSpace;
+  globeMat.map = t; globeMat.color.set(0xffffff); globeMat.needsUpdate = true;
+});
 
-// Try local first, fall back to three.js CDN
-const EARTH_LOCAL   = '/images/earth-2k.jpg';
-const EARTH_CDN     = 'https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg';
-const SPECULAR_CDN  = 'https://threejs.org/examples/textures/planets/earth_specular_2048.jpg';
+/* ── Subtle neutral atmosphere (not a blue ring) ────────────── */
+const atmosMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+  vertexShader: `varying vec3 vN; varying vec3 vV;
+    void main(){ vec4 mv=modelViewMatrix*vec4(position,1.0);
+      vN=normalize(normalMatrix*normal); vV=normalize(-mv.xyz);
+      gl_Position=projectionMatrix*mv; }`,
+  fragmentShader: `varying vec3 vN; varying vec3 vV;
+    void main(){ float rim=pow(1.0-abs(dot(vN,vV)),4.0);
+      gl_FragColor=vec4(vec3(0.35,0.45,0.6), rim*0.30); }`,
+});
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.06, 64, 64), atmosMat));
 
-function loadTex(url, fallback) {
-  return new Promise(resolve => {
-    loader.load(url, resolve, undefined, () => {
-      if (fallback) loader.load(fallback, resolve, undefined, () => resolve(null));
-      else resolve(null);
-    });
-  });
+/* ── INDIA as its real shape, glowing molten orange ─────────── */
+// Simplified India outline (lat, lon), clockwise from the north.
+const INDIA_OUTLINE = [
+  [35.0,74.0],[34.0,78.0],[32.5,79.2],[30.2,81.0],[28.6,84.0],[27.6,88.2],
+  [27.2,92.0],[28.1,95.4],[26.6,97.2],[24.2,94.2],[23.0,93.2],[22.0,92.0],
+  [21.6,89.0],[20.2,87.0],[16.5,81.5],[13.1,80.3],[10.3,79.8],[8.1,77.5],
+  [9.2,76.2],[12.8,74.6],[15.8,73.6],[19.0,72.8],[20.9,70.2],[22.6,69.0],
+  [24.3,71.0],[26.0,70.0],[28.0,70.2],[30.0,74.0],[32.2,75.0],[35.0,74.0],
+];
+
+function buildIndiaTexture() {
+  const W = 2048, H = 1024;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  x.clearRect(0, 0, W, H);
+  const px = (lat, lon) => [((lon + 180) / 360) * W, ((90 - lat) / 180) * H];
+
+  // Outer glow (radiating burst) — soft orange halo around India
+  x.save();
+  x.shadowColor = 'rgba(255,120,30,0.95)';
+  x.shadowBlur = 90;
+  x.beginPath();
+  INDIA_OUTLINE.forEach(([lat, lon], i) => { const [a, b] = px(lat, lon); i ? x.lineTo(a, b) : x.moveTo(a, b); });
+  x.closePath();
+  x.fillStyle = 'rgba(255,120,30,1)';
+  x.fill();
+  x.fill(); // double for a stronger halo
+  x.restore();
+
+  // Filled India with a molten gradient (hot core → deep orange edge)
+  const [cx, cy] = px(21, 79);
+  const grd = x.createRadialGradient(cx, cy, 4, cx, cy, 150);
+  grd.addColorStop(0.0, '#fff1c0');
+  grd.addColorStop(0.35, '#ff8a1e');
+  grd.addColorStop(1.0, '#e24a08');
+  x.beginPath();
+  INDIA_OUTLINE.forEach(([lat, lon], i) => { const [a, b] = px(lat, lon); i ? x.lineTo(a, b) : x.moveTo(a, b); });
+  x.closePath();
+  x.fillStyle = grd;
+  x.fill();
+
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
 }
 
-// Globe sphere — visible immediately with dark placeholder, texture swaps in
-const globeMat = new THREE.MeshPhongMaterial({
-  color: 0x1a2a40,
-  specular: new THREE.Color(0x224488),
-  shininess: 18,
-});
-const globe = new THREE.Mesh(new THREE.SphereGeometry(1, 80, 80), globeMat);
-// Start with India/Kolhapur (74.2°E) facing the camera
-globe.rotation.y = -(74.2 + 90) * (Math.PI / 180);
-scene.add(globe);
+// Glow burst behind India (radiating rays / molten halo)
+const indiaBurst = new THREE.Sprite(new THREE.SpriteMaterial({
+  map: (function(){
+    const s=256,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');
+    const g=x.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+    g.addColorStop(0,'rgba(255,180,80,0.9)');g.addColorStop(0.3,'rgba(255,110,25,0.6)');
+    g.addColorStop(0.6,'rgba(230,70,10,0.25)');g.addColorStop(1,'rgba(230,70,10,0)');
+    x.fillStyle=g;x.fillRect(0,0,s,s);return new THREE.CanvasTexture(c);
+  })(),
+  transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+}));
+indiaBurst.position.copy(ll(21, 78, 1.01));
+indiaBurst.scale.setScalar(0.95);
+indiaBurst.renderOrder = 1;
+earth.add(indiaBurst);
 
-// Load textures asynchronously and swap in
-Promise.all([
-  loadTex(EARTH_LOCAL, EARTH_CDN),
-  loadTex(SPECULAR_CDN, null),
-]).then(([earthTex, specTex]) => {
-  if (earthTex) {
-    earthTex.colorSpace = THREE.SRGBColorSpace;
-    globeMat.map     = earthTex;
-    globeMat.color.set(0xffffff);
-    globeMat.needsUpdate = true;
-  }
-  if (specTex) {
-    globeMat.specularMap = specTex;
-    globeMat.specular.set(0x888888);
-    globeMat.shininess = 25;
-    globeMat.needsUpdate = true;
-  }
-});
-
-/* ── Atmosphere glow ────────────────────────────────────────── */
-const atmosMat = new THREE.ShaderMaterial({
-  side: THREE.BackSide,
-  transparent: true,
-  blending: THREE.AdditiveBlending,
-  depthWrite: false,
-  uniforms: {
-    innerColor: { value: new THREE.Color(0x1a44aa) },
-    rimColor:   { value: new THREE.Color(0x3388ee) },
-    sunDir:     { value: sun.position.clone().normalize() },
-  },
-  vertexShader: `
-    varying vec3 vNormal;
-    varying vec3 vViewDir;
-    void main() {
-      vec4 mv = modelViewMatrix * vec4(position, 1.0);
-      vNormal  = normalize(normalMatrix * normal);
-      vViewDir = normalize(-mv.xyz);
-      gl_Position = projectionMatrix * mv;
-    }
-  `,
-  fragmentShader: `
-    uniform vec3 innerColor;
-    uniform vec3 rimColor;
-    uniform vec3 sunDir;
-    varying vec3 vNormal;
-    varying vec3 vViewDir;
-    void main() {
-      float rim = 1.0 - abs(dot(vNormal, vViewDir));
-      rim = pow(rim, 2.8);
-      // Slight sun-side brightening
-      float sun = clamp(dot(vNormal, sunDir) * 0.5 + 0.5, 0.0, 1.0);
-      vec3 col = mix(innerColor, rimColor, rim) * (0.7 + sun * 0.3);
-      gl_FragColor = vec4(col, rim * 0.75);
-    }
-  `,
-});
-const atmos = new THREE.Mesh(new THREE.SphereGeometry(1.095, 64, 64), atmosMat);
-scene.add(atmos);
+// India as its real country shape — solid molten fill so the shape reads clearly
+const indiaShell = new THREE.Mesh(
+  new THREE.SphereGeometry(1.006, 96, 96),
+  new THREE.MeshBasicMaterial({
+    map: buildIndiaTexture(), transparent: true, depthWrite: false,
+  })
+);
+indiaShell.renderOrder = 2;
+earth.add(indiaShell);
 
 /* ── Lat/lon → 3D ───────────────────────────────────────────── */
 function ll(lat, lon, r = 1.0) {
-  const phi   = (90 - lat) * (Math.PI / 180);
+  const phi = (90 - lat) * (Math.PI / 180);
   const theta = (lon + 180) * (Math.PI / 180);
   return new THREE.Vector3(
     -r * Math.sin(phi) * Math.cos(theta),
@@ -161,150 +167,151 @@ function ll(lat, lon, r = 1.0) {
   );
 }
 
-/* ── Shipping routes ────────────────────────────────────────── */
-const ORIGIN = [16.7, 74.2]; // Kolhapur
-const ROUTES = [
-  { dest: [41.9, 12.5],   label: 'Italy',  color: new THREE.Color(0xff6a1a) },
-  { dest: [51.5, -0.1],   label: 'UK',     color: new THREE.Color(0xff8844) },
-  { dest: [35.7, 139.7],  label: 'Japan',  color: new THREE.Color(0xffaa66) },
-  { dest: [38.0, -97.0],  label: 'USA',    color: new THREE.Color(0xffcc88) },
-];
+/* ── Molten glow sprite (for drops + lava pools) ────────────── */
+function glowTex() {
+  const s = 128, c = document.createElement('canvas'); c.width = c.height = s;
+  const x = c.getContext('2d');
+  const g = x.createRadialGradient(s/2, s/2, 0, s/2, s/2, s/2);
+  g.addColorStop(0.0, 'rgba(255,245,220,1)');
+  g.addColorStop(0.25, 'rgba(255,130,30,0.95)');
+  g.addColorStop(0.6, 'rgba(220,70,10,0.4)');
+  g.addColorStop(1.0, 'rgba(220,70,10,0)');
+  x.fillStyle = g; x.fillRect(0, 0, s, s);
+  return new THREE.CanvasTexture(c);
+}
+const moltenTex = glowTex();
+const moltenSprite = (size) => {
+  const m = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: moltenTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  m.scale.setScalar(size); return m;
+};
 
-const ARC_R = 1.018;
-const arcObjects = []; // { line, fullPos, startMs }
-const destDots   = [];
+/* ── Trade routes ───────────────────────────────────────────── */
+const ORIGIN = [16.7, 74.2];
+const DESTS = [[41.9,12.5],[51.5,-0.1],[35.7,139.7],[38.0,-97.0]]; // Italy, UK, Japan, USA
+const ARC_R = 1.012;
+const arcs = [];
 
-ROUTES.forEach(route => {
-  const from  = ll(ORIGIN[0], ORIGIN[1], ARC_R);
-  const to    = ll(route.dest[0], route.dest[1], ARC_R);
-  const N     = 90;
-  const full  = new Float32Array((N + 1) * 3);
-
+DESTS.forEach((d) => {
+  const from = ll(ORIGIN[0], ORIGIN[1], ARC_R), to = ll(d[0], d[1], ARC_R);
+  const N = 100; const pts = [];
   for (let i = 0; i <= N; i++) {
     const t = i / N;
     const p = new THREE.Vector3().lerpVectors(from, to, t).normalize();
-    const lift = 1 + Math.sin(t * Math.PI) * 0.22;
-    p.multiplyScalar(ARC_R * lift);
-    full[i*3] = p.x; full[i*3+1] = p.y; full[i*3+2] = p.z;
+    p.multiplyScalar(ARC_R * (1 + Math.sin(t * Math.PI) * 0.22));
+    pts.push(p);
   }
-
-  const geo  = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(full.slice(0, 3), 3));
-  geo._full = full; geo._N = N;
-
-  const mat  = new THREE.LineBasicMaterial({
-    color: route.color, transparent: true, opacity: 0.85, linewidth: 1,
-  });
-  const line = new THREE.Line(geo, mat);
-  scene.add(line);
-  arcObjects.push({ line, geo, startMs: null });
-
-  // Destination dot
-  const dot  = new THREE.Mesh(
-    new THREE.SphereGeometry(0.020, 12, 12),
-    new THREE.MeshBasicMaterial({ color: 0xfff0e0 })
-  );
-  dot.position.copy(ll(route.dest[0], route.dest[1], ARC_R + 0.012));
-  dot.visible = false;
-  scene.add(dot);
-  destDots.push(dot);
+  const full = new Float32Array(pts.length * 3);
+  pts.forEach((p, i) => { full[i*3]=p.x; full[i*3+1]=p.y; full[i*3+2]=p.z; });
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(full.slice(0,3), 3));
+  geo._full = full; geo._N = N; geo._pts = pts;
+  earth.add(new THREE.Line(geo, new THREE.LineBasicMaterial({
+    color: 0xff7a1e, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending,
+  })));
+  const drop = moltenSprite(0.11); drop.visible = false; earth.add(drop);
+  const pool = moltenSprite(0.0);  pool.position.copy(ll(d[0], d[1], 1.015)); earth.add(pool);
+  arcs.push({ geo, drop, pool, startMs: null, pts });
 });
 
-/* ── Kolhapur origin marker ─────────────────────────────────── */
-const originDot = new THREE.Mesh(
-  new THREE.SphereGeometry(0.024, 16, 16),
-  new THREE.MeshBasicMaterial({ color: 0xff6a1a })
-);
-originDot.position.copy(ll(ORIGIN[0], ORIGIN[1], ARC_R + 0.012));
-scene.add(originDot);
-
-// Pulsing ring
-const pulseRing = new THREE.Mesh(
-  new THREE.RingGeometry(0.030, 0.038, 36),
-  new THREE.MeshBasicMaterial({
-    color: 0xff6a1a, transparent: true, opacity: 0.7,
-    side: THREE.DoubleSide, depthWrite: false,
-  })
-);
-pulseRing.position.copy(originDot.position);
-pulseRing.lookAt(new THREE.Vector3(0, 0, 0));
-scene.add(pulseRing);
-
-/* ── Arc draw animation ─────────────────────────────────────── */
-let arcsStarted = false;
-
+/* ── Arc animation ──────────────────────────────────────────── */
+let started = false;
 function startArcs() {
-  if (arcsStarted) return;
-  arcsStarted = true;
+  if (started) return; started = true;
   const now = performance.now();
-  arcObjects.forEach((a, i) => { a.startMs = now + i * 320; });
+  arcs.forEach((a, i) => { a.startMs = now + i * 380; });
 }
-
 function updateArcs(now) {
-  arcObjects.forEach((a, i) => {
+  arcs.forEach((a) => {
     if (a.startMs === null) return;
-    const t  = Math.max(0, Math.min(1, (now - a.startMs) / 1800));
-    const N  = a.geo._N;
-    const ct = Math.max(2, Math.round(t * N));
-    const buf = a.geo._full.slice(0, ct * 3);
-    a.geo.setAttribute('position', new THREE.BufferAttribute(buf, 3));
+    const DRAW = 1700;
+    const t = Math.max(0, Math.min(1, (now - a.startMs) / DRAW));
+    const N = a.geo._N, ct = Math.max(2, Math.round(t * N));
+    a.geo.setAttribute('position', new THREE.BufferAttribute(a.geo._full.slice(0, ct*3), 3));
     a.geo.attributes.position.needsUpdate = true;
     a.geo.setDrawRange(0, ct);
-    if (t >= 0.99 && !destDots[i].visible) destDots[i].visible = true;
+    if (t > 0 && t < 1) { a.drop.visible = true; a.drop.position.copy(a.pts[Math.min(ct, N)]); }
+    else if (t >= 1) {
+      a.drop.visible = false;
+      const since = (now - (a.startMs + DRAW)) / 1000;
+      const flare = Math.min(since / 0.4, 1);
+      const pulse = 0.22 + 0.06 * Math.sin(since * 3.0);
+      a.pool.scale.setScalar(flare * pulse + 0.001);
+      a.pool.material.opacity = 0.65 + 0.25 * Math.sin(since * 3.0);
+    }
   });
 }
 
-/* ── Rotate all scene objects with the globe ────────────────── */
-const INIT_ROT = -(74.2 + 90) * (Math.PI / 180);
-let rotY = INIT_ROT;
+/* ── Interactivity: drag to rotate, inertia, auto-spin resume ── */
+let dragging = false, lastX = 0, lastY = 0;
+let velY = 0, velX = 0;          // inertia
+let userY = 0, userX = 0;        // accumulated user rotation
+let autoSpin = 0;                // auto rotation accumulator
+let idleMs = 0;                  // ms since last interaction
 
-function rotatePt(pos, ry) {
-  return pos.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), ry);
+canvas.style.cursor = 'grab';
+function onDown(e) {
+  dragging = true; idleMs = 0; canvas.style.cursor = 'grabbing';
+  const p = e.touches ? e.touches[0] : e;
+  lastX = p.clientX; lastY = p.clientY; velY = velX = 0;
 }
-
-function syncWithGlobe(ry) {
-  arcObjects.forEach(a => { a.line.rotation.y = ry; });
-  destDots.forEach(d   => { d.rotation.y = ry; });
-  originDot.position.copy(rotatePt(ll(ORIGIN[0], ORIGIN[1], ARC_R + 0.012), ry - INIT_ROT));
-  pulseRing.position.copy(originDot.position);
-  pulseRing.lookAt(new THREE.Vector3(0, 0, 0));
+function onMove(e) {
+  if (!dragging) return;
+  const p = e.touches ? e.touches[0] : e;
+  const dx = p.clientX - lastX, dy = p.clientY - lastY;
+  // On touch, let a clearly-vertical swipe scroll the page instead of rotating.
+  if (e.touches && Math.abs(dy) > Math.abs(dx) * 1.3) { dragging = false; return; }
+  lastX = p.clientX; lastY = p.clientY;
+  velY = dx * 0.005; velX = dy * 0.005;
+  userY += velY; userX += velX;
+  userX = Math.max(-0.6, Math.min(0.6, userX)); // clamp tilt
+  if (e.cancelable && (!e.touches || Math.abs(dx) >= Math.abs(dy))) e.preventDefault();
 }
+function onUp() { dragging = false; idleMs = 0; canvas.style.cursor = 'grab'; }
 
-/* ── Render loop ────────────────────────────────────────────── */
+canvas.addEventListener('mousedown', onDown);
+window.addEventListener('mousemove', onMove);
+window.addEventListener('mouseup', onUp);
+canvas.addEventListener('touchstart', onDown, { passive: true });
+canvas.addEventListener('touchmove', onMove, { passive: false });
+canvas.addEventListener('touchend', onUp);
+
+/* ── Loop ───────────────────────────────────────────────────── */
 const clock = new THREE.Clock();
 let running = false;
 
 function tick() {
   if (!running) return;
   requestAnimationFrame(tick);
+  const dt = clock.getDelta();
+  const now = performance.now();
 
-  const el    = clock.getElapsedTime();
-  const now   = performance.now();
-
-  if (!REDUCED) {
-    rotY = INIT_ROT + el * 0.10;
-    globe.rotation.y = rotY;
-    atmos.rotation.y = rotY * 0.95;
-    syncWithGlobe(rotY);
-
-    // Pulse ring
-    const ps = 1 + Math.sin(el * 2.8) * 0.3;
-    pulseRing.scale.setScalar(ps);
-    pulseRing.material.opacity = 0.7 - Math.sin(el * 2.8) * 0.35;
+  if (!dragging) {
+    idleMs += dt * 1000;
+    // inertia decay
+    userY += velY; userX += velX;
+    velY *= 0.94; velX *= 0.94;
+    userX = Math.max(-0.6, Math.min(0.6, userX));
+    // resume gentle auto-spin after 2.5s idle
+    if (!REDUCED && idleMs > 2500) autoSpin += dt * 0.07;
   }
+
+  earth.rotation.y = INIT_ROT + autoSpin + userY;
+  earth.rotation.x = INIT_TILT + userX;
+
+  // India breathing glow burst
+  const el = clock.elapsedTime;
+  indiaBurst.scale.setScalar(0.95 * (1 + Math.sin(el * 2.2) * 0.10));
+  indiaBurst.material.opacity = 0.85 + Math.sin(el * 2.2) * 0.12;
 
   updateArcs(now);
   renderer.render(scene, camera);
 }
 
-/* ── IntersectionObserver ───────────────────────────────────── */
-const obs = new IntersectionObserver(entries => {
+const obs = new IntersectionObserver((entries) => {
   const vis = entries[0].isIntersecting;
-  if (vis) {
-    startArcs();
-    if (!running) { running = true; clock.start(); tick(); }
-  } else {
-    running = false;
-  }
+  if (vis) { startArcs(); if (!running) { running = true; clock.start(); tick(); } }
+  else running = false;
 }, { threshold: 0.15 });
 obs.observe(canvas);
