@@ -27,13 +27,13 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene  = new THREE.Scene();
 // Pull the camera back so the globe + arcs sit with margin (no crop).
 const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
-camera.position.set(0, 0, 3.5);
+camera.position.set(0, 0, 3.25);   // full globe with margin (not cropped)
 camera.lookAt(0, 0, 0);
 
 function resize() {
   const w = container.clientWidth || window.innerWidth;
-  // Taller aspect so the sphere is never clipped top/bottom.
-  const h = Math.min(Math.round(w * 0.62), 600);
+  // Tall canvas so the big sphere has full vertical room (never clipped).
+  const h = Math.min(Math.round(w * 0.82), 860);
   renderer.setSize(w, h);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
@@ -43,12 +43,12 @@ function resize() {
 resize();
 window.addEventListener('resize', resize);
 
-/* ── Lighting (jeskojets-style dark monochrome globe) ───────── */
-scene.add(new THREE.AmbientLight(0xffffff, 0.95));
-const sun = new THREE.DirectionalLight(0xffe6c4, 0.85);
+/* ── Lighting (neutral — jeskojets grey globe) ──────────────── */
+scene.add(new THREE.AmbientLight(0xffffff, 1.0));
+const sun = new THREE.DirectionalLight(0xffffff, 0.75);
 sun.position.set(2.5, 1.4, 3.0);
 scene.add(sun);
-const fill = new THREE.DirectionalLight(0xffcaa0, 0.18);
+const fill = new THREE.DirectionalLight(0xffffff, 0.14);
 fill.position.set(-3, -1, -2);
 scene.add(fill);
 
@@ -60,56 +60,36 @@ earth.rotation.y = INIT_ROT;
 earth.rotation.x = INIT_TILT;
 scene.add(earth);
 
-/* ── Dark monochrome globe (jeskojets style) ────────────────── */
-const globeMat = new THREE.MeshStandardMaterial({ color: 0x16120c, roughness: 1, metalness: 0 });
+/* ── Globe — jeskojets look: light-grey land, near-black ocean ── */
+const globeMat = new THREE.MeshStandardMaterial({ color: 0x101013, roughness: 1, metalness: 0 });
 const globe = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 96), globeMat);
 earth.add(globe);
-// Load earth-2k and recolour: blue oceans → near-black, land → faint warm tan.
+// Recolour earth-2k → clean matte-grey continents with a CRISP coastline
+// outline (so they're defined, not messy), near-black ocean. (jeskojets look)
 new THREE.TextureLoader().load('/images/earth-2k.jpg', (t) => {
-  const img = t.image, W = 1024, H = 512;
+  const W = 1024, H = 512;
   const c = document.createElement('canvas'); c.width = W; c.height = H;
-  const x = c.getContext('2d'); x.drawImage(img, 0, 0, W, H);
+  const x = c.getContext('2d'); x.drawImage(t.image, 0, 0, W, H);
   const d = x.getImageData(0, 0, W, H), a = d.data;
-  for (let i = 0; i < a.length; i += 4) {
-    const r = a[i], g = a[i + 1], bch = a[i + 2];
-    if (bch > r + 8 && bch > g + 2) {            // blue-dominant = ocean
-      a[i] = 17; a[i + 1] = 14; a[i + 2] = 10;
-    } else {                                      // land = warm tan relief
-      const lum = (r * 0.3 + g * 0.59 + bch * 0.11) / 255;
-      const v = 0.45 + 0.55 * Math.pow(lum, 0.85);
-      a[i] = Math.round(48 + v * 78); a[i + 1] = Math.round(40 + v * 60); a[i + 2] = Math.round(30 + v * 42);
-    }
+  // pass 1 — land/ocean mask (ocean = blue-dominant)
+  const land = new Uint8Array(W * H);
+  for (let pi = 0; pi < W * H; pi++) { const i = pi * 4; land[pi] = (a[i+2] > a[i]+8 && a[i+2] > a[i+1]+2) ? 0 : 1; }
+  // pass 2 — recolour: ocean black, land matte grey, coastline a bright edge
+  for (let pi = 0; pi < W * H; pi++) {
+    const i = pi * 4;
+    if (!land[pi]) { a[i] = 12; a[i+1] = 12; a[i+2] = 14; continue; }
+    const lum = (a[i]*0.3 + a[i+1]*0.59 + a[i+2]*0.11) / 255;
+    let gy = Math.round(132 + Math.pow(lum, 0.7) * 48);     // uniform matte grey 132..180
+    const xc = pi % W, yc = (pi / W) | 0;
+    const edge = (xc>0 && !land[pi-1]) || (xc<W-1 && !land[pi+1]) || (yc>0 && !land[pi-W]) || (yc<H-1 && !land[pi+W]);
+    if (edge) gy = 220;                                     // crisp coastline outline
+    a[i] = gy; a[i+1] = gy; a[i+2] = gy + 4;
   }
   x.putImageData(d, 0, 0);
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
   globeMat.map = tex; globeMat.color.set(0xffffff); globeMat.needsUpdate = true;
 });
-
-/* ── Faint lat/long grid (jeskojets meridians/parallels) ────── */
-(function addGrid() {
-  const W = 2048, H = 1024, c = document.createElement('canvas'); c.width = W; c.height = H;
-  const x = c.getContext('2d'); x.clearRect(0, 0, W, H);
-  x.strokeStyle = 'rgba(225,185,135,0.16)'; x.lineWidth = 1.5;
-  for (let lat = -80; lat <= 80; lat += 20) { const y = ((90 - lat) / 180) * H; x.beginPath(); x.moveTo(0, y); x.lineTo(W, y); x.stroke(); }
-  for (let lon = -180; lon < 180; lon += 20) { const xx = ((lon + 180) / 360) * W; x.beginPath(); x.moveTo(xx, 0); x.lineTo(xx, H); x.stroke(); }
-  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
-  const grid = new THREE.Mesh(new THREE.SphereGeometry(1.004, 96, 96),
-    new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
-  earth.add(grid);
-})();
-
-/* ── Subtle warm rim (no blue atmosphere) ───────────────────── */
-const atmosMat = new THREE.ShaderMaterial({
-  side: THREE.BackSide, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
-  vertexShader: `varying vec3 vN; varying vec3 vV;
-    void main(){ vec4 mv=modelViewMatrix*vec4(position,1.0);
-      vN=normalize(normalMatrix*normal); vV=normalize(-mv.xyz);
-      gl_Position=projectionMatrix*mv; }`,
-  fragmentShader: `varying vec3 vN; varying vec3 vV;
-    void main(){ float rim=pow(1.0-abs(dot(vN,vV)),4.0);
-      gl_FragColor=vec4(vec3(0.55,0.38,0.20), rim*0.28); }`,
-});
-scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.06, 64, 64), atmosMat));
+// (no lat/long grid, no atmosphere ring — match jeskojets exactly)
 
 /* ── INDIA as its real shape, glowing molten orange ─────────── */
 // Simplified India outline (lat, lon), clockwise from the north.
@@ -128,29 +108,19 @@ function buildIndiaTexture() {
   x.clearRect(0, 0, W, H);
   const px = (lat, lon) => [((lon + 180) / 360) * W, ((90 - lat) / 180) * H];
 
-  // Outer glow (radiating burst) — soft orange halo around India
-  x.save();
-  x.shadowColor = 'rgba(255,120,30,0.95)';
-  x.shadowBlur = 90;
-  x.beginPath();
-  INDIA_OUTLINE.forEach(([lat, lon], i) => { const [a, b] = px(lat, lon); i ? x.lineTo(a, b) : x.moveTo(a, b); });
-  x.closePath();
-  x.fillStyle = 'rgba(255,120,30,1)';
-  x.fill();
-  x.fill(); // double for a stronger halo
-  x.restore();
+  const path = () => { x.beginPath(); INDIA_OUTLINE.forEach(([lat, lon], i) => { const [a, b] = px(lat, lon); i ? x.lineTo(a, b) : x.moveTo(a, b); }); x.closePath(); };
 
-  // Filled India with a molten gradient (hot core → deep orange edge)
+  // small, clean glow (no big fuzzy halo)
+  x.save(); x.shadowColor = 'rgba(255,120,30,0.55)'; x.shadowBlur = 18; path(); x.fillStyle = '#ff7a1e'; x.fill(); x.restore();
+
+  // clean orange fill
   const [cx, cy] = px(21, 79);
-  const grd = x.createRadialGradient(cx, cy, 4, cx, cy, 150);
-  grd.addColorStop(0.0, '#fff1c0');
-  grd.addColorStop(0.35, '#ff8a1e');
-  grd.addColorStop(1.0, '#e24a08');
-  x.beginPath();
-  INDIA_OUTLINE.forEach(([lat, lon], i) => { const [a, b] = px(lat, lon); i ? x.lineTo(a, b) : x.moveTo(a, b); });
-  x.closePath();
-  x.fillStyle = grd;
-  x.fill();
+  const grd = x.createRadialGradient(cx, cy, 4, cx, cy, 140);
+  grd.addColorStop(0.0, '#ffb24d'); grd.addColorStop(0.5, '#ff7a1e'); grd.addColorStop(1.0, '#e85a10');
+  path(); x.fillStyle = grd; x.fill();
+
+  // crisp outline so the country shape reads clearly
+  path(); x.lineWidth = 4; x.strokeStyle = 'rgba(255,224,170,0.92)'; x.stroke();
 
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
@@ -169,7 +139,7 @@ const indiaBurst = new THREE.Sprite(new THREE.SpriteMaterial({
   transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
 }));
 indiaBurst.position.copy(ll(21, 78, 1.01));
-indiaBurst.scale.setScalar(0.95);
+indiaBurst.scale.setScalar(0.5);   // smaller, subtle glow (not a big halo)
 indiaBurst.renderOrder = 1;
 earth.add(indiaBurst);
 
@@ -283,6 +253,7 @@ function onDown(e) {
   const p = e.touches ? e.touches[0] : e;
   lastX = p.clientX; lastY = p.clientY; velY = velX = 0;
 }
+const LIMIT = Math.PI / 2;        // ±90° → 180° total, left-right only
 function onMove(e) {
   if (!dragging) return;
   const p = e.touches ? e.touches[0] : e;
@@ -290,9 +261,8 @@ function onMove(e) {
   // On touch, let a clearly-vertical swipe scroll the page instead of rotating.
   if (e.touches && Math.abs(dy) > Math.abs(dx) * 1.3) { dragging = false; return; }
   lastX = p.clientX; lastY = p.clientY;
-  velY = dx * 0.005; velX = dy * 0.005;
-  userY += velY; userX += velX;
-  userX = Math.max(-0.6, Math.min(0.6, userX)); // clamp tilt
+  velY = dx * 0.005;                                  // horizontal only
+  userY = Math.max(-LIMIT, Math.min(LIMIT, userY + velY));  // clamp to 180°
   if (e.cancelable && (!e.touches || Math.abs(dx) >= Math.abs(dy))) e.preventDefault();
 }
 function onUp() { dragging = false; idleMs = 0; canvas.style.cursor = 'grab'; }
@@ -315,17 +285,15 @@ function tick() {
   const now = performance.now();
 
   if (!dragging) {
-    idleMs += dt * 1000;
-    // inertia decay
-    userY += velY; userX += velX;
-    velY *= 0.94; velX *= 0.94;
-    userX = Math.max(-0.6, Math.min(0.6, userX));
-    // resume gentle auto-spin after 2.5s idle
-    if (!REDUCED && idleMs > 2500) autoSpin += dt * 0.07;
+    // horizontal inertia, clamped to the 180° range. No full 360 spin.
+    userY = Math.max(-LIMIT, Math.min(LIMIT, userY + velY));
+    velY *= 0.94;
   }
 
-  earth.rotation.y = INIT_ROT + autoSpin + userY;
-  earth.rotation.x = INIT_TILT + userX;
+  // gentle idle left-right oscillation so the globe is alive (pauses while dragging)
+  const osc = (REDUCED || dragging) ? 0 : Math.sin(clock.elapsedTime * 0.16) * 0.30;
+  earth.rotation.y = INIT_ROT + userY + osc;   // left-right only
+  earth.rotation.x = INIT_TILT;                // fixed tilt (no vertical drag)
 
   // India breathing glow burst
   const el = clock.elapsedTime;

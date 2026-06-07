@@ -10,88 +10,84 @@
  * to a clean, fully-visible stacked gallery (CSS default). We only switch on
  * the pinned cinematic mode here.
  */
-(function () {
+(function unifiedStaircase () {
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const story = document.querySelector('.story');
   if (!story) return;
-
   const scroll = story.querySelector('.story__scroll');
   const stage = story.querySelector('.story__stage');
-  const specimens = [...story.querySelectorAll('.story__specimen')];
+  const builds = [...story.querySelectorAll('.story__specimen')];
+  const mvv = document.querySelector('.mvv');
+  const cards = mvv ? [...mvv.querySelectorAll('.mvv__card')] : [];
   const fill = story.querySelector('.story__progress-fill');
   const countEl = story.querySelector('.story__count');
-  const N = specimens.length;
-  if (!scroll || !stage || !N) return;
-  if (REDUCED) return;   // reduced-motion → accessible stacked gallery (CSS default)
+  if (!scroll || !stage || !builds.length) return;
+  if (REDUCED) return;   // fallback: sections stay stacked (CSS default)
 
-  // F1 history carousel: full-screen slides laid in a row; vertical scroll
-  // drives a HORIZONTAL slide (one centred at a time, neighbours off-screen,
-  // slide-out-left / slide-in-right). NOT a cross-fade.
-  const rail = document.createElement('div'); rail.className = 'story__rail';
-  specimens.forEach(s => rail.appendChild(s));
-  stage.appendChild(rail);
+  // ONE carousel: buildings (row 0) + Mission cards (row 1, one step down).
+  // Scroll moves the camera RIGHT through buildings, takes ONE diagonal step
+  // DOWN-right from building 4 into Mission, then RIGHT through Mission.  --\--
+  cards.forEach(c => {
+    c.classList.remove('film-reveal');
+    if (!c.querySelector('.mvv__box')) {
+      const box = document.createElement('div'); box.className = 'mvv__box';
+      while (c.firstChild) box.appendChild(c.firstChild); c.appendChild(box);
+    }
+  });
+  const track = document.createElement('div'); track.className = 'story__track';
+  builds.forEach(b => track.appendChild(b));
+  cards.forEach(c => track.appendChild(c));
+  stage.appendChild(track);
+  // Mission now lives in this carousel → hide the old empty container, but KEEP
+  // its heading: move it into the stage and fade it in over the Mission stops.
+  if (mvv) mvv.style.display = 'none';
+  const mvvHead = document.querySelector('.about-us__section-head--mvv');
+  if (mvvHead){ mvvHead.classList.add('rx-mvv-head'); stage.appendChild(mvvHead); }
 
-  story.classList.add('is-pinned');
-  // extra 60vh at the end = the diagonal "riser" where building 4 exits up-left
-  const setHeights = () => { scroll.style.height = (N * 100 + 60) + 'vh'; };
-  setHeights();
-  addEventListener('resize', setHeights);
+  const items = [...builds, ...cards];   // 0..b-1 buildings, then Mission
+  const B = builds.length, stops = items.length;
+  items.forEach(it => it.classList.add('rx-stop'));
 
-  let sy = scrollY, target = scrollY, mx = 0, my = 0, tmx = 0, tmy = 0;
+  const layout = () => {
+    const W = innerWidth, H = innerHeight;
+    items.forEach((it, k) => {
+      const slotX = k * W, slotY = (k >= B) ? H : 0;   // Mission sits one row down
+      it.style.left = '50%'; it.style.top = '50%';
+      it.style.transform = `translate(-50%,-50%) translate(${slotX}px, ${slotY}px)`;
+    });
+  };
+  layout(); addEventListener('resize', layout);
+
+  story.classList.add('is-unified');
+  const setH = () => { scroll.style.height = (stops * 100) + 'vh'; };
+  setH(); addEventListener('resize', setH);
+
+  let sy = scrollY, target = scrollY;
   addEventListener('scroll', () => { target = scrollY; }, { passive: true });
-  addEventListener('mousemove', (e) => {
-    tmx = e.clientX / innerWidth - 0.5;
-    tmy = e.clientY / innerHeight - 0.5;
-  }, { passive: true });
-
   const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
-  let lastActive = -1;
+  let lastA = -1;
 
-  function frame() {
+  function frame () {
     requestAnimationFrame(frame);
-    sy += (target - sy) * 0.11;                 // ← buttery damp
-    mx += (tmx - mx) * 0.06;
-    my += (tmy - my) * 0.06;
-
+    sy += (target - sy) * 0.11;                  // buttery damp
     const rect = scroll.getBoundingClientRect();
     const total = scroll.offsetHeight - innerHeight;
-    const scrolled = clamp(sy - (rect.top + scrollY), 0, total);
-    const riserPx = innerHeight * 0.6;
-    const carTotal = Math.max(1, total - riserPx);
-    const pc = clamp(scrolled, 0, carTotal) / carTotal;   // carousel progress (horizontal)
-    const fp = pc * (N - 1);                               // 0 .. N-1
-    const riser = clamp((scrolled - carTotal) / riserPx, 0, 1);  // 0→1 the diagonal exit
-
-    // horizontal slide + (at the end) building 4 exits UP-LEFT on the diagonal
-    rail.style.transform = `translate3d(${(-fp * innerWidth - riser * innerWidth * 0.62).toFixed(1)}px, ${(-riser * innerHeight * 0.55).toFixed(1)}px, 0)`;
-    rail.style.opacity = clamp(1 - riser * 1.25, 0, 1).toFixed(3);
-    const active = clamp(Math.round(fp), 0, N - 1);
-
-    specimens.forEach((sp, i) => {
-      const d = fp - i;                          // 0 when this slide is centred
-      const e = clamp(1 - Math.abs(d), 0, 1);
-      const build = sp.querySelector('.story__build');
-      if (build) {
-        const tiltY = mx * 18 * e, tiltX = -my * 11 * e;   // stronger tilt-to-cursor (interactive)
-        build.style.transform =
-          `perspective(1200px) translateX(${(d * 7).toFixed(2)}vw) ` +     // depth parallax within slide
-          `rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) ` +
-          `scale(${(0.92 + 0.08 * e).toFixed(3)})`;
-        // cut-out float: drop-shadow grounds it on the background
-        build.style.filter = `drop-shadow(0 30px 42px rgba(0,0,0,.5)) brightness(${(0.88 + 0.12 * e).toFixed(2)})`;
-      }
-      const txt = sp.querySelector('.story__text');
-      if (txt) {
-        txt.style.opacity = clamp(1 - Math.abs(d) * 1.4, 0, 1).toFixed(3);
-        txt.style.transform = `translateX(${(d * -3).toFixed(2)}vw)`;       // text drifts a touch slower
-      }
-    });
-
-    if (fill) fill.style.transform = `scaleX(${pc.toFixed(4)})`;
-    if (active !== lastActive) {
-      lastActive = active;
-      if (countEl) countEl.textContent =
-        String(active + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
+    const docTop = rect.top + scrollY;
+    stage.style.top = clamp(scrollY - docTop, 0, total).toFixed(1) + 'px';   // JS pin
+    const p = total > 0 ? clamp(sy - docTop, 0, total) / total : 0;
+    const t = p * (stops - 1);                   // camera position along the path (0..stops-1)
+    const W = innerWidth, H = innerHeight;
+    const camX = t * W;                          // always travelling right
+    const camY = clamp(t - (B - 1), 0, 1) * H;   // ONE step down: building 4 → Mission (the \)
+    track.style.transform = `translate3d(${(-camX).toFixed(1)}px, ${(-camY).toFixed(1)}px, 0)`;
+    if (mvvHead) mvvHead.style.opacity = clamp(t - (B - 1), 0, 1).toFixed(2);  // heading fades in at Mission
+    if (fill) fill.style.transform = `scaleX(${p.toFixed(4)})`;
+    const a = clamp(Math.round(t), 0, stops - 1);
+    if (a !== lastA) {
+      lastA = a;
+      if (countEl) countEl.textContent = a < B
+        ? String(a + 1).padStart(2, '0') + ' / ' + String(B).padStart(2, '0')
+        : 'Purpose';
     }
   }
   requestAnimationFrame(frame);
