@@ -43,12 +43,12 @@ function resize() {
 resize();
 window.addEventListener('resize', resize);
 
-/* ── Lighting (realistic day Earth) ─────────────────────────── */
-scene.add(new THREE.AmbientLight(0x445566, 0.6));
-const sun = new THREE.DirectionalLight(0xfff4e0, 2.3);
-sun.position.set(2.5, 1.2, 3.0);
+/* ── Lighting (jeskojets-style dark monochrome globe) ───────── */
+scene.add(new THREE.AmbientLight(0xffffff, 0.95));
+const sun = new THREE.DirectionalLight(0xffe6c4, 0.85);
+sun.position.set(2.5, 1.4, 3.0);
 scene.add(sun);
-const fill = new THREE.DirectionalLight(0x88aaff, 0.28);
+const fill = new THREE.DirectionalLight(0xffcaa0, 0.18);
 fill.position.set(-3, -1, -2);
 scene.add(fill);
 
@@ -60,18 +60,45 @@ earth.rotation.y = INIT_ROT;
 earth.rotation.x = INIT_TILT;
 scene.add(earth);
 
-/* ── Realistic Earth sphere ─────────────────────────────────── */
-const globeMat = new THREE.MeshPhongMaterial({
-  color: 0x2a3a4a, specular: new THREE.Color(0x335577), shininess: 15,
-});
+/* ── Dark monochrome globe (jeskojets style) ────────────────── */
+const globeMat = new THREE.MeshStandardMaterial({ color: 0x16120c, roughness: 1, metalness: 0 });
 const globe = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 96), globeMat);
 earth.add(globe);
+// Load earth-2k and recolour: blue oceans → near-black, land → faint warm tan.
 new THREE.TextureLoader().load('/images/earth-2k.jpg', (t) => {
-  t.colorSpace = THREE.SRGBColorSpace;
-  globeMat.map = t; globeMat.color.set(0xffffff); globeMat.needsUpdate = true;
+  const img = t.image, W = 1024, H = 512;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d'); x.drawImage(img, 0, 0, W, H);
+  const d = x.getImageData(0, 0, W, H), a = d.data;
+  for (let i = 0; i < a.length; i += 4) {
+    const r = a[i], g = a[i + 1], bch = a[i + 2];
+    if (bch > r + 8 && bch > g + 2) {            // blue-dominant = ocean
+      a[i] = 17; a[i + 1] = 14; a[i + 2] = 10;
+    } else {                                      // land = warm tan relief
+      const lum = (r * 0.3 + g * 0.59 + bch * 0.11) / 255;
+      const v = 0.45 + 0.55 * Math.pow(lum, 0.85);
+      a[i] = Math.round(48 + v * 78); a[i + 1] = Math.round(40 + v * 60); a[i + 2] = Math.round(30 + v * 42);
+    }
+  }
+  x.putImageData(d, 0, 0);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  globeMat.map = tex; globeMat.color.set(0xffffff); globeMat.needsUpdate = true;
 });
 
-/* ── Subtle neutral atmosphere (not a blue ring) ────────────── */
+/* ── Faint lat/long grid (jeskojets meridians/parallels) ────── */
+(function addGrid() {
+  const W = 2048, H = 1024, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d'); x.clearRect(0, 0, W, H);
+  x.strokeStyle = 'rgba(225,185,135,0.16)'; x.lineWidth = 1.5;
+  for (let lat = -80; lat <= 80; lat += 20) { const y = ((90 - lat) / 180) * H; x.beginPath(); x.moveTo(0, y); x.lineTo(W, y); x.stroke(); }
+  for (let lon = -180; lon < 180; lon += 20) { const xx = ((lon + 180) / 360) * W; x.beginPath(); x.moveTo(xx, 0); x.lineTo(xx, H); x.stroke(); }
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  const grid = new THREE.Mesh(new THREE.SphereGeometry(1.004, 96, 96),
+    new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
+  earth.add(grid);
+})();
+
+/* ── Subtle warm rim (no blue atmosphere) ───────────────────── */
 const atmosMat = new THREE.ShaderMaterial({
   side: THREE.BackSide, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
   vertexShader: `varying vec3 vN; varying vec3 vV;
@@ -80,7 +107,7 @@ const atmosMat = new THREE.ShaderMaterial({
       gl_Position=projectionMatrix*mv; }`,
   fragmentShader: `varying vec3 vN; varying vec3 vV;
     void main(){ float rim=pow(1.0-abs(dot(vN,vV)),4.0);
-      gl_FragColor=vec4(vec3(0.35,0.45,0.6), rim*0.30); }`,
+      gl_FragColor=vec4(vec3(0.55,0.38,0.20), rim*0.28); }`,
 });
 scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.06, 64, 64), atmosMat));
 

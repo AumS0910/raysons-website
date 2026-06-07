@@ -18,11 +18,12 @@
   <meta name="twitter:image" content="https://raysons-website.vercel.app/images/pillar-1.jpg"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <script>
     document.documentElement.dataset.theme = localStorage.getItem('raysons-theme') || 'dark';
   </script>
   <link rel="stylesheet" href="./style.css"/>
+  <link rel="stylesheet" href="./enhance.css"/>
   <link rel="canonical" href="https://raysons-website.vercel.app/about.html"/>
 </head>
 <body class="page page--about">
@@ -82,44 +83,78 @@
 
 <!-- ═══════════════ HERO ═══════════════ -->
 
+<!-- ═══════════════ THE RAYSONS STORY (chaptered scroll journey) ═══════════════ -->
+<section class="story" id="story">
+
+  <!-- CH 00 · Cover -->
+  <div class="story__cover">
+    <p class="about-us__eyebrow">About Us</p>
+    <h1 class="story__cover-title">Part of Something Bigger</h1>
+    <p class="story__cover-sub">Four group companies: Raysons Shell Cast · Raysons Sandchem Pvt Ltd · Raysons Industries · Raysons Marketing Pvt Ltd.</p>
+    <span class="story__scrollhint" aria-hidden="true">Scroll to begin</span>
+  </div>
+
+  <!-- CH 01–04 · The four businesses, one at a time (establishment order) -->
+  <div class="story__scroll">
+    <div class="story__stage">
+      <div class="story__progress" aria-hidden="true"><span class="story__progress-fill"></span></div>
+      <div class="story__count" aria-hidden="true">01 / 04</div>
+
+      <figure class="story__specimen">
+        <p class="story__tag">Foundry Materials</p>
+        <h2 class="story__name">Raysons Sandchem Pvt Ltd</h2>
+        <div class="story__build-wrap">
+          <img class="story__build" src="/images/raysons-sandchem.png" alt="Raysons Sandchem Pvt Ltd facility" loading="lazy" decoding="async">
+        </div>
+        <div class="story__meta">
+          <span class="story__year">Since the 1980s</span>
+          <p class="story__line">Raysons Group founded in the 1980s in Kolhapur. Strong foundation in Resin Coated Sand and casting technologies.</p>
+        </div>
+      </figure>
+
+      <figure class="story__specimen">
+        <p class="story__tag">Real Estate · Retail</p>
+        <h2 class="story__name">Real Estate · Retail</h2>
+        <div class="story__build-wrap">
+          <img class="story__build" src="/images/raysons-real-estate-retail.png" alt="Raysons real estate and retail development" loading="lazy" decoding="async">
+        </div>
+        <div class="story__meta">
+          <span class="story__year">Diversified Group</span>
+          <p class="story__line">Diversified industrial group across Foundry, Real Estate, Hospitality, Retail, and Renewable Energy.</p>
+        </div>
+      </figure>
+
+      <figure class="story__specimen">
+        <p class="story__tag">Hospitality</p>
+        <h2 class="story__name">REGENTA Place</h2>
+        <div class="story__build-wrap">
+          <img class="story__build" src="/images/regenta-place.png" alt="REGENTA Place hospitality property" loading="lazy" decoding="async">
+        </div>
+        <div class="story__meta">
+          <span class="story__year">Partnered Brands</span>
+          <p class="story__line">Partnered brands: REGENTA Place · Westside · Neora · Sky Zone.</p>
+        </div>
+      </figure>
+
+      <figure class="story__specimen">
+        <p class="story__tag">Precision Foundry</p>
+        <h2 class="story__name">Raysons Shell Cast</h2>
+        <div class="story__build-wrap">
+          <img class="story__build" src="/images/raysons-shellcast.png" alt="Raysons Shell Cast facility" loading="lazy" decoding="async">
+        </div>
+        <div class="story__meta">
+          <span class="story__year">Est. 2021</span>
+          <p class="story__line">Raysons Shell Cast established in 2021 as the group’s precision manufacturing vertical.</p>
+        </div>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ABOUT (Purpose / Journey / People / Standards / Customers) ═══════════════ -->
 <section class="about-us" id="about-us">
   <div class="about-us__inner">
-    <div class="about-us__header">
-      <p class="about-us__eyebrow">About Us</p>
-      <h1 class="about-us__headline">Part of Something Bigger</h1>
-    </div>
-
-    <div class="about-us__lead-grid">
-      <div class="about-us__copy">
-        <ul class="about-us__points">
-          <li>Raysons Group founded in the 1980s in Kolhapur.</li>
-          <li>Diversified industrial group across Foundry, Real Estate, Hospitality, Retail, and Renewable Energy.</li>
-          <li>Four group companies: Raysons Shell Cast · Raysons Sandchem Pvt Ltd · Raysons Industries · Raysons Marketing Pvt Ltd.</li>
-          <li>Partnered brands: REGENTA Place · Westside · Neora · Sky Zone.</li>
-          <li>Raysons Shell Cast established in 2021 as the group’s precision manufacturing vertical.</li>
-          <li>Strong foundation in Resin Coated Sand and casting technologies.</li>
-        </ul>
-      </div>
-
-      <div class="about-us__photo-grid" aria-label="Raysons Group businesses">
-        <figure class="about-us__photo-card">
-          <img src="/images/raysons-sandchem.jpeg" alt="Raysons Sandchem Pvt Ltd facility">
-          <figcaption>Raysons Sandchem Pvt Ltd</figcaption>
-        </figure>
-        <figure class="about-us__photo-card">
-          <img src="/images/raysons-shellcast.jpeg" alt="Raysons Shell Cast facility">
-          <figcaption>Raysons Shell Cast</figcaption>
-        </figure>
-        <figure class="about-us__photo-card">
-          <img src="/images/raysons-real-estate-retail.jpeg" alt="Raysons real estate and retail development">
-          <figcaption>Real Estate · Retail</figcaption>
-        </figure>
-        <figure class="about-us__photo-card">
-          <img src="/images/regenta-place.jpeg" alt="REGENTA Place hospitality property">
-          <figcaption>REGENTA Place</figcaption>
-        </figure>
-      </div>
-    </div>
 
     <div class="about-us__section-head about-us__section-head--mvv">
       <p class="about-us__eyebrow">Purpose</p>
@@ -310,6 +345,8 @@
 </footer>
 
 <script type="module" src="./main.js"></script>
+<script type="module" src="./enhance.js"></script>
+<script type="module" src="./about-story.js"></script>
 
 <!-- Custom cursor — must be last child of body, outside all sections
      so mix-blend-mode:difference is NOT clipped by hero isolation -->

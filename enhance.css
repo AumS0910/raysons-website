@@ -1,0 +1,344 @@
+/* ───────────────────────────────────────────────────────────────
+   enhance.css — landonorris-style interactivity layered onto V1.
+   Purely additive. Does not alter existing V1 layout or content.
+   ─────────────────────────────────────────────────────────────── */
+
+:root{
+  --rx-ember:#ff6a1a;
+  /* #02 — distinctive body face (not Inter/Roboto), keeps Syne display.
+     Inter kept only as a fallback so nothing breaks if the font is slow. */
+  --fb: 'Hanken Grotesk', 'Inter', sans-serif;
+}
+
+/* ── Floating hover-reveal image (industries list) ───────────── */
+.rx-reveal{
+  position:fixed; top:0; left:0;
+  width:clamp(220px,22vw,330px); aspect-ratio:4/5;
+  pointer-events:none; z-index:60;
+  border-radius:6px; overflow:hidden;
+  opacity:0; transform:translate(-50%,-50%) scale(.82) rotate(-3deg);
+  transition:opacity .45s ease, transform .6s cubic-bezier(.16,1,.3,1);
+  will-change:transform,opacity;
+  box-shadow:0 30px 80px rgba(0,0,0,.55);
+}
+.rx-reveal::after{content:'';position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,106,26,.12),transparent 60%);}
+.rx-reveal img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.08)}
+.rx-reveal.show{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0deg)}
+
+/* industries items become clearly interactive */
+.industries__item{
+  transition:padding-left .45s cubic-bezier(.16,1,.3,1), opacity .4s, color .4s;
+  cursor:pointer; position:relative;
+}
+.industries__list:hover .industries__item{ opacity:.4; }      /* dim the rest… */
+.industries__list .industries__item:hover{ opacity:1; padding-left:18px; } /* …spotlight hovered */
+.industries__item:hover .industries__name{ color:var(--rx-ember); }
+.industries__item .industries__dot{ transition:transform .45s cubic-bezier(.16,1,.3,1), background .4s; }
+.industries__item:hover .industries__dot{ transform:scale(1.8); background:var(--rx-ember); }
+
+/* ── Magnetic buttons ────────────────────────────────────────── */
+[data-rx-magnetic]{ transition:transform .35s cubic-bezier(.16,1,.3,1); will-change:transform; }
+
+/* ── Editorial image treatment: clip-wipe reveal + parallax + hover ──
+   transform on <img> is driven by JS (parallax) → hover uses FILTER only,
+   so the two never conflict. The clip lives on the WRAPPER. */
+.rx-img{ overflow:hidden; }
+.rx-img img,.rx-img > picture > img{ will-change:transform; transition:filter .5s ease; }
+.rx-img:hover img{ filter:brightness(1.08) contrast(1.03); }
+
+/* clip-wipe reveal (class added by JS only — no-JS keeps image visible) */
+.rx-cliphide{ clip-path:inset(0 0 100% 0); }
+.rx-cliphide.rx-in{ clip-path:inset(0 0 0 0); transition:clip-path 1.15s cubic-bezier(.16,1,.3,1); }
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPREHENSIVE HOVER MICRO-INTERACTIONS (the "alive / 10k" layer)
+   Bold color-shift + depth on every interactive element. 200–300ms.
+   Pure CSS — zero conflict with V1's existing reveal/scrub system.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* every clickable gets a pointer + smooth base */
+.nav__link,.footer__nav a,.footer__col a,.footer__col li,.faq__q,.stats__item,
+.beat__pill,.about__facts span,.industries__email,.ticker__item,.theme-toggle,
+.nav__email,.float-cta__link,.beats__nav-dot,.material-card,.dest{ cursor:pointer; }
+
+/* ── Nav links: underline-slide + lift ── */
+.nav__link{ position:relative; transition:color .25s ease, transform .25s cubic-bezier(.16,1,.3,1); }
+.nav__link::after{ content:''; position:absolute; left:0; bottom:-4px; height:1.5px; width:100%;
+  background:var(--rx-ember); transform:scaleX(0); transform-origin:right; transition:transform .35s cubic-bezier(.16,1,.3,1); }
+.nav__link:hover{ color:var(--rx-ember); }
+.nav__link:hover::after{ transform:scaleX(1); transform-origin:left; }
+
+/* ── Stats cards: lift + ember edge + glow on the number ── */
+.stats__item{ transition:transform .35s cubic-bezier(.16,1,.3,1); }
+.stats__item:hover{ transform:translateY(-6px); }
+.stats__item:hover .stats__num,.stats__item:hover .stats__suffix{ color:var(--rx-ember); transition:color .3s; text-shadow:0 0 24px rgba(255,106,26,.35); }
+
+/* ── FAQ rows: indent + ember marker on hover/open ── */
+.faq__q{ transition:padding-left .3s cubic-bezier(.16,1,.3,1), color .25s; }
+.faq__q:hover{ padding-left:10px; color:var(--rx-ember); }
+.faq__item{ transition:background .3s; }
+.faq__item:hover{ background:linear-gradient(90deg,rgba(255,106,26,.05),transparent 60%); }
+
+/* ── Material / generic content cards: lift + ember border + sheen ── */
+.material-card,.about-us__standards-grid > *{ transition:transform .4s cubic-bezier(.16,1,.3,1), box-shadow .4s, border-color .4s; }
+.material-card:hover{ transform:translateY(-8px); box-shadow:0 28px 60px rgba(0,0,0,.45); }
+
+/* ── About fan gallery cards: the fan owns the card transform (JS) ──
+   so hover uses the IMAGE only (brighten + subtle zoom) — no conflict. */
+.about-us__photo-card{ overflow:hidden; cursor:pointer; }
+.about-us__photo-card img{ transition:filter .5s ease, transform .9s cubic-bezier(.16,1,.3,1); }
+.about-us__photo-card:hover img{ filter:brightness(1.1) contrast(1.04); transform:scale(1.06); }
+
+/* ── Beat / material pills: fill on hover ── */
+.beat__pill,.about__facts span,.hub-realm__specs span,.ch7-dests span{
+  transition:background .25s, color .25s, border-color .25s, transform .25s; }
+.beat__pill:hover,.about__facts span:hover{ background:var(--rx-ember); color:#0a0a0a!important; border-color:var(--rx-ember); transform:translateY(-2px); }
+
+/* ── Footer links: slide + ember ── */
+.footer__nav a,.footer__col a,.footer__col li{ position:relative; display:inline-block;
+  transition:color .25s, transform .25s cubic-bezier(.16,1,.3,1); }
+.footer__nav a:hover,.footer__col a:hover{ color:var(--rx-ember); transform:translateX(5px); }
+
+/* ── Email / contact links: animated underline ── */
+.industries__email,.nav__email{ position:relative; transition:color .25s; }
+.industries__email::after,.nav__email::after{ content:''; position:absolute; left:0; bottom:-3px; height:1px; width:100%;
+  background:currentColor; transform:scaleX(0); transform-origin:right; transition:transform .35s cubic-bezier(.16,1,.3,1); }
+.industries__email:hover,.nav__email:hover{ color:var(--rx-ember); }
+.industries__email:hover::after,.nav__email:hover::after{ transform:scaleX(1); transform-origin:left; }
+
+/* ── Client-logo marquee (21st.dev "Clients" pattern) ── */
+.rx-marquee{ display:block!important; overflow:hidden; position:relative;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent); }
+.rx-marq-track{ display:flex; align-items:center; gap:clamp(40px,6vw,96px); width:max-content;
+  animation:rx-marq 32s linear infinite; will-change:transform; }
+.rx-marquee:hover .rx-marq-track{ animation-play-state:paused; }
+.rx-marquee .about-us__logo{ flex:0 0 auto; white-space:nowrap; cursor:default;
+  transition:color .3s ease, opacity .3s ease; opacity:.62; }
+.rx-marquee .about-us__logo:hover{ color:var(--rx-ember); opacity:1; }
+@keyframes rx-marq{ to{ transform:translateX(-50%); } }
+@media (prefers-reduced-motion:reduce){ .rx-marq-track{ animation:none } .rx-marquee{ -webkit-mask-image:none; mask-image:none } }
+
+/* ── Ticker items glow on hover (the marquee stays alive) ── */
+.ticker__item{ transition:color .25s; }
+.ticker__item:hover{ color:var(--rx-ember); }
+
+/* ── Float CTA pill: depth + arrow nudge ── */
+.float-cta__link{ transition:transform .3s cubic-bezier(.16,1,.3,1); }
+.float-cta:hover{ box-shadow:0 16px 40px rgba(255,106,26,.3); }
+.float-cta:hover .float-cta__icon{ transform:translateX(4px); transition:transform .3s; }
+
+/* ── Beats nav dots: scale + glow when active/hover ── */
+.beats__nav-dot{ transition:transform .3s, background .3s, box-shadow .3s; }
+.beats__nav-dot:hover{ transform:scale(1.6); box-shadow:0 0 14px var(--rx-ember); }
+
+/* ── Reveal-on-scroll for elements V1 doesn't already handle ── */
+.rx-up{ opacity:0; transform:translateY(34px); transition:opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1); }
+.rx-up.rx-in{ opacity:1; transform:none; }
+
+/* ── INNER-PAGE molten atmosphere (heat-glow + drifting embers) ──
+   Decorative, behind content, pointer-events none. Brings the overview's
+   living atmosphere to the static inner pages. Disabled on reduced-motion. */
+.rx-atmo{ position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+.rx-atmo__glow{ position:absolute; inset:0;
+  background:
+    radial-gradient(60% 42% at 78% 6%, rgba(255,106,26,.13), transparent 60%),
+    radial-gradient(46% 36% at 6% 20%, rgba(255,72,12,.08), transparent 55%),
+    radial-gradient(50% 50% at 50% 108%, rgba(255,106,26,.10), transparent 60%);
+  animation:rx-breath 9s ease-in-out infinite; }
+@keyframes rx-breath{ 0%,100%{opacity:.5} 50%{opacity:.95} }
+.rx-ember-dot{ position:absolute; bottom:-12px; width:3px; height:3px; border-radius:50%;
+  background:#ff8334; box-shadow:0 0 9px 1px rgba(255,106,26,.75);
+  opacity:0; transform:scale(var(--sc,1));
+  animation:rx-rise var(--d,9s) linear var(--delay,0s) infinite; }
+@keyframes rx-rise{
+  6%{opacity:var(--o,.4)} 92%{opacity:var(--o,.4)}
+  100%{ transform:translate(var(--x,0), -104vh) scale(var(--sc,1)); opacity:0 } }
+/* keep V1 content above the atmosphere */
+.page:not(.page--home) > nav,
+.page:not(.page--home) > section,
+.page:not(.page--home) > main,
+.page:not(.page--home) > footer,
+.page:not(.page--home) > .float-cta{ position:relative; z-index:1; }
+@media (prefers-reduced-motion:reduce){ .rx-atmo{ display:none } }
+
+/* ── INNER-PAGE dramatic reveals (V1 disables its own reveals here) ──
+   Headings wipe up from a mask; content slides + fades; staggered.
+   Scoped via JS to non-home pages only → overview untouched. */
+.rx-rv{ opacity:0; transform:translateY(42px);
+  transition:opacity 1s cubic-bezier(.16,1,.3,1), transform 1.1s cubic-bezier(.16,1,.3,1); }
+.rx-rv.rx-shown{ opacity:1; transform:none; }
+.rx-rvmask{ clip-path:inset(0 0 115% 0);
+  transition:clip-path 1.15s cubic-bezier(.16,1,.3,1); }
+.rx-rvmask.rx-shown{ clip-path:inset(0 0 -12% 0); }
+@media (prefers-reduced-motion:reduce){
+  .rx-rv,.rx-rvmask{ opacity:1!important; transform:none!important; clip-path:none!important; transition:none!important }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   THE RAYSONS STORY — about-page chaptered scroll journey
+   (F1-feature workflow: cover → 4 businesses one at a time, buttery)
+   Fallback (no-JS / reduced-motion): a clean stacked gallery.
+   ═══════════════════════════════════════════════════════════════ */
+.story{ position:relative; z-index:1; }
+
+/* CH00 · cover */
+.story__cover{ min-height:100vh; display:flex; flex-direction:column; justify-content:center;
+  padding:0 8vw; position:relative; }
+.story__cover-title{ font-family:var(--fd,'Syne',sans-serif); font-weight:800;
+  font-size:clamp(2.8rem,9vw,8rem); line-height:.95; letter-spacing:-.02em; color:var(--w); margin:.18em 0 .4em; }
+.story__cover-sub{ max-width:48ch; color:var(--t);
+  font-size:clamp(1rem,1.4vw,1.25rem); line-height:1.6; }
+.story__scrollhint{ position:absolute; left:8vw; bottom:5vh; font-size:.72rem; letter-spacing:.28em;
+  text-transform:uppercase; color:var(--rx-ember); }
+.story__scrollhint::after{ content:''; display:block; width:1px; height:38px; margin-top:10px;
+  background:linear-gradient(var(--rx-ember),transparent); transform-origin:top;
+  animation:rx-hint 1.8s ease-in-out infinite; }
+@keyframes rx-hint{ 0%,100%{transform:scaleY(.35);opacity:.35} 50%{transform:scaleY(1);opacity:1} }
+
+/* the scroll block + sticky stage */
+.story__scroll{ position:relative; }
+.story.is-pinned .story__stage{ position:sticky; top:0; height:100vh; overflow:hidden; }
+
+/* F1 horizontal carousel: full-screen slides in a row, slide left/right */
+.story__rail{ display:flex; flex-wrap:nowrap; height:100%; width:max-content; will-change:transform; }
+
+/* specimen — ESPN stack: tag + name on top, big image centre, details below.
+   Default (fallback) = same stack, readable. */
+.story__specimen{ display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; gap:clamp(.4rem,1.4vh,1rem); padding:8vh 8vw; min-height:90vh; }
+.story.is-pinned .story__specimen{ flex:0 0 100vw; width:100vw; height:100vh;
+  min-height:0; margin:0; padding:7vh 8vw 8vh; opacity:1; }
+
+.story__tag{ font-size:.72rem; letter-spacing:.26em; text-transform:uppercase;
+  color:var(--rx-ember); margin:0; }
+.story__name{ font-family:var(--fd,'Syne',sans-serif); font-weight:800;
+  font-size:clamp(2rem,5.2vw,4.6rem); line-height:1; letter-spacing:-.02em; color:var(--w); margin:.2rem 0 0; }
+
+/* big cut-out building, floating on the background */
+.story__build-wrap{ position:relative; flex:1 1 auto; min-height:0; width:100%;
+  display:flex; align-items:center; justify-content:center; cursor:grab; }
+.story__build-wrap:active{ cursor:grabbing; }
+/* interactive: ember glow lights up behind the building on hover */
+.story__build-wrap::after{ content:''; position:absolute; left:50%; top:52%; transform:translate(-50%,-50%);
+  width:64%; height:56%; z-index:0; border-radius:50%; pointer-events:none; filter:blur(45px);
+  background:radial-gradient(closest-side, rgba(255,106,26,.30), transparent 72%);
+  opacity:0; transition:opacity .45s ease; }
+.story__build-wrap:hover::after{ opacity:1; }
+/* transparent cut-outs → float with a drop-shadow (no mask needed) */
+.story__build{ position:relative; z-index:1; width:auto; max-width:min(1000px,86vw); max-height:58vh; object-fit:contain;
+  transform-origin:center bottom; will-change:transform,filter; }
+
+/* details below the image (ESPN FIG block) */
+.story__meta{ display:flex; flex-direction:column; align-items:center; gap:.6rem; max-width:62ch; }
+.story__year{ font-size:.9rem; letter-spacing:.14em; text-transform:uppercase; color:var(--t2); margin:0; }
+.story__line{ color:var(--t); font-size:clamp(1rem,1.3vw,1.2rem); line-height:1.65; margin:0; }
+
+/* progress rail + count — pinned only */
+.story__progress{ position:absolute; left:8vw; right:8vw; bottom:6vh; height:2px;
+  background:var(--t3); border-radius:2px; z-index:5; }
+.story__progress-fill{ display:block; height:100%; width:100%; transform:scaleX(0); transform-origin:left;
+  background:linear-gradient(90deg,#ff8a3a,var(--rx-ember)); box-shadow:0 0 12px var(--rx-ember); }
+.story__count{ position:absolute; right:8vw; bottom:8vh; font-family:var(--fd,'Syne',sans-serif);
+  font-size:.8rem; letter-spacing:.2em; color:var(--t2); z-index:5; }
+.story:not(.is-pinned) .story__progress,
+.story:not(.is-pinned) .story__count{ display:none; }
+
+@media (max-width:860px){
+  .story__specimen{ grid-template-columns:1fr; gap:1.6rem; align-content:center; }
+  .story__build{ max-height:42vh; }
+}
+@media (prefers-reduced-motion:reduce){ .story__scrollhint::after{ animation:none } }
+
+/* ── Certificates — horizontal "history of cars" traverse ──
+   Activated by JS (.is-htrav). Default (no-JS/reduced) = normal grid. */
+.about-us__standards.is-htrav{ position:relative; }
+/* JS-pinned (sticky is broken inside .about-us__inner) + full-bleed breakout */
+.htrav__stage{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:100vw; height:100vh;
+  overflow:hidden; display:flex; align-items:center; }
+.is-htrav .about-us__section-head{ position:absolute; top:8vh; left:8vw; right:8vw; z-index:3; margin:0; }
+.htrav__big{ position:absolute; left:50%; top:50%; transform:translate(-50%,-54%); z-index:0;
+  font-family:var(--fd,'Syne',sans-serif); font-weight:800; line-height:.8; letter-spacing:-.03em;
+  font-size:clamp(6rem,22vw,22rem); color:rgba(255,106,26,.12); pointer-events:none; white-space:nowrap; }
+.is-htrav .about-us__standards-grid{ display:flex!important; flex-wrap:nowrap; gap:clamp(1.5rem,3vw,3rem);
+  width:max-content; position:relative; z-index:2; will-change:transform; }
+.is-htrav .about-us__standard{ flex:0 0 clamp(300px,54vw,680px); opacity:.3; transform:scale(.9);
+  transition:opacity .5s ease, transform .5s ease; background:var(--bg2);
+  border:1px solid var(--t3); border-radius:12px; padding:clamp(1.6rem,2.6vw,2.4rem); }
+.is-htrav .about-us__standard.is-active{ opacity:1; transform:scale(1);
+  border-color:rgba(255,106,26,.5); box-shadow:0 30px 60px -25px rgba(0,0,0,.35); }
+.htrav__rail{ position:absolute; left:8vw; right:8vw; bottom:7vh; height:2px;
+  background:var(--t3); border-radius:2px; z-index:3; }
+.htrav__rail-fill{ display:block; height:100%; transform:scaleX(0); transform-origin:left;
+  background:linear-gradient(90deg,#ff8a3a,var(--rx-ember)); box-shadow:0 0 12px var(--rx-ember); }
+@media (max-width:860px){ .is-htrav .about-us__standard{ flex-basis:78vw; } .htrav__big{ font-size:30vw; } }
+
+/* ── Mission · Vision · Values — HORIZONTAL scroll-jack (cards slide sideways) ── */
+.mvv-sec{ position:relative; }
+.mvv-sec .mvv-stage{ position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:100vw; height:100vh; overflow:hidden; }
+.mvv-sec .about-us__section-head--mvv{ position:absolute; top:8vh; left:8vw; right:8vw; z-index:3; margin:0; }
+.mvv.is-mvvrail{ display:flex!important; flex-wrap:nowrap; width:max-content; height:100%; gap:0; will-change:transform; }
+.mvv.is-mvvrail .mvv__card{ flex:0 0 100vw; width:100vw; height:100vh; margin:0; border:0; background:none;
+  display:grid; place-items:center; padding:0 8vw; }
+.mvv__box{ width:min(640px,86vw); background:var(--bg2);
+  border:1px solid var(--t3); border-radius:16px; padding:clamp(2rem,4vw,3.4rem);
+  will-change:transform,opacity; box-shadow:0 30px 70px -30px rgba(0,0,0,.35); }
+.mvv.is-mvvrail .mvv__label{ color:var(--rx-ember); }
+
+/* ── The Journey (Growth & Innovation) — DIAGONAL scroll-jack ──
+   JS-pinned (sticky broken in .about-us__inner) + full-bleed; years travel
+   down-right along a diagonal as you scroll. */
+.timeline.is-diag{ position:relative; }
+.timeline.is-diag .timeline__inner{ position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:100vw; height:100vh; overflow:hidden; max-width:none; display:block; }
+.timeline.is-diag::after{ content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:linear-gradient(135deg,transparent 38%,rgba(255,106,26,.08),transparent 72%); }
+.timeline.is-diag .timeline__eyebrow{ position:absolute; top:7vh; left:8vw; z-index:4; margin:0; }
+.timeline.is-diag .timeline__headline{ position:absolute; top:calc(7vh + 1.6rem); left:8vw; z-index:4; margin:0;
+  font-size:clamp(1.3rem,2.2vw,2rem); line-height:1.05; }
+.timeline__bigyear{ position:absolute; left:50%; top:50%; transform:translate(-50%,-54%) rotate(-4deg); z-index:0;
+  font-family:var(--fd,'Syne',sans-serif); font-weight:800; line-height:.8; letter-spacing:-.03em;
+  font-size:clamp(7rem,26vw,24rem); color:rgba(255,106,26,.13); pointer-events:none; }
+.timeline.is-diag .rx-tl-track{ position:absolute; inset:0; z-index:2; }
+.timeline.is-diag .rx-tl-item{ position:absolute; left:50%; top:50%; width:clamp(320px,44vw,600px);
+  margin:0; will-change:transform,opacity; text-align:left; }
+.timeline.is-diag .timeline__year{ color:var(--rx-ember); font-size:clamp(1.6rem,2.8vw,2.6rem); font-weight:700; }
+.timeline.is-diag .timeline__title{ font-size:clamp(1.3rem,2.4vw,2.2rem); color:var(--w); margin:.35rem 0 .7rem; line-height:1.1; }
+.timeline.is-diag .timeline__desc{ color:var(--t); font-size:clamp(.98rem,1.25vw,1.15rem); line-height:1.65; }
+.timeline__rail{ position:absolute; left:8vw; right:8vw; bottom:7vh; height:2px;
+  background:var(--t3); border-radius:2px; z-index:4; }
+.timeline__rail-fill{ display:block; height:100%; transform:scaleX(0); transform-origin:left;
+  background:linear-gradient(90deg,#ff8a3a,var(--rx-ember)); box-shadow:0 0 12px var(--rx-ember); }
+@media (max-width:860px){ .timeline.is-diag .timeline__item{ width:80vw; } .timeline__bigyear{ font-size:36vw; } }
+
+/* ═══ #08 — INVISIBLE EXPENSIVE STUFF (a11y / keyboard / touch) ═══ */
+
+/* Visible keyboard focus ring (ember) — only for keyboard users, never on click */
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible,
+input:focus-visible, textarea:focus-visible, select:focus-visible,
+.faq__q:focus-visible, .nav__link:focus-visible, .theme-toggle:focus-visible{
+  outline:2px solid var(--rx-ember);
+  outline-offset:3px;
+  border-radius:3px;
+}
+/* magnetic transform must not hide the focus ring */
+[data-rx-magnetic]:focus-visible{ transform:none!important; }
+
+/* Skip-to-content affordance respects keyboard users */
+:focus:not(:focus-visible){ outline:none; }
+
+/* Touch targets ≥ 44px on phones (WCAG / Apple HIG) */
+@media (max-width:768px){
+  .nav__mobile-links a,.footer__nav a{ min-height:44px; display:inline-flex; align-items:center; }
+  .faq__q{ min-height:52px; }
+  .theme-toggle,.nav__hamburger{ min-width:44px; min-height:44px; }
+}
+
+@media (hover:none){ .rx-reveal{display:none} .industries__list:hover .industries__item{opacity:1} }
+@media (prefers-reduced-motion:reduce){
+  .rx-reveal,.rx-cliphide,.rx-up{ transition:none!important }
+  .rx-cliphide{clip-path:none!important} .rx-up{opacity:1;transform:none}
+  .rx-img img{ transform:none!important }
+  [data-rx-magnetic]{ transform:none!important }
+}
