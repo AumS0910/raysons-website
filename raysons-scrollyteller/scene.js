@@ -9,8 +9,12 @@ import { UnrealBloomPass } from 'https://unpkg.com/three@0.160.0/examples/jsm/po
 import { RoomEnvironment } from 'https://unpkg.com/three@0.160.0/examples/jsm/environments/RoomEnvironment.js';
 
 const canvas = document.getElementById('gl');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:false, powerPreference:'high-performance', preserveDrawingBuffer:true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+// Device tier: throttle particle count, bloom resolution, antialias and pixel
+// ratio on phones/tablets so the foundry holds framerate on mobile Safari.
+const MOBILE = matchMedia('(pointer:coarse)').matches || innerWidth < 760;
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:!MOBILE, alpha:false, powerPreference:'high-performance', preserveDrawingBuffer:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE ? 1.5 : 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
@@ -44,7 +48,7 @@ scene.add(castLight);
 // ============================================================
 //  EMBERS — drifting sparks that follow the camera
 // ============================================================
-const EMBER_N = 900;
+const EMBER_N = MOBILE ? 320 : 900;
 const emGeo = new THREE.BufferGeometry();
 const emPos = new Float32Array(EMBER_N*3);
 const emVel = new Float32Array(EMBER_N);
@@ -184,7 +188,7 @@ sparks.position.y=-2.4; pour.add(sparks);
 scene.add(pour);
 
 // ============================================================
-//  HERO POUR — V1 ladle pour (frames2 image sequence) on a 3D
+//  HERO POUR — hero2 frame sequence (from hero2.mp4) on a 3D
 //  billboard plane. Hides the procedural pour above. The plane
 //  faces the camera and scrubs frame index from scroll progress;
 //  additive blending drops the dark surround so only the molten
@@ -192,13 +196,31 @@ scene.add(pour);
 // ============================================================
 pour.visible = false;
 
-const POUR_N = 240;
-const pourImgs = new Array(POUR_N);
-for (let i = 0; i < POUR_N; i++) {
-  const im = new Image();
-  im.src = '/frames2/ezgif-frame-' + String(i + 1).padStart(3, '0') + '.jpg';
-  pourImgs[i] = im;
-}
+// hero2 frame sequence (extracted from hero2.mp4), scrubbed by scroll for a
+// buttery frame-by-frame pour. Relative path so it resolves in dev
+// (/raysons-scrollyteller/hero2/) AND in the static deploy (root -> /hero2/).
+// Asset load tracker — the loader bar in app.js gates on real decode counts
+// (not a fake timer) so the user never scrolls into a blank billboard.
+const Assets = (window.__assets = { hero: 0, valve: 0, bore: 0, heroN: 240, valveN: 300, boreN: 240, fail: 0 });
+
+const HERO_N = 240;
+const heroImgs = new Array(HERO_N);
+// Throttled loader (max 8 in flight). Firing all 240 fetches at once floods the
+// event loop with promise microtasks and starves the loader's setInterval — which
+// is what stalled the reveal for 15-30s. 8-at-a-time keeps the timer responsive.
+(function loadHero(){
+  let next = 0, active = 0; const CONC = 8;
+  function pump(){
+    while (active < CONC && next < HERO_N){
+      const i = next++; active++;
+      fetch('hero2/ezgif-frame-' + String(i + 1).padStart(3, '0') + '.jpg')
+        .then(r => r.blob()).then(bl => createImageBitmap(bl, { resizeWidth: 1280, resizeQuality: 'high' }))
+        .then(bm => { heroImgs[i] = bm; Assets.hero++; }).catch(() => { Assets.fail++; })
+        .finally(() => { active--; pump(); });
+    }
+  }
+  pump();
+})();
 const pourCanvas = document.createElement('canvas');
 pourCanvas.width = 1280; pourCanvas.height = 720;
 const pourCtx = pourCanvas.getContext('2d');
@@ -227,27 +249,24 @@ pourPlane.renderOrder = -1; // draw before embers so sparks cross in front of th
 const _pourDir = new THREE.Vector3();
 const POUR_DIST = 18; // units in front of the camera
 
-let _pourDrawn = -1;
-function drawPourFrame(idx) {
-  idx = Math.max(0, Math.min(POUR_N - 1, idx | 0));
-  if (idx === _pourDrawn) return;
-  const im = pourImgs[idx];
-  if (!im || !im.complete || !im.naturalWidth) return;
+// Scrub the hero frame sequence by scroll (cover-fit onto the canvas texture).
+let _heroDrawn = -1;
+function drawHeroFrame(idx) {
+  idx = Math.max(0, Math.min(HERO_N - 1, idx | 0));
+  if (idx === _heroDrawn) return;
+  const im = heroImgs[idx]; if (!im) return;
   const cw = pourCanvas.width, ch = pourCanvas.height;
   pourCtx.fillStyle = '#000'; pourCtx.fillRect(0, 0, cw, ch);
-  const s = Math.max(cw / im.naturalWidth, ch / im.naturalHeight);
-  const w = im.naturalWidth * s, h = im.naturalHeight * s;
-  pourCtx.drawImage(im, (cw - w) / 2, (ch - h) / 2, w, h);
-  pourTex.needsUpdate = true;
-  _pourDrawn = idx;
+  const s = Math.max(cw / im.width, ch / im.height);
+  pourCtx.drawImage(im, (cw - im.width*s)/2, (ch - im.height*s)/2, im.width*s, im.height*s);
+  pourTex.needsUpdate = true; _heroDrawn = idx;
 }
 function updatePour(p) {
-  // Lock the pour as the HERO: it lives a fixed distance in front of the camera
-  // through the whole opening, plays its full pour as you scroll (0 -> 0.26),
-  // then fades out as the flanged hub casting takes over (~0.26 -> 0.31).
-  const fp = _clamp01(p / 0.40);
-  drawPourFrame(fp * (POUR_N - 1));
-  const op = _clamp01((0.48 - p) / 0.06);
+  // Lock the pour as the HERO: a fixed distance in front of the camera through the
+  // opening, scrubbing the frame sequence, then fading out BEFORE the casting beat
+  // so it never overlaps the assembly.
+  drawHeroFrame(_clamp01(p / 0.40) * (HERO_N - 1));
+  const op = _clamp01((0.46 - p) / 0.06);
   pourPlane.material.uniforms.uOpacity.value = op;
   pourPlane.visible = op > 0.001;
   if (pourPlane.visible) {
@@ -270,25 +289,45 @@ function updatePour(p) {
 //  solid metal, not a glow) floats the part cleanly in the void and
 //  scrubs the rotation across the casting beat (~0.40 -> 0.66).
 // ============================================================
-const VALVE_N = 240;
+const VALVE_N = 300;
 const valveImgs = new Array(VALVE_N);
-for (let i = 0; i < VALVE_N; i++) {
-  fetch('/assembly-frames/ezgif-frame-' + String(i + 1).padStart(3, '0') + '.jpg')
-    .then(r => r.blob()).then(b => createImageBitmap(b, { resizeWidth: 720, resizeQuality: 'high' }))
-    .then(bm => { valveImgs[i] = bm; }).catch(() => {});
+// assembly-frames2 (landscape) — the finished part assembling, shown at the CASTING
+// beat AFTER the pour, replacing the old portrait assembly-frames. Deferred 2s so it
+// doesn't compete with the hero loader. Relative path resolves on dev + static deploy.
+function loadValveFrames(){
+  for (let i = 0; i < VALVE_N; i++) {
+    fetch('assembly-frames2/ezgif-frame-' + String(i + 1).padStart(3, '0') + '.jpg')
+      .then(r => r.blob()).then(b => createImageBitmap(b, { resizeWidth: 1280, resizeQuality: 'high' }))
+      .then(bm => { valveImgs[i] = bm; Assets.valve++; }).catch(() => { Assets.fail++; });
+  }
 }
+setTimeout(loadValveFrames, 2000);
 const valveCanvas = document.createElement('canvas');
-valveCanvas.width = 720; valveCanvas.height = 1280;
+valveCanvas.width = 1280; valveCanvas.height = 720;   // LANDSCAPE 16:9 (new assembly-frames2 footage)
 const valveCtx = valveCanvas.getContext('2d');
 const valveTex = new THREE.CanvasTexture(valveCanvas);
 valveTex.colorSpace = THREE.SRGBColorSpace;
-// The footage is on PURE BLACK — no key needed (keying was eating the cast
-// components' mid-tones and making them look dull). Normal blending keeps every
-// part fresh and fully-toned; the black background blends into the void on its own.
-const valveMat = new THREE.MeshBasicMaterial({ map: valveTex, transparent: true, opacity: 0, depthWrite: false, toneMapped: true });
-// Hub-sized (not a full-screen overlay): sit it where the flanged hub was so the
-// casting camera frames it as a part in the scene.
-const valvePlane = new THREE.Mesh(new THREE.PlaneGeometry(5.5, 9.8), valveMat); // 9:16 portrait
+// New footage sits on a genuinely BLACK stage (sampled edges ≈ rgb 3/255). A soft
+// dark-key alphas out ONLY the near-black background (luma < ~0.11) so the part
+// floats cleanly in the void with no rectangle edge — while every mid-tone of the
+// casting stays fully opaque and fresh (no dulling, the old luma-key's failure mode).
+const valveMat = new THREE.ShaderMaterial({
+  uniforms: { uTex:{value:valveTex}, uOpacity:{value:0} },
+  transparent: true, depthWrite: false,
+  vertexShader: 'varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
+  fragmentShader: `
+    uniform sampler2D uTex; uniform float uOpacity; varying vec2 vUv;
+    void main(){
+      vec4 t = texture2D(uTex, vUv);
+      float luma = dot(t.rgb, vec3(0.299, 0.587, 0.114));
+      float a = smoothstep(0.025, 0.11, luma);   // key out near-black bg, keep the part
+      gl_FragColor = vec4(t.rgb, a * uOpacity);
+    }`
+});
+// Landscape 16:9 billboard sized to sit in the casting framing with margin on all
+// sides, so the FULL exploded assembly is visible (the old 9:16 plane cropped the
+// wide spread). Camera-locked + centered in updateValve so it never drifts off-frame.
+const valvePlane = new THREE.Mesh(new THREE.PlaneGeometry(16, 9), valveMat);
 valvePlane.position.set(0, 0.4, -92);
 scene.add(valvePlane);
 let _valveDrawn = -1;
@@ -304,12 +343,14 @@ function drawValveFrame(idx){
 }
 function updateValve(p){
   const t = _clamp01((p - 0.48) / (0.63 - 0.48));   // SLOWER assembly — spread over more scroll
+  // Full assembly: exploded components -> one casting. (The widest-explosion frames
+  // are clipped L/R in the SOURCE render; only a re-render with margin fixes that.)
   drawValveFrame(t * (VALVE_N - 1));
   // Fade in after the pour clears, hold the assembled part, then CROSS-FADE OUT
   // into the bore (0.62 -> 0.67) so it dissolves into looking down its own bore.
   const lin = Math.min(_clamp01((p - 0.48) / 0.05), _clamp01((0.67 - p) / 0.05));
   const op = lin * lin * (3 - 2 * lin);
-  valveMat.opacity = op;
+  valveMat.uniforms.uOpacity.value = op;
   valvePlane.visible = op > 0.001;
   if (valvePlane.visible) {
     // Camera-locked + centered so the components never drift off-frame as the
@@ -328,11 +369,19 @@ function updateValve(p){
 // ============================================================
 const BORE_N = 240;
 const boreImgs = new Array(BORE_N);
-for (let i = 0; i < BORE_N; i++) {
-  fetch('/bore-frames/ezgif-frame-' + String(i + 1).padStart(3, '0') + '.jpg')
-    .then(r => r.blob()).then(b => createImageBitmap(b, { resizeWidth: 720, resizeQuality: 'high' }))
-    .then(bm => { boreImgs[i] = bm; }).catch(() => {});
+// Bore frames only appear at ~62% scroll, so defer them — loading them at init
+// alongside the hero set jams the connection pool and stalls the loader. 3s in,
+// the hero is already streaming and the page has revealed.
+let _boreLoadStarted = false;
+function loadBoreFrames(){
+  if (_boreLoadStarted) return; _boreLoadStarted = true;
+  for (let i = 0; i < BORE_N; i++) {
+    fetch('/bore-frames/ezgif-frame-' + String(i + 1).padStart(3, '0') + '.jpg')
+      .then(r => r.blob()).then(b => createImageBitmap(b, { resizeWidth: 720, resizeQuality: 'high' }))
+      .then(bm => { boreImgs[i] = bm; Assets.bore++; }).catch(() => { Assets.fail++; });
+  }
 }
+setTimeout(loadBoreFrames, 3000);
 const boreCanvas = document.createElement('canvas');
 boreCanvas.width = 720; boreCanvas.height = 1280;   // portrait — hub-sized porthole, not full-screen
 const boreCtx = boreCanvas.getContext('2d');
@@ -599,9 +648,11 @@ function applyProgress(g){
   const a=KF[i], b=KF[i+1];
   _p.set(a.p[0]+(b.p[0]-a.p[0])*t, a.p[1]+(b.p[1]-a.p[1])*t, a.p[2]+(b.p[2]-a.p[2])*t);
   _l.set(a.l[0]+(b.l[0]-a.l[0])*t, a.l[1]+(b.l[1]-a.l[1])*t, a.l[2]+(b.l[2]-a.l[2])*t);
-  // gentle parallax sway
-  _p.x += Math.sin(clock.elapsedTime*0.3)*0.25;
-  _p.y += Math.cos(clock.elapsedTime*0.24)*0.18;
+  // gentle parallax sway (skipped for reduced-motion users)
+  if (!REDUCED){
+    _p.x += Math.sin(clock.elapsedTime*0.3)*0.25;
+    _p.y += Math.cos(clock.elapsedTime*0.24)*0.18;
+  }
   camera.position.lerp(_p, 0.11);
   _tmp.copy(_l); camera.lookAt(_tmp);
 
@@ -619,7 +670,7 @@ function applyProgress(g){
 // ============================================================
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight), 0.9, 0.7, 0.18);
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth*(MOBILE?0.5:1), innerHeight*(MOBILE?0.5:1)), MOBILE?0.7:0.9, 0.7, 0.18);
 composer.addPass(bloom);
 
 // ============================================================
@@ -627,6 +678,9 @@ composer.addPass(bloom);
 // ============================================================
 function tick(){
   requestAnimationFrame(tick);
+  // Don't render behind the opaque loader — rendering the bloom scene full-speed
+  // while hidden starves the loader's timer and stalls the reveal. Wait for 'entered'.
+  if (!document.body.classList.contains('entered')) return;
   const dt=Math.min(0.05, clock.getDelta()); const et=clock.elapsedTime;
   progress += (targetProgress-progress)*0.30;  // light: Lenis already smooths scroll; camera lerp below is the cinematic easing
   emMat.uniforms.uTime.value=et;
@@ -685,10 +739,7 @@ window.Foundry = {
 };
 window.__dbg = { camera, casting, hub, hubWire, pourPlane, THREE,
   getState: () => ({ progress, targetProgress }),
-  pourState: () => {
-    let loaded = 0; for (let i=0;i<POUR_N;i++) if (pourImgs[i] && pourImgs[i].complete && pourImgs[i].naturalWidth) loaded++;
-    return { framesLoaded: loaded, drawn: _pourDrawn, visible: pourPlane.visible, opacity: +pourPlane.material.opacity.toFixed(3), pos: pourPlane.position.toArray().map(n=>+n.toFixed(1)) };
-  } };
+  pourState: () => { let n=0; for(let i=0;i<HERO_N;i++) if(heroImgs[i]) n++; return { heroLoaded:n, drawn:_heroDrawn, visible:pourPlane.visible, opacity:+pourPlane.material.uniforms.uOpacity.value.toFixed(2) }; } };
 addEventListener('resize', ()=>window.Foundry.resize());
 tick();
 window.dispatchEvent(new Event('foundry-ready'));

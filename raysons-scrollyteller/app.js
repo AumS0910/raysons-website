@@ -6,8 +6,16 @@
   const N = chapters.length;               // overlay chapters
   const KF_SEG = N - 1;                    // matches camera segments in scene.js
   const scrollSpace = document.getElementById('scroll-space');
+
+  // ---- device / capability flags ----
+  const MOBILE   = matchMedia('(pointer:coarse)').matches || innerWidth < 760;
+  const REDUCED  = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const NO_WEBGL = !(function(){ try{ const c=document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl')||c.getContext('experimental-webgl'))); }catch(e){ return false; } })();
+  if (NO_WEBGL) document.body.classList.add('no-webgl');
+  const VH_PER = MOBILE ? 72 : 100;        // shorter journey on phones: faster scrub, less scrolling
+
   // total scrollable height: ~ one viewport per chapter transition + tail
-  scrollSpace.style.height = (N * 100 + 40) + 'vh';
+  scrollSpace.style.height = (N * VH_PER + 40) + 'vh';
 
   const progTrack = document.querySelector('.prog .track i');
   const progCur   = document.querySelector('.prog .cur');
@@ -16,6 +24,9 @@
   const ctaQuote  = document.getElementById('cta-quote');
   const hudTemp   = document.getElementById('hud-temp');
   const hudStage  = document.getElementById('hud-stage');
+  const progEl    = document.querySelector('.prog');
+  const hudEl     = document.querySelector('.hud');
+
   const STAGES = ['STANDBY','CHARGE','MELT · 1450°C','CAST','MACHINE','SPEC','GLOBAL'];
 
   // ============================================================
@@ -28,7 +39,7 @@
   let progress = 0, lastActive = -1;
   gsap.registerPlugin(ScrollTrigger);
 
-  const lenis = new Lenis({ lerp: 0.09, smoothWheel: true, wheelMultiplier: 1.0 });
+  const lenis = new Lenis(REDUCED ? { lerp: 1, smoothWheel: false } : { lerp: 0.09, smoothWheel: true, wheelMultiplier: 1.0 });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((t)=> lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
@@ -79,6 +90,9 @@
     cue.classList.toggle('hide', pr > 0.03);
     legal.classList.toggle('show', pr > 0.965);
     if (ctaQuote) ctaQuote.classList.toggle('visible', pr > 0.08);
+    // Clear the side chrome at the trust finale so the stage is uncluttered.
+    if (progEl) progEl.classList.toggle('dim', pr > 0.93);
+    if (hudEl)  hudEl.classList.toggle('dim', pr > 0.93);
   }
 
   ScrollTrigger.create({
@@ -87,7 +101,9 @@
     end: 'bottom bottom',
     // Gentle snap: nudges to the nearest beat once the wheel settles, but never
     // blocks free scrubbing through the pour. Tunable / removable.
-    snap: { snapTo: 1 / KF_SEG, duration: { min: 0.2, max: 0.6 }, delay: 0.12, ease: 'power2.inOut' },
+    // Snap to the nearest static beat once the wheel settles — but leave the pour
+    // (0 → ~0.42) completely free so the molten stream can be slow-scrubbed.
+    snap: { snapTo:(v)=> v < 0.42 ? v : Math.round(v*KF_SEG)/KF_SEG, duration:{ min:0.2, max:0.6 }, delay:0.12, ease:'power2.inOut' },
     onUpdate: (self)=>{
       progress = self.progress;
       if (window.Foundry) window.Foundry.setProgress(progress);
@@ -95,7 +111,7 @@
     },
   });
 
-  addEventListener('resize', ()=>{ scrollSpace.style.height = (N*100+40)+'vh'; ScrollTrigger.refresh(); });
+  addEventListener('resize', ()=>{ scrollSpace.style.height = (N*VH_PER+40)+'vh'; ScrollTrigger.refresh(); });
 
   // persist scroll position (survives refresh during iteration)
   let saveT=null;
@@ -123,22 +139,35 @@
   const loader = document.getElementById('loader');
   const bar = loader.querySelector('.loader-bar i');
   const pct = loader.querySelector('.loader-pct');
-  let p = 0;
+  let p = 0, revealed = false;
+  const T0 = performance.now();
+  const MAX_WAIT = 4500; // hard ceiling: never trap the user behind streaming frames
   function startReveal(){
+    if (revealed) return; revealed = true;
     loader.classList.add('done');
     document.body.classList.add('entered');
     ScrollTrigger.refresh();
     restoreScroll();
     applyChrome(progress);
     // Split once fonts are settled (correct word wrapping), then reveal current beat.
-    ((document.fonts && document.fonts.ready) || Promise.resolve()).then(()=>{ initSplit(); revealChapter(Math.max(0, lastActive)); });
+    ((document.fonts && document.fonts.ready) || Promise.resolve()).then(()=>{ if(!REDUCED) initSplit(); revealChapter(Math.max(0, lastActive)); });
   }
   const li = setInterval(()=>{
-    p += Math.random()*7 + 4;
-    if(p >= 100){ p = 100; clearInterval(li); setTimeout(startReveal, 520); }
-    bar.style.width = p + '%';
-    pct.textContent = Math.floor(p).toString().padStart(3,'0');
-  }, 82);
+    if (NO_WEBGL){ clearInterval(li); bar.style.width='100%'; pct.textContent='100'; setTimeout(startReveal, 200); return; }
+    const a = window.__assets;
+    const elapsed = performance.now() - T0;
+    // Bar reflects whichever is further along: hero decode or a gentle time crawl,
+    // so it always feels alive while the rest of the frames stream in behind it.
+    const heroFrac = a ? a.hero / a.heroN : 0;
+    const target = Math.max(heroFrac, Math.min(1, elapsed / MAX_WAIT)) * 100;
+    p = Math.max(p, p + (target - p) * 0.2);
+    // Reveal as soon as the OPENING frames are decoded (the rest stream while you read
+    // the hero). Gating on all 240 frames made cold loads hang 30s+ on a slow server.
+    const ready = (a && a.hero >= 16) || elapsed > MAX_WAIT;
+    if (ready){ p = 100; clearInterval(li); setTimeout(startReveal, 300); }
+    bar.style.width = Math.min(100, p) + '%';
+    pct.textContent = Math.floor(Math.min(100, p)).toString().padStart(3,'0');
+  }, 80);
 
   // ============================================================
   //  CUSTOM CURSOR + magnetic buttons

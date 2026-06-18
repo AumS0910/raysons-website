@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Request a Quote — Raysons Shell Cast</title>
+<meta name="description" content="Request a casting quote from Raysons Shell Cast — shell moulded & no-bake iron castings, 0.5 kg to 500 kg. Engineering response within 48 hours. Kolhapur, India." />
+<link rel="stylesheet" href="styles.css" />
+<style>
+  /* ── Enquire page: reuses the molten tokens from styles.css ── */
+  html{scroll-behavior:smooth}
+  body{cursor:auto;overflow-x:hidden}
+  .eq-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(60% 50% at 18% 10%, rgba(255,106,26,.14), transparent 60%),
+      radial-gradient(50% 60% at 90% 100%, rgba(194,48,10,.16), transparent 60%),
+      var(--bg);}
+  .eq-grain{position:fixed;inset:-50%;z-index:1;pointer-events:none;opacity:.045;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+  .eq-nav{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
+    padding:22px clamp(20px,4vw,56px);}
+  .eq-nav .brand{display:flex;align-items:center;gap:12px;font-weight:600;font-size:15px;color:var(--ink)}
+  .eq-nav .brand span{font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:var(--ink-dim);border:1px solid var(--line-strong);padding:3px 7px;border-radius:2px}
+  .eq-back{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim);display:inline-flex;align-items:center;gap:8px;transition:color .3s}
+  .eq-back:hover{color:var(--molten-hot)}
+
+  .eq-wrap{position:relative;z-index:5;max-width:1240px;margin:0 auto;
+    padding:clamp(120px,16vh,180px) clamp(20px,6vw,72px) 90px;
+    display:grid;grid-template-columns:1fr 1.05fr;gap:clamp(40px,6vw,90px);align-items:start}
+  @media(max-width:900px){.eq-wrap{grid-template-columns:1fr;gap:48px}}
+
+  /* left rail */
+  .eq-eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--molten);
+    display:flex;align-items:center;gap:12px;margin-bottom:24px}
+  .eq-eyebrow::before{content:"";width:26px;height:1px;background:var(--molten)}
+  .eq-title{font-family:var(--serif);font-weight:500;line-height:.98;letter-spacing:-.02em;
+    font-size:clamp(40px,6vw,82px);text-wrap:balance}
+  .eq-title em{font-style:italic;font-weight:500;color:var(--bronze-lite)}
+  .eq-sub{font-size:clamp(16px,1.4vw,20px);line-height:1.6;color:#c9beb1;font-weight:400;max-width:44ch;margin-top:24px}
+  .eq-contact{margin-top:46px;display:grid;grid-template-columns:1fr 1fr;gap:26px 36px}
+  .eq-contact .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px}
+  .eq-contact .v{font-size:15px;color:var(--ink-dim);line-height:1.6}
+  .eq-contact a.v:hover,.eq-contact .v a:hover{color:var(--molten-hot)}
+  .eq-badges{margin-top:36px;display:flex;flex-wrap:wrap;gap:10px}
+  .eq-badges span{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--ink-dim);border:1px solid var(--line);padding:8px 13px;border-radius:40px}
+
+  /* form card */
+  .eq-form{background:rgba(20,14,10,.55);border:1px solid var(--line);border-radius:18px;
+    padding:clamp(26px,3vw,40px);backdrop-filter:blur(10px);box-shadow:0 30px 80px rgba(0,0,0,.45)}
+  .eq-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:560px){.eq-grid{grid-template-columns:1fr}}
+  .field{display:flex;flex-direction:column;gap:8px}
+  .field.full{grid-column:1 / -1}
+  .field label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim)}
+  .field label .req{color:var(--molten)}
+  .field input,.field select,.field textarea{
+    background:rgba(7,5,4,.6);border:1px solid var(--line);border-radius:10px;
+    color:var(--ink);font-family:var(--sans);font-size:15px;padding:13px 14px;width:100%;
+    transition:border-color .25s,box-shadow .25s;}
+  .field textarea{resize:vertical;min-height:108px}
+  .field select{cursor:pointer;appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%23ff6a1a' stroke-width='1.6'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--bronze-lite);box-shadow:0 0 0 3px rgba(166,121,46,.18)}
+  .field.invalid input,.field.invalid select,.field.invalid textarea{border-color:var(--molten-deep)}
+  .field .err{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:#ff8a5a;display:none}
+  .field.invalid .err{display:block}
+  .eq-note{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-faint);margin-top:6px;line-height:1.6}
+  .eq-submit{display:inline-flex;align-items:center;gap:14px;border:none;cursor:pointer;
+    font-family:var(--mono);font-size:13px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
+    background:linear-gradient(180deg,var(--molten-hot),var(--molten));color:#180c03;
+    padding:17px 30px;border-radius:46px;margin-top:8px;width:100%;justify-content:center;
+    box-shadow:0 10px 36px rgba(255,106,26,.3);transition:box-shadow .3s,transform .2s}
+  .eq-submit:hover{box-shadow:0 16px 52px rgba(255,106,26,.5)}
+  .eq-submit:active{transform:translateY(1px)}
+  .eq-submit[disabled]{opacity:.6;cursor:wait}
+
+  /* success state */
+  .eq-success{display:none;text-align:center;padding:24px 8px}
+  .eq-success.show{display:block;animation:eqfade .6s ease}
+  @keyframes eqfade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .eq-success .tick{width:64px;height:64px;border-radius:50%;margin:0 auto 22px;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,var(--molten-hot),var(--molten));color:#180c03;font-size:30px}
+  .eq-success h3{font-family:var(--serif);font-size:30px;font-weight:500;letter-spacing:-.02em}
+  .eq-success p{color:var(--ink-dim);margin-top:12px;font-size:15px;line-height:1.6;max-width:40ch;margin-left:auto;margin-right:auto}
+
+  .eq-foot{position:relative;z-index:5;text-align:center;padding:26px 14px;
+    font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div class="eq-bg"></div>
+<div class="eq-grain"></div>
+
+<nav class="eq-nav">
+  <a class="brand" href="index.html"><b>RAYSONS</b> <span>SHELL CAST</span></a>
+  <a class="eq-back" href="index.html">← Back to the foundry</a>
+</nav>
+
+<div class="eq-wrap">
+  <!-- ── left: pitch + contact ── -->
+  <div>
+    <div class="eq-eyebrow">Request a Quote</div>
+    <h1 class="eq-title">Let's build the<br/><em>casting brief.</em></h1>
+    <p class="eq-sub">Share your drawing, material grade, weight range and annual requirement. Our engineering team responds within 48 hours.</p>
+
+    <div class="eq-contact">
+      <div>
+        <div class="k">Email</div>
+        <a class="v" href="mailto:industries@raysonsgroup.com">industries@raysonsgroup.com</a>
+      </div>
+      <div>
+        <div class="k">Phone / WhatsApp</div>
+        <a class="v" href="tel:+919999999999">+91 XXXXX XXXXX</a>
+      </div>
+      <div>
+        <div class="k">Foundry</div>
+        <div class="v">MIDC Shiroli, Kolhapur<br/>Maharashtra 416122, India</div>
+      </div>
+      <div>
+        <div class="k">Response time</div>
+        <div class="v">Within 48 hours</div>
+      </div>
+    </div>
+
+    <div class="eq-badges">
+      <span>ISO 9001:2015</span><span>0.5 kg – 500 kg</span><span>Shell · No-Bake</span><span>Export-ready</span>
+    </div>
+  </div>
+
+  <!-- ── right: RFQ form ── -->
+  <div class="eq-form">
+    <form id="rfq" novalidate>
+      <div class="eq-grid">
+        <div class="field">
+          <label>Name <span class="req">*</span></label>
+          <input type="text" name="name" autocomplete="name" required />
+          <span class="err">Please enter your name.</span>
+        </div>
+        <div class="field">
+          <label>Company</label>
+          <input type="text" name="company" autocomplete="organization" />
+          <span class="err"></span>
+        </div>
+        <div class="field">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" name="email" autocomplete="email" required />
+          <span class="err">Please enter a valid email.</span>
+        </div>
+        <div class="field">
+          <label>Phone</label>
+          <input type="tel" name="phone" autocomplete="tel" />
+          <span class="err"></span>
+        </div>
+        <div class="field">
+          <label>Material grade</label>
+          <select name="material">
+            <option value="">Select…</option>
+            <option>Grey CI · IS 210</option>
+            <option>SG / Ductile · IS 1865</option>
+            <option>SiMo Ductile</option>
+            <option>ADI</option>
+            <option>Not sure — advise me</option>
+          </select>
+          <span class="err"></span>
+        </div>
+        <div class="field">
+          <label>Process</label>
+          <select name="process">
+            <option value="">Select…</option>
+            <option>Shell moulding</option>
+            <option>No-bake casting</option>
+            <option>Not sure — advise me</option>
+          </select>
+          <span class="err"></span>
+        </div>
+        <div class="field">
+          <label>Weight range</label>
+          <input type="text" name="weight" placeholder="e.g. 5–25 kg" />
+          <span class="err"></span>
+        </div>
+        <div class="field">
+          <label>Annual quantity</label>
+          <input type="text" name="quantity" placeholder="e.g. 5,000 pcs / yr" />
+          <span class="err"></span>
+        </div>
+        <div class="field full">
+          <label>Project details <span class="req">*</span></label>
+          <textarea name="message" required placeholder="Part description, tolerances, machining needs, target timeline…"></textarea>
+          <span class="err">Tell us a little about the part.</span>
+          <p class="eq-note">Have a drawing (PDF / STEP / DWG)? Mention it here — we'll reply with a secure upload link, or email it directly to industries@raysonsgroup.com.</p>
+        </div>
+      </div>
+
+      <button type="submit" class="eq-submit" id="rfq-submit">Send enquiry <span>→</span></button>
+    </form>
+
+    <!-- success panel -->
+    <div class="eq-success" id="rfq-success">
+      <div class="tick">✓</div>
+      <h3>Enquiry received.</h3>
+      <p>Thank you — our engineering team will review your brief and respond within 48 hours.</p>
+    </div>
+  </div>
+</div>
+
+<div class="eq-foot">© 2026 Raysons Shell Cast · Precision Foundry · Kolhapur, Maharashtra, India</div>
+
+<script>
+(function(){
+  // ────────────────────────────────────────────────────────────────
+  //  RFQ submit handler.
+  //  TODO (wire backend): set ENDPOINT to a Formspree/Basin/Getform URL
+  //  (POST, JSON). While it's empty the form validates and shows the
+  //  success state locally so the UX is complete — no submissions are
+  //  sent yet. To go live, e.g.:
+  //    const ENDPOINT = 'https://formspree.io/f/XXXXXXX';
+  //  (Formspree accepts the FormData below as-is and emails it to you.)
+  // ────────────────────────────────────────────────────────────────
+  const ENDPOINT = '';
+
+  const form    = document.getElementById('rfq');
+  const success = document.getElementById('rfq-success');
+  const btn     = document.getElementById('rfq-submit');
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function setInvalid(field, bad){ field.classList.toggle('invalid', bad); }
+
+  function validate(){
+    let ok = true;
+    form.querySelectorAll('.field').forEach(f=>{
+      const ctrl = f.querySelector('input,select,textarea');
+      if(!ctrl || !ctrl.hasAttribute('required')) return;
+      let bad = !ctrl.value.trim();
+      if(ctrl.type === 'email' && ctrl.value.trim() && !emailRe.test(ctrl.value.trim())) bad = true;
+      setInvalid(f, bad);
+      if(bad) ok = false;
+    });
+    return ok;
+  }
+
+  // clear the error state as the user fixes a field
+  form.addEventListener('input', e=>{
+    const f = e.target.closest('.field');
+    if(f && f.classList.contains('invalid')) setInvalid(f, false);
+  });
+
+  form.addEventListener('submit', async e=>{
+    e.preventDefault();
+    if(!validate()){
+      form.querySelector('.field.invalid input,.field.invalid select,.field.invalid textarea')?.focus();
+      return;
+    }
+    const data = new FormData(form);
+
+    if(ENDPOINT){
+      btn.disabled = true; btn.textContent = 'Sending…';
+      try{
+        const res = await fetch(ENDPOINT, { method:'POST', body:data, headers:{ Accept:'application/json' } });
+        if(!res.ok) throw new Error('bad status');
+      }catch(err){
+        btn.disabled = false; btn.innerHTML = 'Try again <span>→</span>';
+        alert('Sorry — something went wrong sending your enquiry. Please email industries@raysonsgroup.com directly.');
+        return;
+      }
+    } else {
+      // No endpoint yet — log the payload so you can verify the shape.
+      console.log('RFQ (no endpoint wired):', Object.fromEntries(data.entries()));
+    }
+
+    form.style.display = 'none';
+    success.classList.add('show');
+    success.scrollIntoView({ behavior:'smooth', block:'center' });
+  });
+})();
+</script>
+</body>
+</html>

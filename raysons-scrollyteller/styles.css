@@ -2,21 +2,24 @@
    RAYSONS — Through the Foundry  ·  Dark Molten direction
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Montserrat:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
 :root{
-  --bg:#070504;
+  --bg:#0a0807;            /* warm near-black */
   --ink:#f4ece2;
   --ink-dim:#9a8e80;
-  --ink-faint:#6b6056;
-  --molten:#ff6a1a;
+  --ink-faint:#7a6e62;
+  --molten:#ff6a1a;        /* accent — fire / the pour */
   --molten-hot:#ffb24a;
   --molten-deep:#c2300a;
+  --bronze:#a6792e;        /* accent — precision / the finished part */
+  --bronze-lite:#c99a4e;   /* bronze for small text emphasis (contrast-safe) */
+  --bronze-deep:#6e4f1c;
   --iron:#3a342e;
-  --line:rgba(244,236,226,.12);
+  --line:rgba(244,236,226,.10);
   --line-strong:rgba(244,236,226,.22);
-  --serif:"Space Grotesk",sans-serif;
-  --sans:"Space Grotesk",-apple-system,sans-serif;
+  --serif:"Cormorant",Georgia,"Times New Roman",serif;
+  --sans:"Montserrat",-apple-system,BlinkMacSystemFont,sans-serif;
   --mono:"Space Mono",monospace;
 }
 
@@ -106,12 +109,10 @@ a{color:inherit;text-decoration:none}
 
 /* furnace HUD */
 .hud{
-  position:fixed;right:clamp(16px,3vw,40px);bottom:clamp(16px,3vw,38px);z-index:40;
   font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-dim);
-  text-align:right;line-height:1.9;pointer-events:none;
-  text-transform:uppercase;
+  text-align:left;line-height:1.9;pointer-events:none;text-transform:uppercase;
 }
-.hud .row{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.hud .row{display:flex;align-items:center;justify-content:flex-start;gap:8px}
 .hud .dot{width:6px;height:6px;border-radius:50%;background:var(--molten);box-shadow:0 0 10px var(--molten);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .hud b{color:var(--molten-hot);font-weight:700}
@@ -119,7 +120,6 @@ a{color:inherit;text-decoration:none}
 
 /* progress ticker — left */
 .prog{
-  position:fixed;left:clamp(16px,3vw,40px);bottom:clamp(16px,3vw,38px);z-index:40;
   font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--ink-faint);
   display:flex;align-items:center;gap:12px;pointer-events:none;text-transform:uppercase;
 }
@@ -153,12 +153,15 @@ a{color:inherit;text-decoration:none}
 
 /* sound toggle */
 .sound{
-  position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:41;
-  display:flex;align-items:center;gap:9px;cursor:none;pointer-events:auto;
+  display:inline-flex;align-items:center;gap:9px;cursor:none;pointer-events:auto;
   font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--ink-dim);text-transform:uppercase;
   background:rgba(10,7,5,.4);border:1px solid var(--line);padding:7px 13px;border-radius:40px;backdrop-filter:blur(6px);
   transition:color .3s,border-color .3s;
 }
+/* consolidated bottom-left instrument cluster */
+.readout{position:fixed;left:clamp(16px,3vw,40px);bottom:clamp(16px,3vw,34px);z-index:40;
+  display:flex;flex-direction:column;align-items:flex-start;gap:13px;pointer-events:none}
+@media(max-width:640px){.readout{display:none}}
 .sound:hover{color:var(--ink);border-color:var(--line-strong)}
 .eq{display:flex;align-items:flex-end;gap:2px;height:11px}
 .eq i{width:2px;height:30%;background:currentColor;transition:height .2s}
@@ -189,19 +192,27 @@ a{color:inherit;text-decoration:none}
 }
 .eyebrow::before{content:"";width:26px;height:1px;background:var(--molten)}
 .display{
-  font-family:var(--serif);font-weight:500;line-height:.95;letter-spacing:-.02em;
-  font-size:clamp(44px,8.4vw,124px);text-wrap:balance;
+  font-family:var(--serif);font-weight:600;line-height:1.0;letter-spacing:-.01em;
+  font-size:clamp(50px,9vw,150px);text-wrap:balance;
   /* legibility halo — keeps headings readable over the bright molten pour */
   text-shadow:0 2px 30px rgba(7,5,4,.92), 0 0 12px rgba(7,5,4,.7);
 }
-.display .thin{font-weight:300;color:var(--ink-dim)}
-.display em{font-style:normal;color:var(--molten-hot)}
+.display .thin{font-weight:400;color:var(--ink-dim)}
+/* accent word: italic Cormorant — the couture move (was a flat orange swap) */
+.display em{font-style:italic;font-weight:500;color:var(--molten-hot)}
+/* precision beats tint the accent bronze instead of molten (pour→part story) */
+.display.cool em{color:var(--bronze-lite)}
 .lede{
-  font-size:clamp(17px,1.55vw,23px);line-height:1.55;color:var(--ink-dim);
-  max-width:46ch;margin-top:30px;font-weight:300;text-wrap:pretty;
-  text-shadow:0 1px 18px rgba(7,5,4,.8);
+  font-size:clamp(17px,1.55vw,23px);line-height:1.55;color:#c9beb1;
+  max-width:46ch;margin-top:30px;font-weight:400;text-wrap:pretty;
+  text-shadow:0 1px 18px rgba(7,5,4,.85);
 }
 .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--ink-faint);text-transform:uppercase}
+/* legacy / air pull-quote — italic Cormorant, a held breath under the heading */
+.pullquote{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--ink-dim);
+  font-size:clamp(19px,2.2vw,31px);line-height:1.4;max-width:26ch;margin:30px auto 0;text-align:center;text-wrap:balance;
+  text-shadow:0 1px 18px rgba(7,5,4,.8)}
+.pullquote b{color:var(--bronze-lite);font-weight:500;font-style:normal}
 
 /* staggered reveal of children when active */
 .chapter .rise{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
@@ -228,17 +239,19 @@ a{color:inherit;text-decoration:none}
 }
 
 /* stat strip */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:8px}
-.stats .s{background:var(--bg);padding:24px 22px}
-.stats .s .n{font-family:var(--serif);font-size:clamp(28px,3.4vw,46px);font-weight:500;letter-spacing:-.02em}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-top:1px solid rgba(166,121,46,.5);margin-top:8px}
+.stats .s{background:var(--bg);padding:30px 26px}
+.stats .s .n{font-family:var(--serif);font-size:clamp(30px,3.6vw,52px);font-weight:500;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .stats .s .n b{color:var(--molten-hot);font-weight:500}
 .stats .s .l{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-top:8px}
+/* tabular figures on the live readouts so counters don't jitter the layout */
+.prog .cur,#hud-temp{font-variant-numeric:tabular-nums}
 @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
 
 /* feature callouts (casting) */
 .feat{display:flex;flex-direction:column;gap:18px;max-width:360px}
 .feat .f{display:flex;gap:16px;align-items:baseline;padding-bottom:16px;border-bottom:1px solid var(--line)}
-.feat .f .i{font-family:var(--mono);font-size:12px;color:var(--molten);min-width:24px}
+.feat .f .i{font-family:var(--mono);font-size:12px;color:var(--bronze-lite);min-width:24px}
 .feat .f .t{font-size:16px;color:var(--ink)}
 .feat .f .t span{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:5px;letter-spacing:.05em}
 
@@ -252,17 +265,38 @@ a{color:inherit;text-decoration:none}
 @media(max-width:560px){.steps{grid-template-columns:1fr}}
 
 /* spec list */
-.specs{display:grid;grid-template-columns:1fr 1fr;gap:0;width:100%;margin-top:30px;border-top:1px solid var(--line)}
-.specs .sp{display:flex;justify-content:space-between;align-items:baseline;gap:20px;padding:18px 4px;border-bottom:1px solid var(--line)}
-.specs .sp .k{font-size:15px;font-weight:500}
-.specs .sp .v{font-family:var(--mono);font-size:12px;color:var(--ink-dim);text-align:right;letter-spacing:.04em}
-.specs .sp .v b{color:var(--molten-hot);font-weight:400}
+.specs{display:grid;grid-template-columns:1fr 1fr;gap:0;width:100%;margin-top:30px;border-top:1px solid rgba(166,121,46,.5)}
+.specs .sp{display:flex;justify-content:space-between;align-items:baseline;gap:20px;padding:22px 6px;border-bottom:1px solid var(--line)}
+.specs .sp .k{font-size:16px;font-weight:500}
+.specs .sp .v{font-family:var(--mono);font-size:12px;color:var(--ink-dim);text-align:right;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.specs .sp .v b{color:var(--bronze-lite);font-weight:700}
 @media(max-width:760px){.specs{grid-template-columns:1fr}}
 
 /* customers / sectors chips */
 .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px;max-width:760px}
 .chips span{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--ink-dim);border:1px solid var(--line);padding:9px 15px;border-radius:40px;transition:border-color .3s,color .3s}
-.chips span:hover{border-color:var(--molten);color:var(--ink)}
+.chips span:hover{border-color:var(--bronze-lite);color:var(--ink)}
+
+/* customer logo marquee — finale trust crescendo */
+.marquee{width:100%;overflow:hidden;margin-top:40px;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.marquee-track{display:flex;width:max-content;animation:marq 42s linear infinite;will-change:transform}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee-track span{font-family:var(--mono);font-size:clamp(14px,1.5vw,19px);letter-spacing:.05em;
+  color:var(--ink-dim);white-space:nowrap;margin-right:clamp(34px,5vw,64px);transition:color .3s}
+.marquee-track span:hover{color:var(--bronze-lite)}
+@keyframes marq{to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.marquee-track{animation:none;transform:none}}
+
+/* ISO seal + global reach line */
+.trust-row{display:flex;align-items:center;justify-content:center;gap:22px;margin-top:34px;flex-wrap:wrap}
+.iso-seal{flex:0 0 auto;width:76px;height:76px;border-radius:50%;border:1px solid var(--bronze-deep);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.5;
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--bronze-lite);
+  box-shadow:inset 0 0 22px rgba(166,121,46,.14)}
+.iso-seal b{font-weight:700;font-size:11px;color:var(--bronze-lite)}
+.trust-row .kicker{margin-top:0}
 
 /* timeline */
 .timeline{display:flex;gap:0;width:100%;margin-top:34px;overflow-x:auto;padding-bottom:8px;pointer-events:auto;scrollbar-width:none}
@@ -323,3 +357,26 @@ a{color:inherit;text-decoration:none}
 
 .legal{position:fixed;left:0;right:0;bottom:0;z-index:9;text-align:center;padding:14px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--ink-faint);opacity:0;transition:opacity .6s;text-transform:uppercase;pointer-events:none}
 .legal.show{opacity:1}
+
+/* ---- progress + hud fade out at the trust finale to clear the stage ---- */
+.prog,.hud{transition:opacity .6s ease}
+.prog.dim,.hud.dim{opacity:0}
+
+/* ---- reduced-motion: kill looping/idle decoration, make reveals instant ---- */
+@media (prefers-reduced-motion: reduce){
+  .grain{animation:none}
+  .cue .line::after{animation:none}
+  .hud .dot{animation:none}
+  .sound.on .eq i{animation:none}
+  .chapter .rise{transition-duration:.001ms}
+}
+
+/* ---- WebGL unavailable: degrade to a readable stacked page ---- */
+.no-webgl{cursor:auto}
+.no-webgl #gl,.no-webgl .atmos,.no-webgl .grain,.no-webgl #loader,
+.no-webgl .cue,.no-webgl .hud,.no-webgl .prog,.no-webgl .sound,
+.no-webgl .cursor,.no-webgl #scroll-space{display:none}
+.no-webgl #chapters{position:static;pointer-events:auto}
+.no-webgl .chapter{position:relative;inset:auto;opacity:1;visibility:visible;
+  padding:140px clamp(20px,6vw,110px);min-height:auto;border-bottom:1px solid var(--line)}
+.no-webgl .chapter .rise{opacity:1;transform:none}

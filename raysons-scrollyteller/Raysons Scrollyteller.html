@@ -37,25 +37,25 @@
     <a href="#" data-jump="about">About</a>
     <a href="#" data-jump="foundry">Foundry</a>
     <a href="#" data-jump="products">Products</a>
-    <a href="#" data-jump="enquire">Enquire</a>
+    <a href="enquire.html">Enquire</a>
   </div>
 </nav>
 
-<button id="sound" class="sound">
-  <span class="eq"><i></i><i></i><i></i><i></i></span>
-  <span class="lbl">Sound</span>
-</button>
-
-<div class="hud">
-  <div class="row"><span class="dot"></span> <span id="hud-stage">STANDBY</span></div>
-  <div class="row">Furnace <b id="hud-temp">28°C</b></div>
-  <div class="row">MIDC Shiroli · Kolhapur</div>
-</div>
-
-<div class="prog">
-  <span class="cur">01 / 07</span>
-  <span class="track"><i></i></span>
-  <span class="label">Through the foundry</span>
+<!-- Instrument cluster — consolidated bottom-left readout (stage · progress · sound) -->
+<div class="readout">
+  <div class="hud">
+    <div class="row"><span class="dot"></span> <span id="hud-stage">STANDBY</span></div>
+    <div class="row">Furnace <b id="hud-temp">28°C</b></div>
+  </div>
+  <div class="prog">
+    <span class="cur">01 / 07</span>
+    <span class="track"><i></i></span>
+    <span class="label">Through the foundry</span>
+  </div>
+  <button id="sound" class="sound">
+    <span class="eq"><i></i><i></i><i></i><i></i></span>
+    <span class="lbl">Sound</span>
+  </button>
 </div>
 
 <div class="cue">
@@ -65,7 +65,7 @@
 
 <!-- Persistent conversion CTA — fades in after the hero, present through the journey -->
 <div class="cta-dock">
-  <a id="cta-quote" class="cta-quote mag" href="/enquire.html">Request a Quote <span class="arrow">→</span></a>
+  <a id="cta-quote" class="cta-quote mag" href="enquire.html">Request a Quote <span class="arrow">→</span></a>
 </div>
 
 <div class="cursor" id="cursor"><span class="ring"></span><span class="dot"></span></div>
@@ -82,7 +82,6 @@
         “Every casting we pour is engineered for performance — shaped by fire, finished by craft,
         trusted by the world’s most demanding industries.”
       </p>
-      <div class="kicker rise" style="margin-top:34px">Precision Foundry · Kolhapur, India</div>
     </div>
   </section>
 
@@ -91,6 +90,7 @@
     <div class="inner">
       <div class="kicker rise" style="margin-bottom:22px">Raysons Shell Cast · Est. 2021</div>
       <h2 class="display rise">We are <span class="thin">the part</span><br/>inside the <em>machine.</em></h2>
+      <p class="pullquote rise">Forged within the Raysons Group — a <b>forty-year</b> industrial legacy.</p>
     </div>
   </section>
 
@@ -125,7 +125,7 @@
       <div class="col-split" style="align-items:center">
         <div>
           <div class="eyebrow rise">Precision Casting · Products</div>
-          <h2 class="display rise" style="font-size:clamp(40px,6.8vw,100px)">The part inside<br/>the <em>machine.</em></h2>
+          <h2 class="display rise cool" style="font-size:clamp(40px,6.8vw,100px)">From pour to<br/><em>finished part.</em></h2>
           <p class="lede rise">
             Every casting leaves our facility dimensionally certified, spectrometer-verified and
             assembly-ready — shell moulded to ±0.3 mm, machined to drawing on HMC, VMC &amp; CNC.
@@ -148,7 +148,7 @@
       <div class="col-split">
         <div>
           <div class="eyebrow rise">Engineered Features</div>
-          <h2 class="display rise" style="font-size:clamp(36px,5.4vw,78px)">Machined to<br/>drawing. <em>Verified.</em></h2>
+          <h2 class="display rise cool" style="font-size:clamp(36px,5.4vw,78px)">Machined to<br/>drawing. <em>Verified.</em></h2>
         </div>
         <div class="feat rise" style="margin-left:auto">
           <div class="f"><span class="i">01</span><span class="t">8-spline precision bore<span>Broached &amp; gauge-checked</span></span></div>
@@ -165,7 +165,7 @@
       <div class="col-split" style="align-items:start">
         <div>
           <div class="eyebrow rise">Specifications</div>
-          <h2 class="display rise" style="font-size:clamp(38px,5.8vw,86px)">Casting<br/><em>programs.</em></h2>
+          <h2 class="display rise cool" style="font-size:clamp(38px,5.8vw,86px)">Casting<br/><em>programs.</em></h2>
           <p class="lede rise">Spec-driven capability across shell moulding, no-bake casting, machining, melting, finishing and quality.</p>
         </div>
         <div class="specs rise" style="grid-template-columns:1fr">
@@ -184,13 +184,17 @@
   <section class="chapter c-center" data-screen-label="07">
     <div class="inner">
       <div class="eyebrow rise" style="justify-content:center">Global Customers</div>
-      <h2 class="display rise" style="font-size:clamp(34px,5.4vw,80px)">Trusted by companies that<br/>don’t compromise on <em>quality.</em></h2>
-      <div class="chips rise" style="justify-content:center;margin-left:auto;margin-right:auto">
-        <span>Tata Hendrikson</span><span>Schwing Stetter</span><span>Caterpillar</span>
-        <span>Halliburton</span><span>Faster Hydraulics · Italy</span><span>Wikov · Czech Republic</span>
-        <span>SAS Sanwa · Japan</span><span>Vanaz Engineering</span>
+      <h2 class="display rise cool" style="font-size:clamp(34px,5.4vw,80px)">Trusted by companies that<br/>don’t compromise on <em>quality.</em></h2>
+      <div class="marquee rise">
+        <div class="marquee-track">
+          <span>Tata Hendrikson</span><span>Schwing Stetter</span><span>Caterpillar</span><span>Halliburton</span><span>Faster Hydraulics · Italy</span><span>Wikov · Czech Republic</span><span>SAS Sanwa · Japan</span><span>Vanaz Engineering</span>
+          <span aria-hidden="true">Tata Hendrikson</span><span aria-hidden="true">Schwing Stetter</span><span aria-hidden="true">Caterpillar</span><span aria-hidden="true">Halliburton</span><span aria-hidden="true">Faster Hydraulics · Italy</span><span aria-hidden="true">Wikov · Czech Republic</span><span aria-hidden="true">SAS Sanwa · Japan</span><span aria-hidden="true">Vanaz Engineering</span>
+        </div>
       </div>
-      <div class="kicker rise" style="margin-top:30px">Italy · United Kingdom · Japan · USA — shipped from Kolhapur</div>
+      <div class="trust-row rise">
+        <span class="iso-seal">ISO<br/><b>9001:2015</b></span>
+        <span class="kicker">Italy · United Kingdom · Japan · USA — shipped from Kolhapur</span>
+      </div>
     </div>
   </section>
 
