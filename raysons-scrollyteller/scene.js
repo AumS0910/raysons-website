@@ -376,7 +376,7 @@ let _boreLoadStarted = false;
 function loadBoreFrames(){
   if (_boreLoadStarted) return; _boreLoadStarted = true;
   for (let i = 0; i < BORE_N; i++) {
-    fetch('/bore-frames/ezgif-frame-' + String(i + 1).padStart(3, '0') + '.jpg')
+    fetch('bore-frames/ezgif-frame-' + String(i + 1).padStart(3, '0') + '.jpg')
       .then(r => r.blob()).then(b => createImageBitmap(b, { resizeWidth: 720, resizeQuality: 'high' }))
       .then(bm => { boreImgs[i] = bm; Assets.bore++; }).catch(() => { Assets.fail++; });
   }
