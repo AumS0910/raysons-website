@@ -6,7 +6,6 @@ import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import { EffectComposer } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { ShaderPass } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/ShaderPass.js';
 import { RoomEnvironment } from 'https://unpkg.com/three@0.160.0/examples/jsm/environments/RoomEnvironment.js';
 
 const canvas = document.getElementById('gl');
@@ -674,25 +673,6 @@ composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth*(MOBILE?0.5:1), innerHeight*(MOBILE?0.5:1)), MOBILE?0.7:0.9, 0.7, 0.18);
 composer.addPass(bloom);
 
-// Always-on cinematic "punch" grade (RIFT technique). Runs as a POST pass — not on
-// the source frame canvases — so it re-saturates the molten metal the luminance keys
-// dull, and lifts contrast against the black, without ever disturbing the keys.
-const gradePass = new ShaderPass({
-  uniforms: { tDiffuse:{value:null}, uBright:{value:1.06}, uContrast:{value:1.07}, uSat:{value:1.20} },
-  vertexShader: 'varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
-  fragmentShader: `
-    uniform sampler2D tDiffuse; uniform float uBright, uContrast, uSat; varying vec2 vUv;
-    void main(){
-      vec4 c = texture2D(tDiffuse, vUv);
-      vec3 col = c.rgb * uBright;
-      col = (col - 0.5) * uContrast + 0.5;                 // contrast around mid-grey
-      float l = dot(col, vec3(0.299, 0.587, 0.114));
-      col = mix(vec3(l), col, uSat);                       // saturation
-      gl_FragColor = vec4(clamp(col, 0.0, 1.0), c.a);
-    }`
-});
-composer.addPass(gradePass);
-
 // ============================================================
 //  LOOP
 // ============================================================
@@ -702,7 +682,6 @@ function tick(){
   // while hidden starves the loader's timer and stalls the reveal. Wait for 'entered'.
   if (!document.body.classList.contains('entered')) return;
   const dt=Math.min(0.05, clock.getDelta()); const et=clock.elapsedTime;
-  const _vel = Math.min(1, Math.abs(targetProgress - progress) * 30);   // scroll speed (0..1)
   progress += (targetProgress-progress)*0.30;  // light: Lenis already smooths scroll; camera lerp below is the cinematic easing
   emMat.uniforms.uTime.value=et;
   spMat.uniforms.uTime.value=et;
@@ -731,7 +710,7 @@ function tick(){
   // Pour -> hub handoff: a bloom + light flash centred where the pour fades and
   // the finished part is revealed, so the molten metal visibly *becomes* the part.
   const _ho = Math.exp(-Math.pow((progress - 0.46) / 0.05, 2));
-  bloom.strength = 0.9 + _ho * 0.95 + _vel * 0.55;   // fast scroll → cinematic glow surge
+  bloom.strength = 0.9 + _ho * 0.95;
   castLight.intensity += _ho * 7;
   composer.render();
 }
