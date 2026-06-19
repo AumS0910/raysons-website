@@ -35,6 +35,8 @@ body{
 }
 a{color:inherit;text-decoration:none}
 ::selection{background:var(--molten);color:#1a0d04}
+/* keyboard focus visibility (a11y) — bronze ring, never removed */
+:focus-visible{outline:2px solid var(--bronze-lite);outline-offset:3px;border-radius:3px}
 
 /* ---- WebGL canvas, fixed full-bleed background ---- */
 #gl{
@@ -208,6 +210,10 @@ a{color:inherit;text-decoration:none}
   text-shadow:0 1px 18px rgba(7,5,4,.85);
 }
 .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--ink-faint);text-transform:uppercase}
+/* hero value proposition — concrete "what we do" line at the fold (mono, bronze, WCAG 7.8:1) */
+.valueprop{font-family:var(--mono);font-size:clamp(11px,1.15vw,13px);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--bronze-lite);margin:20px auto 0;text-align:center;max-width:64ch;line-height:1.9;
+  text-shadow:0 1px 14px rgba(7,5,4,.9)}
 /* legacy / air pull-quote — italic Cormorant, a held breath under the heading */
 .pullquote{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--ink-dim);
   font-size:clamp(19px,2.2vw,31px);line-height:1.4;max-width:26ch;margin:30px auto 0;text-align:center;text-wrap:balance;
