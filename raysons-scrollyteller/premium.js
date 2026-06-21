@@ -20,7 +20,17 @@
   .pcursor.is-hot .pcursor__ring{width:62px;height:62px;background:rgba(255,255,255,.10)}
   .pcursor.is-hot .pcursor__dot{opacity:0}
   .pcursor.is-hot .pcursor__label{opacity:1}
-  [data-magnetic],.mag,.nav-links a,.cta-quote{will-change:transform}`;
+  [data-magnetic],.mag,.nav-links a,.cta-quote{will-change:transform}
+  /* split-text word reveal */
+  [data-split]{}
+  .psplit__w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.14em;margin-bottom:-.14em}
+  .psplit__i{display:inline-block;transform:translateY(115%);transition:transform 1s cubic-bezier(.2,.7,.2,1)}
+  .psplit.in .psplit__i{transform:none}
+  /* molten page-transition curtain */
+  .ptrans{position:fixed;inset:0;z-index:9998;pointer-events:none;transform:translateY(101%);
+    background:linear-gradient(0deg,var(--molten-deep,#c2300a),var(--molten,#ff6a1a) 58%,var(--molten-hot,#ffb24a));
+    transition:transform .55s cubic-bezier(.7,0,.25,1)}
+  .ptrans.cover{transform:translateY(0)}`;
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
   document.documentElement.classList.add('pc-on');
 
@@ -80,4 +90,56 @@
       }
     }, { passive:true });
   }
+
+  // ---- SPLIT-TEXT word reveal (per-word mask rise; preserves inline <em>) ----
+  function splitReveal(){
+    document.querySelectorAll('[data-split]').forEach(el => {
+      if(el.dataset.splitDone) return; el.dataset.splitDone = '1';
+      const nodes = Array.from(el.childNodes);
+      el.innerHTML = ''; el.classList.add('psplit');
+      let wi = 0;
+      nodes.forEach(node => {
+        if(node.nodeType === 3){                       // text → split into words
+          node.textContent.split(/(\s+)/).forEach(tok => {
+            if(tok === '') return;
+            if(/^\s+$/.test(tok)){ el.appendChild(document.createTextNode(' ')); return; }
+            const w = document.createElement('span'); w.className = 'psplit__w';
+            const i = document.createElement('span'); i.className = 'psplit__i';
+            i.textContent = tok; i.style.transitionDelay = (wi++ * 0.045) + 's';
+            w.appendChild(i); el.appendChild(w);
+          });
+        } else if(node.nodeName === 'BR'){
+          el.appendChild(document.createElement('br'));
+        } else {                                        // element (e.g. <em>) → one unit
+          const w = document.createElement('span'); w.className = 'psplit__w';
+          const i = document.createElement('span'); i.className = 'psplit__i';
+          i.appendChild(node.cloneNode(true)); i.style.transitionDelay = (wi++ * 0.045) + 's';
+          w.appendChild(i); el.appendChild(w);
+        }
+      });
+    });
+    const all = document.querySelectorAll('.psplit');
+    if(REDUCED || !('IntersectionObserver' in window)){ all.forEach(e => e.classList.add('in')); return; }
+    const io = new IntersectionObserver((es) => {
+      es.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { rootMargin:'0px 0px -8% 0px', threshold:0.1 });
+    all.forEach(e => io.observe(e));
+    // safety: never leave a split heading permanently hidden
+    setTimeout(() => all.forEach(e => { const r = e.getBoundingClientRect(); if(r.top < innerHeight && r.bottom > 0) e.classList.add('in'); }), 1200);
+  }
+  if(document.readyState !== 'loading') splitReveal();
+  else document.addEventListener('DOMContentLoaded', splitReveal);
+
+  // ---- MOLTEN PAGE-TRANSITION (leave wipe; the enter is each page's loader) ----
+  const pt = document.createElement('div'); pt.className = 'ptrans'; document.body.appendChild(pt);
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a'); if(!a) return;
+    const href = a.getAttribute('href'); if(!href) return;
+    if(a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+    if(/^(https?:|mailto:|tel:|#)/.test(href) || !/\.html(\?|#|$)/.test(href)) return;  // only internal .html
+    e.preventDefault();
+    if(REDUCED){ location.href = href; return; }
+    pt.classList.add('cover');
+    setTimeout(() => { location.href = href; }, 560);
+  });
 })();
