@@ -74,14 +74,15 @@
   /* editorial acts — fixed overlays, one visible at a time */
   #acts{position:fixed;inset:0;z-index:10;pointer-events:none}
   .act{position:fixed;inset:0;display:flex;padding:max(96px,12vh) clamp(20px,6vw,110px) max(90px,11vh);
-    opacity:0;visibility:hidden;transition:opacity .8s ease, visibility .8s}
+    opacity:0;visibility:hidden;transition:opacity .25s ease, visibility .25s}
   .act.on{opacity:1;visibility:visible}
   .act .inner{width:100%;max-width:1320px;margin:auto}
   .act.center{text-align:center;flex-direction:column;align-items:center;justify-content:center}
   .act.center .display{font-size:clamp(52px,10vw,160px)}
   .act.bottom{align-items:flex-end}
-  .act .inner .rise{opacity:0;transform:translateY(26px)}
-  .act.on .inner .rise{opacity:1;transform:none;transition:opacity .9s cubic-bezier(.2,.7,.2,1) .15s, transform .9s cubic-bezier(.2,.7,.2,1) .15s}
+  /* motion is driven by scroll (cinema.js sets .inner transform+opacity), so the
+     children carry no separate timed reveal — that timed fade read as a slideshow */
+  .act .inner .rise{opacity:1;transform:none}
 
   /* legibility scrims — local dark backing so text reads over the bright pour
      (the cinema acts use .act.center/.bottom, which the styles.css .c-center

@@ -212,13 +212,24 @@
 
     if(seg.act !== lastAct){ overlays.forEach((o,i)=> o.classList.toggle('on', i===seg.act)); lastAct=seg.act; }
 
-    // scroll-tied parallax: the active scene's text drifts upward with the film
-    // as you move through the beat, so it reads as an authored camera move rather
-    // than a static slideshow crossfade. local=0 => no offset (resting scene sits
-    // in place); opacity stays with the CSS .on crossfade.
+    // SCROLL-TIED MOTION: the active scene's text physically travels and fades
+    // with scroll — it rises from below, holds centred where you read it, then
+    // lifts up and fades out as the next scene rises in. Both adjacent scenes are
+    // ~0 opacity at the boundary, so the act-switch is invisible (no slideshow
+    // crossfade). Scene 0 is special-cased: it's already shown (hero auto-play),
+    // so it only exits, never enters from below.
     if(!REDUCED){
       const inner = overlays[seg.act] && overlays[seg.act].querySelector('.inner');
-      if(inner) inner.style.transform = 'translate3d(0,'+(local*-140).toFixed(1)+'px,0)';
+      if(inner){
+        if(seg.act === 0){
+          inner.style.transform = 'translate3d(0,'+(local*-150).toFixed(1)+'px,0)';
+          inner.style.opacity = (local < 0.72 ? 1 : Math.max(0,(1-local)/0.28)).toFixed(3);
+        } else {
+          inner.style.transform = 'translate3d(0,'+((0.5-local)*180).toFixed(1)+'px,0)';
+          const op = local < 0.20 ? local/0.20 : local > 0.80 ? (1-local)/0.20 : 1;
+          inner.style.opacity = clamp(op,0,1).toFixed(3);
+        }
+      }
     }
 
     if(cue) cue.classList.toggle('hide', progress>0.015);
@@ -241,7 +252,7 @@
       const p = (autoT % 1) * POUR_FRAC;
       render(p, 0.05);
       const hi = overlays[0] && overlays[0].querySelector('.inner');
-      if(hi){ hi.style.transform='none'; }      // keep hero text stable while it loops
+      if(hi){ hi.style.transform='none'; hi.style.opacity='1'; }  // hold hero text stable while it loops
       if(cue) cue.classList.remove('hide');
       if(ctaDock) ctaDock.classList.remove('on');
       prevP = p; return;
