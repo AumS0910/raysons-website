@@ -104,6 +104,10 @@
   #ccta .cta-quote{opacity:1;transform:none}
 
   #cscroll{position:relative;z-index:5;pointer-events:none}
+  /* real logomark in nav — opt out of the nav's mix-blend so brand colors aren't inverted */
+  .nav{mix-blend-mode:normal}
+  .nav .brand,.nav .nav-links a{text-shadow:0 1px 14px rgba(7,5,4,.92)}
+  .brand .brandmark{width:28px;height:28px;display:block;flex:0 0 auto}
   @media(prefers-reduced-motion:reduce){ .act{transition:none} }
 </style>
 </head>
@@ -141,7 +145,7 @@
 </div>
 
 <nav class="nav">
-  <a class="brand" href="index.html"><b>RAYSONS</b> <span>SHELL CAST</span></a>
+  <a class="brand" href="index.html"><img src="images/raysons-logo.png" alt="" class="brandmark" /> <b>RAYSONS</b> <span>SHELL CAST</span></a>
   <div class="nav-links">
     <a href="About Us.html">About</a>
     <a href="enquire.html">Enquire</a>

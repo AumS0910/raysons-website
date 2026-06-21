@@ -177,8 +177,13 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
   font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase}
 @media(max-width:760px){.about-footer .ft-mid{grid-template-columns:1fr;gap:24px}}
 
+/* real logomark in nav — opt out of mix-blend so brand colors aren't inverted */
+.nav{mix-blend-mode:normal}
+.nav .brand,.nav .nav-links a{text-shadow:0 1px 14px rgba(7,5,4,.92)}
+.brand .brandmark{width:28px;height:28px;display:block;flex:0 0 auto}
+
 /* nav mobile */
-.nav-burger{display:none;background:none;border:0;width:34px;height:34px;cursor:pointer;flex-direction:column;justify-content:center;gap:5px;padding:6px;mix-blend-mode:difference}
+.nav-burger{display:none;background:none;border:0;width:34px;height:34px;cursor:pointer;flex-direction:column;justify-content:center;gap:5px;padding:6px;mix-blend-mode:normal}
 .nav-burger span{display:block;height:1.5px;background:#fff;transition:transform .3s,opacity .3s}
 body.nav-open .nav-burger span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
 body.nav-open .nav-burger span:nth-child(2){opacity:0}
