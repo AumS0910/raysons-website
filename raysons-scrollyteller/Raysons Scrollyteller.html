@@ -5,7 +5,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Raysons Shell Cast — Through the Foundry · Fire to Finished Part</title>
 <meta name="description" content="Molten iron, poured and forged into a precision hydraulic valve casting — scroll-scrubbed frame by frame. Shell moulded & no-bake iron castings 0.5 kg–500 kg, machined to drawing, ISO 9001:2015. Kolhapur, India." />
+<meta name="theme-color" content="#0a0807" />
+<link rel="canonical" href="https://raysons-website.vercel.app/raysons-scrollyteller/" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0807'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23ff6a1a'/%3E%3C/svg%3E" />
+<!-- Open Graph / Twitter -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Raysons Shell Cast — Through the Foundry · Fire to Finished Part" />
+<meta property="og:description" content="A scroll-scrubbed product film: molten iron poured and forged into a precision hydraulic valve casting. Shell moulded iron castings 0.5 kg–500 kg, ISO 9001:2015, Kolhapur, India." />
+<meta property="og:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/valve/pour-poster.jpg" />
+<meta property="og:site_name" content="Raysons Shell Cast" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Raysons Shell Cast — Through the Foundry" />
+<meta name="twitter:description" content="Molten iron forged into a precision valve casting, scroll-scrubbed frame by frame. ISO 9001:2015 · Kolhapur, India." />
+<meta name="twitter:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/valve/pour-poster.jpg" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Raysons Shell Cast",
+  "description": "Shell moulded and no-bake iron foundry producing cast iron and ductile iron castings from 0.5 kg to 500 kg, machined to drawing. ISO 9001:2015 certified.",
+  "url": "https://raysons-website.vercel.app/raysons-scrollyteller/",
+  "image": "https://raysons-website.vercel.app/raysons-scrollyteller/valve/pour-poster.jpg",
+  "email": "industries@raysonsgroup.com",
+  "parentOrganization": { "@type": "Organization", "name": "Raysons Group" },
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "MIDC Shiroli",
+    "addressLocality": "Kolhapur",
+    "addressRegion": "Maharashtra",
+    "postalCode": "416122",
+    "addressCountry": "IN"
+  },
+  "hasCredential": "ISO 9001:2015",
+  "areaServed": ["IN", "IT", "GB", "JP", "US"]
+}
+</script>
 <link rel="stylesheet" href="styles.css" />
+<!-- prioritise the hero so first paint is instant: poster decodes immediately,
+     pour clip starts downloading before cinema.js runs -->
+<link rel="preload" as="image" href="valve/pour-poster.jpg" fetchpriority="high" />
+<link rel="preload" as="fetch" href="valve/pour.mp4" crossorigin />
 <style>
   html{scroll-behavior:auto}
   body{cursor:auto;background:var(--bg)}
@@ -44,6 +83,17 @@
   .act .inner .rise{opacity:0;transform:translateY(26px)}
   .act.on .inner .rise{opacity:1;transform:none;transition:opacity .9s cubic-bezier(.2,.7,.2,1) .15s, transform .9s cubic-bezier(.2,.7,.2,1) .15s}
 
+  /* legibility scrims — local dark backing so text reads over the bright pour
+     (the cinema acts use .act.center/.bottom, which the styles.css .c-center
+     scrim never covered — this is why the headings were washing out) */
+  .act::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .act.center::before{background:radial-gradient(ellipse 66% 50% at 50% 50%, rgba(7,5,4,.80), rgba(7,5,4,0) 70%)}
+  .act.bottom::before{background:linear-gradient(0deg, rgba(7,5,4,.94) 0%, rgba(7,5,4,.66) 26%, rgba(7,5,4,.12) 52%, transparent 66%)}
+  .act:not(.center):not(.bottom)::before{background:linear-gradient(0deg, rgba(7,5,4,.92) 0%, rgba(7,5,4,.4) 40%, transparent 66%)}
+  /* lift the small mono text further off the fire */
+  .act .eyebrow{text-shadow:0 1px 3px #050302, 0 2px 18px rgba(7,5,4,.96)}
+  .act .valueprop,.act .kicker,.act .lede{text-shadow:0 1px 4px #050302, 0 2px 18px rgba(7,5,4,.95)}
+
   #ccta{opacity:0;transform:translateY(16px);transition:opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1)}
   #ccta.on{opacity:1;transform:none}
   #ccta .cta-quote{opacity:1;transform:none}
@@ -53,6 +103,26 @@
 </style>
 </head>
 <body>
+
+<noscript>
+  <style>
+    #cloader,.ccue,#ccta,.cine-vig,.cine-floor,.grain,#stage{display:none!important}
+    #acts,.act{position:static!important;opacity:1!important;visibility:visible!important;display:block!important;height:auto!important;padding:0!important}
+    .act .inner .rise{opacity:1!important;transform:none!important}
+    .ns-fallback{max-width:760px;margin:0 auto;padding:120px 24px 80px;color:var(--ink);font-family:var(--sans)}
+    .ns-fallback h1{font-family:var(--serif);font-size:clamp(40px,8vw,90px);line-height:1;margin-bottom:18px}
+    .ns-fallback p{color:#c9beb1;line-height:1.6;margin:14px 0}
+    .ns-fallback a{color:var(--molten-hot);text-decoration:underline}
+  </style>
+  <div class="ns-fallback">
+    <h1>Raysons Shell Cast</h1>
+    <p>Precision shell&nbsp;moulded &amp; no-bake iron castings, 0.5&nbsp;kg–500&nbsp;kg, machined to drawing on HMC&nbsp;·&nbsp;VMC&nbsp;·&nbsp;CNC and spectrometer-verified. ISO&nbsp;9001:2015 · Kolhapur, India.</p>
+    <p>Materials: Grey CI (IS&nbsp;210) · SG / Ductile (IS&nbsp;1865) · SiMo Ductile · ADI. Capacity 500&nbsp;MT/yr → 700&nbsp;MT. Trusted by OEMs across Italy, the UK, Japan and the USA.</p>
+    <p>This page is an interactive scroll film and needs JavaScript. To talk to us directly:
+      <a href="mailto:industries@raysonsgroup.com">industries@raysonsgroup.com</a> ·
+      <a href="enquire.html">Request a quote →</a></p>
+  </div>
+</noscript>
 
 <canvas id="stage"></canvas>
 <div class="cine-vig"></div>

@@ -56,17 +56,74 @@
   // ---- captured frame store ----
   const frames = {};
   let capturedClips = 0;
+  let settledFrames = 0;   // idle-loop counter; reset whenever the stage must repaint
   const uniqueClips = Object.keys(CLIPS).length;
+
+  // ============================================================
+  //  FRAME CACHE — IndexedDB (RIFT whitepaper §3.6 / §8)
+  //  Each clip's WebP frames persist per device, keyed by clip|bucket.
+  //  First visit decodes the clips once; every later visit / reload
+  //  restores from disk with zero video decode. Partial captures from
+  //  a stalled decode are never written.
+  // ============================================================
+  const DB_NAME = 'raysons-cinema', STORE = 'frames', CACHE_VER = 'v1';
+  const cacheKey = (key)=> `${CACHE_VER}|${key}|${MOBILE?'m':'d'}`;
+  let dbP = null;
+  function openDB(){
+    if(dbP) return dbP;
+    dbP = new Promise((res)=>{
+      let req; try{ req = indexedDB.open(DB_NAME, 1); }catch(e){ return res(null); }
+      req.onupgradeneeded = ()=>{ try{ req.result.createObjectStore(STORE); }catch(e){} };
+      req.onsuccess = ()=> res(req.result);
+      req.onerror   = ()=> res(null);
+    });
+    return dbP;
+  }
+  async function idbGet(key){
+    const db = await openDB(); if(!db) return null;
+    return new Promise((res)=>{ try{
+      const r = db.transaction(STORE,'readonly').objectStore(STORE).get(cacheKey(key));
+      r.onsuccess = ()=> res(r.result || null); r.onerror = ()=> res(null);
+    }catch(e){ res(null); } });
+  }
+  async function idbSet(key, blobs){
+    const db = await openDB(); if(!db) return;
+    try{ db.transaction(STORE,'readwrite').objectStore(STORE).put(blobs, cacheKey(key)); }catch(e){}
+  }
+  // Build Image objects from a stored Blob[] (no decode of video at all).
+  function imagesFromBlobs(blobs){
+    return blobs.map(b=>{ const im=new Image(); im.src=URL.createObjectURL(b); return im; });
+  }
+
+  // Restore a clip from cache if present; returns true on hit.
+  async function loadCached(key){
+    const blobs = await idbGet(key);
+    if(!blobs || !blobs.length) return false;
+    frames[key] = imagesFromBlobs(blobs);
+    capturedClips++; updateLoader();
+    return true;
+  }
 
   function captureClip(key, src){
     return new Promise((resolve)=>{
       const v = document.createElement('video');
       v.muted = true; v.playsInline = true; v.preload = 'auto'; v.crossOrigin = 'anonymous'; v.src = src;
-      const arr = [];
+      const arr = [];           // Image objects for painting
+      const blobArr = [];       // WebP Blobs for persisting to IndexedDB
       const cap = document.createElement('canvas');
       const cx  = cap.getContext('2d');
-      let sized = false, done = false;
-      const finish = ()=>{ if(done) return; done=true; frames[key]=arr; capturedClips++; resolve(arr); };
+      let sized = false, done = false, ended = false, persisted = false;
+      // toBlob is async — only persist a clean, fully-decoded clip once EVERY
+      // frame's WebP blob has actually landed (never a stalled / mid-encode partial).
+      const maybePersist = ()=>{
+        if(persisted || !ended) return;
+        if(blobArr.length && blobArr.every(Boolean)){ persisted=true; idbSet(key, blobArr.slice()); }
+      };
+      const finish = ()=>{
+        if(done) return; done=true; frames[key]=arr; capturedClips++;
+        maybePersist();
+        resolve(arr);
+      };
       function grab(){
         if(!v.videoWidth){ if(v.requestVideoFrameCallback) v.requestVideoFrameCallback(grab); return; }
         if(!sized){
@@ -75,24 +132,25 @@
           cap.width = Math.round(v.videoWidth*scale); cap.height = Math.round(v.videoHeight*scale); sized=true;
         }
         cx.drawImage(v, 0,0, cap.width, cap.height);
-        const idx = arr.length; arr.push(null);
-        cap.toBlob(b=>{ if(!b) return; const im=new Image(); im.src=URL.createObjectURL(b); arr[idx]=im; }, 'image/webp', 0.9);
+        const idx = arr.length; arr.push(null); blobArr.push(null);
+        cap.toBlob(b=>{ if(!b) return; blobArr[idx]=b; const im=new Image(); im.src=URL.createObjectURL(b); arr[idx]=im; maybePersist(); }, 'image/webp', 0.95);
         updateLoader();
-        if(v.ended) finish();
+        if(v.ended){ ended=true; finish(); }
         else if(v.requestVideoFrameCallback) v.requestVideoFrameCallback(grab);
       }
-      v.onended = finish;
+      v.onended = ()=>{ ended=true; finish(); };
       v.onerror = finish;
       v.addEventListener('canplay', ()=>{
         v.play().then(()=>{
           if(v.requestVideoFrameCallback) v.requestVideoFrameCallback(grab);
-          else { const iv=setInterval(()=>{ if(done){clearInterval(iv);return;} grab(); if(v.ended){clearInterval(iv);finish();} }, 1000/24); }
+          else { const iv=setInterval(()=>{ if(done){clearInterval(iv);return;} grab(); if(v.ended){ended=true;clearInterval(iv);finish();} }, 1000/24); }
         }).catch(finish);
       }, { once:true });
     });
   }
 
   function updateLoader(){
+    settledFrames = 0;   // a new frame just landed — keep the canvas live so it paints in
     const cap = Object.values(frames).reduce((s,a)=>s+a.length,0);
     const frac = clamp(capturedClips/uniqueClips + (cap%30)/30/uniqueClips, 0, 1);
     lbar.style.width = (frac*100).toFixed(0)+'%';
@@ -102,7 +160,7 @@
   // ============================================================
   //  RENDER
   // ============================================================
-  const _grade = REDUCED ? '' : 'brightness(1.05) contrast(1.04) saturate(1.12)';
+  const _grade = REDUCED ? '' : 'brightness(1.10) contrast(1.07) saturate(1.16)';
   let lastAct = -1, breathT = 0, lastGood = null;
 
   function paint(im, vel){
@@ -149,6 +207,16 @@
     if(!drew) paintFallback();
 
     if(seg.act !== lastAct){ overlays.forEach((o,i)=> o.classList.toggle('on', i===seg.act)); lastAct=seg.act; }
+
+    // scroll-tied parallax: the active scene's text drifts upward with the film
+    // as you move through the beat, so it reads as an authored camera move rather
+    // than a static slideshow crossfade. local=0 => no offset (resting scene sits
+    // in place); opacity stays with the CSS .on crossfade.
+    if(!REDUCED){
+      const inner = overlays[seg.act] && overlays[seg.act].querySelector('.inner');
+      if(inner) inner.style.transform = 'translate3d(0,'+(local*-42).toFixed(1)+'px,0)';
+    }
+
     if(cue) cue.classList.toggle('hide', progress>0.015);
     if(ctaDock) ctaDock.classList.toggle('on', progress>0.05);
   }
@@ -156,11 +224,30 @@
   // ============================================================
   //  SCROLL LOOP (lerped — buttery)
   // ============================================================
-  let sy=scrollY, target=scrollY, prevP=0;
-  addEventListener('scroll', ()=>{ target=scrollY; }, {passive:true});
+  let sy=scrollY, target=scrollY, prevP=0, autoplay=true, autoT=0;
+  const POUR_FRAC = SEGMENTS[0].span / TOTAL;   // scroll fraction the pour clip occupies
+  addEventListener('scroll', ()=>{ if(scrollY>2) autoplay=false; target=scrollY; settledFrames=0; }, {passive:true});
   function loop(){
     requestAnimationFrame(loop);
+    // HERO AUTO-PLAY: until the user scrolls, the pour flows on its own (looping)
+    // so the molten is alive, not a frozen frame. First scroll hands off to the
+    // scroll-scrub. Reduced-motion opts out and holds a still frame.
+    if(autoplay && target < 2 && !REDUCED){
+      autoT += 0.0033;                          // ~5s per pour cycle
+      const p = (autoT % 1) * POUR_FRAC;
+      render(p, 0.05);
+      const hi = overlays[0] && overlays[0].querySelector('.inner');
+      if(hi){ hi.style.transform='none'; }      // keep hero text stable while it loops
+      if(cue) cue.classList.remove('hide');
+      if(ctaDock) ctaDock.classList.remove('on');
+      prevP = p; return;
+    }
+    const prev=sy;
     sy += (target-sy) * (REDUCED?1:0.09);
+    const moving = Math.abs(target-sy) > 0.4 || Math.abs(sy-prev) > 0.1;
+    // Idle: once the scroll has settled and the breathing has been painted a
+    // few frames, stop the full-screen canvas repaint entirely (battery/GPU).
+    if(!moving){ if(settledFrames > 6) return; settledFrames++; } else { settledFrames=0; }
     const max = Math.max(1, scrollSpace.offsetHeight - innerHeight);
     const p = clamp(sy/max, 0, 1);
     const vel = Math.min(1, Math.abs(p-prevP)*60); prevP=p;
@@ -191,6 +278,12 @@
     // background. Scrubbing holds the last good frame / poster until each is ready.
     posterReady().then(()=> setTimeout(start, 600));
     setTimeout(()=>{ if(!started) start(); }, 4000);   // ceiling
-    (async ()=>{ for(const key of ['pour','forge','deconstruct','orbit','bridge','macro']) await captureClip(key, CLIPS[key]); })();
+    // Each clip restores from IndexedDB if cached (instant, decode-free);
+    // only a cache miss falls through to the one-time video capture.
+    (async ()=>{
+      for(const key of ['pour','forge','deconstruct','orbit','bridge','macro']){
+        if(!(await loadCached(key))) await captureClip(key, CLIPS[key]);
+      }
+    })();
   }
 })();
