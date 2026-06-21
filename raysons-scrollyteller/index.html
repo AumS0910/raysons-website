@@ -87,12 +87,16 @@
      (the cinema acts use .act.center/.bottom, which the styles.css .c-center
      scrim never covered — this is why the headings were washing out) */
   .act::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
-  .act.center::before{background:radial-gradient(ellipse 66% 50% at 50% 50%, rgba(7,5,4,.80), rgba(7,5,4,0) 70%)}
-  .act.bottom::before{background:linear-gradient(0deg, rgba(7,5,4,.94) 0%, rgba(7,5,4,.66) 26%, rgba(7,5,4,.12) 52%, transparent 66%)}
-  .act:not(.center):not(.bottom)::before{background:linear-gradient(0deg, rgba(7,5,4,.92) 0%, rgba(7,5,4,.4) 40%, transparent 66%)}
+  .act .inner{will-change:transform}
+  /* taller/stronger so the whole text column (eyebrow + heading + valueprop) is
+     backed, and it still covers the parallax drift as the text rises on scroll */
+  .act.center::before{background:radial-gradient(ellipse 76% 72% at 50% 46%, rgba(7,5,4,.88), rgba(7,5,4,0) 76%)}
+  .act.bottom::before{background:linear-gradient(0deg, rgba(7,5,4,.95) 0%, rgba(7,5,4,.72) 30%, rgba(7,5,4,.22) 58%, transparent 72%)}
+  .act:not(.center):not(.bottom)::before{background:linear-gradient(0deg, rgba(7,5,4,.95) 0%, rgba(7,5,4,.5) 44%, transparent 72%)}
   /* lift the small mono text further off the fire */
-  .act .eyebrow{text-shadow:0 1px 3px #050302, 0 2px 18px rgba(7,5,4,.96)}
-  .act .valueprop,.act .kicker,.act .lede{text-shadow:0 1px 4px #050302, 0 2px 18px rgba(7,5,4,.95)}
+  .act .eyebrow{text-shadow:0 1px 3px #050302, 0 2px 20px rgba(7,5,4,.98), 0 0 40px rgba(7,5,4,.7)}
+  .act .valueprop,.act .kicker,.act .lede{color:#d8cdbe;text-shadow:0 1px 4px #050302, 0 2px 20px rgba(7,5,4,.98)}
+  .act .valueprop{color:var(--bronze-lite)}
 
   #ccta{opacity:0;transform:translateY(16px);transition:opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1)}
   #ccta.on{opacity:1;transform:none}

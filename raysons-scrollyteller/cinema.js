@@ -218,7 +218,7 @@
     // in place); opacity stays with the CSS .on crossfade.
     if(!REDUCED){
       const inner = overlays[seg.act] && overlays[seg.act].querySelector('.inner');
-      if(inner) inner.style.transform = 'translate3d(0,'+(local*-42).toFixed(1)+'px,0)';
+      if(inner) inner.style.transform = 'translate3d(0,'+(local*-140).toFixed(1)+'px,0)';
     }
 
     if(cue) cue.classList.toggle('hide', progress>0.015);
