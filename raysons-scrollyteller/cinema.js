@@ -142,6 +142,10 @@
       v.onerror = finish;
       v.addEventListener('canplay', ()=>{
         v.play().then(()=>{
+          // Capture at high playback speed so each clip is ready in ~1.5s instead
+          // of real-time (~5s). The video is muted, so a high rate is allowed; the
+          // compositor still presents frames to requestVideoFrameCallback.
+          try{ v.playbackRate = MOBILE ? 3 : 4; }catch(e){}
           if(v.requestVideoFrameCallback) v.requestVideoFrameCallback(grab);
           else { const iv=setInterval(()=>{ if(done){clearInterval(iv);return;} grab(); if(v.ended){ended=true;clearInterval(iv);finish();} }, 1000/24); }
         }).catch(finish);
