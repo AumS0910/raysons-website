@@ -41,6 +41,41 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 .no-gsap .rv,.reduced .rv{opacity:1;transform:none}
 
 /* ============================================================
+   THE FILM — sticky-canvas scrollyteller (hero + 4 buildings)
+   Same "scroll scrubs a fixed film" feel as index.
+   ============================================================ */
+.film{position:relative;z-index:10;height:560vh}
+.film__pin{position:sticky;top:0;height:100svh;overflow:hidden}
+.film #stage{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+.film__vig{position:absolute;inset:0;z-index:1;pointer-events:none;background:
+  radial-gradient(125% 95% at 50% 50%, transparent 42%, rgba(7,5,4,.66) 100%),
+  linear-gradient(180deg, rgba(7,5,4,.72) 0%, transparent 22%, transparent 76%, rgba(7,5,4,.94) 100%)}
+.film__floor{position:absolute;left:0;right:0;bottom:0;height:40vh;z-index:1;pointer-events:none;
+  background:radial-gradient(60% 120% at 50% 130%, rgba(166,121,46,.16), transparent 70%)}
+.film__overlays{position:absolute;inset:0;z-index:10}
+.fact{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;
+  padding:max(96px,12vh) clamp(20px,6vw,110px) max(90px,12vh);opacity:0;visibility:hidden;
+  transition:opacity .3s ease,visibility .3s;will-change:transform,opacity}
+.fact.on{visibility:visible;opacity:1}
+.fact .inner{width:100%;max-width:1280px;margin:0 auto}
+.fact.center{text-align:center;align-items:center}
+.fact.center .inner{display:flex;flex-direction:column;align-items:center}
+.fact .f-tag{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--molten);
+  text-shadow:0 1px 12px rgba(7,5,4,.9)}
+.fact .f-name{font-family:var(--serif);font-weight:600;line-height:.98;letter-spacing:-.01em;
+  font-size:clamp(40px,7vw,120px);margin:16px 0 18px;text-shadow:0 3px 30px rgba(7,5,4,.85)}
+.fact .f-name em{font-style:italic;font-weight:500;color:var(--bronze-lite)}
+.fact .f-line{font-size:clamp(15px,1.5vw,20px);line-height:1.6;color:#dcd0c1;max-width:48ch;font-weight:300;
+  text-shadow:0 1px 14px rgba(7,5,4,.85)}
+.fact.center .f-line{margin-left:auto;margin-right:auto}
+.fact .f-yr{display:inline-block;margin-top:20px;font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--bronze-lite)}
+.fact .ahero__sub{margin-top:26px}
+.film__count{position:absolute;top:clamp(90px,12vh,118px);right:clamp(20px,6vw,110px);z-index:11;
+  font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.film__count b{color:var(--molten-hot)}
+@media(max-width:760px){.fact .f-name{font-size:clamp(36px,11vw,72px)}}
+
+/* ============================================================
    HERO — ties to the index: faint pour behind the title
    ============================================================ */
 .ahero{position:relative;z-index:10;height:100svh;min-height:600px;display:flex;flex-direction:column;
