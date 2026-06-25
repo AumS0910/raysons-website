@@ -66,7 +66,7 @@
   //  restores from disk with zero video decode. Partial captures from
   //  a stalled decode are never written.
   // ============================================================
-  const DB_NAME = 'raysons-cinema', STORE = 'frames', CACHE_VER = 'v1';
+  const DB_NAME = 'raysons-cinema', STORE = 'frames', CACHE_VER = 'v2';  // bump = invalidate any stale cached captures
   const cacheKey = (key)=> `${CACHE_VER}|${key}|${MOBILE?'m':'d'}`;
   let dbP = null;
   function openDB(){
@@ -98,7 +98,8 @@
   // Restore a clip from cache if present; returns true on hit.
   async function loadCached(key){
     const blobs = await idbGet(key);
-    if(!blobs || !blobs.length) return false;
+    // ignore empty / partial cache entries (a too-short capture = frozen scrub) — re-capture instead
+    if(!blobs || blobs.length < 8 || !blobs.every(Boolean)) return false;
     frames[key] = imagesFromBlobs(blobs);
     capturedClips++; updateLoader();
     return true;
