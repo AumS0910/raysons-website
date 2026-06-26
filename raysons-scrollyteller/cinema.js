@@ -222,9 +222,15 @@
     if(!REDUCED){
       const inner = overlays[seg.act] && overlays[seg.act].querySelector('.inner');
       if(inner){
+        const isLast = (seg === SEGMENTS[SEGMENTS.length-1]);
         if(seg.act === 0){
           inner.style.transform = 'translate3d(0,'+(local*-150).toFixed(1)+'px,0)';
           inner.style.opacity = (local < 0.72 ? 1 : Math.max(0,(1-local)/0.28)).toFixed(3);
+        } else if(isLast){
+          // finale: enters from below, then HOLDS (no exit fade — nothing follows it)
+          const lf = Math.min(local, 0.5);
+          inner.style.transform = 'translate3d(0,'+((0.5-lf)*180).toFixed(1)+'px,0)';
+          inner.style.opacity = (local < 0.20 ? local/0.20 : 1).toFixed(3);
         } else {
           inner.style.transform = 'translate3d(0,'+((0.5-local)*180).toFixed(1)+'px,0)';
           const op = local < 0.20 ? local/0.20 : local > 0.80 ? (1-local)/0.20 : 1;
