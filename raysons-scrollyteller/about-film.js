@@ -25,7 +25,9 @@
   const holder = film.querySelector('.film__pin') || film;
   const builds = CLIPS.map(src => {
     const v = document.createElement('video');
-    v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = src;
+    // preload:none → a clip is only fetched when its beat approaches (prime()), so the
+    // page isn't dragged down by ~33MB of building footage on first load
+    v.muted = true; v.playsInline = true; v.preload = 'none'; v.src = src;
     v.setAttribute('aria-hidden','true');
     v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;'
       + 'opacity:0;z-index:0;pointer-events:none;transform-origin:50% 50%;'

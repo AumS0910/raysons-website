@@ -19,8 +19,16 @@
   // No eras or reduced-motion -> stacked fallback, nothing to drive.
   if(!N || REDUCED){ document.documentElement.classList.add('reduced'); return; }
 
-  // ambient backdrop: try to autoplay the loop; ignore if blocked (poster/dim still reads)
-  if(vid){ vid.play && vid.play().catch(function(){}); }
+  // ambient backdrop: lazy — only fetch + play the loop when the timeline nears the
+  // viewport (it's preload:none), and pause it when far so it never costs on first load
+  if(vid && 'IntersectionObserver' in window){
+    new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){ try{ vid.preload='auto'; vid.play().catch(function(){}); }catch(_){ } }
+        else { try{ vid.pause(); }catch(_){ } }
+      });
+    }, { rootMargin: '40% 0px' }).observe(sec);
+  }
 
   let cur = 0, target = 0, raf = null, lastActive = -1;
 
