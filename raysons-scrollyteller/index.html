@@ -118,11 +118,18 @@
   @media(prefers-reduced-motion:reduce){.handoff .cue::after{animation:none}}
   .handoff .k,.handoff .t{display:none}   /* wormhole replaces the prompt text — keep only the cue */
 
-  /* WORMHOLE — dive into the part; the dark bore swallows the screen, masking the
-     page swap, then About emerges from the same black. #stage scales toward you. */
-  #stage{will-change:transform;transform-origin:50% 47%}
-  #wormhole{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:0;transition:opacity .18s ease;
-    background:radial-gradient(circle at 50% 47%, #000 0%, #000 var(--r,0%), rgba(3,2,2,0) calc(var(--r,0%) + 14%))}
+  /* PRODUCT LIFT (Cartier-style) — at the end of the film the part RISES and floats
+     to centre, the world falls to a noir void around it (a tightening vignette with a
+     champagne spotlight rim), then it carries over as About's opening hero. The part
+     never goes dark — it stays the lit, crisp anchor while everything else swaps. */
+  #stage{will-change:transform,filter;transform-origin:50% 47%}
+  #wormhole{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:0;transition:opacity .25s ease;
+    background:radial-gradient(circle at 50% 46%,
+      rgba(5,3,2,0) 0%,
+      rgba(5,3,2,0) calc(var(--hole,64%) - 5%),
+      rgba(201,162,78,.20) var(--hole,64%),
+      #050302 calc(var(--hole,64%) + 9%),
+      #050302 100%)}
 
   #cscroll{position:relative;z-index:5;pointer-events:none}
   /* real logomark in nav — opt out of the nav's mix-blend so brand colors aren't inverted */
@@ -179,7 +186,7 @@
   <a class="cta-quote mag" href="enquire.html">Request a Quote <span class="arrow">→</span></a>
 </div>
 
-<!-- wormhole dive into the part → continues into the About reel -->
+<!-- noir-lift void: world falls away, the part floats to centre → carries into About -->
 <div id="wormhole" aria-hidden="true"></div>
 <a class="handoff" id="handoff" href="About Us.html" aria-label="Keep scrolling to enter the group story">
   <span class="cue"></span>
@@ -290,10 +297,12 @@
 <script src="premium.js"></script>
 <script src="sound.js"></script>
 <script>
-/* WORMHOLE: at the end of the film, continued scroll DIVES the camera into the
-   part — it scales toward you while the dark bore (#wormhole) swallows the screen,
-   masking the page swap. About emerges from the same black (its film "emerges").
-   Scroll-driven + reversible; releasing past ~80% commits, below it eases back. */
+/* PRODUCT LIFT (Cartier-style): at the end of the film, continued scroll LIFTS the
+   part — it rises and scales gently to centre while the world falls to a noir void
+   (a tightening vignette with a champagne spotlight rim) and the text sinks away.
+   The part stays lit and crisp, then carries over as About's opening hero (no black-
+   out — it's the constant anchor). Scroll-driven + reversible: past ~76% it settles
+   in and commits; below it eases back to the film. */
 (function(){
   var RED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var stage=document.getElementById('stage'), acts=document.getElementById('acts'),
@@ -313,27 +322,34 @@
   }
   addEventListener('scroll', setEnd, {passive:true}); addEventListener('resize', setEnd); setEnd();
 
+  /* easeOut so the lift decelerates into the hold (gallery-float, not a yank) */
   function apply(){
-    if(stage) stage.style.transform = ep>0 ? 'scale('+(1+ep*5).toFixed(3)+')' : '';
-    if(acts) acts.style.opacity = ep>0 ? String(Math.max(0,1-ep*1.7)) : '';
-    if(handoff) handoff.style.opacity = ep>0 ? String(Math.max(0,1-ep*3)) : '';
-    if(worm){ worm.style.opacity = ep>0?'1':'0'; worm.style.setProperty('--r',(ep*ep*135)+'%'); }
+    var e=ep, s=1-(1-e)*(1-e);              // easeOutQuad for the visual motion
+    if(stage){
+      stage.style.transform = e>0 ? 'translateY('+(-s*6).toFixed(2)+'vh) scale('+(1+s*0.17).toFixed(3)+')' : '';
+      stage.style.filter    = e>0 ? 'saturate('+(1+s*0.18).toFixed(2)+') contrast('+(1+s*0.10).toFixed(2)+') brightness('+(1+s*0.05).toFixed(2)+')' : '';
+    }
+    if(acts){ acts.style.opacity = e>0 ? String(Math.max(0,1-e*2.3)) : '';
+              acts.style.transform = e>0 ? 'translateY('+(s*5).toFixed(2)+'vh)' : ''; }
+    if(handoff) handoff.style.opacity = e>0 ? String(Math.max(0,1-e*3.4)) : '';
+    if(worm){ worm.style.opacity = e>0?'1':'0';
+              worm.style.setProperty('--hole',(64-s*34).toFixed(1)+'%'); }  // 64% -> 30% noir closes in
   }
-  function commit(){ if(gone) return; gone=true; setTimeout(function(){ location.href='About Us.html'; }, 80); }
-  function dive(d){
+  function commit(){ if(gone) return; gone=true; setTimeout(function(){ location.href='About Us.html'; }, 90); }
+  function lift(d){
     if(!atEnd||!armed||gone||RED) return;
     ep=clamp(ep+d); scrolling=true; clearTimeout(scrollT); scrollT=setTimeout(function(){scrolling=false;},240);
     apply(); if(ep>=1) commit();
   }
-  addEventListener('wheel', function(e){ if(atEnd&&armed&&!RED&&(e.deltaY>0||ep>0)) dive(e.deltaY*0.0017); }, {passive:true});
+  addEventListener('wheel', function(e){ if(atEnd&&armed&&!RED&&(e.deltaY>0||ep>0)) lift(e.deltaY*0.0017); }, {passive:true});
   var ty=0;
   addEventListener('touchstart', function(e){ ty=e.touches[0].clientY; }, {passive:true});
-  addEventListener('touchmove', function(e){ var d=ty-e.touches[0].clientY; ty=e.touches[0].clientY; if(atEnd&&armed&&!RED&&(d>0||ep>0)) dive(d*0.006); }, {passive:true});
+  addEventListener('touchmove', function(e){ var d=ty-e.touches[0].clientY; ty=e.touches[0].clientY; if(atEnd&&armed&&!RED&&(d>0||ep>0)) lift(d*0.006); }, {passive:true});
 
-  /* settle: release past ~78% -> fall in; below -> gently ease back out */
+  /* settle: release past ~76% -> float into the hold and commit; below -> ease back */
   (function loop(){ requestAnimationFrame(loop);
     if(gone||RED) return;
-    if(!scrolling && ep>0 && ep<1){ ep = ep>=0.78 ? Math.min(1,ep+0.05) : Math.max(0,ep-0.016); apply(); if(ep>=1) commit(); }
+    if(!scrolling && ep>0 && ep<1){ ep = ep>=0.76 ? Math.min(1,ep+0.045) : Math.max(0,ep-0.016); apply(); if(ep>=1) commit(); }
   })();
 
   /* reduced-motion: plain navigate on an extra scroll at the bottom */
