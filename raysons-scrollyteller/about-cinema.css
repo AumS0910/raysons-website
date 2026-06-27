@@ -288,7 +288,7 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 /* era panels — stacked, only the active one lit */
 /* seat the era panel in the band between the header (top) and the rail (bottom) */
 .tl__stage{position:absolute;inset:0;z-index:2;display:grid;place-items:center start;padding:26vh clamp(20px,6vw,110px) 18vh}
-.tl__era{grid-area:1/1;width:min(720px,86vw);justify-self:start;align-self:center;margin:0;
+.tl__era{grid-area:1/1;width:min(840px,90vw);justify-self:start;align-self:center;margin:0;
   opacity:0;visibility:hidden;transform:translateY(40px);pointer-events:none;
   transition:opacity .45s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1),visibility .45s}
 .tl__era.on{opacity:1;visibility:visible;transform:none;pointer-events:auto;transition:opacity .6s cubic-bezier(.2,.7,.2,1) .12s,transform .7s cubic-bezier(.2,.7,.2,1) .12s,visibility .6s}
@@ -298,15 +298,26 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 .tl__era-k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--molten);margin-bottom:16px}
 .tl__era-h{font-family:var(--serif);font-size:clamp(30px,4.4vw,60px);font-weight:600;line-height:1;letter-spacing:-.01em;margin-bottom:30px;color:var(--ink)}
 .tl__era-h em{font-style:italic;font-weight:500;color:var(--bronze-lite)}
-.tl__items .it{display:grid;grid-template-columns:78px 1fr;gap:20px;padding:16px 0;border-top:1px solid var(--line);
-  opacity:0;transform:translateY(20px);transition:opacity .7s,transform .7s}
+/* MILESTONE PILLARS — standing markers in a row: the YEAR engraved on top, the
+   milestone below (the body), each on a lit champagne spine rising from a ground line.
+   The reference's "year-on-top columns", rebuilt as elegant monuments (no orange). */
+.tl__items{display:flex;align-items:stretch;gap:clamp(14px,2vw,38px);margin-top:4px;
+  padding-top:16px;border-top:1px solid var(--line)}
+.tl__items .it{flex:1 1 0;position:relative;display:block;padding:6px 6px 0 22px;
+  opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
 .tl__era.on .tl__items .it{opacity:1;transform:none}
-.tl__era.on .tl__items .it:nth-child(1){transition-delay:.12s}
-.tl__era.on .tl__items .it:nth-child(2){transition-delay:.22s}
-.tl__era.on .tl__items .it:nth-child(3){transition-delay:.32s}
-.tl__items .it .y{font-family:var(--mono);font-size:13px;color:var(--bronze-lite);font-variant-numeric:tabular-nums}
-.tl__items .it h4{font-size:16px;font-weight:600;margin-bottom:7px;letter-spacing:-.01em;color:var(--ink)}
-.tl__items .it p{font-size:13.5px;line-height:1.6;color:var(--ink-dim);font-weight:300;max-width:54ch}
+.tl__era.on .tl__items .it:nth-child(1){transition-delay:.14s}
+.tl__era.on .tl__items .it:nth-child(2){transition-delay:.26s}
+.tl__era.on .tl__items .it:nth-child(3){transition-delay:.38s}
+/* the pillar's lit spine + glowing cap (the marker head) */
+.tl__items .it::before{content:"";position:absolute;left:0;top:-16px;bottom:6px;width:1px;
+  background:linear-gradient(180deg,rgba(201,162,78,.55) 0%,rgba(220,189,130,.22) 26%,var(--line) 68%,transparent 100%)}
+.tl__items .it::after{content:"";position:absolute;left:-1.5px;top:-16px;width:3px;height:26px;border-radius:2px;
+  background:linear-gradient(var(--molten-hot),transparent);box-shadow:0 0 14px rgba(201,162,78,.5)}
+.tl__items .it .y{display:block;font-family:var(--serif);font-weight:600;letter-spacing:-.02em;
+  font-size:clamp(26px,3vw,46px);line-height:.9;color:var(--bronze-lite);margin-bottom:14px;font-variant-numeric:tabular-nums}
+.tl__items .it h4{font-size:15px;font-weight:600;margin-bottom:8px;letter-spacing:-.01em;color:var(--ink)}
+.tl__items .it p{font-size:12.5px;line-height:1.55;color:var(--ink-dim);font-weight:300}
 
 @media(max-width:820px){
   .tl{height:520vh}
@@ -314,7 +325,10 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
   .tl__head{max-width:80vw}
   .tl__rail{flex-direction:row;flex-wrap:wrap;gap:10px;left:clamp(20px,6vw,110px);bottom:24px}
   .tl__era{width:88vw;justify-self:center;align-self:start;margin-top:24vh}
-  .tl__items .it{grid-template-columns:60px 1fr;gap:12px}
+  .tl__items{flex-direction:column;gap:0;padding-top:6px}        /* pillars stack on mobile */
+  .tl__items .it{padding:16px 0 16px 20px}
+  .tl__items .it::after{height:20px}
+  .tl__items .it .y{font-size:clamp(24px,7vw,34px);margin-bottom:8px}
 }
 
 /* graceful fallback: no JS / reduced-motion -> show every era stacked, no pin tricks */
