@@ -131,14 +131,15 @@
 <!-- ===================== JOURNEY · cinematic year-counter timeline ===================== -->
 <section class="tl" id="tl" aria-label="Our journey — growth and innovation since 1987">
   <div class="tl__pin">
-    <!-- cinematic backdrop: drop a Veo era clip at valve/era-journey.mp4 (ambient, dimmed) -->
-    <video class="tl__bg" id="tlvid" muted playsinline loop preload="none" aria-hidden="true">
-      <source src="valve/era-journey.mp4" type="video/mp4">
-    </video>
+    <!-- per-era MONUMENT backdrops: each pillar carved with its year; cross-fade as you
+         travel the corridor. The carved year IS the era marker. -->
+    <div class="tl__mons" aria-hidden="true">
+      <video class="tl__mon on" data-era="0" muted playsinline loop preload="none"><source src="valve/era-1987.mp4" type="video/mp4"></video>
+      <video class="tl__mon"    data-era="1" muted playsinline loop preload="none"><source src="valve/era-2005.mp4" type="video/mp4"></video>
+      <video class="tl__mon"    data-era="2" muted playsinline loop preload="none"><source src="valve/era-2021.mp4" type="video/mp4"></video>
+      <video class="tl__mon"    data-era="3" muted playsinline loop preload="none"><source src="valve/era-2027.mp4" type="video/mp4"></video>
+    </div>
     <div class="tl__veil" aria-hidden="true"></div>
-
-    <!-- giant year that ticks up as you travel the corridor -->
-    <div class="tl__year" aria-hidden="true"><span id="tlYear">1987</span></div>
 
     <!-- intro overline + progress rail -->
     <div class="tl__head">
