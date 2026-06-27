@@ -246,7 +246,7 @@
   // ============================================================
   //  SCROLL LOOP (lerped — buttery)
   // ============================================================
-  let sy=scrollY, target=scrollY, prevP=0, autoplay=true, autoT=0;
+  let sy=scrollY, target=scrollY, prevP=0, autoplay=false, autoT=0;
   const POUR_FRAC = SEGMENTS[0].span / TOTAL;   // scroll fraction the pour clip occupies
   addEventListener('scroll', ()=>{ if(scrollY>2) autoplay=false; target=scrollY; settledFrames=0; }, {passive:true});
   function loop(){

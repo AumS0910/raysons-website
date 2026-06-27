@@ -16,27 +16,26 @@
   let on = localStorage.getItem(KEY); on = (on === null) ? true : (on === '1');
   let armed = false;
 
-  // ---- audio store (fails silently if a file is missing) ----
+  // ---- audio store: LAZY — files are only fetched when sound is actually
+  //  used, so a page with no /audio yet makes ZERO requests (no 404 noise). ----
+  const CFG = { bed:['audio/foundry-bed.mp3', true, 0.32], click:['audio/click.mp3', false, 0.55], whoosh:['audio/whoosh.mp3', false, 0.5] };
+  for(let i=0;i<8;i++) CFG['s'+i] = ['audio/s'+i+'.mp3', false, 0.5];
   const A = {};
-  function load(name, src, loop, vol){
-    try{
-      const a = new Audio(src); a.loop = !!loop; a.preload = 'auto';
-      a.volume = (vol == null ? 1 : vol);
-      a.addEventListener('error', ()=>{ A[name] = null; }, { once:true });
-      A[name] = a;
-    }catch(e){ A[name] = null; }
+  function get(name){
+    if(name in A) return A[name];
+    const c = CFG[name]; if(!c){ A[name] = null; return null; }
+    let a = null;
+    try{ a = new Audio(c[0]); a.loop = !!c[1]; a.volume = c[2]; a.preload = 'auto';
+         a.addEventListener('error', ()=>{ A[name] = null; }, { once:true }); }
+    catch(e){ a = null; }
+    A[name] = a; return a;
   }
-  load('bed', 'audio/foundry-bed.mp3', true, 0);
-  load('click', 'audio/click.mp3', false, 0.55);
-  load('whoosh', 'audio/whoosh.mp3', false, 0.5);
-  for(let i=0;i<8;i++) load('s'+i, 'audio/s'+i+'.mp3', false, 0.5);
-
   function fadeTo(a, target, ms){
     if(!a) return; const start = a.volume, t0 = performance.now();
     (function step(t){ const k = Math.min(1, (t-t0)/ms); a.volume = start + (target-start)*k; if(k<1) requestAnimationFrame(step); })(t0);
   }
-  function startBed(){ const b = A.bed; if(!b || !on) return; b.play().then(()=> fadeTo(b, 0.32, 1400)).catch(()=>{}); }
-  function play(name){ if(!on) return; const a = A[name]; if(!a) return; try{ const c = a.cloneNode(); c.volume = a.volume; c.play().catch(()=>{}); }catch(e){} }
+  function startBed(){ const b = get('bed'); if(!b || !on) return; b.volume = 0; b.play().then(()=> fadeTo(b, 0.32, 1400)).catch(()=>{}); }
+  function play(name){ if(!on || !armed) return; const a = get(name); if(!a) return; try{ const c = a.cloneNode(); c.volume = CFG[name] ? CFG[name][2] : 0.5; c.play().catch(()=>{}); }catch(e){} }
 
   // ---- toggle UI (self-contained) ----
   const css = `

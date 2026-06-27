@@ -15,8 +15,11 @@
   let pct = 0;
   const tick = setInterval(()=>{ pct = Math.min(100, pct + 9); if(lbar) lbar.style.width = pct+'%'; if(lpct) lpct.textContent = String(pct).padStart(3,'0'); if(pct>=100) clearInterval(tick); }, 80);
   function reveal(){ if(lbar) lbar.style.width='100%'; if(lpct) lpct.textContent='100'; clearInterval(tick); if(loader) loader.classList.add('done'); document.body.classList.add('entered'); }
-  addEventListener('load', ()=> setTimeout(reveal, 350));
-  setTimeout(reveal, 1800);
+  // Arriving from the index product-lift? The part is already on screen — skip the
+  // loader entirely so the handoff reads as one continuous shot (no loading curtain).
+  const FROM_LIFT = /[?&]from=lift\b/.test(location.search);
+  if(FROM_LIFT){ if(loader){ loader.classList.add('done'); loader.style.display='none'; } document.body.classList.add('entered'); }
+  else { addEventListener('load', ()=> setTimeout(reveal, 350)); setTimeout(reveal, 1800); }
 
   // ---- drifting embers ----
   if(!REDUCED){

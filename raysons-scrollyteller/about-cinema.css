@@ -45,22 +45,19 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
    Same "scroll scrubs a fixed film" feel as index.
    ============================================================ */
 .film{position:relative;z-index:10;height:560vh}
-.film__pin{position:sticky;top:0;height:100svh;overflow:hidden}
+.film__pin{position:sticky;top:0;height:100svh;overflow:hidden;
+  background:#050302 url(valve/lift-poster.jpg) center/cover no-repeat}  /* instant hero paint = the lift's last frame */
 .film #stage{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;transform-origin:50% 47%}
-/* EMERGE — carries the index "product lift": About opens on the SAME part, still
-   risen and lit against noir, then it settles down into the hero before the reel runs */
+/* MATCH-CUT — About opens on the EXACT frame the index lift ended on (same valve),
+   so this is barely a move: a whisper of scale + a brief noir wash to mask the page
+   swap, then the part is simply here and the reel begins. */
 @media(prefers-reduced-motion:no-preference){
-  .film #stage{animation:filmEmerge 1.5s cubic-bezier(.16,.84,.28,1) both}
-  @keyframes filmEmerge{
-    0%  {transform:translateY(-6vh) scale(1.17);opacity:.35;filter:saturate(1.18) brightness(1.05)}
-    34% {transform:translateY(-4.2vh) scale(1.13);opacity:.9}      /* hold the lifted hero a beat */
-    100%{transform:translateY(0) scale(1);opacity:1;filter:none}
-  }
-  /* a one-shot noir wash over the whole pin that lifts as the part settles —
-     so About literally opens out of the same darkness the part rose into */
-  .film__pin::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
-    background:#050302;animation:filmVoidLift 1.5s cubic-bezier(.16,.84,.28,1) both}
-  @keyframes filmVoidLift{0%{opacity:.72}38%{opacity:.5}100%{opacity:0}}
+  .film #stage{animation:filmEmerge 1.1s cubic-bezier(.16,.84,.28,1) both}
+  @keyframes filmEmerge{0%{transform:scale(1.05);opacity:.5}100%{transform:scale(1);opacity:1}}
+  /* one-shot noir wash that lifts as the part settles — hides the navigation instant */
+  .film__pin::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:#050302;animation:filmVoidLift .8s ease-out both}
+  @keyframes filmVoidLift{0%{opacity:.55}100%{opacity:0}}
 }
 .film__vig{position:absolute;inset:0;z-index:1;pointer-events:none;background:
   radial-gradient(125% 95% at 50% 50%, transparent 42%, rgba(7,5,4,.66) 100%),

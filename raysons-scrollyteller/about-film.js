@@ -13,9 +13,9 @@
   const ctx = canvas.getContext('2d');
   const facts = Array.from(document.querySelectorAll('.fact'));
 
-  // hero ties to index (the pour), then the four buildings
+  // hero IS the part the index lift ends on (same frame) — then the four buildings
   const SRC = [
-    'valve/pour-poster.jpg',
+    'valve/lift-poster.jpg',
     'images/raysons-sandchem.png',
     'images/raysons-real-estate-retail.png',
     'images/regenta-place.png',
@@ -44,7 +44,9 @@
     const seg = Math.min(N-1, Math.floor(t));
     const local = t - seg;
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.filter = GRADE;
+    // hero (seg 0) is the valve — keep it ungraded so it match-cuts the index lift clip;
+    // the buildings keep the warm film grade for cohesion
+    ctx.filter = seg===0 ? 'none' : GRADE;
     const scale = 1.02 + local*0.08;                 // ken-burns push
     const fade  = local < 0.20 ? local/0.20 : 1;     // cross-dissolve from previous
     if(seg > 0 && fade < 1){ ctx.globalAlpha = 1; cover(imgs[seg-1], 1.10); }
