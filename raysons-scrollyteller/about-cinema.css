@@ -264,10 +264,11 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
   text-shadow:0 0 60px rgba(201,162,78,.06)}
 
 /* intro head (top-left) */
-.tl__head{position:absolute;top:clamp(74px,12vh,128px);left:clamp(20px,6vw,110px);z-index:3;max-width:60ch}
+.tl__head{position:absolute;top:clamp(74px,11vh,116px);left:clamp(20px,6vw,110px);z-index:3;max-width:60ch}
 .tl__k{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--molten)}
-.tl__title{font-family:var(--serif);font-weight:600;line-height:1.0;letter-spacing:-.02em;
-  font-size:clamp(30px,5vw,76px);color:var(--ink-dim);margin-top:14px}
+/* quiet, compact header — the ERA headline below is the hero, so keep this small */
+.tl__title{font-family:var(--serif);font-weight:600;line-height:1.04;letter-spacing:-.01em;
+  font-size:clamp(20px,2.4vw,34px);color:var(--ink-faint);margin-top:10px}
 .tl__title em{font-style:italic;font-weight:500;color:var(--bronze-lite)}
 
 /* progress rail (left, vertical) */
@@ -286,7 +287,7 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 
 /* era panels — stacked, only the active one lit */
 /* seat the era panel in the band between the header (top) and the rail (bottom) */
-.tl__stage{position:absolute;inset:0;z-index:2;display:grid;place-items:center start;padding:30vh clamp(20px,6vw,110px) 20vh}
+.tl__stage{position:absolute;inset:0;z-index:2;display:grid;place-items:center start;padding:26vh clamp(20px,6vw,110px) 18vh}
 .tl__era{grid-area:1/1;width:min(720px,86vw);justify-self:start;align-self:center;margin:0;
   opacity:0;visibility:hidden;transform:translateY(40px);pointer-events:none;
   transition:opacity .45s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1),visibility .45s}
