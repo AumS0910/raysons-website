@@ -301,21 +301,28 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 /* MILESTONE PILLARS — standing markers in a row: the YEAR engraved on top, the
    milestone below (the body), each on a lit champagne spine rising from a ground line.
    The reference's "year-on-top columns", rebuilt as elegant monuments (no orange). */
-.tl__items{display:flex;align-items:stretch;gap:clamp(14px,2vw,38px);margin-top:4px;
-  padding-top:16px;border-top:1px solid var(--line)}
-.tl__items .it{flex:1 1 0;position:relative;display:block;padding:6px 6px 0 22px;
-  opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.tl__items{display:flex;align-items:stretch;gap:clamp(10px,1.4vw,24px);margin-top:10px}
+.tl__items .it{flex:1 1 0;position:relative;display:block;padding:28px clamp(15px,1.5vw,24px) 32px;
+  /* the lit column body — a champagne glow fading down the pillar */
+  background:linear-gradient(180deg,rgba(201,162,78,.13) 0%,rgba(201,162,78,.05) 32%,rgba(255,255,255,.014) 72%,transparent 100%);
+  border-left:1px solid rgba(220,189,130,.18);
+  box-shadow:inset 1px 0 0 rgba(230,196,131,.12);   /* lit left edge (3D) */
+  opacity:0;transform:translateY(30px);
+  transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
 .tl__era.on .tl__items .it{opacity:1;transform:none}
 .tl__era.on .tl__items .it:nth-child(1){transition-delay:.14s}
 .tl__era.on .tl__items .it:nth-child(2){transition-delay:.26s}
 .tl__era.on .tl__items .it:nth-child(3){transition-delay:.38s}
-/* the pillar's lit spine + glowing cap (the marker head) */
-.tl__items .it::before{content:"";position:absolute;left:0;top:-16px;bottom:6px;width:1px;
-  background:linear-gradient(180deg,rgba(201,162,78,.55) 0%,rgba(220,189,130,.22) 26%,var(--line) 68%,transparent 100%)}
-.tl__items .it::after{content:"";position:absolute;left:-1.5px;top:-16px;width:3px;height:26px;border-radius:2px;
-  background:linear-gradient(var(--molten-hot),transparent);box-shadow:0 0 14px rgba(201,162,78,.5)}
+/* the capital — a glowing bar across the top of each pillar */
+.tl__items .it::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;
+  background:linear-gradient(90deg,transparent 2%,rgba(230,196,131,.9) 32%,rgba(201,162,78,.55) 72%,transparent 98%);
+  box-shadow:0 0 16px rgba(201,162,78,.5)}
+/* the base — a soft champagne glow grounding the pillar (the 'plinth') */
+.tl__items .it::after{content:"";position:absolute;left:8%;right:8%;bottom:-2px;height:20px;
+  background:radial-gradient(62% 100% at 50% 0%,rgba(201,162,78,.18),transparent 72%)}
 .tl__items .it .y{display:block;font-family:var(--serif);font-weight:600;letter-spacing:-.02em;
-  font-size:clamp(26px,3vw,46px);line-height:.9;color:var(--bronze-lite);margin-bottom:14px;font-variant-numeric:tabular-nums}
+  font-size:clamp(30px,3.3vw,52px);line-height:.9;color:var(--bronze-lite);margin-bottom:16px;
+  font-variant-numeric:tabular-nums;text-shadow:0 1px 0 rgba(0,0,0,.5),0 0 26px rgba(201,162,78,.28)}
 .tl__items .it h4{font-size:15px;font-weight:600;margin-bottom:8px;letter-spacing:-.01em;color:var(--ink)}
 .tl__items .it p{font-size:12.5px;line-height:1.55;color:var(--ink-dim);font-weight:300}
 
