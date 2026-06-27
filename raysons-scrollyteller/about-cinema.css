@@ -45,8 +45,7 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
    Same "scroll scrubs a fixed film" feel as index.
    ============================================================ */
 .film{position:relative;z-index:10;height:560vh}
-.film__pin{position:sticky;top:0;height:100svh;overflow:hidden;
-  background:#050302 url(valve/lift-poster.jpg) center/cover no-repeat}  /* instant hero paint = the lift's last frame */
+.film__pin{position:sticky;top:0;height:100svh;overflow:hidden;background:#050302}  /* noir base — the canvas paints over it; never let the hero bleed behind later frames */
 .film #stage{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;transform-origin:50% 47%}
 /* MATCH-CUT — About opens on the EXACT frame the index lift ended on (same valve),
    so this is barely a move: a whisper of scale + a brief noir wash to mask the page
@@ -242,3 +241,84 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
     opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;mix-blend-mode:normal}
   body.nav-open .nav-links{display:flex;opacity:1;visibility:visible}
 }
+
+/* ============================================================
+   JOURNEY — cinematic year-counter timeline (pinned corridor)
+   Scroll travels 1987 -> 2027: a giant year ticks up, the active
+   era cross-fades, a ghost numeral sits behind, milestones rise.
+   ============================================================ */
+.tl{position:relative;z-index:10;height:460vh;background:#070504}
+.tl__pin{position:sticky;top:0;height:100svh;overflow:hidden;background:#070504}
+.tl__bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.34;
+  filter:saturate(1.05) contrast(1.05) brightness(.7);transform:scale(1.04)}
+.tl__veil{position:absolute;inset:0;pointer-events:none;background:
+  radial-gradient(120% 90% at 70% 40%, rgba(255,106,26,.10), transparent 60%),
+  radial-gradient(100% 100% at 50% 120%, rgba(201,162,78,.10), transparent 55%),
+  linear-gradient(180deg, rgba(7,5,4,.78) 0%, rgba(7,5,4,.35) 30%, rgba(7,5,4,.55) 70%, rgba(7,5,4,.95) 100%)}
+
+/* giant ticking year */
+.tl__year{position:absolute;right:clamp(16px,5vw,90px);top:50%;transform:translateY(-50%);
+  font-family:var(--serif);font-weight:600;line-height:.8;letter-spacing:-.02em;
+  font-size:clamp(110px,27vw,440px);color:rgba(220,189,130,.10);
+  font-variant-numeric:tabular-nums;pointer-events:none;user-select:none;z-index:1;
+  text-shadow:0 0 60px rgba(201,162,78,.06)}
+
+/* intro head (top-left) */
+.tl__head{position:absolute;top:clamp(74px,12vh,128px);left:clamp(20px,6vw,110px);z-index:3;max-width:60ch}
+.tl__k{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--molten)}
+.tl__title{font-family:var(--serif);font-weight:600;line-height:1.0;letter-spacing:-.02em;
+  font-size:clamp(30px,5vw,76px);color:var(--ink-dim);margin-top:14px}
+.tl__title em{font-style:italic;font-weight:500;color:var(--bronze-lite)}
+
+/* progress rail (left, vertical) */
+.tl__rail{position:absolute;left:clamp(20px,6vw,110px);bottom:clamp(40px,8vh,90px);z-index:3;
+  list-style:none;display:flex;flex-direction:column;gap:14px;margin:0;padding:0}
+.tl__rail li{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:11px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);opacity:.5;
+  transition:opacity .5s,color .5s}
+.tl__rail li b{display:inline-flex;align-items:center;justify-content:center;width:34px;height:24px;
+  border:1px solid var(--line);border-radius:3px;font-style:normal;font-size:11px;color:var(--ink-faint);
+  transition:border-color .5s,color .5s,background .5s}
+.tl__rail li.on{opacity:1;color:var(--bronze-lite)}
+.tl__rail li.on b{border-color:var(--bronze-deep);color:var(--bronze-lite)}
+.tl__rail li.cur{color:var(--molten)}
+.tl__rail li.cur b{border-color:var(--molten);color:var(--molten);background:rgba(255,106,26,.08);box-shadow:0 0 16px rgba(255,106,26,.18)}
+
+/* era panels — stacked, only the active one lit */
+.tl__stage{position:absolute;inset:0;z-index:2;display:grid;place-items:center;padding:0 clamp(20px,6vw,110px)}
+.tl__era{grid-area:1/1;width:min(720px,86vw);justify-self:start;align-self:center;
+  opacity:0;visibility:hidden;transform:translateY(40px);pointer-events:none;
+  transition:opacity .45s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1),visibility .45s}
+.tl__era.on{opacity:1;visibility:visible;transform:none;pointer-events:auto;transition:opacity .6s cubic-bezier(.2,.7,.2,1) .12s,transform .7s cubic-bezier(.2,.7,.2,1) .12s,visibility .6s}
+.tl__ghost{position:absolute;left:clamp(-6px,-1vw,0);top:-14%;z-index:-1;
+  font-family:var(--serif);font-weight:600;font-size:clamp(120px,22vw,300px);line-height:.8;
+  color:rgba(255,255,255,.035);letter-spacing:-.02em;pointer-events:none}
+.tl__era-k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--molten);margin-bottom:16px}
+.tl__era-h{font-family:var(--serif);font-size:clamp(30px,4.4vw,60px);font-weight:600;line-height:1;letter-spacing:-.01em;margin-bottom:30px;color:var(--ink)}
+.tl__era-h em{font-style:italic;font-weight:500;color:var(--bronze-lite)}
+.tl__items .it{display:grid;grid-template-columns:78px 1fr;gap:20px;padding:16px 0;border-top:1px solid var(--line);
+  opacity:0;transform:translateY(20px);transition:opacity .7s,transform .7s}
+.tl__era.on .tl__items .it{opacity:1;transform:none}
+.tl__era.on .tl__items .it:nth-child(1){transition-delay:.12s}
+.tl__era.on .tl__items .it:nth-child(2){transition-delay:.22s}
+.tl__era.on .tl__items .it:nth-child(3){transition-delay:.32s}
+.tl__items .it .y{font-family:var(--mono);font-size:13px;color:var(--bronze-lite);font-variant-numeric:tabular-nums}
+.tl__items .it h4{font-size:16px;font-weight:600;margin-bottom:7px;letter-spacing:-.01em;color:var(--ink)}
+.tl__items .it p{font-size:13.5px;line-height:1.6;color:var(--ink-dim);font-weight:300;max-width:54ch}
+
+@media(max-width:820px){
+  .tl{height:520vh}
+  .tl__year{top:auto;bottom:18vh;right:50%;transform:translateX(50%);font-size:clamp(96px,40vw,200px);color:rgba(220,189,130,.08)}
+  .tl__head{max-width:80vw}
+  .tl__rail{flex-direction:row;flex-wrap:wrap;gap:10px;left:clamp(20px,6vw,110px);bottom:24px}
+  .tl__era{width:88vw;justify-self:center;align-self:start;margin-top:24vh}
+  .tl__items .it{grid-template-columns:60px 1fr;gap:12px}
+}
+
+/* graceful fallback: no JS / reduced-motion -> show every era stacked, no pin tricks */
+.no-tl .tl,.reduced .tl{height:auto}
+.no-tl .tl__pin,.reduced .tl__pin{position:relative;height:auto;padding:clamp(80px,14vh,160px) 0}
+.no-tl .tl__stage,.reduced .tl__stage{position:relative;display:block;gap:0}
+.no-tl .tl__era,.reduced .tl__era{position:relative;opacity:1;visibility:visible;transform:none;margin:0 auto clamp(48px,9vh,120px)}
+.no-tl .tl__era .it,.reduced .tl__era .it{opacity:1;transform:none}
+.no-tl .tl__year,.reduced .tl__year{display:none}

@@ -128,50 +128,76 @@
 </section>
 
 <!-- ===================== JOURNEY / TIMELINE ===================== -->
-<section class="kinetic">
-  <div class="wrap"><h2 class="line" data-split>Growth &amp; innovation<br/><em>since 1987.</em></h2></div>
-</section>
+<!-- ===================== JOURNEY · cinematic year-counter timeline ===================== -->
+<section class="tl" id="tl" aria-label="Our journey — growth and innovation since 1987">
+  <div class="tl__pin">
+    <!-- cinematic backdrop: drop a Veo era clip at valve/era-journey.mp4 (ambient, dimmed) -->
+    <video class="tl__bg" id="tlvid" muted playsinline loop autoplay preload="auto" aria-hidden="true">
+      <source src="valve/era-journey.mp4" type="video/mp4">
+    </video>
+    <div class="tl__veil" aria-hidden="true"></div>
 
-<section class="sec"><div class="wrap">
-  <div class="era">
-    <div class="era__num" data-num>1987</div>
-    <div>
-      <div class="era__k rv">Era I · Foundation</div>
-      <h3 class="era__h rv">The first RCS in <em>Maharashtra.</em></h3>
-      <div class="it rv"><span class="y">1987</span><div><h4>Foundation of Raysons Industries</h4><p>The first manufacturer of Resin Coated Sand (RCS) in Maharashtra — pioneering quality foundry materials in the region.</p></div></div>
-      <div class="it rv"><span class="y">1992</span><div><h4>Expansion with SBR Unit</h4><p>A second manufacturing unit to meet growing demand, expanding capacity and reach.</p></div></div>
-      <div class="it rv"><span class="y">1995</span><div><h4>ISO Certification</h4><p>Raysons SBR achieved ISO certification — a commitment to international quality standards.</p></div></div>
+    <!-- giant year that ticks up as you travel the corridor -->
+    <div class="tl__year" aria-hidden="true"><span id="tlYear">1987</span></div>
+
+    <!-- intro overline + progress rail -->
+    <div class="tl__head">
+      <span class="tl__k">Our Journey</span>
+      <h2 class="tl__title">Growth &amp; innovation<br/><em>since 1987.</em></h2>
+    </div>
+    <ol class="tl__rail" aria-hidden="true">
+      <li data-era="0"><b>I</b><span>Foundation</span></li>
+      <li data-era="1"><b>II</b><span>Scale</span></li>
+      <li data-era="2"><b>III</b><span>Ignition</span></li>
+      <li data-era="3"><b>IV</b><span>Ahead</span></li>
+    </ol>
+
+    <!-- era panels (only the active one is lit; cross-fades as the year passes) -->
+    <div class="tl__stage">
+      <article class="tl__era on" data-era="0">
+        <div class="tl__ghost" aria-hidden="true">1987</div>
+        <div class="tl__era-k">Era I · Foundation</div>
+        <h3 class="tl__era-h">The first RCS in <em>Maharashtra.</em></h3>
+        <div class="tl__items">
+          <div class="it"><span class="y">1987</span><div><h4>Foundation of Raysons Industries</h4><p>The first manufacturer of Resin Coated Sand (RCS) in Maharashtra — pioneering quality foundry materials in the region.</p></div></div>
+          <div class="it"><span class="y">1992</span><div><h4>Expansion with SBR Unit</h4><p>A second manufacturing unit to meet growing demand, expanding capacity and reach.</p></div></div>
+          <div class="it"><span class="y">1995</span><div><h4>ISO Certification</h4><p>Raysons SBR achieved ISO certification — a commitment to international quality standards.</p></div></div>
+        </div>
+      </article>
+
+      <article class="tl__era" data-era="1">
+        <div class="tl__ghost" aria-hidden="true">2005</div>
+        <div class="tl__era-k">Era II · Scale</div>
+        <h3 class="tl__era-h">Scaling the <em>sand business.</em></h3>
+        <div class="tl__items">
+          <div class="it"><span class="y">1997</span><div><h4>Inception of SRI Durga Mata</h4><p>Diversified operations, strengthening our position in foundry and allied industries.</p></div></div>
+          <div class="it"><span class="y">2002</span><div><h4>Launch of RR Sand Industries</h4><p>Founded to support bonding and coating materials — another specialised division.</p></div></div>
+          <div class="it"><span class="y">2005</span><div><h4>Raysons Sand Chem Pvt. Ltd.</h4><p>A state-of-the-art plant with 3,000 tons/month capacity, serving domestic and export markets.</p></div></div>
+        </div>
+      </article>
+
+      <article class="tl__era" data-era="2">
+        <div class="tl__ghost" aria-hidden="true">2021</div>
+        <div class="tl__era-k">Era III · Ignition</div>
+        <h3 class="tl__era-h">The foundry is <em>lit.</em></h3>
+        <div class="tl__items">
+          <div class="it"><span class="y">2021</span><div><h4>Establishment of Raysons Shell Cast</h4><p>Founded with a 450-ton monthly melting capacity — our entry into precision shell moulded casting.</p></div></div>
+          <div class="it"><span class="y">2022</span><div><h4>No-Bake Foundry Line Commissioned</h4><p>A modern no-bake line for larger, complex castings — expanding technical capability.</p></div></div>
+        </div>
+      </article>
+
+      <article class="tl__era" data-era="3">
+        <div class="tl__ghost" aria-hidden="true">2027</div>
+        <div class="tl__era-k">Era IV · The Road Ahead</div>
+        <h3 class="tl__era-h">Full-service precision <em>partner.</em></h3>
+        <div class="tl__items">
+          <div class="it"><span class="y">2026</span><div><h4>Advanced Machine Shop &amp; Heat Treatment</h4><p>A dedicated CNC/VMC machine shop and in-house heat treatment — fully machined, ready-to-assemble deliveries.</p></div></div>
+          <div class="it"><span class="y">2027</span><div><h4>New HMC &amp; VMC Additions</h4><p>Further machining expansion — cementing Raysons as a full-service precision casting partner.</p></div></div>
+        </div>
+      </article>
     </div>
   </div>
-  <div class="era">
-    <div class="era__num" data-num>2005</div>
-    <div>
-      <div class="era__k rv">Era II · Scale</div>
-      <h3 class="era__h rv">Scaling the <em>sand business.</em></h3>
-      <div class="it rv"><span class="y">1997</span><div><h4>Inception of SRI Durga Mata</h4><p>Diversified operations, strengthening our position in foundry and allied industries.</p></div></div>
-      <div class="it rv"><span class="y">2002</span><div><h4>Launch of RR Sand Industries</h4><p>Founded to support bonding and coating materials — another specialised division.</p></div></div>
-      <div class="it rv"><span class="y">2005</span><div><h4>Raysons Sand Chem Pvt. Ltd.</h4><p>A state-of-the-art plant with 3,000 tons/month capacity, serving domestic and export markets.</p></div></div>
-    </div>
-  </div>
-  <div class="era">
-    <div class="era__num" data-num>2021</div>
-    <div>
-      <div class="era__k rv">Era III · Ignition</div>
-      <h3 class="era__h rv">The foundry is <em>lit.</em></h3>
-      <div class="it rv"><span class="y">2021</span><div><h4>Establishment of Raysons Shell Cast</h4><p>Founded with a 450-ton monthly melting capacity — our entry into precision shell moulded casting.</p></div></div>
-      <div class="it rv"><span class="y">2022</span><div><h4>No-Bake Foundry Line Commissioned</h4><p>A modern no-bake line for larger, complex castings — expanding technical capability.</p></div></div>
-    </div>
-  </div>
-  <div class="era">
-    <div class="era__num" data-num>2027</div>
-    <div>
-      <div class="era__k rv">Era IV · The Road Ahead</div>
-      <h3 class="era__h rv">Full-service precision <em>partner.</em></h3>
-      <div class="it rv"><span class="y">2026</span><div><h4>Advanced Machine Shop &amp; Heat Treatment</h4><p>A dedicated CNC/VMC machine shop and in-house heat treatment — fully machined, ready-to-assemble deliveries.</p></div></div>
-      <div class="it rv"><span class="y">2027</span><div><h4>New HMC &amp; VMC Additions</h4><p>Further machining expansion — cementing Raysons as a full-service precision casting partner.</p></div></div>
-    </div>
-  </div>
-</div></section>
+</section>
 
 <!-- ===================== PURPOSE ===================== -->
 <section class="sec"><div class="wrap">
@@ -256,6 +282,7 @@
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
 <script src="about.js"></script>
 <script src="about-film.js"></script>
+<script src="about-timeline.js"></script>
 <script src="premium.js"></script>
 <script src="sound.js"></script>
 </body>

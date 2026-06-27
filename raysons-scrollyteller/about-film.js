@@ -44,6 +44,9 @@
     const seg = Math.min(N-1, Math.floor(t));
     const local = t - seg;
     ctx.clearRect(0,0,canvas.width,canvas.height);
+    // paint a noir base first so any transparency in a building PNG reads as black,
+    // never the previous (hero) frame bleeding through
+    ctx.filter='none'; ctx.fillStyle='#050302'; ctx.fillRect(0,0,canvas.width,canvas.height);
     // hero (seg 0) is the valve — keep it ungraded so it match-cuts the index lift clip;
     // the buildings keep the warm film grade for cohesion
     ctx.filter = seg===0 ? 'none' : GRADE;
