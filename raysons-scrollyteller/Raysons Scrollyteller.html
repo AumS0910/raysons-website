@@ -182,8 +182,8 @@
 </div>
 
 <!-- product-lift hero clip: scroll scrubs the part rising → its last frame is About's hero -->
-<video id="liftvid" muted playsinline preload="auto" poster="valve/lift-poster.jpg" aria-hidden="true">
-  <source src="valve/lift.mp4" type="video/mp4">
+<video id="liftvid" muted playsinline preload="none" poster="valve/lift-poster.jpg" aria-hidden="true">
+  <source src="https://cdn.jsdelivr.net/gh/AumS0910/raysons-website@media-v1/raysons-scrollyteller/valve/lift.mp4" type="video/mp4">
 </video>
 <a class="handoff" id="handoff" href="About Us.html?from=lift" aria-label="Keep scrolling to enter the group story">
   <span class="cue"></span>
@@ -329,6 +329,16 @@
     vid.addEventListener('seeked', function(){ seeking=false; pumpSeek(); });
     try{ vid.load(); }catch(e){}
   }
+
+  // lazy-load: the clip is preload:none, so start fetching it once you're most of the
+  // way down — ready by the time you reach the dive, but never on first paint
+  var warmed=false;
+  function warm(){
+    if(warmed||!vid) return;
+    var max=document.documentElement.scrollHeight-innerHeight;
+    if(scrollY > max*0.6){ warmed=true; try{ vid.preload='auto'; vid.load(); }catch(_){ } }
+  }
+  addEventListener('scroll', warm, {passive:true});
 
   function setEnd(){
     var max=document.documentElement.scrollHeight-innerHeight;

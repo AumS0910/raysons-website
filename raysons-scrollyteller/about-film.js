@@ -17,7 +17,10 @@
 
   // hero (image, on canvas) + four building clips (video layers, scrubbed)
   const heroImg = new Image(); heroImg.src = 'valve/lift-poster.jpg';
-  const CLIPS = ['images/sandchem.mp4','images/industries.mp4','images/regenta.mp4','images/shellcast.mp4'];
+  // heavy clips are served from jsDelivr's CDN (off the Vercel deploy) — range-request
+  // support keeps the scrub working; pinned to the media-v1 tag for stable caching
+  const CDN = 'https://cdn.jsdelivr.net/gh/AumS0910/raysons-website@media-v1/raysons-scrollyteller/';
+  const CLIPS = [CDN+'images/sandchem.mp4', CDN+'images/industries.mp4', CDN+'images/regenta.mp4', CDN+'images/shellcast.mp4'];
   const N = CLIPS.length + 1;   // hero + 4
   const GRADE = REDUCED ? 'none' : 'brightness(.8) contrast(1.06) saturate(1.05)';
 
