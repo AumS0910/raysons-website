@@ -19,6 +19,10 @@
 
   if(!N || REDUCED){ document.documentElement.classList.add('reduced'); return; }
 
+  // MOBILE / iOS can't seek live <video> on scroll → don't scrub; the monument's POSTER
+  // still (its carved year) shows, cross-fading per era. The mp4 never loads on mobile.
+  const MOBILE = matchMedia('(hover:none) and (pointer:coarse)').matches || innerWidth <= 820;
+
   // per-era monument clips with their own scrub state (same seek-pump as the index lift)
   const mons = Array.from(sec.querySelectorAll('.tl__mon')).map(function(v){
     const m = { el:v, dur:0, targetCT:0, seeking:false, seekT:0, primed:false };
@@ -45,8 +49,8 @@
   if('IntersectionObserver' in window){
     new IntersectionObserver(function(es){
       near = es[0].isIntersecting;
-      if(near){ const a = lastActive >= 0 ? lastActive : 0; prime(mons[a]); prime(mons[a+1]); }
-      else mons.forEach(function(m){ try{ m.el.pause(); }catch(_){ } });
+      if(near && !MOBILE){ const a = lastActive >= 0 ? lastActive : 0; prime(mons[a]); prime(mons[a+1]); }
+      else if(!near) mons.forEach(function(m){ try{ m.el.pause(); }catch(_){ } });
     }, { rootMargin: '35% 0px' }).observe(sec);
   } else { near = true; }
 
@@ -74,15 +78,15 @@
       eras.forEach((e,i)=> e.classList.toggle('on', i === active));
       rail.forEach((e,i)=>{ e.classList.toggle('on', i <= active); e.classList.toggle('cur', i === active); });
       mons.forEach(function(m,i){
-        if(i === active){ m.el.classList.add('on'); if(near){ prime(m); } }
+        if(i === active){ m.el.classList.add('on'); if(near && !MOBILE){ prime(m); } }
         else m.el.classList.remove('on');
       });
-      if(near){ prime(mons[active+1]); }   // ready the next pillar before you reach it
+      if(near && !MOBILE){ prime(mons[active+1]); }   // desktop: ready the next pillar
       lastActive = active;
     }
 
-    // scroll drives the carved-year monument's slow push-in
-    if(near) scrub(mons[active], local);
+    // desktop: scroll drives the carved-year monument's slow push-in. mobile: poster still.
+    if(near && !MOBILE) scrub(mons[active], local);
   }
 
   addEventListener('scroll', onScroll, { passive:true });

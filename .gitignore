@@ -1,3 +1,10 @@
 node_modules/
 dist/
 .DS_Store
+
+.vercel
+
+# raw AI-generated source clips — heavy; served from the jsDelivr CDN (media-v1 tag), never deployed
+raysons-scrollyteller/valve/Monument_*.mp4
+raysons-scrollyteller/**/Building_*.mp4
+raysons-scrollyteller/**/*-src.mp4

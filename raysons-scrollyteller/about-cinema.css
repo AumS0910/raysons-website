@@ -312,10 +312,28 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
   .tl__head{max-width:80vw}
   .tl__rail{flex-direction:row;flex-wrap:wrap;gap:8px;left:clamp(20px,6vw,110px);top:auto;bottom:auto;transform:none;
     /* keep the rail above the bottom strip */ margin:0}
-  .tl__rail{top:clamp(150px,22vh,220px)}
-  .tl__items{flex-direction:column;gap:14px;border-top:0;padding-top:8px}
+  .tl__rail{top:clamp(150px,21vh,210px)}
+  /* shrink the header so it never collides with the rail below it */
+  .tl__title{font-size:clamp(18px,5.2vw,24px);margin-top:7px}
+  /* push the carved YEAR up into the clear upper zone so it never sits behind the text sheet */
+  .tl__mon{object-position:center 26%}
+  /* the era copy becomes a solid dark bottom-sheet — text always reads over the bright monument */
+  .tl__stage{pointer-events:auto}
+  .tl__era{left:0;right:0;bottom:0;padding:20px clamp(18px,6vw,26px) calc(22px + env(safe-area-inset-bottom,0px));
+    max-height:64vh;overflow:hidden;
+    background:linear-gradient(to top,rgba(6,4,3,.97) 0%,rgba(6,4,3,.95) 52%,rgba(6,4,3,.82) 74%,rgba(6,4,3,0) 100%)}
+  .tl__era-k{margin-bottom:9px}
+  .tl__era-h{font-size:clamp(22px,6.4vw,32px);margin-bottom:16px}
+  .tl__items{flex-direction:column;gap:13px;border-top:0;padding-top:4px}
   .tl__items .it{max-width:none}
-  .tl__items .it .y{font-size:clamp(22px,6vw,30px);margin-bottom:6px}
+  .tl__items .it .y{font-size:clamp(20px,5.4vw,26px);margin-bottom:4px}
+  .tl__items .it h4{font-size:14px}
+  .tl__items .it p{font-size:12px;line-height:1.45}
+}
+/* very short / small phones: trim the third milestone so the sheet never overflows its cap */
+@media(max-width:820px) and (max-height:740px){
+  .tl__items .it:nth-child(3){display:none}
+  .tl__era-h{margin-bottom:12px}
 }
 
 /* graceful fallback: no JS / reduced-motion -> show every era stacked, no pin tricks */

@@ -21,16 +21,22 @@
   // support keeps the scrub working; pinned to the media-v1 tag for stable caching
   const CDN = 'https://cdn.jsdelivr.net/gh/AumS0910/raysons-website@media-v1/raysons-scrollyteller/';
   const CLIPS = [CDN+'images/sandchem.mp4', CDN+'images/industries.mp4', CDN+'images/regenta.mp4', CDN+'images/shellcast.mp4'];
+  const POSTERS = ['images/sandchem-poster.jpg','images/industries-poster.jpg','images/regenta-poster.jpg','images/shellcast-poster.jpg'];
+  // MOBILE / iOS can't reliably seek live <video> on scroll (frames never decode → black),
+  // so on touch/small screens we DON'T scrub — we show each clip's poster still (cross-fading).
+  // Bonus: the heavy mp4 never downloads on mobile, only the ~100KB poster.
+  const MOBILE = matchMedia('(hover:none) and (pointer:coarse)').matches || innerWidth <= 820;
+  const SCRUB  = !MOBILE && !REDUCED;
   const N = CLIPS.length + 1;   // hero + 4
   const GRADE = REDUCED ? 'none' : 'brightness(.8) contrast(1.06) saturate(1.05)';
 
-  // build the building <video> layers — visible-capable (opacity-driven), scrubbed
+  // build the building layers — <video> (scrubbed) on desktop, poster-still on mobile
   const holder = film.querySelector('.film__pin') || film;
-  const builds = CLIPS.map(src => {
+  const builds = CLIPS.map((src, idx) => {
     const v = document.createElement('video');
-    // preload:none → a clip is only fetched when its beat approaches (prime()), so the
-    // page isn't dragged down by ~33MB of building footage on first load
-    v.muted = true; v.playsInline = true; v.preload = 'none'; v.src = src;
+    v.muted = true; v.playsInline = true; v.preload = 'none';
+    v.poster = POSTERS[idx];                 // the still shown until/unless we scrub the clip
+    if(SCRUB) v.src = src;                    // only load the heavy clip where we can actually scrub
     v.setAttribute('aria-hidden','true');
     v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;'
       + 'opacity:0;z-index:0;pointer-events:none;transform-origin:50% 50%;'
@@ -88,8 +94,8 @@
       if(s === seg){ op = local < 0.20 ? local/0.20 : 1; frac = local; }     // active: scrub start->end
       else if(s === seg-1){ op = local < 0.20 ? 1-local/0.20 : 0; frac = 1; } // outgoing: hold last frame, fade out
       m.el.style.opacity = op.toFixed(3);
-      if(op > 0.001){
-        if(!REDUCED) m.el.style.transform = 'scale('+(1.02 + frac*0.08).toFixed(3)+')';
+      if(op > 0.001 && SCRUB){
+        m.el.style.transform = 'scale('+(1.02 + frac*0.08).toFixed(3)+')';
         scrub(m, frac);
       }
     });
@@ -97,7 +103,7 @@
     if(seg !== lastSeg){
       facts.forEach((f,i)=> f.classList.toggle('on', i===seg));
       if(countEl) countEl.textContent = String(seg+1).padStart(2,'0');
-      prime(builds[seg-1]); prime(builds[seg]);   // ready current + upcoming clip for instant scrub
+      if(SCRUB){ prime(builds[seg-1]); prime(builds[seg]); }   // desktop: ready clips for scrub
       lastSeg = seg;
     }
     if(!REDUCED){
