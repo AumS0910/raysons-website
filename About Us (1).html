@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>About Us — Raysons Shell Cast</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="about-styles.css" />
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body data-dir="ember">
+
+<!-- WebGL background -->
+<canvas id="gl"></canvas>
+<div class="atmos"></div>
+<div class="grain"></div>
+
+<!-- ===================== LOADER ===================== -->
+<div id="loader">
+  <div class="loader-mark">RAYSONS&nbsp;GROUP</div>
+  <div class="loader-bar"><i></i></div>
+  <div class="loader-foot">
+    <span>Opening the archive</span>
+    <span class="loader-pct">000</span>
+  </div>
+</div>
+
+<!-- ===================== CHROME ===================== -->
+<nav class="nav">
+  <a class="brand" href="Raysons Scrollyteller.html"><b>RAYSONS</b> <span>SHELL CAST</span></a>
+  <div class="nav-links">
+    <a href="Raysons Scrollyteller.html">Overview</a>
+    <a href="#" data-jump="top">About</a>
+    <a href="Raysons Scrollyteller.html">Foundry</a>
+    <a href="Raysons Scrollyteller.html">Products</a>
+    <a href="#" data-jump="global">Enquire</a>
+  </div>
+</nav>
+
+<button id="sound" class="sound">
+  <span class="eq"><i></i><i></i><i></i><i></i></span>
+  <span class="lbl">Sound</span>
+</button>
+
+<div class="hud">
+  <div class="row"><span class="dot"></span> <span id="hud-stage">ORIGIN</span></div>
+  <div class="row">Year <b id="hud-year">1987</b></div>
+  <div class="row">MIDC Shiroli · Kolhapur</div>
+</div>
+
+<div class="prog">
+  <span class="cur">01 / 11</span>
+  <span class="track"><i></i></span>
+  <span class="label">Growth &amp; innovation since 1987</span>
+</div>
+
+<div class="cue">
+  <span>Scroll</span>
+  <span class="line"></span>
+</div>
+
+<div class="cursor" id="cursor"><span class="ring"></span><span class="dot"></span></div>
+
+<!-- ===================== CHAPTERS ===================== -->
+<div id="chapters">
+
+  <!-- 0 — HERO -->
+  <section class="chapter c-center active" data-screen-label="01">
+    <div class="inner">
+      <div class="eyebrow rise" style="justify-content:center">About Us</div>
+      <h1 class="display rise">Part of something<br/><em>bigger.</em></h1>
+      <p class="lede rise" style="margin-left:auto;margin-right:auto;text-align:center;max-width:56ch">
+        Four group companies: Raysons Shell Cast · Raysons Sandchem Pvt Ltd ·
+        Raysons Industries · Raysons Marketing Pvt Ltd.
+      </p>
+      <div class="kicker rise" style="margin-top:34px">Kolhapur, India · Since the 1980s</div>
+    </div>
+  </section>
+
+  <!-- 1 — THE GROUP -->
+  <section class="chapter" data-screen-label="02" style="align-items:center">
+    <div class="inner">
+      <div class="eyebrow rise">The Raysons Group</div>
+      <h2 class="display rise" style="font-size:clamp(38px,5.8vw,86px)">Four verticals.<br/>One <em>discipline.</em></h2>
+      <div class="groupgrid rise">
+        <div class="g"><div><div class="tag">Foundry Materials</div><h4>Raysons Sandchem Pvt Ltd</h4></div><p>Strong foundation in Resin Coated Sand and casting technologies since the 1980s.</p></div>
+        <div class="g"><div><div class="tag">Real Estate · Retail</div><h4>Raysons Industries</h4></div><p>Diversified across Foundry, Real Estate, Hospitality, Retail and Renewable Energy.</p></div>
+        <div class="g"><div><div class="tag">Hospitality</div><h4>REGENTA Place</h4></div><p>Partnered brands: REGENTA Place · Westside · Neora · Sky Zone.</p></div>
+        <div class="g"><div><div class="tag">Precision Foundry</div><h4>Raysons Shell Cast</h4></div><p>Established 2021 as the group’s precision manufacturing vertical.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 — PURPOSE -->
+  <section class="chapter" data-screen-label="03" style="align-items:center">
+    <div class="inner">
+      <div class="eyebrow rise">Purpose</div>
+      <h2 class="display rise" style="font-size:clamp(36px,5.4vw,80px)">Mission, vision<br/>&amp; <em>values.</em></h2>
+      <div class="mv rise">
+        <div class="m"><h4>Our Mission</h4><p>To design, manufacture and supply precision-engineered shell moulded and no-bake castings with unmatched quality and reliability — delivering value through technological excellence, continuous innovation and sustainable practices.</p></div>
+        <div class="m"><h4>Our Vision</h4><p>To be recognised globally as a trusted and innovative casting solutions partner, setting industry benchmarks in quality, sustainability and customer service — driven by advanced technology, integrity and a passion for excellence.</p></div>
+      </div>
+      <div class="values rise">
+        <div class="v"><span class="ix">01</span><h5>Innovation</h5><p>Continuously adopting new technologies and smarter processes.</p></div>
+        <div class="v"><span class="ix">02</span><h5>Quality</h5><p>Ensuring zero-defect manufacturing and superior performance.</p></div>
+        <div class="v"><span class="ix">03</span><h5>Sustainability</h5><p>Promoting an eco-friendly and safe workplace.</p></div>
+        <div class="v"><span class="ix">04</span><h5>Integrity</h5><p>Building transparent, long-term relationships with customers and partners.</p></div>
+        <div class="v"><span class="ix">05</span><h5>Teamwork</h5><p>Empowering people to grow and achieve excellence together.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 — JOURNEY INTRO -->
+  <section class="chapter c-center" data-screen-label="04">
+    <div class="inner">
+      <div class="eyebrow rise" style="justify-content:center">Our Journey</div>
+      <h2 class="display rise">Growth &amp; innovation<br/><em>since 1987.</em></h2>
+      <p class="lede rise" style="margin-left:auto;margin-right:auto;text-align:center;max-width:46ch">
+        Forty years, ten milestones. Scroll to travel the corridor — from the first
+        Resin Coated Sand in Maharashtra to a full-service precision casting partner.
+      </p>
+    </div>
+  </section>
+
+  <!-- 4 — ERA I · 1987–1995 -->
+  <section class="chapter" data-screen-label="05" style="align-items:center">
+    <div class="inner">
+      <div class="eyebrow rise">Era I · Foundation</div>
+      <h2 class="display rise" style="font-size:clamp(36px,5.2vw,76px)">The first RCS<br/>in <em>Maharashtra.</em></h2>
+      <div class="era rise">
+        <div class="e"><div class="yr">1987</div><h4>Foundation of Raysons Industries</h4><p>Established as the first manufacturer of Resin Coated Sand (RCS) in Maharashtra — pioneering a new era of quality foundry materials in the region.</p></div>
+        <div class="e"><div class="yr">1992</div><h4>Expansion with SBR Unit</h4><p>A second manufacturing unit set up under SBR to meet growing demand, expanding production capacity and customer reach.</p></div>
+        <div class="e"><div class="yr">1995</div><h4>ISO Certification</h4><p>Raysons SBR achieved ISO certification — a commitment to international quality standards and consistent process excellence.</p></div>
+      </div>
+    </div>
+    <div class="era-mark">1987</div>
+  </section>
+
+  <!-- 5 — ERA II · 1997–2005 -->
+  <section class="chapter" data-screen-label="06" style="align-items:center">
+    <div class="inner">
+      <div class="eyebrow rise">Era II · Expansion</div>
+      <h2 class="display rise" style="font-size:clamp(36px,5.2vw,76px)">Scaling the<br/><em>sand business.</em></h2>
+      <div class="era rise">
+        <div class="e"><div class="yr">1997</div><h4>Inception of SRI Durga Mata</h4><p>Diversified operations, further strengthening our position in the foundry and allied industries.</p></div>
+        <div class="e"><div class="yr">2002</div><h4>Launch of RR Sand Industries</h4><p>Founded to support growing requirements for bonding and coating materials — another specialised division under the group umbrella.</p></div>
+        <div class="e"><div class="yr">2005</div><h4>Raysons Sand Chem Pvt. Ltd.</h4><p>Commissioned a state-of-the-art plant with 3,000 tons/month capacity, serving larger domestic and export markets.</p></div>
+      </div>
+    </div>
+    <div class="era-mark">2005</div>
+  </section>
+
+  <!-- 6 — ERA III · 2021–2022 · IGNITION -->
+  <section class="chapter" data-screen-label="07" style="align-items:center">
+    <div class="inner">
+      <div class="eyebrow rise">Era III · Ignition</div>
+      <h2 class="display rise" style="font-size:clamp(38px,5.6vw,82px)">The foundry<br/>is <em>lit.</em></h2>
+      <div class="era two rise">
+        <div class="e"><div class="yr">2021</div><h4>Establishment of Raysons Shell Cast</h4><p>Founded with a 450-ton monthly melting capacity — our entry into precision shell moulded casting manufacturing for leading global industries.</p></div>
+        <div class="e"><div class="yr">2022</div><h4>No-Bake Foundry Line Commissioned</h4><p>A modern No-Bake line to meet demand for larger, complex castings — expanding technical capabilities and production flexibility.</p></div>
+      </div>
+    </div>
+    <div class="era-mark">2021</div>
+  </section>
+
+  <!-- 7 — ERA IV · 2026–2027 · AHEAD -->
+  <section class="chapter" data-screen-label="08" style="align-items:center">
+    <div class="inner">
+      <div class="eyebrow rise">Era IV · The Road Ahead</div>
+      <h2 class="display rise" style="font-size:clamp(36px,5.2vw,76px)">Full-service<br/>precision <em>partner.</em></h2>
+      <div class="era two rise">
+        <div class="e"><div class="yr">2026</div><h4>Advanced Machine Shop &amp; Heat Treatment</h4><p>A dedicated CNC/VMC machine shop and in-house heat treatment facility — enabling fully machined, ready-to-assemble casting deliveries.</p></div>
+        <div class="e"><div class="yr">2027</div><h4>New HMC &amp; VMC Machine Additions</h4><p>Further expansion of machining capabilities — cementing Raysons as a full-service precision casting partner.</p></div>
+      </div>
+    </div>
+    <div class="era-mark">2027</div>
+  </section>
+
+  <!-- 8 — OUR PEOPLE -->
+  <section class="chapter" data-screen-label="09" style="align-items:center">
+    <div class="inner">
+      <div class="eyebrow rise">Our People</div>
+      <h2 class="display rise" style="font-size:clamp(38px,5.8vw,86px)">The foundry<br/>is the <em>team.</em></h2>
+      <div class="people-copy rise">
+        <p><b>Led by ownership</b> with a clear vision: to build a precision foundry from Kolhapur that global OEM buyers can trust for consistency, transparency and engineering discipline.</p>
+        <p><b>Our technical team</b> brings together metallurgical control, quality leadership and experienced foundry supervision across moulding, melting, pouring, fettling, machining and dispatch.</p>
+        <p><b>Operators are trained</b> through process discipline, shop-floor supervision, inspection feedback and repeatable work standards — accountability from raw material to shipment.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 — CERTIFICATIONS -->
+  <section class="chapter" data-screen-label="10" style="align-items:center">
+    <div class="inner">
+      <div class="eyebrow rise">Certifications &amp; Standards</div>
+      <h2 class="display rise" style="font-size:clamp(36px,5.4vw,80px)">Standards buyers<br/>can <em>verify.</em></h2>
+      <div class="certs rise">
+        <div class="c"><h4>ISO 9001:2015</h4><p>Quality Management System</p></div>
+        <div class="c"><h4>JDT 17015</h4><p>Casting Soundness · Deere standard</p></div>
+        <div class="c"><h4>CT9 / CT10</h4><p>Casting Tolerance Grades per JDM B15</p></div>
+        <div class="c"><h4>ASTM A802</h4><p>Surface Quality Standard</p></div>
+        <div class="c"><h4>ISPM 15</h4><p>Fumigated export packaging</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 — GLOBAL / CTA -->
+  <section class="chapter c-center" data-screen-label="11">
+    <div class="inner">
+      <div class="eyebrow rise" style="justify-content:center">Global Customers</div>
+      <h2 class="display rise" style="font-size:clamp(34px,5.4vw,80px)">Trusted by companies that<br/>don’t compromise on <em>quality.</em></h2>
+      <div class="chips rise" style="justify-content:center;margin-left:auto;margin-right:auto">
+        <span>Tata Hendrikson</span><span>Schwing Stetter</span><span>Caterpillar</span>
+        <span>Halliburton</span><span>Faster Hydraulics · Italy</span><span>Wikov · Czech Republic</span>
+        <span>SAS Sanwa · Japan</span><span>Vanaz Engineering</span>
+      </div>
+      <div class="cta-row rise" style="justify-content:center">
+        <a class="mag" href="/cdn-cgi/l/email-protection#f29b9c96878186809b9781b280938b819d9c8195809d8782dc919d9f">Request a Quote <span class="arrow">→</span></a>
+        <a class="mag ghost" href="Raysons Scrollyteller.html">Back to Overview</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="legal">© 2026 Raysons Shell Cast · Precision Foundry · Kolhapur, Maharashtra, India</div>
+
+<!-- scroll space -->
+<div id="scroll-space"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module" src="about-scene.js"></script>
+<script src="about-app.js"></script>
+
+<!-- ===================== TWEAKS (React island) ===================== -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<div id="tweaks-root"></div>
+<script type="text/babel">
+const ABOUT_TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "direction": "Ember",
+  "scrollLength": 100,
+  "scrollEase": 12,
+  "camChase": 8,
+  "drift": 1,
+  "bloom": 0.85
+}/*EDITMODE-END*/;
+
+function AboutTweaks() {
+  const [t, setTweak] = useTweaks(ABOUT_TWEAK_DEFAULTS);
+
+  React.useEffect(() => {
+    const apply = () => { if (window.AboutPage) window.AboutPage.applyTweaks(t); };
+    if (window.AboutScene && window.AboutScene.ready) apply();
+    else window.addEventListener('about-ready', apply, { once: true });
+    apply();
+  }, [t]);
+
+  return (
+    <TweaksPanel>
+      <TweakSection label="Direction" />
+      <TweakRadio label="Visual direction" value={t.direction}
+                  options={['Ember', 'Steel']}
+                  onChange={(v) => setTweak('direction', v)} />
+      <TweakSection label="Camera & scroll feel" />
+      <TweakSlider label="Journey length" value={t.scrollLength} min={55} max={180} step={5} unit="vh/ch"
+                   onChange={(v) => setTweak('scrollLength', v)} />
+      <TweakSlider label="Scroll easing" value={t.scrollEase} min={4} max={30} step={1} unit="%"
+                   onChange={(v) => setTweak('scrollEase', v)} />
+      <TweakSlider label="Camera chase" value={t.camChase} min={3} max={25} step={1} unit="%"
+                   onChange={(v) => setTweak('camChase', v)} />
+      <TweakSlider label="Hand-held drift" value={t.drift} min={0} max={3} step={0.1}
+                   onChange={(v) => setTweak('drift', v)} />
+      <TweakSection label="Atmosphere" />
+      <TweakSlider label="Bloom" value={t.bloom} min={0} max={2} step={0.05}
+                   onChange={(v) => setTweak('bloom', v)} />
+    </TweaksPanel>
+  );
+}
+ReactDOM.createRoot(document.getElementById('tweaks-root')).render(<AboutTweaks></AboutTweaks>);
+</script>
+</body>
+</html>

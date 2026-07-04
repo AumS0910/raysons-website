@@ -75,6 +75,13 @@
   #acts{position:fixed;inset:0;z-index:10;pointer-events:none}
   .act{position:fixed;inset:0;display:flex;padding:max(96px,12vh) clamp(20px,6vw,110px) max(90px,11vh);
     opacity:0;visibility:hidden;transition:opacity .25s ease, visibility .25s}
+  @media(max-width:640px){
+    .act{padding:max(72px,10vh) clamp(16px,5vw,40px) max(60px,8vh)}
+    .act.center .display,.act .display{font-size:clamp(38px,10vw,90px)!important}
+  }
+  @media(max-width:420px){
+    .act{padding:max(64px,9vh) 18px max(54px,7vh)}
+  }
   .act.on{opacity:1;visibility:visible}
   .act .inner{width:100%;max-width:1320px;margin:auto}
   .act.center{text-align:center;flex-direction:column;align-items:center;justify-content:center}
@@ -169,8 +176,11 @@
 
 <nav class="nav">
   <a class="brand" href="index.html"><img src="images/raysons-logo.png" alt="" class="brandmark" /> <b>RAYSONS</b> <span>SHELL CAST</span></a>
+  <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-links">
+    <a href="index.html" aria-current="page">Overview</a>
     <a href="About Us.html">About</a>
+    <a href="foundry.html">Foundry</a>
     <a href="enquire.html">Enquire</a>
   </div>
 </nav>
@@ -223,6 +233,7 @@
     <div class="inner">
       <div class="eyebrow rise cool" style="color:var(--bronze-lite)">Scene 04 · And back, better</div>
       <h2 class="display cool rise" style="font-size:clamp(40px,6.6vw,100px)">And go back<br/><em>better.</em></h2>
+      <p class="lede rise" style="margin-top:24px">Engineered to spec. Verified before it ships. Every dimension checked against your drawing, every heat spectrometer-verified — nothing leaves without sign-off.</p>
     </div>
   </section>
 
@@ -244,6 +255,7 @@
     <div class="inner">
       <div class="eyebrow rise cool" style="justify-content:center;color:var(--bronze-lite)">Scene 06</div>
       <h2 class="display cool rise" style="font-size:clamp(38px,5.8vw,86px)">The part inside<br/>the <em>machine.</em></h2>
+      <p class="lede rise" style="margin-top:24px;text-align:center;max-width:52ch;margin-left:auto;margin-right:auto">Inside Caterpillar excavator arms. Inside Halliburton pump heads. Inside Schwing concrete delivery systems.</p>
     </div>
   </section>
 
@@ -261,6 +273,7 @@
         <div class="sp"><span class="k">Materials</span><span class="v">CI · DI · SiMo · ADI</span></div>
         <div class="sp"><span class="k">Testing</span><span class="v">Spectro · UTM · BHN · UT</span></div>
       </div>
+      <style>@media(max-width:560px){.specs.rise{grid-template-columns:1fr!important}}</style>
     </div>
   </section>
 
@@ -292,7 +305,24 @@
 
 <script src="cinema.js"></script>
 <script src="premium.js"></script>
-<script src="sound.js"></script>
+<script>
+/* ── Mobile nav burger ── */
+(function(){
+  var burger = document.getElementById('navBurger');
+  var links  = document.querySelector('.nav-links');
+  if(!burger || !links) return;
+  burger.addEventListener('click', function(){
+    var open = document.body.classList.toggle('nav-open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  links.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){
+      document.body.classList.remove('nav-open');
+      burger.setAttribute('aria-expanded','false');
+    });
+  });
+})();
+</script>
 <script>
 /* PRODUCT LIFT (Cartier-style): at the end of the film, continued scroll SCRUBS a
    bespoke hero clip (valve/lift.mp4) — the part rises, turns under a champagne light

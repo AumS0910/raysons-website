@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Casting Sequence — Raysons Shell Cast</title>
+<meta name="description" content="Watch the hydraulic valve housing assemble from five components and reveal its inner bore — a scroll-controlled cinematic sequence."/>
+<meta name="theme-color" content="#050302"/>
+
+<!-- fonts loaded by CastingSequence.module.css via @import -->
+<link rel="stylesheet" href="styles.css"/>
+<link rel="stylesheet" href="components/scenes/CastingSequence.module.css"/>
+
+<style>
+  /* page chrome overrides */
+  body { cursor: auto; background: #050302; overflow-x: hidden; }
+
+  /* nav sits on top of the pinned canvas */
+  .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+
+  /* casting wrap fills page naturally */
+  .cs-wrap { margin-top: 0; }
+
+  /* after the sequence a brief outro section */
+  .outro {
+    position: relative; z-index: 10;
+    padding: clamp(80px,14vh,160px) clamp(24px,6vw,110px);
+    text-align: center;
+    background: #050302;
+  }
+  .outro h2 {
+    font-family: 'Cormorant Garamond', 'Cormorant', Georgia, serif;
+    font-weight: 300;
+    font-size: clamp(32px,5vw,72px);
+    color: #E8E0D5;
+    margin-bottom: 28px;
+    line-height: 1.1;
+  }
+  .outro p {
+    font-family: 'DM Sans', var(--sans, sans-serif);
+    font-weight: 300;
+    font-size: clamp(15px,1.4vw,18px);
+    color: #9a9081;
+    max-width: 54ch;
+    margin: 0 auto 36px;
+    line-height: 1.7;
+  }
+  .outro a {
+    display: inline-block;
+    padding: 14px 36px;
+    border: 1px solid rgba(201,162,78,.45);
+    border-radius: 3px;
+    font-family: 'Space Mono', var(--mono, monospace);
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: #c9a24e;
+    text-decoration: none;
+    transition: background .25s, color .25s, border-color .25s;
+  }
+  .outro a:hover {
+    background: #c9a24e;
+    color: #050302;
+    border-color: #c9a24e;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── nav (reuse the shared chrome) ── -->
+<nav class="nav">
+  <a class="brand" href="index.html">
+    <img src="images/raysons-logo.png" alt="" class="brandmark" width="28" height="28"/>
+    <b>RAYSONS</b> <span>SHELL CAST</span>
+  </a>
+  <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-links">
+    <a href="index.html">Overview</a>
+    <a href="About Us.html">About</a>
+    <a href="foundry.html">Foundry</a>
+    <a href="casting-sequence.html" aria-current="page">Process</a>
+    <a href="enquire.html">Enquire</a>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════
+     THE CASTING SEQUENCE — 800vh scroll runway
+     Assembly (0–50%) + Bore Entry (50–100%)
+════════════════════════════════════════════ -->
+<section class="cs-wrap" id="casting">
+  <!-- .cs-stage + all inner elements injected by CastingSequence.js -->
+  <div class="cs-stage"></div>
+</section>
+
+<!-- ── brief outro after the sequence ── -->
+<section class="outro" aria-label="Foundry process outro">
+  <h2>Precision at every stage.</h2>
+  <p>
+    From resin-coated sand to a machined, dimensionally verified casting —
+    every step is measured, documented, and repeatable to ISO 9001:2015.
+  </p>
+  <a href="enquire.html" id="cta-casting-sequence">Request a Quote →</a>
+</section>
+
+<!-- GSAP (required by CastingSequence on desktop) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<!-- CastingSequence component -->
+<script src="components/scenes/CastingSequence.js"></script>
+<script>
+  // Shared nav burger (lifted from foundry.js pattern)
+  (function(){
+    const burger = document.getElementById('navBurger');
+    const links  = document.querySelector('.nav-links');
+    if(burger && links){
+      burger.addEventListener('click', function(){
+        const open = document.body.classList.toggle('nav-open');
+        burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      links.querySelectorAll('a').forEach(function(a){
+        a.addEventListener('click', function(){
+          document.body.classList.remove('nav-open');
+          burger.setAttribute('aria-expanded','false');
+        });
+      });
+    }
+  })();
+
+  // Boot the component
+  initCastingSequence({
+    container:     '#casting',
+    assemblyDir:   'assembly-frames',
+    boreDir:       'bore-frames',
+    framePrefix:   'ezgif-frame-',
+    frameCount:    240,
+    assemblyVideo: null,   // set to 'assembly.mp4' when video files are ready
+    boreVideo:     null,   // set to 'bore.mp4' when video files are ready
+  });
+</script>
+
+</body>
+</html>

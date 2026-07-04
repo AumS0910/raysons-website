@@ -1,0 +1,181 @@
+I have two frame sequences in /public/assets/:
+  /assembly-frames/  — 240 JPG frames (frame001.jpg to frame240.jpg)
+  /bore-frames/      — 240 JPG frames (frame001.jpg to frame240.jpg)
+
+I also have these videos in /public/assets/:
+  assembly.mp4   — fallback for mobile
+  bore.mp4       — fallback for mobile
+
+Use the 3d-scroll-skill and gsap skill fully.
+
+Build ONE component: components/scenes/CastingSequence.js
+
+This component has two phases controlled by scroll:
+
+════════════════════════════════════════
+PHASE 1 — ASSEMBLY (scroll 0–50% of component)
+════════════════════════════════════════
+
+Desktop (no touch, width > 1024px):
+  Canvas element, full viewport
+  Preload all 240 assembly frames
+  Show loading progress: thin amber line 
+  filling left to right, percentage in 
+  JetBrains Mono 11px center screen
+  
+  Scroll scrubbing:
+    progress = scrollY within section / section height
+    frameIndex = Math.floor(progress * 239)
+    Draw frames[frameIndex] to canvas on every RAF tick
+    
+  GSAP ScrollTrigger integration:
+    Use scrub: true for butter smooth frame advance
+    pin the section while frames play
+    
+  Text overlays (GSAP fade in/out by scroll position):
+    At frame 20:  "Five components." fade in
+                  "One casting."
+                  JetBrains Mono 12px amber
+                  bottom-left
+    At frame 80:  Previous text fades out
+    At frame 120: "Shell moulded."
+                  "SG Iron · IS 1865"
+                  fade in bottom-left  
+    At frame 180: Text fades out
+    At frame 220: "Hydraulic Valve Housing"
+                  Cormorant Garamond 300, 36px, cream
+                  "CT8 · Grade 450/12"
+                  JetBrains Mono 13px amber
+                  center bottom
+
+Mobile (touch device or width ≤ 1024px):
+  No canvas. No frames.
+  <video autoplay muted playsinline loop>
+    assembly.mp4
+  </video>
+  IntersectionObserver: 
+    video.play() when 40% visible
+    video.pause() when out of view
+  Same text overlays but triggered by 
+  video timeupdate event instead of scroll
+
+════════════════════════════════════════
+PHASE 2 — BORE ENTRY (scroll 50–100% of component)
+════════════════════════════════════════
+
+Desktop:
+  Second canvas (or reuse first, swap image arrays)
+  240 bore frames
+  Same scroll scrubbing technique
+  
+  At frame 1:   Show "Look inside." 
+                Cormorant italic 28px
+                center, steel-silver
+                Pulse animation 0.6→1.0 opacity
+  
+  At frame 60:  "Look inside." fades out
+  
+  At frame 180: Screen starts to darken
+                CSS overlay: rgba(5,4,3,0) → rgba(5,4,3,0.7)
+  
+  At frame 239: Full black overlay
+                After 800ms delay:
+                Text fades in center:
+                "Every machine has one."
+                Cormorant Garamond 300
+                clamp(24px, 3.5vw, 44px)
+                #E8E0D5
+                
+                After 600ms more:
+                "The part that holds everything together."
+                DM Sans 300, 16px, #B8B0A8
+
+Mobile:
+  bore.mp4 autoplays when reached
+  Same text triggers via timeupdate
+
+════════════════════════════════════════
+PERFORMANCE REQUIREMENTS
+════════════════════════════════════════
+
+Frame preloading strategy:
+  Load first 20 frames immediately
+  Load remaining frames in background chunks of 30
+  Show progress indicator until first 20 loaded
+  Never block scroll — show whatever frame is loaded
+
+Memory management:
+  Store frames as ImageBitmap not Image objects
+  createImageBitmap() is faster to draw to canvas
+  
+Canvas optimization:
+  Use requestAnimationFrame
+  Only redraw when frameIndex changes
+  Use will-change: transform on canvas element
+  ctx.drawImage with correct cover calculation:
+    const scale = Math.max(
+      canvas.width / img.width,
+      canvas.height / img.height  
+    )
+    const x = (canvas.width - img.width * scale) / 2
+    const y = (canvas.height - img.height * scale) / 2
+    ctx.drawImage(img, x, y, img.width*scale, img.height*scale)
+
+GSAP specifics:
+  Use GSAP ScrollTrigger with scrub: 0.5
+  (not scrub: true — 0.5 gives slight lag 
+   that feels more cinematic)
+  
+  ScrollTrigger.create({
+    trigger: containerRef.current,
+    start: 'top top',
+    end: 'bottom bottom', 
+    pin: true,
+    scrub: 0.5,
+    onUpdate: (self) => {
+      const phase = self.progress < 0.5 ? 'assembly' : 'bore'
+      const phaseProgress = self.progress < 0.5 
+        ? self.progress * 2 
+        : (self.progress - 0.5) * 2
+      const frameIndex = Math.floor(phaseProgress * 239)
+      setCurrentFrame(phase, frameIndex)
+    }
+  })
+
+Total component scroll height: 800vh
+(400vh for assembly + 400vh for bore)
+This gives users enough scroll distance to 
+feel like they're controlling it precisely
+
+════════════════════════════════════════
+DEVICE DETECTION
+════════════════════════════════════════
+
+const isMobile = () => {
+  return window.innerWidth <= 1024 || 
+    ('ontouchstart' in window) ||
+    (navigator.maxTouchPoints > 0)
+}
+
+const isSlowConnection = () => {
+  const conn = navigator.connection
+  if(!conn) return false
+  return ['slow-2g','2g','3g'].includes(conn.effectiveType)
+}
+
+If isSlowConnection():
+  Show static image only
+  No video, no frames
+  Image: first frame of assembly sequence
+
+════════════════════════════════════════
+OUTPUT FILES
+════════════════════════════════════════
+
+components/scenes/CastingSequence.js
+components/scenes/CastingSequence.module.css
+
+After building, tell me:
+1. Estimated memory usage for 240 frames
+2. Any performance concerns you found
+3. Confirm mobile fallback works without canvas

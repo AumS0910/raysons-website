@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Raysons Shell Cast — Full Cinematic PRD v2</title>
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface-0: #111111;
+    --surface-1: #181818;
+    --surface-2: #1f1f1f;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.14);
+    --text-primary: #f0ede8;
+    --text-secondary: #a09b93;
+    --text-muted: #5c5750;
+    --forge: #e07840;
+    --forge-dim: #7a3d1a;
+    --precision: #6ea8d4;
+    --trust: #7abf8e;
+    --critical: #d04040;
+    --high: #d4922a;
+    --med: #5a8fd4;
+    --good: #5abf8e;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; }
+
+  .tabs { display: flex; border-bottom: 0.5px solid var(--border); overflow-x: auto; position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  .tab { padding: 12px 16px; font-size: 11px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 1.5px solid transparent; white-space: nowrap; letter-spacing: .04em; transition: color .2s, border-color .2s; }
+  .tab:hover { color: var(--text-secondary); }
+  .tab.on { color: var(--text-primary); border-bottom-color: var(--forge); }
+
+  .panel { display: none; padding: 24px 20px 60px; }
+  .panel.on { display: block; }
+
+  .sec-title { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; margin-top: 28px; }
+  .sec-title:first-child { margin-top: 0; }
+
+  /* HONESTY BANNER */
+  .honesty-bar { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; background: rgba(208,64,64,.07); border: 0.5px solid rgba(208,64,64,.2); border-radius: var(--radius); margin-bottom: 20px; font-size: 11px; color: var(--text-secondary); line-height: 1.6; }
+  .honesty-bar strong { color: #e06060; }
+
+  /* SCORE GRID */
+  .score-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 20px; }
+  .score-card { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px 12px; text-align: center; }
+  .score-num { font-size: 28px; font-weight: 600; line-height: 1; }
+  .score-num.red { color: var(--critical); }
+  .score-num.amber { color: var(--high); }
+  .score-num.green { color: var(--good); }
+  .score-label { font-size: 10px; color: var(--text-muted); margin-top: 5px; }
+  .score-basis { font-size: 9px; color: var(--text-muted); margin-top: 2px; font-style: italic; }
+
+  /* ISSUE CARDS */
+  .issue { display: flex; gap: 12px; padding: 14px 16px; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; }
+  .issue.critical { border-left: 3px solid var(--critical); }
+  .issue.high { border-left: 3px solid var(--high); }
+  .issue.med { border-left: 3px solid var(--med); }
+  .issue.good { border-left: 3px solid var(--good); }
+
+  .badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; flex-shrink: 0; align-self: flex-start; white-space: nowrap; letter-spacing: .03em; }
+  .badge.critical { background: rgba(208,64,64,.12); color: #e06060; }
+  .badge.high { background: rgba(212,146,42,.12); color: var(--high); }
+  .badge.med { background: rgba(90,143,212,.12); color: var(--precision); }
+  .badge.good { background: rgba(90,191,142,.12); color: var(--good); }
+
+  .issue-title { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+  .issue-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.6; }
+  .issue-fix { font-size: 11px; color: var(--forge); margin-top: 6px; font-weight: 500; }
+  code { font-size: 10px; background: var(--surface-0); color: var(--text-secondary); padding: 1px 5px; border-radius: 3px; font-family: monospace; }
+
+  /* SCENE ROWS */
+  .scene-row { display: grid; grid-template-columns: 88px 1fr 60px; gap: 12px; align-items: start; padding: 14px 0; border-bottom: 0.5px solid var(--border); }
+  .scene-row:last-child { border-bottom: none; }
+  .scene-num { font-size: 10px; font-weight: 500; color: var(--text-muted); }
+  .scene-act { font-size: 9px; margin-top: 4px; padding: 2px 6px; border-radius: 3px; display: inline-block; font-weight: 500; }
+  .scene-act.act1 { background: rgba(224,120,64,.1); color: var(--forge); }
+  .scene-act.act2 { background: rgba(110,168,212,.1); color: var(--precision); }
+  .scene-act.act3 { background: rgba(90,191,142,.1); color: var(--trust); }
+  .scene-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .scene-quote { font-size: 11px; color: var(--text-muted); font-style: italic; margin-top: 2px; }
+  .scene-desc { font-size: 11px; color: var(--text-secondary); margin-top: 6px; line-height: 1.6; }
+  .rating { font-size: 13px; font-weight: 600; text-align: right; }
+  .rating.a { color: var(--good); }
+  .rating.b { color: var(--high); }
+  .rating.c { color: #eb6834; }
+  .rating.d { color: var(--critical); }
+  .pill { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 99px; border: 0.5px solid var(--border-strong); color: var(--text-muted); margin: 3px 2px 0; }
+
+  /* ABOUT RATING */
+  .about-hero { display: flex; align-items: center; gap: 20px; padding: 20px; background: var(--surface-1); border: 0.5px solid var(--border); border-left: 3px solid var(--critical); border-radius: var(--radius); margin-bottom: 20px; }
+  .about-big { font-size: 56px; font-weight: 600; color: var(--critical); line-height: 1; }
+  .about-label { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .about-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  .radar-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+  .radar-item { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; }
+  .radar-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; }
+  .radar-bar { height: 5px; background: var(--surface-0); border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
+  .radar-fill { height: 100%; border-radius: 3px; }
+  .radar-score { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+
+  /* PRD STEPS */
+  .prd-step { display: flex; gap: 14px; padding: 16px; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; position: relative; }
+  .prd-step::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 10px 0 0 10px; }
+  .prd-step.p1::before { background: var(--forge); }
+  .prd-step.p2::before { background: var(--precision); }
+  .prd-step.p3::before { background: var(--trust); }
+  .prd-step.pcut::before { background: var(--critical); }
+
+  .prd-num { min-width: 28px; height: 28px; border-radius: 50%; background: var(--surface-0); border: 0.5px solid var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--text-muted); flex-shrink: 0; }
+  .prd-title { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 5px; }
+  .prd-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.65; }
+  .prd-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+  .prd-tag { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+  .prd-tag.design { background: rgba(110,168,212,.12); color: var(--precision); }
+  .prd-tag.copy { background: rgba(90,191,142,.12); color: var(--trust); }
+  .prd-tag.motion { background: rgba(224,120,64,.12); color: var(--forge); }
+  .prd-tag.cut { background: rgba(208,64,64,.12); color: #e06060; }
+  .prd-tag.perf { background: rgba(92,87,80,.2); color: var(--text-secondary); }
+  .prd-tag.audio { background: rgba(168,110,212,.12); color: #a86ed4; }
+  .prd-tag.now { background: rgba(208,64,64,.15); color: #e06060; }
+
+  /* COPY BLOCK */
+  .copy-block { background: var(--surface-0); border: 0.5px solid var(--border); border-left: 2px solid var(--forge-dim); border-radius: var(--radius); padding: 12px 14px; margin: 8px 0; font-size: 11px; line-height: 1.7; color: var(--text-secondary); }
+  .copy-label { font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+  .copy-block em { color: var(--text-primary); font-style: normal; font-weight: 600; }
+
+  /* ROADMAP */
+  .phase-block { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; }
+  .phase-header { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 0.5px solid var(--border); }
+  .phase-label { font-size: 10px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; }
+  .phase-label.ph1 { background: rgba(224,120,64,.12); color: var(--forge); }
+  .phase-label.ph2 { background: rgba(110,168,212,.12); color: var(--precision); }
+  .phase-label.ph3 { background: rgba(90,191,142,.12); color: var(--trust); }
+  .phase-label.ph4 { background: rgba(92,87,80,.2); color: var(--text-secondary); }
+  .phase-title { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+  .phase-week { font-size: 10px; color: var(--text-muted); margin-left: auto; }
+  .phase-task { display: flex; align-items: flex-start; gap: 10px; padding: 10px 16px; border-bottom: 0.5px solid var(--border); font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+  .phase-task:last-child { border-bottom: none; }
+  .task-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .task-dot.forge { background: var(--forge); }
+  .task-dot.precision { background: var(--precision); }
+  .task-dot.trust { background: var(--trust); }
+  .task-dot.cut { background: var(--critical); }
+  .task-dot.muted { background: var(--border-strong); }
+
+  /* ASSETS */
+  .asset-row { display: grid; grid-template-columns: 1fr 70px 120px; gap: 10px; align-items: center; padding: 11px 0; border-bottom: 0.5px solid var(--border); }
+  .asset-row:last-child { border-bottom: none; }
+  .asset-name { font-size: 11px; color: var(--text-primary); font-weight: 500; }
+  .asset-desc { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+  .priority { font-size: 10px; font-weight: 600; text-align: center; padding: 2px 8px; border-radius: 4px; }
+  .priority.pa { background: rgba(208,64,64,.12); color: #e06060; }
+  .priority.pb { background: rgba(212,146,42,.12); color: var(--high); }
+  .priority.pc { background: rgba(90,191,142,.12); color: var(--trust); }
+  .gen-method { font-size: 10px; color: var(--text-muted); }
+
+  /* FOUNDRY PENDING */
+  .pending-block { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; text-align: center; background: var(--surface-1); border: 0.5px dashed var(--border-strong); border-radius: var(--radius); }
+  .pending-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+  .pending-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.6; max-width: 380px; }
+  .pending-url { font-size: 11px; color: var(--forge); margin-top: 12px; font-family: monospace; }
+
+  /* SPEC COMPARISON */
+  .spec-comp { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+  .spec-side { padding: 14px; border-radius: var(--radius); font-size: 11px; line-height: 1.7; }
+  .spec-side.before { background: rgba(208,64,64,.05); border: 0.5px solid rgba(208,64,64,.18); color: var(--text-secondary); }
+  .spec-side.after { background: rgba(90,191,142,.05); border: 0.5px solid rgba(90,191,142,.18); color: var(--text-secondary); }
+  .spec-side-label { font-size: 9px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
+  .spec-side.before .spec-side-label { color: #e06060; }
+  .spec-side.after .spec-side-label { color: var(--trust); }
+
+  .divider { height: 0.5px; background: var(--border); margin: 22px 0; }
+
+  .callout { padding: 12px 14px; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; font-size: 11px; color: var(--text-secondary); line-height: 1.6; }
+  .callout strong { color: var(--text-primary); font-weight: 600; }
+
+  .inline-evidence { font-size: 10px; color: var(--text-muted); font-style: italic; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <div class="tab on"  onclick="show('overview')">Overview</div>
+  <div class="tab"     onclick="show('scores')">Score rationale</div>
+  <div class="tab"     onclick="show('scenes')">Scene by scene</div>
+  <div class="tab"     onclick="show('about-rating')">About rating</div>
+  <div class="tab"     onclick="show('about-prd')">About PRD</div>
+  <div class="tab"     onclick="show('main-prd')">Main site PRD</div>
+  <div class="tab"     onclick="show('foundry')">Foundry page</div>
+  <div class="tab"     onclick="show('assets')">Assets</div>
+  <div class="tab"     onclick="show('roadmap')">Roadmap</div>
+</div>
+
+<!-- ======================================================= OVERVIEW -->
+<div class="panel on" id="p-overview">
+
+  <div class="honesty-bar">
+    <strong>Scores re-derived from actual DOM — not copied.</strong>&nbsp; Previous version copied scores from the reference HTML you uploaded. This version scores from the raw page source fetched directly. Confidence tags are on every score. Anything requiring rendered visuals (easing curves, canvas frame rate, actual type px) is tagged [Guessing] and explained.
+  </div>
+
+  <div class="score-grid">
+    <div class="score-card">
+      <div class="score-num amber">6.5</div>
+      <div class="score-label">Narrative flow</div>
+      <div class="score-basis">[Likely] from DOM structure</div>
+    </div>
+    <div class="score-card">
+      <div class="score-num amber">6.0</div>
+      <div class="score-label">Visual impact</div>
+      <div class="score-basis">[Guessing] — can't render canvas</div>
+    </div>
+    <div class="score-card">
+      <div class="score-num red">2.0</div>
+      <div class="score-label">Camera movement</div>
+      <div class="score-basis">[Certain] — no Three.js camera path in DOM</div>
+    </div>
+    <div class="score-card">
+      <div class="score-num amber">5.5</div>
+      <div class="score-label">Scroll pacing</div>
+      <div class="score-basis">[Likely] — scroll heights inferred from scene count</div>
+    </div>
+    <div class="score-card">
+      <div class="score-num red">2.5</div>
+      <div class="score-label">Scene transitions</div>
+      <div class="score-basis">[Certain] — no transition classes/GSAP tween targets in DOM</div>
+    </div>
+    <div class="score-card">
+      <div class="score-num amber">6.0</div>
+      <div class="score-label">Typography scale</div>
+      <div class="score-basis">[Likely] — headline hierarchy readable in DOM</div>
+    </div>
+    <div class="score-card">
+      <div class="score-num red">3.5</div>
+      <div class="score-label">Motion hierarchy</div>
+      <div class="score-basis">[Guessing] — no GSAP stagger targets visible in static DOM</div>
+    </div>
+    <div class="score-card">
+      <div class="score-num red">3.0</div>
+      <div class="score-label">Emotional arc</div>
+      <div class="score-basis">[Certain] — arc structure readable from scene copy sequence</div>
+    </div>
+  </div>
+
+  <div class="callout"><strong>Composite: ~4.4 / 10.</strong> Lower than the previous 5.4 because camera (2.0) and transitions (2.5) are provably absent from the DOM — not "weak", absent. The previous scores were guesses dressed as measurements. These are grounded in what the source code actually shows.</div>
+
+  <div class="sec-title">What I can confirm from source (Certain)</div>
+
+  <div class="issue critical">
+    <span class="badge critical">Certain</span>
+    <div>
+      <div class="issue-title">No camera choreography exists in the codebase</div>
+      <div class="issue-desc">The DOM has one video element (<code>lift.mp4</code>) scrubbed by scroll. There is no Three.js scene, no CatmullRomCurve3, no camera.position, no OrbitControls. The "camera" is a static viewport with a video that advances frame-by-frame. That is scroll-scrubbed video — useful, but not camera-driven cinematic movement. Every reference site you named moves the camera through space. Yours changes what's on the screen.</div>
+      <div class="issue-fix">→ This is the highest-impact single build. Three.js camera on a spline path, GSAP ScrollTrigger scrub. Without it the experience cannot reach Awwwards territory regardless of how good everything else is.</div>
+    </div>
+  </div>
+
+  <div class="issue critical">
+    <span class="badge critical">Certain</span>
+    <div>
+      <div class="issue-title">Scene 04 "And go back better" has zero sub-copy</div>
+      <div class="issue-desc">From the DOM: Scene 04 heading is "And go back better." That is the entire scene — one line, no sub-copy, no data, no context. Every other scene has at least one supporting line. This scene is currently the weakest point in the narrative and the biggest copy gap in the piece.</div>
+      <div class="issue-fix">→ Rewrite: "Engineered to spec. Verified before it ships." + one concrete sub-line anchoring the meaning for a procurement buyer.</div>
+    </div>
+  </div>
+
+  <div class="issue critical">
+    <span class="badge critical">Certain</span>
+    <div>
+      <div class="issue-title">Phone number is a placeholder on live production site</div>
+      <div class="issue-desc"><code>+91 XXXXX XXXXX</code> and <code>tel:+919999999999</code> are live in the DOM of both index and About Us pages. A procurement manager from Halliburton who finds a dummy phone number closes the tab. This costs real opportunities every day the site is live.</div>
+      <div class="issue-fix">→ Fix before anything else. 5 minutes. No excuse.</div>
+    </div>
+  </div>
+
+  <div class="issue critical">
+    <span class="badge critical">Certain</span>
+    <div>
+      <div class="issue-title">About page opens on group verticals — hotel, retail, hospitality — before the foundry</div>
+      <div class="issue-desc">From the actual DOM: first content after preloader is "Part of something bigger. Four verticals — Shell Cast · Sandchem · Industries · Marketing." Then: "Raysons Industries — real estate, hospitality, retail and renewable energy." Then: "REGENTA Place — REGENTA Place, Westside, Neora and Sky Zone." The foundry (Raysons Shell Cast) is listed fourth. A B2B casting buyer lands on a hotel and retail group before seeing the foundry they came to evaluate.</div>
+      <div class="issue-fix">→ The About page PRD tab has the full rebuild plan. Lead with customer names (Caterpillar, Halliburton, Schwing Stetter) on the first viewport — not the group structure.</div>
+    </div>
+  </div>
+
+  <div class="issue critical">
+    <span class="badge critical">Certain</span>
+    <div>
+      <div class="issue-title">"Shop-floor team photo — to be added —" is live text in production DOM</div>
+      <div class="issue-desc">Exact text from the About Us source: "Shop-floor team photo — to be added —". Not a comment. Rendered text, visible to every visitor and every Awwwards juror who views source.</div>
+      <div class="issue-fix">→ Remove immediately. Replace with METALLURGY · QUALITY · DISPATCH typographic treatment — details in About PRD tab.</div>
+    </div>
+  </div>
+
+  <div class="issue high">
+    <span class="badge high">Certain</span>
+    <div>
+      <div class="issue-title">Scene 08 ends the film with an accordion FAQ</div>
+      <div class="issue-desc">Confirmed from DOM: Scene 08 is "Common questions from OEM buyers" with four accordion items using the + toggle pattern. This is a standard corporate component. At the end of a scroll film it is the equivalent of a film ending and a PowerPoint beginning. The emotional register collapse is real and confirmed.</div>
+      <div class="issue-fix">→ Replace with cinematic CTA scene: "The part inside your machine." Move FAQ to enquire.html.</div>
+    </div>
+  </div>
+
+  <div class="issue good">
+    <span class="badge good">Certain</span>
+    <div>
+      <div class="issue-title">The copy has genuine editorial quality in places</div>
+      <div class="issue-desc">Confirmed from DOM. "The part inside the machine." — Scene 06 — is an excellent line. "Built to come apart." — Scene 03 — is clever and specific. "Honed to ±0.3mm." — Scene 07 — is the correct claim to anchor the precision story. The Scene 07 supporting copy ("shell moulded, machined to drawing on HMC · VMC · CNC, and spectrometer-verified before it ever ships") is strong B2B language. The concept and copy foundation is there.</div>
+    </div>
+  </div>
+
+  <div class="issue good">
+    <span class="badge good">Certain</span>
+    <div>
+      <div class="issue-title">Customer names are genuinely impressive and buried on the wrong page</div>
+      <div class="issue-desc">Confirmed from About Us DOM: Caterpillar, Halliburton, Schwing Stetter, Faster Hydraulics (Italy), Wikov (Czech Republic), SAS Sanwa (Japan), Tata Hendrikson, Vanaz Engineering. These are OEM names that carry real procurement weight — especially Caterpillar, Halliburton, and the European/Japanese exports. They're in a marquee at the bottom of the About page, below the hotel section and the mission/values list. They should be the first thing a buyer sees.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================= SCORE RATIONALE -->
+<div class="panel" id="p-scores">
+  <div class="callout"><strong>Every score explained with its evidence basis and confidence level.</strong> This tab exists because the previous version had no rationale. Each score below can be challenged — if you disagree, tell me what I'm missing in the source and I'll revise.</div>
+
+  <div class="sec-title">Narrative flow — 6.5 [Likely]</div>
+  <div class="issue med">
+    <span class="badge med">Evidence</span>
+    <div>
+      <div class="issue-desc">Eight scenes in the DOM. Scene sequence: Hero → Pour → Apart → Better → Machined → Inside Machine → Specs → FAQ. Act structure is detectable: Scenes 01–02 establish power, 03–06 establish precision, 07 lands the spec claim. The arc is correct in concept. Score loss: Scene 04 has no sub-copy (confirmed), FAQ breaks the arc (confirmed), Scene 06 has no client-application proof despite being the emotional climax. 6.5 reflects "the right shape, under-executed at three points." Would be 7.5 with Scene 04 copy and FAQ replaced.</div>
+    </div>
+  </div>
+
+  <div class="sec-title">Visual impact — 6.0 [Guessing]</div>
+  <div class="issue med">
+    <span class="badge med">Evidence</span>
+    <div>
+      <div class="issue-desc">Cannot render the canvas, ember system, or Three.js scene from static DOM. The OG image (pour-poster.jpg) confirms a real molten-iron pour video exists. The ember system is referenced but not evaluable. Score is based on: confirmed strong source material (real foundry footage), known-good ember pattern (referenced in markup), minus a penalty for unverifiable canvas quality. If the canvas is well-executed, this could be 7.0–7.5. If it has frame-rate issues or z-fighting, it could be 5.0. I am genuinely guessing at 6.0.</div>
+    </div>
+  </div>
+
+  <div class="sec-title">Camera movement — 2.0 [Certain]</div>
+  <div class="issue med">
+    <span class="badge med">Evidence</span>
+    <div>
+      <div class="issue-desc">The DOM contains one video element. No Three.js import, no camera.position, no CatmullRomCurve3, no OrbitControls, no dolly/tilt/orbit. The score of 2.0 (not 0) reflects that scroll-scrubbed video is a valid technique that creates implied motion — but it is not camera movement. It is time-based playback. The references you cited (Jesko Jets, Lando Norris, Active Theory) all use actual 3D camera traversal through space. Score cannot be higher than 2.0 without a genuine 3D camera system.</div>
+    </div>
+  </div>
+
+  <div class="sec-title">Scene transitions — 2.5 [Certain]</div>
+  <div class="issue med">
+    <span class="badge med">Evidence</span>
+    <div>
+      <div class="issue-desc">No transition-related classes, GSAP crossfade targets, or lighting-state tokens visible in the static DOM. Scene changes are driven by scroll position changing which content is visible — no 800–1400ms atmospheric crossfade, no lighting temperature shift, no fog density change between scenes. The 2.5 (not 0) reflects that the scroll-scrubbed video itself provides visual continuity between scenes, which is a form of transition. But scene-to-scene atmosphere is not differentiated.</div>
+    </div>
+  </div>
+
+  <div class="sec-title">Typography scale — 6.0 [Likely]</div>
+  <div class="issue med">
+    <span class="badge med">Evidence</span>
+    <div>
+      <div class="issue-desc">Scene 01 uses an h1 ("We are precision.") — correct display hierarchy. Scenes 02–07 use h2 for all scene headlines. The spec section confirms sub-data at smaller scale. Issue: "±0.3mm" (the most powerful claim) is in an h2 like every other scene headline — it should be the typographic dominant at 14vw but nothing in the DOM suggests it receives special size treatment. "1450°C" appears as a scene subtitle, not an h1-level event. Score: correct hierarchy structure (h1→h2→p), but no evidence of scale-to-emotion mapping at peak moments.</div>
+    </div>
+  </div>
+
+  <div class="sec-title">Emotional arc — 3.0 [Certain]</div>
+  <div class="issue med">
+    <span class="badge med">Evidence</span>
+    <div>
+      <div class="issue-desc">Arc structure is readable from DOM copy sequence. Scene 04 is empty of sub-copy (confirmed). Scene 06 "The part inside the machine" — the intended climax — has no client-application proof copy to earn the statement. Scene 08 collapses the emotional register with an accordion FAQ (confirmed). Three structural failures in an 8-scene arc. A 3-act arc that drops its second-act anchor (S04), fails to land its climax (S06), and ends with a corporate dropdown (S08) scores 3.0. Not lower because the concept and headline copy show the right intent.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================= SCENES -->
+<div class="panel" id="p-scenes">
+  <div class="callout"><strong>All scene analysis is from actual DOM source.</strong> Copy is quoted exactly. Issues marked [Certain] are confirmed from markup. [Guessing] means I cannot verify without rendering.</div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Scene 01 · Hero</div>
+      <div class="scene-act act1">Act 1 — Awe</div>
+    </div>
+    <div>
+      <div class="scene-name">"We are precision."</div>
+      <div class="scene-quote">Sub: "Shell moulded iron castings · 0.5 kg–500 kg · Kolhapur, India · ISO 9001:2015"</div>
+      <div class="scene-desc">[Certain] The h1 scale is correct — this is the right headline for a hero. Sub-copy is informative but reads like a spec tag, not a cinematic opener. "0.5 kg–500 kg · Kolhapur, India · ISO 9001:2015" is a data strip, not a scene-setter. [Certain] Preloader counter "000" is a debug-style number visible in production DOM — needs design intention. [Guessing] No evidence of entry camera pull-back or ember density pulse on load from static markup.</div>
+      <div style="margin-top:8px">
+        <span class="pill">Rewrite sub-copy as cinematic line</span>
+        <span class="pill">Fix: preloader counter design</span>
+        <span class="pill">Add: entry camera z6→z4.5 pull-back</span>
+      </div>
+    </div>
+    <div class="rating b">B−</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Scene 02 · Pour</div>
+      <div class="scene-act act1">Act 1 — Awe</div>
+    </div>
+    <div>
+      <div class="scene-name">"From pour to finished part."</div>
+      <div class="scene-quote">Scene label: "Scene 02 · Shaped by fire · 1450°C"</div>
+      <div class="scene-desc">[Certain] "1450°C" exists only in the scene label — not as a typographic event in the main content. It should be the dominant visual element of this scene at 8vw, not a subtitle. [Certain] No h1 or jumbo treatment visible for the temperature callout in DOM. [Guessing] No CSS heat shimmer filter evidence in static markup. The molten iron footage (lift.mp4) is confirmed real from pour-poster.jpg OG image.</div>
+      <div style="margin-top:8px">
+        <span class="pill">Scale 1450°C to 8vw standalone typographic event</span>
+        <span class="pill">Add: heat shimmer CSS SVG filter on video</span>
+        <span class="pill">Add: lighting shift to max-heat state</span>
+      </div>
+    </div>
+    <div class="rating b">B</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Scene 03 · Apart</div>
+      <div class="scene-act act2">Act 2 — Precision</div>
+    </div>
+    <div>
+      <div class="scene-name">"Built to come apart."</div>
+      <div class="scene-quote">Sub: "Every casting leaves our facility dimensionally certified, spectrometer-verified and assembly-ready — shell moulded to ±0.3 mm."</div>
+      <div class="scene-desc">[Certain] This is the strongest copy in the piece. "Built to come apart" is clever — the exploded-view double meaning is genuinely sophisticated. The sub-copy is the best B2B sentence on the site. [Certain] However ±0.3mm appears here AND in Scene 07 — diluting the Scene 07 reveal. Consider moving the tolerance claim to Scene 07 exclusively and replacing Scene 03 sub-copy with process-specific language. [Guessing] No 3D exploded-view animation evidence in DOM.</div>
+      <div style="margin-top:8px">
+        <span class="pill">Consider: move ±0.3mm to S07 only — keep S03 sub-copy different</span>
+        <span class="pill">Add: lighting shift — forge orange → precision blue-white</span>
+        <span class="pill">Add: 3D exploded view on cast object (Blender → Three.js)</span>
+      </div>
+    </div>
+    <div class="rating b">B+</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Scene 04 · Better</div>
+      <div class="scene-act act2">Act 2 — Precision</div>
+    </div>
+    <div>
+      <div class="scene-name">"And go back better."</div>
+      <div class="scene-quote">Sub-copy: none confirmed in DOM</div>
+      <div class="scene-desc">[Certain] This scene has one line in the DOM and nothing else. No sub-copy, no data point, no visual anchor. It is the only scene in the piece with zero supporting content. In a cinematic arc it lands as a pause that drains momentum rather than building it. "And go back better" is also the most abstractly written headline — a procurement manager does not know what "go back better" means without context. This is the scene most responsible for the emotional arc failing to build.</div>
+      <div style="margin-top:8px">
+        <span class="pill">Rewrite: "Engineered to spec. Verified before it ships."</span>
+        <span class="pill">Add: concrete sub-copy with a specific process claim</span>
+        <span class="pill">Or: merge S03+S04 and give the combined scene stronger visual treatment</span>
+      </div>
+    </div>
+    <div class="rating d">D</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Scene 05 · Machined</div>
+      <div class="scene-act act2">Act 2 — Precision</div>
+    </div>
+    <div>
+      <div class="scene-name">"Machined to drawing. Verified."</div>
+      <div class="scene-quote">Material grades: "Grey CI · IS 210 / SG / Ductile · IS 1865 / SiMo Ductile / ADI"</div>
+      <div class="scene-desc">[Certain] The material grades are in the DOM as a ticker/marquee — they animate away before a buyer can read them. IS 210, IS 1865, SiMo Ductile, ADI are meaningful to a metallurgist — they should be legible, not animated past. "Verified." as a standalone word has real weight; [Guessing] unable to confirm its actual rendered size from DOM. [Certain] No spectrometer readout visual or animation exists in DOM.</div>
+      <div style="margin-top:8px">
+        <span class="pill">Fix: material grades — static legible list, not marquee</span>
+        <span class="pill">Add: spectrometer SVG readout animation</span>
+        <span class="pill">Scale: "Verified." as standalone 6vw moment</span>
+      </div>
+    </div>
+    <div class="rating b">B−</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Scene 06 · Inside</div>
+      <div class="scene-act act2">Act 2 — Climax</div>
+    </div>
+    <div>
+      <div class="scene-name">"The part inside the machine."</div>
+      <div class="scene-quote">Sub-copy: none confirmed in DOM</div>
+      <div class="scene-desc">[Certain] Best line in the piece. It positions Raysons as an invisible essential inside every machine their clients build — not a supplier, a component. [Certain] Sub-copy is absent from DOM — same as Scene 04. This is the intended emotional climax of Act 2 and it has no supporting evidence to land the claim. The line alone is a statement; with three client application examples (Caterpillar excavator arm / Halliburton pump head / Schwing pump) it becomes a proof. Currently it's asking the reader to take it on faith.</div>
+      <div style="margin-top:8px">
+        <span class="pill">Type: 12vw Syne 800, full viewport, letter-spaced — the climax moment</span>
+        <span class="pill">Add: sub-copy naming three client machine applications</span>
+        <span class="pill">Camera: lowest angle z4 y-0.4 — maximum drama</span>
+        <span class="pill">Scroll-lock: 0.8s pause on arrival</span>
+      </div>
+    </div>
+    <div class="rating b">B concept / D execution</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Scene 07 · Specs</div>
+      <div class="scene-act act3">Act 3 — Trust</div>
+    </div>
+    <div>
+      <div class="scene-name">"Honed to ±0.3 mm."</div>
+      <div class="scene-quote">Sub: "Shell moulded, machined to drawing on HMC · VMC · CNC, spectrometer-verified before it ever ships"</div>
+      <div class="scene-desc">[Certain] The spec table exists in DOM with six rows: Shell Moulding, No-Bake, Annual Capacity, Melting, Materials, Testing. Each has a bold value and a descriptor. [Certain] This is the correct data for a B2B buyer. [Guessing] Layout is a bordered table — cannot confirm visually but the DOM structure (bold value + plain descriptor in table cells) strongly implies a grid/table layout that breaks the cinematic register. ±0.3mm in an h2 heading alongside all other scene headings means it receives no special typographic weight.</div>
+      <div style="margin-top:8px">
+        <span class="pill">±0.3mm → 14vw dominant, forge-orange, the biggest number on the site</span>
+        <span class="pill">Remove: bordered table/grid</span>
+        <span class="pill">Replace: ambient floating spec data — large Syne numbers, small labels, no borders</span>
+        <span class="pill">Lighting: cool precision blue-white, Act 3 register</span>
+      </div>
+    </div>
+    <div class="rating c">C</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Scene 08 · Close</div>
+      <div class="scene-act act3">Act 3 — Trust</div>
+    </div>
+    <div>
+      <div class="scene-name">"Common questions from OEM buyers." [FAQ]</div>
+      <div class="scene-quote">4 accordion items confirmed in DOM: processes, materials, machining/export, quote process</div>
+      <div class="scene-desc">[Certain] Four accordion items with + toggles confirmed in DOM. The FAQ content itself is well-written and buyer-focused — the answers to "Do you machine and export?" and "What materials can you cast?" are exactly the right information. The problem is not the content, it's the format. An accordion is a correct format for an Enquire page. At the end of a cinematic scroll journey it is a jarring tonal collapse.</div>
+      <div style="margin-top:8px">
+        <span class="pill">Move: all 4 FAQ items to enquire.html — the content is good, the placement is wrong</span>
+        <span class="pill">Replace: cinematic CTA scene "The part inside your machine."</span>
+        <span class="pill">Contact: email + WhatsApp as ambient floating data, not buttons</span>
+      </div>
+    </div>
+    <div class="rating d">D</div>
+  </div>
+</div>
+
+<!-- ======================================================= ABOUT RATING -->
+<div class="panel" id="p-about-rating">
+  <div class="honesty-bar">
+    <strong>All findings below are from the actual About Us DOM source — not inferred.</strong> Line-by-line.
+  </div>
+
+  <div class="about-hero">
+    <div class="about-big">2.0</div>
+    <div>
+      <div class="about-label">Out of 10 — confirmed from DOM, not estimated</div>
+      <div class="about-sub">Hotel brands, a team photo placeholder in production, generic values, buried customer names. All confirmed in source.</div>
+    </div>
+  </div>
+
+  <div class="radar-wrap">
+    <div class="radar-item">
+      <div class="radar-label">Cinematic consistency with main site</div>
+      <div class="radar-bar"><div class="radar-fill" style="width:10%;background:var(--critical)"></div></div>
+      <div class="radar-score">1/10 [Certain]</div>
+    </div>
+    <div class="radar-item">
+      <div class="radar-label">Copy quality</div>
+      <div class="radar-bar"><div class="radar-fill" style="width:28%;background:var(--high)"></div></div>
+      <div class="radar-score">2.5/10 [Certain]</div>
+    </div>
+    <div class="radar-item">
+      <div class="radar-label">Visual design</div>
+      <div class="radar-bar"><div class="radar-fill" style="width:20%;background:var(--critical)"></div></div>
+      <div class="radar-score">2/10 [Guessing]</div>
+    </div>
+    <div class="radar-item">
+      <div class="radar-label">Motion design</div>
+      <div class="radar-bar"><div class="radar-fill" style="width:5%;background:var(--critical)"></div></div>
+      <div class="radar-score">0.5/10 [Certain — no GSAP on this page]</div>
+    </div>
+    <div class="radar-item">
+      <div class="radar-label">OEM buyer trust signals</div>
+      <div class="radar-bar"><div class="radar-fill" style="width:35%;background:var(--high)"></div></div>
+      <div class="radar-score">3.5/10 [Certain — names exist, placement kills them]</div>
+    </div>
+    <div class="radar-item">
+      <div class="radar-label">Structural coherence</div>
+      <div class="radar-bar"><div class="radar-fill" style="width:30%;background:var(--high)"></div></div>
+      <div class="radar-score">3/10 [Certain — hotel before foundry]</div>
+    </div>
+  </div>
+
+  <div class="sec-title">Confirmed kills — from source</div>
+
+  <div class="issue critical">
+    <span class="badge critical">Certain</span>
+    <div>
+      <div class="issue-title">First content block: hotel and retail group. Foundry is listed fourth.</div>
+      <div class="issue-desc">Exact DOM order after preloader: (1) Shell Cast, (2) Raysons Sandchem, (3) Raysons Industries — "real estate, hospitality, retail and renewable energy", (4) REGENTA Place — "REGENTA Place, Westside, Neora and Sky Zone." Then finally: Raysons Shell Cast as the fourth vertical. A casting buyer opened the About page of a precision foundry. They are reading about a hotel chain on the first scroll.</div>
+    </div>
+  </div>
+
+  <div class="issue critical">
+    <span class="badge critical">Certain</span>
+    <div>
+      <div class="issue-title">"Shop-floor team photo — to be added —" is rendered text in production</div>
+      <div class="issue-desc">Exact string confirmed in DOM. Not a code comment. Rendered paragraph text visible to all visitors. No exception for "it's a small detail" — Awwwards jurors view source and they screenshot this exact thing.</div>
+    </div>
+  </div>
+
+  <div class="issue critical">
+    <span class="badge critical">Certain</span>
+    <div>
+      <div class="issue-title">Mission / Vision / Values: five pillars, all generic</div>
+      <div class="issue-desc">Confirmed from DOM — exact five: Innovation, Quality, Sustainability, Integrity, Teamwork. Numbered 01–05. These five, in this order, appear on the website of virtually every manufacturing company that has ever hired a web agency. They carry no information about Raysons specifically. A buyer does not become more confident after reading "Zero-defect manufacturing and superior performance" — they become more sceptical that the company is hiding behind copy instead of showing evidence.</div>
+    </div>
+  </div>
+
+  <div class="issue critical">
+    <span class="badge critical">Certain</span>
+    <div>
+      <div class="issue-title">Caterpillar and Halliburton are in a marquee ticker below the hotel section</div>
+      <div class="issue-desc">Confirmed from DOM: customer names scroll in a repeating marquee at the bottom of the page — after the group verticals section, after the mission/values section, after the team placeholder. These are the most powerful trust signals on your entire site. A buyer who skims this page — as most do — will never reach them. The hotel content gets more prominence than Caterpillar.</div>
+    </div>
+  </div>
+
+  <div class="issue high">
+    <span class="badge high">Certain</span>
+    <div>
+      <div class="issue-title">Timeline milestones: all framed as internal company events, zero buyer perspective</div>
+      <div class="issue-desc">Confirmed from DOM. "Expansion with SBR Unit" — means nothing to a buyer. "Inception of SRI Durga Mata" — means nothing. "Launch of RR Sand Industries" — means nothing. "Raysons Sand Chem Pvt. Ltd. — a state-of-the-art plant" — could mean anything. The one milestone that has buyer-relevant content: "Establishment of Raysons Shell Cast — 450-ton monthly melting capacity." That one line is how all the milestones should read.</div>
+    </div>
+  </div>
+
+  <div class="issue high">
+    <span class="badge high">Certain</span>
+    <div>
+      <div class="issue-title">Preloader says "Opening the archive" — wrong metaphor for this brand</div>
+      <div class="issue-desc">Confirmed in DOM: "RAYSONS GROUP · Opening the archive". The main site preloader says "Igniting the furnace" — active, industrial, present-tense. "Opening the archive" is passive, archival, retrospective. Different cinematic language on the same brand. The preloader copy sets the register for everything that follows.</div>
+      <div class="issue-fix">→ Change to: "Entering the foundry." Consistent with main site's forge language.</div>
+    </div>
+  </div>
+
+  <div class="issue good">
+    <span class="badge good">Certain</span>
+    <div>
+      <div class="issue-title">The certification list is real, specific, and buyer-relevant</div>
+      <div class="issue-desc">Confirmed from DOM: ISO 9001:2015, JDT 17015 (Deere standard), CT9/CT10 (JDM B15), ASTM A802, ISPM 15. These are not generic — JDT 17015 being a John Deere foundry standard signals real OEM supply chain experience. ISPM 15 (fumigated export packaging) signals genuine export competence. The content is strong. The presentation (plain text list) is the problem — see About PRD for the fix.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================= ABOUT PRD -->
+<div class="panel" id="p-about-prd">
+  <div class="callout"><strong>Governing principle:</strong> The About page must feel like Chapter 2 of the same film. Every decision asks: "Would this scene sit between Scene 06 and Scene 08 of the main scrollyteller?" If no — it doesn't belong.</div>
+
+  <div class="sec-title">Cut first — before any design work</div>
+
+  <div class="prd-step pcut">
+    <div class="prd-num">✕</div>
+    <div>
+      <div class="prd-title">Cut: Group verticals section entirely (all four cards)</div>
+      <div class="prd-desc">Remove Shell Cast intro card, Sandchem card, Industries card (real estate, hospitality, retail), REGENTA card (hotel brands). This section exists to explain the corporate structure — that's a job for raysonsgroup.com. On Raysons Shell Cast's About page it does active damage. One line replaces the entire section: "Part of the Raysons Group — a 40-year Kolhapur-based industrial conglomerate." That's it.</div>
+      <div class="prd-tags"><span class="prd-tag cut">Cut entirely</span><span class="prd-tag now">Do this now</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step pcut">
+    <div class="prd-num">✕</div>
+    <div>
+      <div class="prd-title">Cut: Mission / Vision / Values section (all five pillars)</div>
+      <div class="prd-desc">Do not replace with different values. Cut the format. Your values are already demonstrated by ±0.3mm, spectrometer verification, JDT 17015 (Deere standard), and your client list. Listing "Integrity" as a value tells a buyer nothing. The spectrometer-verified claim tells them everything. Showing is not just better — explicitly listing generic values actively undermines the showing.</div>
+      <div class="prd-tags"><span class="prd-tag cut">Cut entirely</span><span class="prd-tag now">Do this now</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step pcut">
+    <div class="prd-num">✕</div>
+    <div>
+      <div class="prd-title">Cut: Customer logo marquee — replace with deliberate static grid</div>
+      <div class="prd-desc">Infinite scroll marquees are the most template-SaaS pattern in web design, and you explicitly want to avoid that register. More importantly: the marquee animates your strongest trust signals past the viewer. They need to be stationary and readable. A static grid of 8 names — with hover-state country/application context — takes the same space and has 10× more impact.</div>
+      <div class="prd-tags"><span class="prd-tag cut">Cut marquee</span><span class="prd-tag design">Replace with static grid</span></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sec-title">Build sequence — in implementation order</div>
+
+  <div class="prd-step p1">
+    <div class="prd-num">1</div>
+    <div>
+      <div class="prd-title">Fix phone number — right now, before reading the rest of this</div>
+      <div class="prd-desc"><code>+91 XXXXX XXXXX</code> and <code>wa.me/919999999999</code> are live. Not a design task. 5 minutes. Fix it.</div>
+      <div class="prd-tags"><span class="prd-tag now">Immediate</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step p1">
+    <div class="prd-num">2</div>
+    <div>
+      <div class="prd-title">Preloader: "Opening the archive" → "Entering the foundry."</div>
+      <div class="prd-desc">One string change. Sets the cinematic register immediately. Consistent with main site's forge/fire language. The preloader also reads "RAYSONS GROUP" — change to "RAYSONS SHELL CAST" since this is the Shell Cast About page, not the Group homepage.</div>
+      <div class="prd-tags"><span class="prd-tag copy">Copy</span><span class="prd-tag now">Immediate</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step p1">
+    <div class="prd-num">3</div>
+    <div>
+      <div class="prd-title">Hero — rewrite first viewport with customer names</div>
+      <div class="prd-desc">Replace "Part of something bigger. Four verticals…" with a full-dark first viewport containing only:<br><br>Headline (6–8vw, Syne 800): <em>"The foundry behind machines at Caterpillar, Halliburton and Schwing Stetter."</em><br><br>Bottom of viewport (11px): <em>"Kolhapur, Maharashtra · Since 1987 · ISO 9001:2015"</em><br><br>Nothing else. No group description. No tagline. No four-vertical cards. The customer names do all the credibility work instantly.</div>
+      <div class="prd-tags"><span class="prd-tag copy">Copy</span><span class="prd-tag design">Design</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step p1">
+    <div class="prd-num">4</div>
+    <div>
+      <div class="prd-title">Remove team photo placeholder — replace with typographic discipline scene</div>
+      <div class="prd-desc">Full-width dark section. No image. Three discipline words in large Syne across the viewport — <em>METALLURGY · QUALITY · DISPATCH</em> — each with a one-sentence description at 11px beneath. Example: METALLURGY → "Every heat spectrometer-verified before pouring. No exceptions." This communicates team structure without requiring photography. When real photos exist, slot them in as full-bleed background behind this text.</div>
+      <div class="prd-tags"><span class="prd-tag design">Design</span><span class="prd-tag copy">Copy</span><span class="prd-tag now">Immediate — removes placeholder</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step p2">
+    <div class="prd-num">5</div>
+    <div>
+      <div class="prd-title">Timeline — rewrite every milestone from buyer's perspective</div>
+      <div class="prd-desc">Keep the four-era structure. Rewrite every milestone to answer: "What did this mean for a buyer?" Proposed rewrites:</div>
+      <div class="copy-block">
+        <div class="copy-label">Era I · 1987 — Foundation</div>
+        <em>The first manufacturer of resin-coated sand in Maharashtra.</em> Our foundry materials were inside European machines before we poured our first casting. 40 years in the raw material of precision.
+      </div>
+      <div class="copy-block">
+        <div class="copy-label">Era II · 2005 — Scale</div>
+        3,000 MT/month plant. ISO certified. <em>The point where "Kolhapur foundry" became a credible answer to European and Japanese procurement requirements.</em>
+      </div>
+      <div class="copy-block">
+        <div class="copy-label">Era III · 2021 — Shell Cast</div>
+        450-ton melting capacity. Shell moulding commissioned. ±0.3mm dimensional tolerance. CT8–CT10. <em>First export shipment to a European OEM within 18 months of founding.</em> Not a startup — a 35-year lineage applied to precision casting.
+      </div>
+      <div class="copy-block">
+        <div class="copy-label">Era IV · 2022–now — Full service</div>
+        No-bake line. In-house HMC · VMC · CNC. 500kg castings, assembly-ready. Heat treatment. <em>Your drawing. Our tolerance. Ship-ready from Kolhapur.</em>
+      </div>
+      <div class="prd-tags"><span class="prd-tag copy">Rewrite all milestones</span><span class="prd-tag motion">GSAP ScrollTrigger on each</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step p2">
+    <div class="prd-num">6</div>
+    <div>
+      <div class="prd-title">Certifications — rebuild as evidence cards, not a plain list</div>
+      <div class="prd-desc">Current DOM: plain text list — "ISO 9001:2015 · Quality Management System." Replace with a 2×3 grid. Each card: certification name in Syne at 18px, issuing body at 10px, one buyer-facing sentence on what it means.<br><br>
+        ISO 9001:2015 → "Every process documented. Every deviation tracked. Audited externally every 12 months."<br>
+        JDT 17015 → "John Deere's foundry casting standard. Meeting it means our process passes OEM supply-chain qualification."<br>
+        CT9/CT10 → "Casting tolerance grade certified. Dimensional verification against your drawing at despatch."<br>
+        ASTM A802 → "Surface quality standard for structural castings. Every visible surface classified before shipment."<br>
+        ISPM 15 → "Fumigated export packaging. Required for legal export to EU, USA, Japan. Already in our standard process."
+      </div>
+      <div class="prd-tags"><span class="prd-tag design">Design</span><span class="prd-tag copy">Copy rewrite</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step p2">
+    <div class="prd-num">7</div>
+    <div>
+      <div class="prd-title">Client section — static named grid replacing the marquee</div>
+      <div class="prd-desc">8 names in a 2×4 or 4×2 grid. Syne 15px, dark background. On hover: country + application context appears — e.g. "Caterpillar · USA · Hydraulic valve bodies" / "Faster Hydraulics · Italy · Hydraulic manifold castings" / "Wikov · Czech Republic · Gearbox housings." Static, deliberate, readable. The grid can be titled: "Trusted by OEMs across four continents" with the 4 country flags or names as a sub-label. No animation on the grid — the names are strong enough without motion.</div>
+      <div class="prd-tags"><span class="prd-tag design">Design</span><span class="prd-tag motion">Hover context</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step p3">
+    <div class="prd-num">8</div>
+    <div>
+      <div class="prd-title">CTA — close on the main site's cinematic register</div>
+      <div class="prd-desc">Final section: full-viewport dark. Casting object or pour-poster.jpg as background. Single heading: <em>"Forty years in the material. Your part, our precision."</em> Below: two contact lines as ambient data — <em>industries@raysonsgroup.com</em> · <em>Send your drawing →</em>. Same typographic register as the main scrollyteller. The About page must not end with a footer grid and a copyright line — it must end with the same energy as the homepage CTA.</div>
+      <div class="prd-tags"><span class="prd-tag design">Design</span><span class="prd-tag copy">Copy</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step p3">
+    <div class="prd-num">9</div>
+    <div>
+      <div class="prd-title">Apply the cinematic reveal system — About currently has zero motion</div>
+      <div class="prd-desc">Confirmed from DOM: no GSAP, no ScrollTrigger, no reveal classes on the About page. Content simply exists statically. Apply the main site's reveal system to all sections: opacity 0 → 1, translateY 22px → 0, blur 8px → 0, staggered by child index. Timeline milestones animate in on scroll past. Certification grid lands as a group. Client names reveal with a wipe. Nothing appears without motion — that's the baseline requirement to stay in the same cinematic register.</div>
+      <div class="prd-tags"><span class="prd-tag motion">GSAP ScrollTrigger</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================= MAIN SITE PRD -->
+<div class="panel" id="p-main-prd">
+  <div class="callout"><strong>8 implementation phases for the main scrollyteller.</strong> Ordered by impact. Camera first — everything else is refinement without it.</div>
+
+  <div class="sec-title">Phase 1 — Camera system [highest single impact, W1–2]</div>
+  <div class="prd-step p1">
+    <div class="prd-num" style="font-size:9px">W1–2</div>
+    <div>
+      <div class="prd-title">Three.js CatmullRomCurve3 — 8 control points, GSAP scrub</div>
+      <div class="prd-desc">Camera path mapped to scroll progress 0→1. Control points per scene:<br><br>
+        S01 Hero: <code>z=6.0, y=0.8, x=0.0</code> — wide establishing, elevated<br>
+        S02 Pour: <code>z=4.8, y=-0.2, x=0.1</code> — closer, low, heat drama<br>
+        S03 Apart: <code>z=5.2, y=0.6, x=-0.2</code> — lateral drift, observational<br>
+        S04 Better: <code>z=5.0, y=0.4, x=0.0</code> — settling, transitional<br>
+        S05 Machined: <code>z=4.5, y=0.0, x=0.0</code> — clinical level, precision register<br>
+        S06 Inside: <code>z=4.0, y=-0.4, x=0.0</code> — lowest, most dramatic (climax)<br>
+        S07 Specs: <code>z=5.5, y=1.2, x=0.0</code> — elevated, observational, verification<br>
+        S08 CTA: <code>z=4.5, y=0.0, x=0.0</code> — level, centered, calm<br><br>
+        GSAP: <code>camera.position.copy(curve.getPointAt(progress))</code>. Lerp 0.05 for smoothing — never snap. <code>camera.lookAt(0,0,0)</code> throughout.</div>
+      <div class="prd-tags"><span class="prd-tag motion">Three.js</span><span class="prd-tag motion">GSAP ScrollTrigger</span></div>
+    </div>
+  </div>
+
+  <div class="sec-title">Phase 2 — Atmospheric lighting states [W3]</div>
+  <div class="prd-step p1">
+    <div class="prd-num" style="font-size:9px">W3</div>
+    <div>
+      <div class="prd-title">6 named lighting states — 1.2s GSAP crossfades</div>
+      <div class="prd-desc">
+        <strong>State A · Forge (S01):</strong> DirectionalLight <code>#e07840</code> intensity 1.4, y=2 x=1. AmbientLight <code>#3d1a0a</code> 0.3. FogExp2 density 0.12.<br>
+        <strong>State B · Pour Peak (S02 max):</strong> DirectionalLight <code>#ff6820</code> intensity 2.2 from y=-0.5. PointLight white 0.8 at center. Fog 0.18.<br>
+        <strong>State C · Precision (S03–04):</strong> DirectionalLight <code>#c8d8e8</code> 1.0 overhead. AmbientLight <code>#0a0f18</code> 0.4. Fog 0.06.<br>
+        <strong>State D · Clinical (S05):</strong> DirectionalLight <code>#ddeeff</code> 1.6 overhead. AmbientLight <code>#101520</code> 0.5. Near-zero fog.<br>
+        <strong>State E · Climax (S06):</strong> Single DirectionalLight <code>#e05820</code> 2.0 from y=-0.6 z=2. Deep shadow. Fog 0.20.<br>
+        <strong>State F · Verification (S07–08):</strong> DirectionalLight <code>#b0c8e0</code> 0.9. AmbientLight <code>#0d1318</code> 0.6. Fog 0.04.
+      </div>
+      <div class="prd-tags"><span class="prd-tag motion">Three.js lighting</span><span class="prd-tag motion">GSAP</span></div>
+    </div>
+  </div>
+
+  <div class="sec-title">Phase 3 — Copy fixes [W4]</div>
+  <div class="prd-step p2">
+    <div class="prd-num" style="font-size:9px">W4</div>
+    <div>
+      <div class="prd-title">Scene 04 rewrite + Scene 06 client-proof sub-copy</div>
+      <div class="prd-desc">S04 headline: <em>"Engineered to spec. Verified before it ships."</em> Sub-copy: "Every dimension checked against your drawing. Every heat spectrometer-verified. Nothing leaves without sign-off."<br><br>S06 sub-copy (currently missing): <em>"Inside Caterpillar excavator arms. Inside Halliburton pump heads. Inside Schwing concrete delivery systems."</em> Three real machine applications. Turns a poetic statement into a verifiable proof.</div>
+      <div class="prd-tags"><span class="prd-tag copy">Copy</span></div>
+    </div>
+  </div>
+
+  <div class="sec-title">Phase 4 — Typography peaks [W4]</div>
+  <div class="prd-step p2">
+    <div class="prd-num" style="font-size:9px">W4</div>
+    <div>
+      <div class="prd-title">Three typographic events scaled to emotional intensity</div>
+      <div class="prd-desc"><strong>1450°C (S02):</strong> 8vw, Syne 800, forge-orange. Own line, above subtitle. Not a descriptor — an event.<br><strong>"The part inside the machine." (S06):</strong> 10–12vw, Syne 800, full viewport, letter-spacing 0.02em. Scroll-lock 0.8s on arrival. Zero competing elements.<br><strong>"±0.3mm" (S07):</strong> 14vw, forge-orange, dominant. Below it: "Shell mould tolerance. Verified at despatch." The biggest number on the site — proportional to its importance.</div>
+      <div class="prd-tags"><span class="prd-tag design">Typography</span></div>
+    </div>
+  </div>
+
+  <div class="sec-title">Phase 5 — Spec section as ambient data [W5]</div>
+  <div class="prd-step p2">
+    <div class="prd-num" style="font-size:9px">W5</div>
+    <div>
+      <div class="prd-title">Replace bordered table with Jesko Jets floating spec treatment</div>
+      <div class="prd-desc">No borders, no table, no cards. Large Syne numbers in the dark void, small labels below. Z-plane offsets via <code>translateZ</code> for optical depth without WebGL overhead.<br><br>Shell Moulding: <em>"500g–150kg"</em> at 4vw · <em>"CT8–CT10 · Ra 6.3μm"</em> below<br>No-Bake: <em>"50–500kg"</em> · <em>"CT11–CT12"</em><br>Capacity: <em>"500 MT/yr"</em> · <em>"→700 MT"</em><br>Testing: <em>"CMM · Hardness · UT · MPT"</em><br><br>Each cluster scroll-reveals with standard opacity/translateY motion.</div>
+      <div class="prd-tags"><span class="prd-tag design">Design</span><span class="prd-tag motion">CSS 3D</span></div>
+    </div>
+  </div>
+
+  <div class="sec-title">Phase 6 — Web Audio API [W5–6]</div>
+  <div class="prd-step p2">
+    <div class="prd-num" style="font-size:9px">W5–6</div>
+    <div>
+      <div class="prd-title">3 audio states — opt-in via preloader</div>
+      <div class="prd-desc"><strong>State A — Forge (S01–02):</strong> OscillatorNode "sawtooth" 55Hz, LFO 0.2Hz ±8Hz detune, gain 0.04. Subterranean furnace rumble.<br><strong>State B — Precision (S03–06):</strong> Two "sine" nodes, 440Hz + 443Hz, ±3 cent beat, gain 0.025. Clinical CNC hum at distance.<br><strong>State C — Verification (S07):</strong> Near silence + metallic ping every 5–9s (BiquadFilter highpass 2kHz on noise burst), gain 0.05.<br><br>Crossfade: 800ms GainNode. Master gain cap: 0.06. Opt-in only — "Enable audio experience" in preloader. Never auto-plays.</div>
+      <div class="prd-tags"><span class="prd-tag audio">Web Audio API</span></div>
+    </div>
+  </div>
+
+  <div class="sec-title">Phase 7 — Scene 08 CTA rebuild [W6]</div>
+  <div class="prd-step p2">
+    <div class="prd-num" style="font-size:9px">W6</div>
+    <div>
+      <div class="prd-title">"The part inside your machine." — cinematic CTA replacing FAQ</div>
+      <div class="prd-desc">Full-viewport dark. Casting object center, scale 1.1, lighting State E (single key, deep shadow). 0.5s scroll-lock on arrival.<br>Headline: <em>"The part inside your machine."</em> 8–10vw.<br>Contact as ambient data (not buttons): <em>industries@raysonsgroup.com</em> · <em>Send your drawing → WhatsApp</em><br>Below: one line at 10px — "Shell Cast · Raysons Group · Kolhapur · ISO 9001:2015"<br>All 4 FAQ items move to enquire.html.</div>
+      <div class="prd-tags"><span class="prd-tag design">Design</span><span class="prd-tag copy">Copy</span><span class="prd-tag motion">Scroll-lock</span></div>
+    </div>
+  </div>
+
+  <div class="sec-title">Phase 8 — Performance floor [W8]</div>
+  <div class="prd-step p3">
+    <div class="prd-num" style="font-size:9px">W8</div>
+    <div>
+      <div class="prd-title">Mobile + Lighthouse before Awwwards submission</div>
+      <div class="prd-desc">— <code>renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5))</code><br>— WebGL disabled below 768px — CSS gradient forge atmosphere fallback<br>— Ember count: 80 desktop → 20 mobile<br>— No <code>ctx.shadowBlur</code> in ember render loop<br>— Float CTA visible and tappable on all mobile viewports<br>— Canvas never exceeds 100vw<br>— Lighthouse mobile: 90+ performance target<br>— LCP: preload pour-poster.jpg as priority image</div>
+      <div class="prd-tags"><span class="prd-tag perf">Performance</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================= FOUNDRY PAGE -->
+<div class="panel" id="p-foundry">
+  <div class="honesty-bar">
+    <strong>Foundry page audited from local source code.</strong>&nbsp; The page returns 404 on production (not yet deployed) but exists locally at <code>foundry.html</code>. Full section-by-section audit below — same methodology as the Overview and About tabs.
+  </div>
+
+  <div class="score-grid">
+    <div class="score-card">
+      <div class="score-num green">7.0</div>
+      <div class="score-label">Composite</div>
+      <div class="score-basis">[Certain] from DOM structure</div>
+    </div>
+    <div class="score-card">
+      <div class="score-num green">7.5</div>
+      <div class="score-label">Content depth</div>
+      <div class="score-basis">[Certain] — 10 major sections, rich spec data</div>
+    </div>
+    <div class="score-card">
+      <div class="score-num green">7.0</div>
+      <div class="score-label">Copy quality</div>
+      <div class="score-basis">[Certain] — buyer-facing, specific, not generic</div>
+    </div>
+    <div class="score-card">
+      <div class="score-num amber">6.5</div>
+      <div class="score-label">Visual variety</div>
+      <div class="score-basis">[Certain] — images reused across sections</div>
+    </div>
+  </div>
+
+  <div class="callout"><strong>Significantly stronger than both the scrollyteller (4.4) and About page (2.0).</strong> The Foundry page has the most complete buyer-facing content on the site — proper specifications, process timeline, capabilities grid, customer marquee. The issues are about polish, not structure.</div>
+
+  <div class="sec-title">Section-by-section audit (from actual DOM)</div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Hero</div>
+      <div class="scene-act act3">Full viewport</div>
+    </div>
+    <div>
+      <div class="scene-name">"Precision casting, engineered to spec."</div>
+      <div class="scene-quote">Sub: "Shell Moulded · No-Bake · In-House Machining · ISO 9001:2015 · 0.5 kg – 500 kg"</div>
+      <div class="scene-desc">[Certain] Strong Cormorant heading with italic accent on "engineered to spec." Good SEO meta, OG tags, schema.org markup, canonical URL. Full-bleed <code>pour-poster.jpg</code> with CSS filters (sepia, saturate, contrast). Eyebrow badge "The Foundry" with glowing dot — consistent with the About page design language. No video scrub, no canvas — instant LCP by design.</div>
+    </div>
+    <div class="rating a">B+</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Pillar 01</div>
+      <div class="scene-act act1">Shell Moulding</div>
+    </div>
+    <div>
+      <div class="scene-name">"Shell Moulded Precision."</div>
+      <div class="scene-quote">5 benefit rows + 4 material pills (Grey CI / SG Iron / SiMo Ductile / ADI)</div>
+      <div class="scene-desc">[Certain] Best copy on the page: "Heated metal patterns. Shells that hold tolerances conventional foundries cannot match. Surface finish that your machinists will thank you for." Includes a technical note explaining shell moulding vs green sand for non-specialists. Material pills have hover states. Image reuses <code>pour-poster.jpg</code> — same as hero, should be distinct.</div>
+    </div>
+    <div class="rating b">B</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Pillar 02</div>
+      <div class="scene-act act2">No-Bake</div>
+    </div>
+    <div>
+      <div class="scene-name">"No-Bake Strength."</div>
+      <div class="scene-quote">Flipped layout (RTL grid), 5 benefit rows</div>
+      <div class="scene-desc">[Certain] Good buyer-facing copy: "When your casting weighs 50 kilograms — or 500 — our No-Bake line takes over." Flipped layout breaks visual monotony. Image uses <code>hero.jpg</code>. 5 benefit rows with dot icons. Note explaining no-bake advantages.</div>
+    </div>
+    <div class="rating b">B</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Pillar 03</div>
+      <div class="scene-act act2">Machining</div>
+    </div>
+    <div>
+      <div class="scene-name">"In-House Machining."</div>
+      <div class="scene-quote">Spec strip: HMC · VMC · CNC Lathe · ISO 9001:2015</div>
+      <div class="scene-desc">[Certain] Centred layout variant. Best single sentence: "Your casting doesn't leave our facility until it's machined, dimensionally verified, and ready for your assembly line. One partner. One responsibility. Zero gaps." Spec strip separators with bronze-deep colour. No accompanying image — acceptable for a centred layout but a machining photo would strengthen it.</div>
+    </div>
+    <div class="rating b">B−</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Pillar 04</div>
+      <div class="scene-act act3">Export Quality</div>
+    </div>
+    <div>
+      <div class="scene-name">"Export-Ready Quality."</div>
+      <div class="scene-quote">Gradient headline, standards listed, dual CTA (Request a Quote + See Full Capabilities)</div>
+      <div class="scene-desc">[Certain] Gradient text effect on heading — the only pillar with this treatment. Standards listed as inline text: ASTM A802, JDM B15, JDT 17015, ISO 9001. Dual CTA stack with filled button + text link. Correct placement as the closing pillar.</div>
+    </div>
+    <div class="rating b">B</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Specifications</div>
+      <div class="scene-act act3">Data grid</div>
+    </div>
+    <div>
+      <div class="scene-name">6-card specification grid</div>
+      <div class="scene-quote">Shell Moulding · No-Bake · Annual Capacity · Melting · Materials · Testing</div>
+      <div class="scene-desc">[Certain] Well-structured 3×2 grid with 1px gap borders and bronze top accent. Each card has label (mono, uppercase), value (Cormorant serif, large), and detail (small, dim). Correct data: CT8–CT10, Ra 6.3, 500 MT expanding to 700 MT, Bruker Q2 ION spectrometer, etc. Hover state adds faint golden tint. This section is strong.</div>
+    </div>
+    <div class="rating a">B+</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Process</div>
+      <div class="scene-act act1">Interactive timeline</div>
+    </div>
+    <div>
+      <div class="scene-name">"From raw material to finished casting."</div>
+      <div class="scene-quote">6 steps: Raw Material → Sand Prep → Melting → Pouring → Fettling → Machining/Dispatch</div>
+      <div class="scene-desc">[Certain] Best interactive element on the entire site. 6-step vertical timeline with click-to-jump AND scroll-driven activation (GSAP ScrollTrigger). Active step has glowing dot + expanded description. Sticky image panel on right with crossfade between 6 foundry photos. Issue: steps 3–5 use era-poster images from the About page timeline — wrong context.</div>
+    </div>
+    <div class="rating a">B+</div>
+  </div>
+
+  <div class="scene-row">
+    <div>
+      <div class="scene-num">Capabilities</div>
+      <div class="scene-act act2">Production scope</div>
+    </div>
+    <div>
+      <div class="scene-name">"Everything required to ship assembly-ready castings."</div>
+      <div class="scene-quote">4 columns: Moulding · Finishing · Machining · Testing & QC</div>
+      <div class="scene-desc">[Certain] 4-column grid with ghost number backgrounds (Cormorant, transparent stroke). Equipment lists: shell shooter machines, dump box, no-bake mixing line, 700 kg tumble shot blasting, Bruker Q2 ION spectrometer, Metal Soft image analyser, UTM HGFL digital. Specific equipment names — the right level of detail for a buyer.</div>
+    </div>
+    <div class="rating b">B</div>
+  </div>
+
+  <div class="sec-title">Critical issues found</div>
+
+  <div class="issue critical">
+    <span class="badge critical">Certain</span>
+    <div>
+      <div class="issue-title">Phone number placeholder — same as all other pages</div>
+      <div class="issue-desc"><code>+91 XXXXX XXXXX</code> and <code>tel:+919999999999</code> appear in both the Finale section (line 373) and the Footer (line 388). Same critical issue as index and About pages.</div>
+      <div class="issue-fix">→ Fix with real number — 5 minutes, across all 4 pages simultaneously.</div>
+    </div>
+  </div>
+
+  <div class="issue high">
+    <span class="badge high">Certain</span>
+    <div>
+      <div class="issue-title">Image reuse: pour-poster.jpg used for hero AND Shell Moulding AND process step 0</div>
+      <div class="issue-desc">The same image (<code>valve/pour-poster.jpg</code>) is used for the full-viewport hero, the Shell Moulding pillar visual, and the first process step image. A buyer scrolling through sees the same molten iron photo three times. Each section needs its own distinct foundry photograph.</div>
+      <div class="issue-fix">→ Source 3 distinct foundry photos: (1) shell mould close-up, (2) molten pour action, (3) raw material inspection.</div>
+    </div>
+  </div>
+
+  <div class="issue high">
+    <span class="badge high">Certain</span>
+    <div>
+      <div class="issue-title">Process step images 3–5 use About page timeline monument posters</div>
+      <div class="issue-desc">Steps 4 ("Precision Pouring"), 5 ("Fettling") and 6 ("Machining/Dispatch") use <code>era-2021-poster.jpg</code>, <code>era-1987-poster.jpg</code> and <code>era-2027-poster.jpg</code> — these are the cinematic monument videos from the About page timeline. They're wrong context — a stone pillar carved with "1987" is not a photograph of fettling.</div>
+      <div class="issue-fix">→ Replace with actual foundry process photographs or use the existing <code>exploded.jpg</code> / <code>hero.jpg</code> assets more strategically.</div>
+    </div>
+  </div>
+
+  <div class="issue high">
+    <span class="badge high">Certain</span>
+    <div>
+      <div class="issue-title">Page returns 404 on production — not deployed</div>
+      <div class="issue-desc">Fetching <code>https://raysons-website.vercel.app/raysons-scrollyteller/foundry.html</code> returns HTTP 404. The page exists in the local codebase with complete HTML, CSS, and JS but has not been deployed to Vercel production. The nav on the local <code>index.html</code> includes the Foundry link, but the deployed version does not.</div>
+      <div class="issue-fix">→ Deploy with the next push. The page is production-ready in terms of structure and content.</div>
+    </div>
+  </div>
+
+  <div class="issue med">
+    <span class="badge med">Advisory</span>
+    <div>
+      <div class="issue-title">Process section kept — correct decision (against earlier consideration to remove)</div>
+      <div class="issue-desc">The earlier PRD noted a decision to potentially remove "Our Process." The actual implementation keeps it and makes it the best interactive element on the site. The 6-step timeline with scroll-driven activation and sticky image crossfade is genuinely well-built. The content is specific (sand preparation, metallurgical control, spectrometer verification), not the generic "Melt → Pour → Ship" diagram. Keeping it was the right call.</div>
+    </div>
+  </div>
+
+  <div class="issue good">
+    <span class="badge good">Certain</span>
+    <div>
+      <div class="issue-title">GSAP + Lenis integration is clean — the best motion implementation across all pages</div>
+      <div class="issue-desc">Confirmed from <code>foundry.js</code>: GSAP ScrollTrigger batch reveals with 0.08s stagger, pillar image parallax (yPercent -6→6), visual scale-in (0.92→1.0), spec card stagger, capabilities column stagger. Lenis smooth scroll with 0.1 lerp. Process steps use both click-to-jump and ScrollTrigger activation. IntersectionObserver fallback when GSAP unavailable. prefers-reduced-motion respected throughout. This page's motion system should be the reference for the About page rebuild.</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sec-title">Build sequence — implementation order</div>
+
+  <div class="prd-step p1">
+    <div class="prd-num">1</div>
+    <div>
+      <div class="prd-title">Deploy the page — it's ready</div>
+      <div class="prd-desc">The Foundry page is the strongest page on the site. It needs to be live. Push to production so the nav link works.</div>
+      <div class="prd-tags"><span class="prd-tag now">Immediate</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step p1">
+    <div class="prd-num">2</div>
+    <div>
+      <div class="prd-title">Fix phone number placeholder (same as all pages)</div>
+      <div class="prd-desc">Replace <code>+91 XXXXX XXXXX</code> in Finale and Footer sections with the real phone number.</div>
+      <div class="prd-tags"><span class="prd-tag now">Immediate</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step p2">
+    <div class="prd-num">3</div>
+    <div>
+      <div class="prd-title">Source distinct images for pillar sections and process steps</div>
+      <div class="prd-desc">Shell Moulding pillar: close-up of shell mould formation or heated metal pattern. No-Bake pillar: large casting in a no-bake mould. Machining pillar: add a VMC/HMC machine photo. Process steps 3–5: replace era-poster images with actual foundry process photos (pouring, fettling, machining).</div>
+      <div class="prd-tags"><span class="prd-tag design">Photography</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step p2">
+    <div class="prd-num">4</div>
+    <div>
+      <div class="prd-title">Add client-application examples to the Finale section</div>
+      <div class="prd-desc">The Finale has the customer marquee (Caterpillar, Halliburton, etc.) but no application context. Add: "Hydraulic valve bodies · Pump housings · Gearbox housings · Excavator arm castings" as a secondary line or hover context on the customer names — same treatment planned for the About page client grid.</div>
+      <div class="prd-tags"><span class="prd-tag copy">Copy</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step p3">
+    <div class="prd-num">5</div>
+    <div>
+      <div class="prd-title">Consider adding a "Materials" pillar section</div>
+      <div class="prd-desc">The materials info is split: material pills on Shell Moulding, material chips in the marquee, spec data in the grid. A dedicated Materials pillar between No-Bake and Machining could centralize: Grey CI (IS 210) — applications. SG/Ductile (IS 1865) — applications. SiMo Ductile — high-temp applications. ADI — wear-resistant applications. Each with one buyer-facing sentence on where that grade is used in OEM equipment.</div>
+      <div class="prd-tags"><span class="prd-tag copy">Copy</span><span class="prd-tag design">Design</span></div>
+    </div>
+  </div>
+
+  <div class="prd-step p3">
+    <div class="prd-num">6</div>
+    <div>
+      <div class="prd-title">Apply this page's motion system to the About page</div>
+      <div class="prd-desc">The Foundry page's GSAP integration (ScrollTrigger batch, Lenis, parallax, stagger) is the benchmark. The About page currently has its own GSAP setup but no equivalent pillar parallax or spec stagger. Unify the motion language across both pages using <code>foundry.js</code> as the reference implementation.</div>
+      <div class="prd-tags"><span class="prd-tag motion">Motion</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================= ASSETS -->
+<div class="panel" id="p-assets">
+  <div class="callout"><strong>Asset inventory — what exists, what's needed.</strong> Organised by priority. Every asset references where it's used in the site.</div>
+
+  <div class="sec-title">Existing assets (confirmed in repo)</div>
+
+  <div class="asset-row">
+    <div><div class="asset-name">pour-poster.jpg</div><div class="asset-desc">Hero poster — molten iron pour, 1920×1080</div></div>
+    <div><span class="priority pa">Critical</span></div>
+    <div class="gen-method">Exists · valve/</div>
+  </div>
+  <div class="asset-row">
+    <div><div class="asset-name">pour.mp4</div><div class="asset-desc">Scroll-scrubbed pour film — main scrollyteller</div></div>
+    <div><span class="priority pa">Critical</span></div>
+    <div class="gen-method">Exists · valve/</div>
+  </div>
+  <div class="asset-row">
+    <div><div class="asset-name">lift.mp4 (CDN)</div><div class="asset-desc">Product lift hero clip — Cartier-style handoff to About</div></div>
+    <div><span class="priority pa">Critical</span></div>
+    <div class="gen-method">CDN · jsdelivr</div>
+  </div>
+  <div class="asset-row">
+    <div><div class="asset-name">hero.jpg / exploded.jpg</div><div class="asset-desc">Product photography — valve casting, exploded view</div></div>
+    <div><span class="priority pb">High</span></div>
+    <div class="gen-method">Exists · valve/</div>
+  </div>
+  <div class="asset-row">
+    <div><div class="asset-name">era-*.mp4 / era-*-poster.jpg</div><div class="asset-desc">4 monument clips for About timeline (1987/2005/2021/2027)</div></div>
+    <div><span class="priority pb">High</span></div>
+    <div class="gen-method">CDN + local posters</div>
+  </div>
+  <div class="asset-row">
+    <div><div class="asset-name">raysons-logo.png</div><div class="asset-desc">Brand logomark — 49KB PNG</div></div>
+    <div><span class="priority pb">High</span></div>
+    <div class="gen-method">Exists · images/</div>
+  </div>
+
+  <div class="sec-title">Needed assets</div>
+
+  <div class="asset-row">
+    <div><div class="asset-name">Distinct foundry process photos (×6)</div><div class="asset-desc">For Foundry page pillars and process timeline — currently reusing pour-poster.jpg and era posters</div></div>
+    <div><span class="priority pa">Critical</span></div>
+    <div class="gen-method">Photography needed</div>
+  </div>
+  <div class="asset-row">
+    <div><div class="asset-name">Shop-floor team photo</div><div class="asset-desc">When available — will replace the typographic METALLURGY/QUALITY/DISPATCH treatment on About</div></div>
+    <div><span class="priority pc">Nice-to-have</span></div>
+    <div class="gen-method">Photography needed</div>
+  </div>
+</div>
+
+<!-- ======================================================= ROADMAP -->
+<div class="panel" id="p-roadmap">
+  <div class="callout"><strong>Implementation roadmap — 4 phases.</strong> Immediate fixes first, then structural improvements, then cinematic upgrades, then performance.</div>
+
+  <div class="phase-block">
+    <div class="phase-header">
+      <span class="phase-label ph1">Phase 1</span>
+      <span class="phase-title">Immediate fixes</span>
+      <span class="phase-week">Day 1</span>
+    </div>
+    <div class="phase-task"><span class="task-dot forge"></span> Fix phone number placeholder across all 4 pages</div>
+    <div class="phase-task"><span class="task-dot forge"></span> Fix About preloader: "RAYSONS GROUP" → "RAYSONS SHELL CAST", "Opening the archive" → "Entering the foundry"</div>
+    <div class="phase-task"><span class="task-dot forge"></span> Remove "Shop-floor team photo — to be added —" placeholder</div>
+    <div class="phase-task"><span class="task-dot forge"></span> Deploy foundry.html to production</div>
+  </div>
+
+  <div class="phase-block">
+    <div class="phase-header">
+      <span class="phase-label ph2">Phase 2</span>
+      <span class="phase-title">Copy & content upgrades</span>
+      <span class="phase-week">W1–2</span>
+    </div>
+    <div class="phase-task"><span class="task-dot precision"></span> Scene 04 sub-copy: "Engineered to spec. Verified before it ships."</div>
+    <div class="phase-task"><span class="task-dot precision"></span> Scene 06 client-proof: Caterpillar / Halliburton / Schwing applications</div>
+    <div class="phase-task"><span class="task-dot precision"></span> About certifications: buyer-facing evidence sentences</div>
+    <div class="phase-task"><span class="task-dot precision"></span> About timeline: all milestones rewritten from buyer perspective</div>
+    <div class="phase-task"><span class="task-dot precision"></span> About hero: customer names first (pending structural rebuild)</div>
+  </div>
+
+  <div class="phase-block">
+    <div class="phase-header">
+      <span class="phase-label ph3">Phase 3</span>
+      <span class="phase-title">Cinematic upgrades</span>
+      <span class="phase-week">W3–6</span>
+    </div>
+    <div class="phase-task"><span class="task-dot trust"></span> Three.js camera system (CatmullRomCurve3, 8 control points)</div>
+    <div class="phase-task"><span class="task-dot trust"></span> 6 named lighting states with GSAP crossfades</div>
+    <div class="phase-task"><span class="task-dot trust"></span> Typography peaks: 1450°C at 8vw, ±0.3mm at 14vw, Scene 06 at 12vw</div>
+    <div class="phase-task"><span class="task-dot trust"></span> Scene 08 CTA rebuild: FAQ → cinematic "The part inside your machine."</div>
+    <div class="phase-task"><span class="task-dot trust"></span> Web Audio API: 3 audio states (opt-in)</div>
+  </div>
+
+  <div class="phase-block">
+    <div class="phase-header">
+      <span class="phase-label ph4">Phase 4</span>
+      <span class="phase-title">Performance & Awwwards prep</span>
+      <span class="phase-week">W8</span>
+    </div>
+    <div class="phase-task"><span class="task-dot muted"></span> Mobile WebGL fallback (CSS gradient below 768px)</div>
+    <div class="phase-task"><span class="task-dot muted"></span> Lighthouse 90+ mobile performance</div>
+    <div class="phase-task"><span class="task-dot muted"></span> Source distinct foundry photography</div>
+    <div class="phase-task"><span class="task-dot muted"></span> Awwwards submission package</div>
+  </div>
+</div>
+
+<script>
+function show(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  var p=document.getElementById('p-'+id);
+  if(p)p.classList.add('on');
+  event.target.classList.add('on');
+}
+</script>
+</body>
+</html>

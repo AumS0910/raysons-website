@@ -1,0 +1,242 @@
+/* ================================================================
+   CastingSequence.module.css
+   Raysons Shell Cast — two-phase scroll-scrubbed frame cinema.
+   Phase 1: Assembly  (0–50% of 800vh runway)
+   Phase 2: Bore Entry (50–100%)
+   
+   All classes prefixed .cs- to avoid collisions with styles.css
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── container: the tall scroll runway ── */
+.cs-wrap {
+  position: relative;
+  height: 800vh;          /* 400vh assembly + 400vh bore */
+  background: #050302;
+}
+
+/* ── pinned stage: stays fixed while runway scrolls ── */
+.cs-stage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #050302;
+}
+
+/* ── desktop canvas ── */
+.cs-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  will-change: transform;
+}
+
+/* ── mobile video fallback ── */
+.cs-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
+/* ================================================================
+   PRELOADER — thin amber bar + percentage
+   ================================================================ */
+.cs-pre {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: #050302;
+  z-index: 9;
+  transition: opacity 0.6s ease;
+}
+.cs-pre.done {
+  opacity: 0;
+  pointer-events: none;
+}
+.cs-pre__bar {
+  width: min(320px, 56vw);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+.cs-pre__bar i {
+  position: absolute;
+  inset: 0;
+  width: 0;
+  background: linear-gradient(90deg, #c9850a, #ffb03a);
+  box-shadow: 0 0 14px #ff9b3d;
+  transition: width 0.25s ease;
+}
+.cs-pre__pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ================================================================
+   TEXT OVERLAYS
+   base state: opacity 0 / invisible; .show brings them in
+   ================================================================ */
+.cs-ov {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.55s ease;
+}
+.cs-ov.show {
+  opacity: 1;
+}
+
+/* bottom-left position (assembly overlays 1 & 2) */
+.cs-ov--bl {
+  left: clamp(24px, 5vw, 72px);
+  bottom: clamp(40px, 9vh, 90px);
+}
+
+/* center-bottom (assembly overlay 3: product reveal) */
+.cs-ov--cb {
+  left: 50%;
+  bottom: clamp(48px, 11vh, 120px);
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+/* dead-center (bore overlay 1: "Look inside.") */
+.cs-ov--c {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+/* ── type styles ── */
+.cs-mono {
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em;
+}
+.cs-amber {
+  color: #ff9b3d;
+}
+.cs-steel {
+  color: #c9d2dc;
+}
+.cs-cream {
+  color: #E8E0D5;
+}
+.cs-mono-12 {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.cs-mono-13 {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.cs-corm-36 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: 36px;
+  color: #E8E0D5;
+  line-height: 1.05;
+}
+.cs-corm-it-28 {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 28px;
+  color: #c9d2dc;
+}
+
+/* pulse on "Look inside." */
+@keyframes cs-lookpulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1;   }
+}
+.cs-pulse {
+  animation: cs-lookpulse 2.4s ease-in-out infinite;
+}
+
+/* ================================================================
+   BORE FINALE — darkening overlay + final copy
+   ================================================================ */
+
+/* full-screen colour overlay that fades 0 → 1 */
+.cs-darken {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: #050302;
+  opacity: 0;
+  pointer-events: none;
+  transition: none;          /* driven by JS directly */
+}
+
+/* finale copy panel */
+.cs-finale {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+  padding: 0 clamp(24px, 6vw, 80px);
+  text-align: center;
+}
+.cs-finale.show {
+  opacity: 1;
+}
+
+.cs-finale__h {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(24px, 3.5vw, 44px);
+  color: #E8E0D5;
+  line-height: 1.1;
+}
+.cs-finale__sub {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #B8B0A8;
+  margin-top: 14px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.cs-finale.show2 .cs-finale__sub {
+  opacity: 1;
+}
+
+/* ================================================================
+   REDUCED MOTION — skip all animations; show static frame
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .cs-ov         { transition: none; }
+  .cs-pre        { transition: none; }
+  .cs-finale     { transition: none; }
+  .cs-pulse      { animation: none; opacity: 1; }
+}
+
+/* ================================================================
+   MOBILE (≤ 1024px): hide canvas, show video
+   ================================================================ */
+@media (max-width: 1024px) {
+  .cs-canvas { display: none; }
+  .cs-video  { display: block; }
+}

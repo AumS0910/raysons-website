@@ -1,0 +1,10 @@
+dist
+node_modules
+.git
+public/frames
+**/Monument_carved_year_*.mp4
+**/Building_*.mp4
+**/Building_establishing_shot*.mp4
+**/*-src.mp4
+**/Ultra-premium_*.jpeg
+*.log

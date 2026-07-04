@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Raysons — Inspect the Part</title>
+<style>
+  :root{ --ink:#f4ece2; --molten:#ff6a1a; }
+  *{margin:0;box-sizing:border-box}
+  html,body{height:100%;background:#050506;overflow:hidden;font-family:"Space Grotesk",system-ui,sans-serif;cursor:grab}
+  body.grabbing{cursor:grabbing}
+  #c{display:block;width:100%;height:100%}
+  /* cinematic vignette + grain over the canvas */
+  .vig{position:fixed;inset:0;pointer-events:none;z-index:2;
+    background:radial-gradient(ellipse 70% 70% at 50% 48%, transparent 40%, rgba(5,5,6,.55) 78%, rgba(5,5,6,.92) 100%);}
+  .hud{position:fixed;z-index:3;color:var(--ink);pointer-events:none;font-family:"Space Mono",ui-monospace,monospace}
+  .eyebrow{top:clamp(28px,6vh,56px);left:clamp(24px,5vw,72px);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--molten);display:flex;align-items:center;gap:12px}
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--molten)}
+  .title{top:calc(clamp(28px,6vh,56px) + 30px);left:clamp(24px,5vw,72px);font-family:"Space Grotesk",sans-serif;font-size:clamp(34px,5vw,68px);font-weight:500;letter-spacing:-.02em;line-height:.96;color:var(--ink);text-shadow:0 2px 30px rgba(7,5,4,.9)}
+  .title em{font-style:normal;color:#ffb24a}
+  .hint{bottom:clamp(26px,5vh,52px);left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,236,226,.55);transition:opacity .5s}
+  .specs{bottom:clamp(26px,5vh,52px);left:clamp(24px,5vw,72px);display:flex;gap:8px 10px;flex-wrap:wrap;max-width:60vw}
+  .specs span{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:rgba(244,236,226,.55);border:1px solid rgba(244,236,226,.12);padding:6px 12px;border-radius:2px;background:rgba(11,11,12,.4);backdrop-filter:blur(4px)}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet"/>
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="vig"></div>
+<div class="hud eyebrow">Precision Casting · Interactive</div>
+<h1 class="hud title">Turn the part<br><em>inside the machine.</em></h1>
+<div class="hud specs">
+  <span>8-spline precision bore</span><span>4-bolt mounting flange</span><span>Machined to ±0.3 mm</span><span>Grey CI · SG Ductile · ADI</span>
+</div>
+<div class="hud hint" id="hint">Drag to rotate · scroll to zoom</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#050506');
+scene.fog = new THREE.FogExp2('#050506', 0.05);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(38, innerWidth/innerHeight, 0.01, 100);
+camera.position.set(2.6, 1.5, 3.4);
+
+// cinematic 3-point lighting on the black void
+scene.add(new THREE.HemisphereLight(0x9ab0cc, 0x0a0806, 0.5));
+const key = new THREE.DirectionalLight(0xfff0e2, 3.2); key.position.set(-4, 5, 4); scene.add(key);
+const fill = new THREE.DirectionalLight(0x8ca6d8, 0.9); fill.position.set(5, 0, 3); scene.add(fill);
+const rim = new THREE.PointLight(0xff7a2a, 14, 18, 2); rim.position.set(3, 2.5, -4); scene.add(rim);
+
+// soft contact shadow disc to ground the part
+const shadow = new THREE.Mesh(
+  new THREE.CircleGeometry(2.4, 64),
+  new THREE.MeshBasicMaterial({ color:0x000000, transparent:true, opacity:0.5 })
+);
+shadow.rotation.x = -Math.PI/2; shadow.position.y = -0.62; scene.add(shadow);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.07;
+controls.minDistance = 2.2; controls.maxDistance = 7;
+controls.enablePan = false;
+controls.autoRotate = true; controls.autoRotateSpeed = 0.9;
+controls.target.set(0, -0.05, 0);
+
+const hint = document.getElementById('hint');
+let interacted = false;
+function onInteract(){ if(!interacted){ interacted=true; hint.style.opacity='0'; } controls.autoRotate=false; document.body.classList.add('grabbing'); }
+canvas.addEventListener('pointerdown', onInteract);
+canvas.addEventListener('pointerup', ()=>document.body.classList.remove('grabbing'));
+canvas.addEventListener('wheel', onInteract, {passive:true});
+
+let hubWire;
+new GLTFLoader().load('/models/raysons-hub.glb', (g)=>{
+  const root = g.scene;
+  const box = new THREE.Box3().setFromObject(root);
+  const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
+  const s = 2.0 / Math.max(size.x, size.y, size.z);
+  root.scale.setScalar(s); root.position.sub(center.multiplyScalar(s));
+  scene.add(root);
+
+  // brand wireframe overlay — the Raysons "blueprint" accent
+  const wireMat = new THREE.MeshBasicMaterial({ color:0xff6a1a, wireframe:true, transparent:true, opacity:0.06, depthWrite:false });
+  hubWire = new THREE.Group();
+  root.traverse(o=>{ if(o.isMesh){ const w=new THREE.Mesh(o.geometry, wireMat); o.getWorldPosition(w.position); w.quaternion.copy(o.getWorldQuaternion(new THREE.Quaternion())); w.scale.copy(o.getWorldScale(new THREE.Vector3())); hubWire.add(w);} });
+  scene.add(hubWire);
+  window.__ready = true;
+});
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight), 0.35, 0.6, 0.85));
+
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
+});
+
+(function tick(){
+  requestAnimationFrame(tick);
+  controls.update();
+  if (hubWire) hubWire.rotation.y = 0; // overlay follows part via world transforms baked above
+  composer.render();
+})();
+</script>
+</body>
+</html>
