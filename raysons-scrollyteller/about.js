@@ -65,15 +65,10 @@
   const { gsap } = window;
   gsap.registerPlugin(ScrollTrigger);
 
-  // Lenis smooth scroll, wired to ScrollTrigger
-  let lenis = null;
-  if(window.Lenis){
-    lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((t)=> lenis.raf(t*1000));
-    gsap.ticker.lagSmoothing(0);
-    window.__lenis = lenis;   // test/debug hook
-  }
+  // NO Lenis on About. The film engine (about-film.js) and the monument timeline already
+  // lerp scroll→scrub; stacking Lenis's smoothing on top double-filtered every input and
+  // WAS the "lag" the user felt. Native scroll + the single per-engine lerp matches
+  // index.html's tight feel. ScrollTrigger runs fine on native scroll.
 
   // staggered reveals
   ScrollTrigger.batch('.rv', {
@@ -82,25 +77,9 @@
   });
   gsap.set('.rv', { opacity:0, y:38 });
 
-  // building plates — parallax the image inside the framed plate + a soft scale-in
-  document.querySelectorAll('[data-chapter]').forEach((ch)=>{
-    const img = ch.querySelector('.chapter__plate img');
-    const plate = ch.querySelector('.chapter__plate');
-    if(img){
-      gsap.fromTo(img, { yPercent:-8 }, { yPercent:8, ease:'none',
-        scrollTrigger:{ trigger:ch, start:'top bottom', end:'bottom top', scrub:true } });
-    }
-    if(plate){
-      gsap.fromTo(plate, { scale:0.92, opacity:0.4 }, { scale:1, opacity:1, ease:'power2.out',
-        scrollTrigger:{ trigger:ch, start:'top 80%', end:'top 40%', scrub:true } });
-    }
-  });
-
-  // timeline year numerals — gentle parallax drift while sticky
-  document.querySelectorAll('[data-num]').forEach((num)=>{
-    gsap.fromTo(num, { yPercent:6 }, { yPercent:-6, ease:'none',
-      scrollTrigger:{ trigger:num.closest('.era'), start:'top bottom', end:'bottom top', scrub:true } });
-  });
+  // (Removed dead [data-chapter] / [data-num] parallax triggers — those belonged to the
+  // retired building-chapters + .era timeline layout and no longer exist in the DOM. They
+  // measured nothing yet still recalculated on every ScrollTrigger.refresh.)
 
   ScrollTrigger.refresh();
   // refresh after the hero image + fonts settle

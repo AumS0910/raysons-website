@@ -205,6 +205,26 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 
 .finale{text-align:center}
 .finale .marquee{margin-top:44px}
+
+/* ---------- finale CLIENT GRID (replaces the marquee) ---------- */
+/* stationary, deliberate, readable — hover/touch reveals country + application.
+   hairline grid matches the certs/values language but the hover reveal is the story. */
+.clients{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-top:1px solid rgba(166,121,46,.5);
+  margin-top:clamp(40px,6vh,72px);text-align:left}
+.client{background:var(--bg);padding:clamp(26px,3.4vh,40px) clamp(16px,1.6vw,24px);
+  min-height:130px;display:flex;flex-direction:column;justify-content:flex-end;gap:9px;
+  transition:background .5s ease}
+.client:hover{background:#0d0908}
+.client__name{font-family:var(--serif);font-size:clamp(18px,1.7vw,25px);font-weight:600;
+  letter-spacing:-.01em;color:var(--ink);line-height:1.04}
+.client__meta{font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--bronze-lite);
+  line-height:1.5;opacity:0;transform:translateY(6px);
+  transition:opacity .45s cubic-bezier(.2,.7,.2,1),transform .45s cubic-bezier(.2,.7,.2,1)}
+.client:hover .client__meta{opacity:1;transform:none}
+@media(hover:none){.client__meta{opacity:.92;transform:none}}   /* touch: no hover, so show it */
+@media(max-width:900px){.clients{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.clients{grid-template-columns:1fr}.client{min-height:0}}
 .finale-contact{pointer-events:auto;display:flex;gap:clamp(18px,3vw,40px);justify-content:center;flex-wrap:wrap;align-items:center;
   margin-top:36px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
 .finale-contact a{color:var(--bronze-lite)}

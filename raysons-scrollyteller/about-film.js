@@ -117,13 +117,34 @@
     }
   }
 
-  let cur = 0, target = 0;
-  function loop(){
-    requestAnimationFrame(loop);
+  // IDLE-GATED LOOP — the old version ran render() every frame forever (repainting the
+  // hero canvas + 4 video layers at 60fps even at the footer). Now the loop only spins
+  // while the scrub is still settling, a seek is in flight, or a clip is priming — and it
+  // parks entirely when the film is off-screen. This is what made About feel laggy.
+  let cur = 0, target = 0, raf = null, visible = true;
+  function measure(){
     const max = Math.max(1, film.offsetHeight - innerHeight);
-    target = Math.max(0, Math.min(1, -film.getBoundingClientRect().top / max));
+    return Math.max(0, Math.min(1, -film.getBoundingClientRect().top / max));
+  }
+  function kick(){ if(!raf && visible) raf = requestAnimationFrame(loop); }
+  function loop(){
+    raf = null;
+    target = measure();
     cur += (target - cur) * (REDUCED ? 1 : 0.1);
     render(cur);
+    // keep spinning only if there's still work: settling, an active seek, or an unprimed clip
+    const settling = Math.abs(target - cur) > 0.0004;
+    const busy = SCRUB && builds.some(m => m.seeking || (!m.primed && m.el.style.opacity > 0.001));
+    if(visible && (settling || busy)) kick();
   }
-  requestAnimationFrame(loop);
+  // native scroll now drives it (Lenis removed from About — see about.js); each scroll
+  // event re-arms the loop, which self-parks once settled
+  addEventListener('scroll', kick, { passive:true });
+  addEventListener('resize', ()=>{ size(); kick(); });
+  // park the whole engine when the film scrolls out of view, wake it just before it returns
+  if('IntersectionObserver' in window){
+    new IntersectionObserver((es)=>{ visible = es[0].isIntersecting; if(visible) kick(); },
+      { rootMargin: '15% 0px' }).observe(film);
+  }
+  kick();
 })();
