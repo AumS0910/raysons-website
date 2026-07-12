@@ -226,11 +226,28 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 .ji h4{font-size:15.5px;font-weight:600;margin:13px 0 9px;letter-spacing:-.01em;color:var(--ink)}
 .ji p{font-size:12.5px;line-height:1.55;color:var(--ink-dim);font-weight:300}
 
-/* progress rail (bottom) */
+/* progress rail (bottom) — molten fill + era ticks + a glowing travelling knob */
 .journey__rail{position:absolute;left:clamp(20px,6vw,110px);right:clamp(20px,6vw,110px);bottom:clamp(46px,7vh,74px);
   z-index:3;height:1px;background:var(--line)}
-.journey__rail-fill{display:block;height:100%;transform-origin:left center;transform:scaleX(0);
+.journey__rail-fill{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:left center;transform:scaleX(0);
   background:linear-gradient(90deg,var(--molten-deep),var(--molten-hot));box-shadow:0 0 14px var(--molten)}
+.journey__rail-knob{position:absolute;top:50%;left:0;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;
+  background:var(--molten-hot);box-shadow:0 0 16px var(--molten),0 0 5px rgba(255,255,255,.7);will-change:left}
+.journey__tick{position:absolute;top:50%;transform:translate(-50%,-50%);width:1px;height:8px;background:var(--line-strong)}
+.journey__tick b{position:absolute;bottom:13px;left:50%;transform:translateX(-50%);font-family:var(--mono);
+  font-size:9.5px;font-weight:400;letter-spacing:.14em;color:var(--ink-faint);font-variant-numeric:tabular-nums;white-space:nowrap}
+.journey__tick:first-child b{left:0;transform:none}
+.journey__tick:last-child b{left:auto;right:0;transform:none}
+
+/* entry choreography — eyebrow → headline reveal in sequence as each era lights (cards stagger already) */
+.journey__k,.journey__h{opacity:0;transform:translateY(16px);
+  transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.journey__era.on .journey__k{opacity:1;transform:none;transition-delay:.04s}
+.journey__era.on .journey__h{opacity:1;transform:none;transition-delay:.12s}
+
+/* cinematic vignette over the 3D corridor */
+.journey-gl .journey__pin::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(125% 100% at 50% 44%, transparent 50%, rgba(4,2,1,.55) 100%)}
 
 /* fallback: reduced-motion / no-JS → all eras stacked, no pin */
 .journey--static{height:auto}
@@ -251,11 +268,11 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
   .journey__era{position:relative;opacity:1!important;visibility:visible!important;transform:none!important;
     margin-bottom:clamp(44px,7vh,80px);padding-top:clamp(28px,5vh,48px);border-top:1px solid var(--line)}
   .journey__era:first-of-type{border-top:0;padding-top:0}
-  .journey__era .ji{opacity:1!important;transform:none!important;min-height:0}
+  .journey__era .ji,.journey__era .journey__k,.journey__era .journey__h{opacity:1!important;transform:none!important;min-height:0}
   .journey__items,.journey__items.two{grid-template-columns:1fr;max-width:none}
 }
 .journey--static .journey__items,.journey--static .journey__items.two{grid-template-columns:1fr;max-width:none}
-.journey--static .journey__era .ji{min-height:0}
+.journey--static .journey__era .ji,.journey--static .journey__k,.journey--static .journey__h{opacity:1;transform:none;min-height:0}
 
 /* ============================================================
    MVV / VALUES / CERTS / PEOPLE / FINALE / FOOTER

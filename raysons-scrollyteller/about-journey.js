@@ -15,6 +15,7 @@
   const marks = Array.from(sec.querySelectorAll('.journey__mark'));
   const yearEl = document.getElementById('jYear');
   const fill   = document.getElementById('jFill');
+  const knob   = document.getElementById('jKnob');
   const N = eras.length;
   if(!N) return;
   const YEARS = marks.map(m => parseInt(m.textContent, 10) || 1987);   // [1987,2005,2021,2027]
@@ -44,6 +45,7 @@
     const i0 = clamp(Math.floor(f), 0, N - 1), i1 = clamp(i0 + 1, 0, N - 1);
     if(yearEl) yearEl.textContent = Math.round(YEARS[i0] + (YEARS[i1] - YEARS[i0]) * (f - i0));
     if(fill)   fill.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+    if(knob)   knob.style.left = (p * 100).toFixed(2) + '%';
 
     if(active !== lastA){
       eras.forEach((e,i)=> e.classList.toggle('on', i === active));

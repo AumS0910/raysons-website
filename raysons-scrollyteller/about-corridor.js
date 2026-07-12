@@ -22,7 +22,7 @@ function boot(){
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
   renderer.setSize(innerWidth, innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMappingExposure = 1.1;
 
   const PAL = { bg:'#070504', fog:'#0a0604', accent:'#ff7a26', hot:'#ffb24a', deep:'#c2300a', amb:'#2a1d12', rim:'#88a6ff' };
   const scene = new THREE.Scene();
@@ -33,7 +33,7 @@ function boot(){
 
   scene.add(new THREE.AmbientLight(PAL.amb, 0.7));
   const key   = new THREE.PointLight(PAL.accent, 2.6, 150, 2.0); key.position.set(0,3,-120); scene.add(key);
-  const rim   = new THREE.DirectionalLight(PAL.rim, 0.25); rim.position.set(-6,8,4); scene.add(rim);
+  const rim   = new THREE.DirectionalLight(PAL.rim, 0.42); rim.position.set(-6,8,4); scene.add(rim);
   const flare = new THREE.PointLight(PAL.hot, 0, 80, 2.2); flare.position.set(0,2,-208); scene.add(flare); // 2021 ignition
 
   // ---- drifting embers ----
@@ -121,7 +121,7 @@ function boot(){
 
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight), 0.8, 0.7, 0.2);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight), 0.92, 0.75, 0.16);
   composer.addPass(bloom);
 
   const clock = new THREE.Clock();
