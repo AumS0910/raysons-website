@@ -274,6 +274,11 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 .tl__mon{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
   opacity:0;transition:opacity 1.1s ease;transform:scale(1.03)}
 .tl__mon.on{opacity:1}
+/* slow ken-burns as each carved-year monument becomes active — life without the heavy video */
+@media(prefers-reduced-motion:no-preference){
+  .tl__mon.on{animation:tlKen 9s ease-out both}
+  @keyframes tlKen{from{transform:scale(1.07)}to{transform:scale(1.01)}}
+}
 /* scrims: keep the top (nav) and the bottom (era text) legible, leave the mid clear so
    the carved year reads strong */
 .tl__veil{position:absolute;inset:0;z-index:1;pointer-events:none;background:

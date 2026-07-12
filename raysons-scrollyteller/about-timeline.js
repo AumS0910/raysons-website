@@ -22,6 +22,10 @@
   // MOBILE / iOS can't seek live <video> on scroll → don't scrub; the monument's POSTER
   // still (its carved year) shows, cross-fading per era. The mp4 never loads on mobile.
   const MOBILE = matchMedia('(hover:none) and (pointer:coarse)').matches || innerWidth <= 820;
+  // SCRUB disabled on EVERY device now: seeking the 4 monument clips was decoder-bound jank
+  // + ~30 MB of downloads that clashed with index's molten world. Cross-fade the carved-year
+  // POSTER stills instead (verified crisp). Flip to `!MOBILE` to bring the video push-in back.
+  const SCRUB = false;
 
   // per-era monument clips with their own scrub state (same seek-pump as the index lift)
   const mons = Array.from(sec.querySelectorAll('.tl__mon')).map(function(v){
@@ -49,7 +53,7 @@
   if('IntersectionObserver' in window){
     new IntersectionObserver(function(es){
       near = es[0].isIntersecting;
-      if(near && !MOBILE){ const a = lastActive >= 0 ? lastActive : 0; prime(mons[a]); prime(mons[a+1]); }
+      if(near && SCRUB){ const a = lastActive >= 0 ? lastActive : 0; prime(mons[a]); prime(mons[a+1]); }
       else if(!near) mons.forEach(function(m){ try{ m.el.pause(); }catch(_){ } });
     }, { rootMargin: '35% 0px' }).observe(sec);
   } else { near = true; }
@@ -78,15 +82,15 @@
       eras.forEach((e,i)=> e.classList.toggle('on', i === active));
       rail.forEach((e,i)=>{ e.classList.toggle('on', i <= active); e.classList.toggle('cur', i === active); });
       mons.forEach(function(m,i){
-        if(i === active){ m.el.classList.add('on'); if(near && !MOBILE){ prime(m); } }
+        if(i === active){ m.el.classList.add('on'); if(near && SCRUB){ prime(m); } }
         else m.el.classList.remove('on');
       });
-      if(near && !MOBILE){ prime(mons[active+1]); }   // desktop: ready the next pillar
+      if(near && SCRUB){ prime(mons[active+1]); }   // desktop: ready the next pillar
       lastActive = active;
     }
 
     // desktop: scroll drives the carved-year monument's slow push-in. mobile: poster still.
-    if(near && !MOBILE) scrub(mons[active], local);
+    if(near && SCRUB) scrub(mons[active], local);
   }
 
   addEventListener('scroll', onScroll, { passive:true });

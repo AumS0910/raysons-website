@@ -26,7 +26,12 @@
   // so on touch/small screens we DON'T scrub — we show each clip's poster still (cross-fading).
   // Bonus: the heavy mp4 never downloads on mobile, only the ~100KB poster.
   const MOBILE = matchMedia('(hover:none) and (pointer:coarse)').matches || innerWidth <= 820;
-  const SCRUB  = !MOBILE && !REDUCED;
+  // HEAVY VIDEO SCRUB — disabled. Seeking 4 heavy building clips on scroll was the last
+  // source of About's scroll lag (decoder-bound), and the ~60 MB of clips didn't match
+  // index's molten-valve world anyway. We now cross-fade the poster stills with a subtle
+  // ken-burns on every device — buttery, index's held-frame feel, heavy clips never load.
+  // Flip back to `!MOBILE && !REDUCED` to re-enable the video once lighter clips land.
+  const SCRUB  = false;
   const N = CLIPS.length + 1;   // hero + 4
   const GRADE = REDUCED ? 'none' : 'brightness(.8) contrast(1.06) saturate(1.05)';
 
@@ -94,9 +99,10 @@
       if(s === seg){ op = local < 0.20 ? local/0.20 : 1; frac = local; }     // active: scrub start->end
       else if(s === seg-1){ op = local < 0.20 ? 1-local/0.20 : 0; frac = 1; } // outgoing: hold last frame, fade out
       m.el.style.opacity = op.toFixed(3);
-      if(op > 0.001 && SCRUB){
-        m.el.style.transform = 'scale('+(1.02 + frac*0.08).toFixed(3)+')';
-        scrub(m, frac);
+      if(op > 0.001){
+        // slow ken-burns on the poster still (all devices) so a held frame isn't dead-frozen
+        m.el.style.transform = 'scale('+(1.04 + frac*0.05).toFixed(3)+')';
+        if(SCRUB) scrub(m, frac);
       }
     });
 
