@@ -81,49 +81,27 @@
   <a class="cta-quote mag" href="enquire.html">Request a Quote <span class="arrow">→</span></a>
 </div>
 
-<!-- ===================== THE FILM — sticky-canvas scrollyteller ===================== -->
+<!-- ===================== THE FILM — the group story over one casting clip ===================== -->
 <section class="film">
   <div class="film__pin">
-    <canvas id="stage" role="img" aria-label="The Raysons Group — Sandchem, Industries, REGENTA and Shell Cast — a scroll-driven film."></canvas>
+    <!-- ONE looping casting clip plays behind the beats (molten iron → the part) — index's
+         molten world. It PLAYS, never scrubs, so it stays light. SWAP: drop any 720p/1080p
+         H.264 clip at valve/about-film.mp4 to re-skin this whole section. -->
+    <video id="filmvid" class="film__vid" muted playsinline loop preload="auto"
+           poster="valve/about-film-poster.jpg" aria-hidden="true">
+      <source src="valve/about-film.mp4" type="video/mp4" />
+    </video>
     <div class="film__vig"></div>
     <div class="film__floor"></div>
-    <div class="film__count" aria-hidden="true"><b>01</b> / 05</div>
     <div class="film__overlays">
-
-      <div class="fact center on" data-fact="0"><div class="inner">
+      <!-- The clip IS the brand film — its own logo + captions narrate — so we do NOT overlay
+           competing headline beats. One restrained title labels the section on entry (left,
+           clear of the video's centred logo + captions), then fades so the film plays clean. -->
+      <div class="fact on" data-fact="0"><div class="inner">
         <div class="eyebrow-badge"><span class="dot"></span> About Us · The Raysons Group</div>
         <h1 class="ahero__title" data-split>Part of something<br/><em>bigger.</em></h1>
-        <p class="ahero__sub">Four verticals, one discipline — Shell Cast · Sandchem · Industries · Marketing. Kolhapur, India · since 1987.</p>
+        <p class="ahero__sub">A forty-year industrial house from Kolhapur — precision casting is the through-line. Since 1987.</p>
       </div></div>
-
-      <div class="fact" data-fact="1"><div class="inner">
-        <p class="f-tag">Foundry Materials</p>
-        <h2 class="f-name" data-split>Raysons <em>Sandchem.</em></h2>
-        <p class="f-line">Where it began — the group's foundation in resin-coated sand. The first RCS manufacturer in Maharashtra, grown into a state-of-the-art 3,000 tons/month plant.</p>
-        <span class="f-yr">Since the 1980s</span>
-      </div></div>
-
-      <div class="fact" data-fact="2"><div class="inner">
-        <p class="f-tag">Real Estate · Retail</p>
-        <h2 class="f-name" data-split>Raysons <em>Industries.</em></h2>
-        <p class="f-line">A diversified industrial group spanning foundry, real estate, hospitality, retail and renewable energy — the breadth that backs the precision.</p>
-        <span class="f-yr">Diversified Group</span>
-      </div></div>
-
-      <div class="fact" data-fact="3"><div class="inner">
-        <p class="f-tag">Hospitality</p>
-        <h2 class="f-name" data-split>REGENTA <em>Place.</em></h2>
-        <p class="f-line">The group's hospitality vertical — partnered brands REGENTA Place, Westside, Neora and Sky Zone.</p>
-        <span class="f-yr">Partnered Brands</span>
-      </div></div>
-
-      <div class="fact" data-fact="4"><div class="inner">
-        <p class="f-tag">Precision Foundry</p>
-        <h2 class="f-name" data-split>Raysons <em>Shell Cast.</em></h2>
-        <p class="f-line">2021 — the group's precision manufacturing vertical. Shell moulded &amp; no-bake iron castings, machined to drawing, shipped to OEMs across the world.</p>
-        <span class="f-yr">Est. 2021</span>
-      </div></div>
-
     </div>
   </div>
 </section>
@@ -135,75 +113,58 @@
   <p class="line rv">Forty years <span class="hot">in the material.</span><br/>Four eras. <em>One&nbsp;discipline.</em></p>
 </section>
 
-<!-- ===================== JOURNEY / TIMELINE ===================== -->
-<!-- ===================== JOURNEY · cinematic year-counter timeline ===================== -->
-<section class="tl" id="tl" aria-label="Our journey — growth and innovation since 1987">
-  <div class="tl__pin">
-    <!-- per-era MONUMENT backdrops: each pillar carved with its year; cross-fade as you
-         travel the corridor. The carved year IS the era marker. -->
-    <div class="tl__mons" aria-hidden="true">
-      <video class="tl__mon on" data-era="0" muted playsinline loop preload="none" poster="valve/era-1987-poster.jpg"><source src="https://cdn.jsdelivr.net/gh/AumS0910/raysons-website@media-v1/raysons-scrollyteller/valve/era-1987.mp4" type="video/mp4"></video>
-      <video class="tl__mon"    data-era="1" muted playsinline loop preload="none" poster="valve/era-2005-poster.jpg"><source src="https://cdn.jsdelivr.net/gh/AumS0910/raysons-website@media-v1/raysons-scrollyteller/valve/era-2005.mp4" type="video/mp4"></video>
-      <video class="tl__mon"    data-era="2" muted playsinline loop preload="none" poster="valve/era-2021-poster.jpg"><source src="https://cdn.jsdelivr.net/gh/AumS0910/raysons-website@media-v1/raysons-scrollyteller/valve/era-2021.mp4" type="video/mp4"></video>
-      <video class="tl__mon"    data-era="3" muted playsinline loop preload="none" poster="valve/era-2027-poster.jpg"><source src="https://cdn.jsdelivr.net/gh/AumS0910/raysons-website@media-v1/raysons-scrollyteller/valve/era-2027.mp4" type="video/mp4"></video>
-    </div>
-    <div class="tl__veil" aria-hidden="true"></div>
+<!-- ===================== JOURNEY · editorial year-numeral timeline ===================== -->
+<!-- Redesigned away from the stone monuments (heavy + off-brand). Giant outlined champagne
+     year-numerals sit sticky while their era's milestones scroll past — type-forward, on the
+     molten stage, asset-free, matching index's editorial register. -->
+<section class="sec journey" id="tl" aria-label="Our journey since 1987">
+  <div class="wrap">
+    <div class="eyebrow-badge rv"><span class="dot"></span> Our Journey</div>
+    <h2 class="display rv" style="font-size:clamp(36px,5.4vw,80px)">Forged over <em>forty years.</em></h2>
+    <div class="eras">
 
-    <!-- intro overline + progress rail -->
-    <div class="tl__head">
-      <span class="tl__k">Our Journey</span>
-      <h2 class="tl__title">Growth &amp; innovation<br/><em>since 1987.</em></h2>
-    </div>
-    <ol class="tl__rail" aria-hidden="true">
-      <li data-era="0"><b>I</b><span>Foundation</span></li>
-      <li data-era="1"><b>II</b><span>Scale</span></li>
-      <li data-era="2"><b>III</b><span>Ignition</span></li>
-      <li data-era="3"><b>IV</b><span>Ahead</span></li>
-    </ol>
-
-    <!-- era panels (only the active one is lit; cross-fades as the year passes) -->
-    <div class="tl__stage">
-      <article class="tl__era on" data-era="0">
-        <div class="tl__ghost" aria-hidden="true">1987</div>
-        <div class="tl__era-k">Era I · Foundation</div>
-        <h3 class="tl__era-h">The first RCS in <em>Maharashtra.</em></h3>
-        <div class="tl__items">
-          <div class="it"><span class="y">1987</span><div><h4>Foundation of Raysons Industries</h4><p>The first manufacturer of Resin Coated Sand in Maharashtra. Our foundry materials were inside European machines before we poured our first casting. 40 years in the raw material of precision.</p></div></div>
-          <div class="it"><span class="y">1992</span><div><h4>Capacity doubled</h4><p>A second manufacturing unit — meeting growing demand from OEM foundries across India.</p></div></div>
-          <div class="it"><span class="y">1995</span><div><h4>ISO Certification</h4><p>International quality standard achieved — making Raysons a credible supplier to export-oriented foundries.</p></div></div>
+      <div class="era">
+        <div class="era__num" aria-hidden="true">1987</div>
+        <div class="era__body">
+          <div class="era__k rv">Era I · Foundation</div>
+          <h3 class="era__h rv">The first RCS in <em>Maharashtra.</em></h3>
+          <div class="it rv"><span class="y">1987</span><div><h4>Foundation of Raysons Industries</h4><p>The first manufacturer of Resin Coated Sand in Maharashtra. Our foundry materials were inside European machines before we poured our first casting.</p></div></div>
+          <div class="it rv"><span class="y">1992</span><div><h4>Capacity doubled</h4><p>A second manufacturing unit — meeting growing demand from OEM foundries across India.</p></div></div>
+          <div class="it rv"><span class="y">1995</span><div><h4>ISO Certification</h4><p>International quality standard achieved — a credible supplier to export-oriented foundries.</p></div></div>
         </div>
-      </article>
+      </div>
 
-      <article class="tl__era" data-era="1">
-        <div class="tl__ghost" aria-hidden="true">2005</div>
-        <div class="tl__era-k">Era II · Scale</div>
-        <h3 class="tl__era-h">Scaling the <em>sand business.</em></h3>
-        <div class="tl__items">
-          <div class="it"><span class="y">1997</span><div><h4>Diversified manufacturing base</h4><p>New operations added — strengthening our supply chain and foundry material portfolio.</p></div></div>
-          <div class="it"><span class="y">2002</span><div><h4>Specialised bonding &amp; coating</h4><p>A dedicated division for bonding and coating materials — the chemistry behind precision moulds.</p></div></div>
-          <div class="it"><span class="y">2005</span><div><h4>3,000 MT/month plant — ISO certified</h4><p>The point where "Kolhapur foundry" became a credible answer to European and Japanese procurement requirements.</p></div></div>
+      <div class="era">
+        <div class="era__num" aria-hidden="true">2005</div>
+        <div class="era__body">
+          <div class="era__k rv">Era II · Scale</div>
+          <h3 class="era__h rv">Scaling the <em>sand business.</em></h3>
+          <div class="it rv"><span class="y">1997</span><div><h4>Diversified manufacturing base</h4><p>New operations added — strengthening our supply chain and foundry material portfolio.</p></div></div>
+          <div class="it rv"><span class="y">2002</span><div><h4>Specialised bonding &amp; coating</h4><p>A dedicated division for bonding and coating materials — the chemistry behind precision moulds.</p></div></div>
+          <div class="it rv"><span class="y">2005</span><div><h4>3,000 MT/month plant — ISO certified</h4><p>The point where "Kolhapur foundry" became a credible answer to European and Japanese procurement.</p></div></div>
         </div>
-      </article>
+      </div>
 
-      <article class="tl__era" data-era="2">
-        <div class="tl__ghost" aria-hidden="true">2021</div>
-        <div class="tl__era-k">Era III · Ignition</div>
-        <h3 class="tl__era-h">The foundry is <em>lit.</em></h3>
-        <div class="tl__items">
-          <div class="it"><span class="y">2021</span><div><h4>450-ton melting capacity commissioned</h4><p>Shell moulding line operational. ±0.3mm dimensional tolerance. CT8–CT10. First export shipment to a European OEM within 18 months of founding.</p></div></div>
-          <div class="it"><span class="y">2022</span><div><h4>No-Bake line — 500 kg castings</h4><p>Structural components, complex geometries, heavy-walled housings. The same standard, a bigger scale.</p></div></div>
+      <div class="era">
+        <div class="era__num" aria-hidden="true">2021</div>
+        <div class="era__body">
+          <div class="era__k rv">Era III · Ignition</div>
+          <h3 class="era__h rv">The foundry is <em>lit.</em></h3>
+          <div class="it rv"><span class="y">2021</span><div><h4>450-ton melting capacity commissioned</h4><p>Shell moulding line operational. ±0.3mm tolerance. CT8–CT10. First export shipment to a European OEM within 18 months of founding.</p></div></div>
+          <div class="it rv"><span class="y">2022</span><div><h4>No-Bake line — 500 kg castings</h4><p>Structural components, complex geometries, heavy-walled housings. The same standard, a bigger scale.</p></div></div>
         </div>
-      </article>
+      </div>
 
-      <article class="tl__era" data-era="3">
-        <div class="tl__ghost" aria-hidden="true">2027</div>
-        <div class="tl__era-k">Era IV · The Road Ahead</div>
-        <h3 class="tl__era-h">Full-service precision <em>partner.</em></h3>
-        <div class="tl__items">
-          <div class="it"><span class="y">2026</span><div><h4>In-house HMC · VMC · CNC + heat treatment</h4><p>Your drawing. Our tolerance. Assembly-ready from Kolhapur — no third-party machining, no gaps in the chain.</p></div></div>
-          <div class="it"><span class="y">2027</span><div><h4>Capacity expansion to 700 MT/year</h4><p>New HMC &amp; VMC lines. Cementing Raysons as a full-service precision casting partner — from raw material to ship-ready.</p></div></div>
+      <div class="era">
+        <div class="era__num" aria-hidden="true">2027</div>
+        <div class="era__body">
+          <div class="era__k rv">Era IV · The Road Ahead</div>
+          <h3 class="era__h rv">Full-service precision <em>partner.</em></h3>
+          <div class="it rv"><span class="y">2026</span><div><h4>In-house HMC · VMC · CNC + heat treatment</h4><p>Your drawing. Our tolerance. Assembly-ready from Kolhapur — no third-party machining, no gaps in the chain.</p></div></div>
+          <div class="it rv"><span class="y">2027</span><div><h4>Capacity expansion to 700 MT/year</h4><p>New HMC &amp; VMC lines. Cementing Raysons as a full-service precision casting partner — from raw material to ship-ready.</p></div></div>
         </div>
-      </article>
+      </div>
+
     </div>
   </div>
 </section>
@@ -310,7 +271,8 @@
      was the double-smoothing that caused the reported lag. -->
 <script src="about.js"></script>
 <script src="about-film.js"></script>
-<script src="about-timeline.js"></script>
+<!-- about-timeline.js removed: the monument-video timeline is retired; the new editorial
+     year-numeral timeline is pure HTML/CSS (sticky numerals + .rv reveals) — no engine needed. -->
 <script src="premium.js"></script>
 </body>
 </html>
