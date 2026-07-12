@@ -31,6 +31,13 @@
 </script>
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="about-cinema.css" />
+<!-- three.js for the "Our Journey" WebGL pillar corridor (desktop only; see about-corridor.js) -->
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
 <style>
   #cloader{position:fixed;inset:0;z-index:100;background:#050302;display:flex;flex-direction:column;
     align-items:center;justify-content:center;transition:opacity .9s ease, visibility .9s}
@@ -123,6 +130,7 @@
      (about-journey.js), asset-free. Reduced-motion / no-JS → a clean stacked list. -->
 <section class="journey" id="tl" aria-label="Our journey — 1987 to 2027">
   <div class="journey__pin">
+    <canvas id="journeyGL" aria-hidden="true"></canvas>
     <div class="journey__glow" aria-hidden="true"></div>
 
     <!-- ticking year HUD -->
@@ -288,6 +296,7 @@
 <script src="about.js"></script>
 <script src="about-film.js"></script>
 <script src="about-journey.js"></script>
+<script type="module" src="about-corridor.js"></script>
 <script src="premium.js"></script>
 </body>
 </html>

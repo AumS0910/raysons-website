@@ -35,6 +35,7 @@
     const total  = sec.offsetHeight - innerHeight;
     const docTop = sec.getBoundingClientRect().top + scrollY;
     const p = total > 0 ? clamp(sy - docTop, 0, total) / total : 0;
+    window.__journeyP = p;                               // hand the WebGL corridor our scroll position
     const f = p * (N - 1);                               // camera position 0..N-1
     const active = clamp(Math.round(f), 0, N - 1);
     const local  = f - active;
