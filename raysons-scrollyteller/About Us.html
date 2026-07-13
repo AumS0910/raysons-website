@@ -4,13 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>About Us — Raysons Shell Cast · Forged over forty years</title>
-<meta name="description" content="The Raysons Group — four verticals, one discipline. From the first resin-coated sand in Maharashtra (1987) to a full-service precision foundry. Shell moulded & no-bake iron castings, ISO 9001:2015, Kolhapur, India." />
+<meta name="description" content="A forty-year industrial house from Kolhapur — from the first resin-coated sand in Maharashtra (1987) to a full-service precision foundry. Shell moulded & no-bake iron castings, ISO 9001:2015." />
 <meta name="theme-color" content="#0a0807" />
 <link rel="canonical" href="https://raysons-website.vercel.app/raysons-scrollyteller/About%20Us.html" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0807'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23c9a24e'/%3E%3C/svg%3E" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="About Raysons Shell Cast — Forged over forty years" />
-<meta property="og:description" content="Four verticals, one discipline. From the first resin-coated sand in Maharashtra to a full-service precision foundry trusted by OEMs worldwide." />
+<meta property="og:description" content="Forged over forty years — from the first resin-coated sand in Maharashtra to a precision foundry trusted by OEMs on four continents." />
 <meta property="og:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/valve/pour-poster.jpg" />
 <meta property="og:site_name" content="Raysons Shell Cast" />
 <script type="application/ld+json">
@@ -97,7 +97,9 @@
     <!-- ONE looping casting clip plays behind the beats (molten iron → the part) — index's
          molten world. It PLAYS, never scrubs, so it stays light. SWAP: drop any 720p/1080p
          H.264 clip at valve/about-film.mp4 to re-skin this whole section. -->
-    <video id="filmvid" class="film__vid" muted playsinline loop preload="auto"
+    <!-- preload=none: phones show only the poster (~100KB) — about-film.js upgrades
+         to auto + plays on desktop, so the 8.5MB clip never downloads on mobile -->
+    <video id="filmvid" class="film__vid" muted playsinline loop preload="none"
            poster="valve/about-film-poster.jpg" aria-hidden="true">
       <source src="valve/about-film.mp4" type="video/mp4" />
     </video>
