@@ -173,8 +173,9 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 .journey__glow{position:absolute;inset:0;z-index:0;pointer-events:none;background:
   radial-gradient(90% 60% at 78% 46%, rgba(201,162,78,.10), transparent 60%),
   radial-gradient(70% 50% at 18% 82%, rgba(166,121,46,.08), transparent 60%)}
-/* WebGL molten-pillar corridor (desktop) — sits behind the journey content */
-#journeyGL{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block}
+/* WebGL flythrough — FIXED whole-page stage (fades in at the journey, carries People/
+   Standards/Finale as one camera move). Above the CSS stage (z0), below grain (z3) + content (z10). */
+#journeyGL{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;display:block;opacity:0}
 /* when the corridor is live: the flat glow becomes a left scrim (keeps the era copy legible over
    the 3D scene), and the flat CSS year watermark is hidden — the 3D pillars carry the years now */
 .journey-gl .journey__glow{background:linear-gradient(90deg, rgba(7,5,4,.92) 0%, rgba(7,5,4,.6) 32%, rgba(7,5,4,.14) 55%, transparent 70%)}
@@ -182,6 +183,13 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 /* premium glass milestone cards — the corridor glows faintly through them (matches the reference) */
 .journey-gl .journey__items{background:rgba(201,154,78,.16);border-color:rgba(201,154,78,.24)}
 .journey-gl .ji{background:rgba(10,7,5,.62);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+/* …and the tail sections join the same world: their opaque cells become glass so the
+   flythrough (people field / seals / constellation) glows through everything */
+.journey-gl .certs{background:rgba(201,154,78,.14);border-color:rgba(201,154,78,.2)}
+.journey-gl .certs .c,.journey-gl .discipline,.journey-gl .client{
+  background:rgba(10,7,5,.6);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.journey-gl .client:hover{background:rgba(20,12,8,.72)}
+.journey-gl .discipline-grid,.journey-gl .clients{background:rgba(201,154,78,.14);border-color:rgba(201,154,78,.2)}
 /* keep the ticking year legible even when a near pillar drifts behind it */
 .journey-gl .journey__hud{padding:10px 16px;border-radius:5px;background:radial-gradient(140% 140% at 90% 10%, rgba(7,5,4,.66), transparent 72%)}
 
@@ -278,7 +286,7 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
    MVV / VALUES / CERTS / PEOPLE / FINALE / FOOTER
    ============================================================ */
 .mvv{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,64px);margin-top:clamp(40px,6vh,72px)}
-.mvv .m{padding-top:30px;border-top:1px solid rgba(166,121,46,.5)}
+.mvv .m{padding-top:30px}   /* (glowing top hairlines removed per user) */
 .mvv .m h4{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--bronze-lite);margin-bottom:18px}
 .mvv .m p{font-size:clamp(16px,1.5vw,20px);line-height:1.6;color:#c9beb1;font-weight:300}
 @media(max-width:760px){.mvv{grid-template-columns:1fr;gap:10px}}
