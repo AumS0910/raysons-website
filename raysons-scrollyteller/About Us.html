@@ -38,6 +38,15 @@
   "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
 }}
 </script>
+<!-- Arriving from the index lift: flag it before first paint so the valve match-cut frame
+     is held on load (the film then dissolves it on scroll — a continuous shot, not a blip). -->
+<script>
+  if(/[?&]from=lift\b/.test(location.search)){
+    document.documentElement.classList.add('from-lift');
+    var _l=document.createElement('link'); _l.rel='preload'; _l.as='image';
+    _l.href='valve/lift-poster.jpg'; _l.setAttribute('fetchpriority','high'); document.head.appendChild(_l);
+  }
+</script>
 <style>
   #cloader{position:fixed;inset:0;z-index:100;background:#050302;display:flex;flex-direction:column;
     align-items:center;justify-content:center;transition:opacity .9s ease, visibility .9s}

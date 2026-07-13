@@ -53,10 +53,12 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 /* valve match-cut: shows the exact frame the index lift ended on, then dissolves into the film */
 .film__matchcut{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2;
   pointer-events:none;opacity:0;will-change:opacity}
-@media(prefers-reduced-motion:no-preference){
-  .film__matchcut{animation:matchDissolve 1.25s ease-out .1s both}
-  @keyframes matchDissolve{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
-}
+/* arriving from the index lift: the valve frame is HELD on first paint (a frozen continuation
+   of the index shot), then about-film.js dissolves it as you scroll into the story. On a direct
+   visit the loader covers the entrance, so the match-cut never shows. */
+.from-lift .film__matchcut{opacity:1}
+/* reduced-motion: no held cut, just the film */
+@media(prefers-reduced-motion:reduce){ .from-lift .film__matchcut{opacity:0} }
 /* MATCH-CUT — About opens on the EXACT frame the index lift ended on (same valve),
    so this is barely a move: a whisper of scale + a brief noir wash to mask the page
    swap, then the part is simply here and the reel begins. */

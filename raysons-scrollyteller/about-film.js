@@ -18,6 +18,11 @@
   const vid = document.getElementById('filmvid');
   const countEl = document.querySelector('.film__count b');
   const N = facts.length || 1;
+  // index→About handoff: the valve match-cut is held on arrival and dissolves on SCROLL
+  // (not on a timer), so the two pages read as one continuous shot.
+  const matchcut = document.querySelector('.film__matchcut');
+  const FROM_LIFT = /[?&]from=lift\b/.test(location.search);
+  if(matchcut && !FROM_LIFT) matchcut.style.opacity = '0';   // direct visit: no valve
 
   // autoplay the casting clip (muted, looping, inline). Playing a clip is cheap and smooth —
   // the old build SCRUBBED heavy clips frame-by-frame, which was the lag. This just plays.
@@ -37,6 +42,10 @@
       facts.forEach((f,i)=> f.classList.toggle('on', i===seg));
       if(countEl) countEl.textContent = String(seg+1).padStart(2,'0');
       lastSeg = seg;
+    }
+    // hold the valve on arrival, dissolve it over the first ~12% of the film scroll
+    if(matchcut && FROM_LIFT && !REDUCED){
+      matchcut.style.opacity = Math.max(0, 1 - p/0.12).toFixed(3);
     }
     // the active beat drifts up + fades at its edges (first beat holds in, last holds out)
     if(!REDUCED){
