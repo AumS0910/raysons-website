@@ -360,13 +360,24 @@
     try{ vid.load(); }catch(e){}
   }
 
-  // lazy-load: the clip is preload:none, so start fetching it once you're most of the
-  // way down — ready by the time you reach the dive, but never on first paint
+  // lazy-load: the clip is preload:none. Once you're ~half way down, fetch the WHOLE 5.3MB
+  // clip into memory and scrub from a blob URL — so every scrub-seek is LOCAL. Seeking a
+  // CDN video does a network range-request PER SEEK (smooth locally, laggy in production);
+  // a fully-downloaded blob makes the scrub buttery everywhere. Falls back to plain buffering.
   var warmed=false;
   function warm(){
     if(warmed||!vid) return;
     var max=document.documentElement.scrollHeight-innerHeight;
-    if(scrollY > max*0.6){ warmed=true; try{ vid.preload='auto'; vid.load(); }catch(_){ } }
+    if(scrollY <= max*0.45) return;
+    warmed=true;
+    var src=(vid.querySelector('source')||{}).src||vid.currentSrc;
+    if(!src){ try{ vid.preload='auto'; vid.load(); }catch(_){ } return; }
+    fetch(src).then(function(r){ if(!r.ok) throw 0; return r.blob(); }).then(function(blob){
+      var ct=vid.currentTime||0; primed=false;
+      try{ vid.src=URL.createObjectURL(blob); vid.load();
+        vid.addEventListener('canplay', function(){ try{ if(ct) vid.currentTime=ct; }catch(_){ } prime(); }, {once:true});
+      }catch(_){ }
+    }).catch(function(){ try{ vid.preload='auto'; vid.load(); }catch(_){ } });
   }
   addEventListener('scroll', warm, {passive:true});
 
