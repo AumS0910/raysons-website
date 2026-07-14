@@ -9,9 +9,6 @@
 // ============================================================
 (function(){
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // phones don't get the 8.5MB clip — the poster still carries the section (index's rule:
-  // heavy media never ships to mobile). Desktop plays the film.
-  const MOBILE  = matchMedia('(hover:none) and (pointer:coarse)').matches || innerWidth <= 820;
   const film = document.querySelector('.film');
   if(!film) return;
   const facts = Array.from(document.querySelectorAll('.fact'));
@@ -24,11 +21,12 @@
   const FROM_LIFT = /[?&]from=lift\b/.test(location.search);
   if(matchcut && !FROM_LIFT) matchcut.style.opacity = '0';   // direct visit: no valve
 
-  // autoplay the casting clip (muted, looping, inline). Playing a clip is cheap and smooth —
-  // the old build SCRUBBED heavy clips frame-by-frame, which was the lag. This just plays.
-  function play(){ if(!vid || REDUCED || MOBILE) return; try{ vid.muted = true; const p = vid.play(); if(p && p.catch) p.catch(()=>{}); }catch(_){ } }
-  if(vid && !REDUCED && !MOBILE){
-    vid.preload = 'auto'; try{ vid.load(); }catch(_){}          // desktop: fetch + play
+  // autoplay the casting clip (muted, looping, inline) on EVERY device — the user wants the
+  // film to play on phone too, not just show the poster. iOS allows muted + playsinline
+  // autoplay via play() without a gesture. (Costs the ~8.5MB clip on mobile data — accepted.)
+  function play(){ if(!vid || REDUCED) return; try{ vid.muted = true; vid.playsInline = true; const p = vid.play(); if(p && p.catch) p.catch(()=>{}); }catch(_){ } }
+  if(vid && !REDUCED){
+    vid.preload = 'auto'; try{ vid.load(); }catch(_){}          // fetch + play (desktop AND mobile)
     if(vid.readyState >= 2) play(); else vid.addEventListener('canplay', play, { once:true });
   }
 
