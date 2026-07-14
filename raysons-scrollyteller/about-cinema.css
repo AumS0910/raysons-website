@@ -268,19 +268,33 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 .journey--static .journey__era{position:relative;opacity:1;visibility:visible;transform:none;margin-bottom:clamp(46px,8vh,90px)}
 .journey--static .journey__era .ji{opacity:1;transform:none}
 
-/* mobile: a clean stacked list + a ticking year label (the pinned corridor is a desktop feel) */
+/* MOBILE — two paths:
+   (a) corridor NOT running (reduced-motion / no-WebGL) → clean stacked list;
+   (b) corridor running (.journey-gl) → keep the pinned 3D corridor, just fit portrait. */
 @media(max-width:820px){
-  .journey{height:auto}
-  .journey__pin{position:relative;height:auto;display:block;padding:clamp(88px,13vh,140px) clamp(20px,6vw,40px)}
-  .journey__marks,.journey__rail{display:none}
-  .journey__hud{position:relative;top:auto;right:auto;flex-direction:row;align-items:baseline;gap:14px;margin-bottom:28px}
-  .journey__eras{max-width:none}
-  .journey__era{position:relative;opacity:1!important;visibility:visible!important;transform:none!important;
+  /* (a) stacked fallback — only when the corridor isn't live */
+  body:not(.journey-gl) .journey{height:auto}
+  body:not(.journey-gl) .journey__pin{position:relative;height:auto;display:block;padding:clamp(88px,13vh,140px) clamp(20px,6vw,40px)}
+  body:not(.journey-gl) .journey__marks,body:not(.journey-gl) .journey__rail{display:none}
+  body:not(.journey-gl) .journey__hud{position:relative;top:auto;right:auto;flex-direction:row;align-items:baseline;gap:14px;margin-bottom:28px}
+  body:not(.journey-gl) .journey__eras{max-width:none}
+  body:not(.journey-gl) .journey__era{position:relative;opacity:1!important;visibility:visible!important;transform:none!important;
     margin-bottom:clamp(44px,7vh,80px);padding-top:clamp(28px,5vh,48px);border-top:1px solid var(--line)}
-  .journey__era:first-of-type{border-top:0;padding-top:0}
-  .journey__era .ji,.journey__era .journey__k,.journey__era .journey__h{opacity:1!important;transform:none!important;min-height:0}
-  .journey__items,.journey__items.two{grid-template-columns:1fr;max-width:none}
+  body:not(.journey-gl) .journey__era:first-of-type{border-top:0;padding-top:0}
+  body:not(.journey-gl) .journey__era .ji,body:not(.journey-gl) .journey__era .journey__k,body:not(.journey-gl) .journey__era .journey__h{opacity:1!important;transform:none!important;min-height:0}
+
+  /* (b) LIVE corridor on phone — fit portrait: 1-col cards, tighter type, compact HUD */
+  .journey-gl .journey__pin{padding:0 clamp(16px,5vw,26px)}
+  .journey-gl .journey__eras{max-width:none}
+  .journey-gl .journey__h{font-size:clamp(25px,6.6vw,40px);max-width:14ch;margin:12px 0 20px}
+  .journey-gl .journey__items,.journey-gl .journey__items.two{grid-template-columns:1fr;max-width:none}
+  .journey-gl .ji{min-height:0;padding:15px 18px}
+  .journey-gl .jy{font-size:clamp(22px,6vw,30px)}
+  .journey-gl .ji p{font-size:12px}
+  .journey-gl .journey__hud{top:clamp(74px,11vh,104px)}
+  .journey-gl .journey__hud-year{font-size:clamp(26px,8vw,42px)}
 }
+/* fallback (static / no-gl) → 1-col cards, all visible */
 .journey--static .journey__items,.journey--static .journey__items.two{grid-template-columns:1fr;max-width:none}
 .journey--static .journey__era .ji,.journey--static .journey__k,.journey--static .journey__h{opacity:1;transform:none;min-height:0}
 

@@ -21,13 +21,17 @@ import { RoomEnvironment } from 'https://unpkg.com/three@0.160.0/examples/jsm/en
 
 const canvas = document.getElementById('journeyGL');
 const journey = document.getElementById('tl');
-if(canvas && journey && !matchMedia('(prefers-reduced-motion: reduce)').matches && innerWidth > 820){
+// Runs on EVERY size now — the user wants the desktop journey on phone/tablet too.
+// boot() tunes render cost + camera FOV down for small screens; reduced-motion / no-WebGL
+// still fall back to the CSS card list.
+if(canvas && journey && !matchMedia('(prefers-reduced-motion: reduce)').matches){
   try { boot(); } catch(e){ /* no WebGL → CSS layout carries the page */ }
 }
 
 function boot(){
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true, powerPreference:'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+  const MOBILE = innerWidth <= 820;                   // phones/tablets: lighter render + wider FOV
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:!MOBILE, alpha:true, powerPreference:'high-performance' });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE ? 1.3 : 1.75));
   renderer.setSize(innerWidth, innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
@@ -49,7 +53,7 @@ function boot(){
   const flare = new THREE.PointLight(PAL.hot, 0, 80, 2.2); flare.position.set(0,2,-208); scene.add(flare); // 2021 ignition
 
   // ---------- drifting embers (whole world) ----------
-  const EMBER_N = 640;
+  const EMBER_N = MOBILE ? 280 : 640;
   const eg = new THREE.BufferGeometry();
   const pos = new Float32Array(EMBER_N*3), vel = new Float32Array(EMBER_N), sz = new Float32Array(EMBER_N), seed = new Float32Array(EMBER_N);
   for(let i=0;i<EMBER_N;i++){
@@ -225,8 +229,18 @@ function boot(){
   composer.addPass(bloom);
 
   const clock=new THREE.Clock();
-  addEventListener('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
-    renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight); });
+  // Size the render buffer to the CANVAS BOX (not innerWidth/innerHeight) so iOS's dynamic
+  // URL-bar viewport can't stretch it; widen the FOV on portrait so the side pillars still frame.
+  function sizeAll(){
+    const r=canvas.getBoundingClientRect();
+    const w=Math.round(r.width)||innerWidth, h=Math.round(r.height)||innerHeight, a=w/h;
+    camera.fov = a<0.7 ? 82 : a<1 ? 66 : 52; camera.aspect=a; camera.updateProjectionMatrix();
+    renderer.setSize(w,h,false); composer.setSize(w,h);
+  }
+  sizeAll();
+  addEventListener('resize', sizeAll);
+  addEventListener('orientationchange', sizeAll);
+  if('ResizeObserver' in window){ new ResizeObserver(sizeAll).observe(canvas); }
 
   function tick(){
     requestAnimationFrame(tick);

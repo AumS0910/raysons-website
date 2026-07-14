@@ -45,10 +45,23 @@
 
   const VH = MOBILE ? 15 : 18;                          // scroll runway per span-unit
   scrollSpace.style.height = (TOTAL * VH + 40) + 'vh';
-  addEventListener('resize', ()=>{ scrollSpace.style.height = (TOTAL*VH+40)+'vh'; sizeCanvas(); });
 
-  function sizeCanvas(){ const dpr=Math.min(devicePixelRatio||1,2); canvas.width=innerWidth*dpr; canvas.height=innerHeight*dpr; }
+  // Size the canvas BUFFER to the element's ACTUAL rendered box — NOT innerWidth/innerHeight.
+  // On iOS the fixed #stage fills the large (URL-bar-collapsed) viewport while innerHeight is
+  // the small viewport, so the two differ; sizing the buffer to the element keeps buffer-aspect
+  // == element-aspect and the pour asset COVERS correctly instead of stretching. A ResizeObserver
+  // catches the iOS URL-bar resize so it stays correct as you scroll.
+  function sizeCanvas(){
+    const dpr=Math.min(devicePixelRatio||1,2);
+    const r=canvas.getBoundingClientRect();
+    const w=Math.round(r.width)||innerWidth, h=Math.round(r.height)||innerHeight;
+    if(canvas.width!==w*dpr || canvas.height!==h*dpr){ canvas.width=w*dpr; canvas.height=h*dpr; }
+  }
+  function onResize(){ scrollSpace.style.height=(TOTAL*VH+40)+'vh'; sizeCanvas(); settledFrames=0; }
   sizeCanvas();
+  addEventListener('resize', onResize);
+  addEventListener('orientationchange', onResize);
+  if('ResizeObserver' in window){ new ResizeObserver(function(){ sizeCanvas(); settledFrames=0; }).observe(canvas); }
 
   // poster = a pour frame, painted instantly while the clips capture in the background
   const posterImg = new Image(); posterImg.src = 'valve/pour-poster.jpg';
