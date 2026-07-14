@@ -443,3 +443,15 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
   body.nav-open .nav-links{opacity:1;visibility:visible;pointer-events:auto}
   .nav-links a{padding:12px 28px}   /* ≥44px touch targets in the mobile menu */
 }
+
+/* ── EXIT TRANSITIONS — internal nav dips to ember-black + types the destination, so the
+   four pages cut like scenes of one film. The dip colour matches the loaders (#050302) so it
+   flows straight into the next page's title card. Shared across all pages (nav-transition.js). ── */
+.nav-xfade{position:fixed;inset:0;z-index:9999;background:#050302;opacity:0;visibility:hidden;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .46s cubic-bezier(.4,0,.2,1),visibility .46s}
+.nav-xfade.on{opacity:1;visibility:visible;pointer-events:auto}
+.nav-xfade__k{font-family:var(--mono);font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--molten);
+  opacity:0;transform:translateY(8px);transition:opacity .38s ease .12s,transform .42s cubic-bezier(.2,.7,.2,1) .12s}
+.nav-xfade.on .nav-xfade__k{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.nav-xfade{transition:none}.nav-xfade__k{transition:none}}

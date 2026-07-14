@@ -194,6 +194,13 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
   opacity:0;transition:opacity .6s ease;
   filter:sepia(.22) saturate(1.2) contrast(1.08) brightness(.84) hue-rotate(-6deg)}
 .process-sec__img.active{opacity:1}
+/* honest "footage pending" panel — real per-station photography isn't shot yet, so we render
+   an in-system HUD frame instead of a mismatched valve photo captioned as a different step */
+.process-sec__img--pending{filter:none;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:11px;text-align:center;padding:24px;background:radial-gradient(120% 90% at 50% 38%, #191009, #0a0706)}
+.process-sec__img--pending .pp-n{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--molten)}
+.process-sec__img--pending .pp-t{font-family:var(--serif);font-size:clamp(19px,2.4vw,30px);font-weight:600;letter-spacing:-.01em;color:var(--ink);line-height:1.06;max-width:18ch}
+.process-sec__img--pending .pp-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line-strong);padding:5px 12px;border-radius:40px;margin-top:4px}
 /* foundry grade overlay */
 .process-sec__frame::after{content:"";position:absolute;inset:0;pointer-events:none;background:
   linear-gradient(180deg, rgba(7,5,4,.12), rgba(7,5,4,.34)),

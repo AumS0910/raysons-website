@@ -12,12 +12,12 @@
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Foundry — Raysons Shell Cast · Precision Casting, Engineered to Spec" />
 <meta property="og:description" content="Shell moulded and no-bake foundry in Kolhapur, India. Cast iron & ductile iron castings 0.5 kg–500 kg, machined to drawing. ISO 9001:2015." />
-<meta property="og:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/valve/pour-poster.jpg" />
+<meta property="og:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/valve/exploded.jpg" />
 <meta property="og:site_name" content="Raysons Shell Cast" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Foundry — Raysons Shell Cast" />
 <meta name="twitter:description" content="Shell moulded & no-bake iron castings, 0.5 kg–500 kg, machined to drawing. ISO 9001:2015 · Kolhapur, India." />
-<meta name="twitter:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/valve/pour-poster.jpg" />
+<meta name="twitter:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/valve/exploded.jpg" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -290,12 +290,16 @@
       </div>
       <div class="process-sec__right">
         <div class="process-sec__frame">
-          <img class="process-sec__img active" src="valve/pour-poster.jpg"  alt="Raw Material Inspection"            data-step-img="0" loading="lazy">
-          <img class="process-sec__img"        src="valve/hero.jpg"         alt="Sand Preparation"                   data-step-img="1" loading="lazy">
-          <img class="process-sec__img"        src="valve/exploded.jpg"     alt="Melting and Metallurgical Control"  data-step-img="2" loading="lazy">
-          <img class="process-sec__img"        src="valve/era-2021-poster.jpg" alt="Precision Pouring"              data-step-img="3" loading="lazy">
-          <img class="process-sec__img"        src="valve/era-1987-poster.jpg" alt="Fettling and Surface Finishing"  data-step-img="4" loading="lazy">
-          <img class="process-sec__img"        src="valve/era-2027-poster.jpg" alt="Machining and Dispatch"         data-step-img="5" loading="lazy">
+          <!-- FOOTAGE PENDING: real per-station photography belongs at images/process/0N-*.jpg.
+               Until it exists we render an honest in-system frame per station — never a mismatched
+               valve photo captioned as a different step. The crossfade engine (foundry.js) toggles
+               .active on these exactly as it did the images. -->
+          <div class="process-sec__img process-sec__img--pending active" data-step-img="0" data-src="images/process/01-raw.jpg"><span class="pp-n">Station 01</span><span class="pp-t">Raw Material Inspection</span><span class="pp-k">Footage pending</span></div>
+          <div class="process-sec__img process-sec__img--pending"        data-step-img="1" data-src="images/process/02-sand.jpg"><span class="pp-n">Station 02</span><span class="pp-t">Sand Preparation &amp; Shell Formation</span><span class="pp-k">Footage pending</span></div>
+          <div class="process-sec__img process-sec__img--pending"        data-step-img="2" data-src="images/process/03-melt.jpg"><span class="pp-n">Station 03</span><span class="pp-t">Melting &amp; Metallurgical Control</span><span class="pp-k">Footage pending</span></div>
+          <div class="process-sec__img process-sec__img--pending"        data-step-img="3" data-src="images/process/04-pour.jpg"><span class="pp-n">Station 04</span><span class="pp-t">Precision Pouring</span><span class="pp-k">Footage pending</span></div>
+          <div class="process-sec__img process-sec__img--pending"        data-step-img="4" data-src="images/process/05-fettle.jpg"><span class="pp-n">Station 05</span><span class="pp-t">Fettling &amp; Surface Finishing</span><span class="pp-k">Footage pending</span></div>
+          <div class="process-sec__img process-sec__img--pending"        data-step-img="5" data-src="images/process/06-dispatch.jpg"><span class="pp-n">Station 06</span><span class="pp-t">Machining, Inspection &amp; Dispatch</span><span class="pp-k">Footage pending</span></div>
           <div class="tint"></div>
         </div>
       </div>
@@ -395,5 +399,6 @@
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
 <script src="foundry.js"></script>
 <script src="premium.js"></script>
+<script src="nav-transition.js"></script>
 </body>
 </html>
