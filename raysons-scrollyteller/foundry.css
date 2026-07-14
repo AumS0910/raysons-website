@@ -315,3 +315,80 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 @media(max-width:375px){
   .pillar__name{font-size:clamp(28px,9vw,48px)!important}
 }
+
+/* ============================================================
+   FOUNDRY FILM CHAPTERS (Phase 1) — pinned scrub sections.
+   Static & readable by default (no-JS / reduced-motion safe); the engine
+   (foundry-chapters.js) adds body.fchap-live to switch on the pin + scrub reveals.
+   ============================================================ */
+.fchap{position:relative;z-index:5}
+.fchap__pin{position:relative;padding:clamp(96px,14vh,140px) clamp(20px,6vw,110px) clamp(72px,10vh,104px)}
+.fchap__bg{position:absolute;inset:0;z-index:0;pointer-events:none;background:
+  radial-gradient(90% 60% at 80% 36%, rgba(201,162,78,.10), transparent 60%),
+  radial-gradient(70% 60% at 14% 92%, rgba(255,106,26,.06), transparent 60%)}
+.fchap__hud{position:absolute;top:clamp(82px,11vh,112px);left:clamp(20px,6vw,110px);right:clamp(20px,6vw,110px);z-index:3;
+  display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase}
+.fchap__hud-k{color:var(--molten)}
+.fchap__hud-i{color:var(--bronze-lite);font-variant-numeric:tabular-nums;flex:0 0 auto}
+.fchap__inner{position:relative;z-index:2;width:100%;max-width:1180px;margin:0 auto}
+.fchap__title{font-family:var(--serif);font-weight:600;font-size:clamp(34px,6vw,86px);line-height:.98;letter-spacing:-.015em;color:var(--ink);margin-bottom:12px}
+.fchap__title em{font-style:italic;font-weight:500;color:var(--bronze-lite)}
+.fchap__lede{font-size:clamp(14px,1.3vw,17px);line-height:1.6;color:var(--ink-dim);font-weight:300;max-width:52ch;margin-bottom:clamp(26px,4.5vh,48px)}
+.fchap__rail{position:absolute;left:clamp(20px,6vw,110px);right:clamp(20px,6vw,110px);bottom:clamp(30px,5vh,52px);z-index:3;height:1px;background:var(--line)}
+.fchap__rail-fill{display:block;height:100%;transform-origin:left center;transform:scaleX(0);background:linear-gradient(90deg,var(--molten-deep),var(--molten-hot));box-shadow:0 0 12px var(--molten)}
+
+/* program rows */
+.fprog{border-top:1px solid var(--line)}
+.fprog__row{display:grid;grid-template-columns:1fr auto minmax(14ch,auto);gap:clamp(16px,3vw,54px);align-items:baseline;
+  padding:clamp(13px,2.3vh,25px) 0;border-bottom:1px solid var(--line)}
+.fprog__k{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+.fprog__v{font-family:var(--serif);font-weight:600;font-size:clamp(22px,3vw,42px);line-height:1;color:var(--molten-hot);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.fprog__d{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);text-align:right}
+@media(max-width:760px){.fprog__row{grid-template-columns:1fr auto;gap:4px 14px}.fprog__d{grid-column:1/-1;text-align:left}}
+
+/* station cards (crossfade, full-bleed) */
+.fstation{position:absolute;inset:0;z-index:1}
+.fstation__card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;gap:16px;padding:clamp(96px,15vh,150px) clamp(24px,8vw,120px);
+  background:radial-gradient(120% 90% at 50% 40%, #17110c, #0a0706)}
+.fstation__n{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--molten)}
+.fstation__t{font-family:var(--serif);font-weight:600;font-size:clamp(30px,5.4vw,74px);line-height:1.02;letter-spacing:-.015em;color:var(--ink);max-width:17ch}
+.fstation__s{font-size:clamp(14px,1.5vw,19px);line-height:1.6;color:#d6cabb;font-weight:300;max-width:46ch}
+.fstation__k{font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);border:1px solid var(--line-strong);padding:5px 12px;border-radius:40px;margin-top:6px}
+
+/* scope columns */
+.fscope{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.fscope__col{background:var(--bg);padding:clamp(24px,3vh,40px) clamp(15px,1.5vw,26px)}
+.fscope__g{font-family:var(--mono);font-size:11px;color:var(--molten);letter-spacing:.12em}
+.fscope__l{font-family:var(--serif);font-size:clamp(19px,2vw,28px);font-weight:600;margin:14px 0 14px;color:var(--ink);letter-spacing:-.01em}
+.fscope__col ul{list-style:none}
+.fscope__col li{font-size:12.5px;line-height:1.85;color:var(--ink-dim);font-weight:300;border-top:1px solid var(--line);padding:7px 0}
+@media(max-width:900px){.fscope{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.fscope{grid-template-columns:1fr}}
+
+/* ---- LIVE (engine on): pin + scrub reveals ---- */
+body.fchap-live .fchap--program{height:250vh}
+body.fchap-live .fchap--station{height:300vh}
+body.fchap-live .fchap--scope{height:210vh}
+body.fchap-live .fchap__pin{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+body.fchap-live .fprog__row{opacity:0;transform:translateY(22px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}
+body.fchap-live .fprog__row.in{opacity:1;transform:none}
+body.fchap-live .fstation__card{opacity:0;visibility:hidden;transition:opacity .65s ease,visibility .65s}
+body.fchap-live .fstation__card.on{opacity:1;visibility:visible}
+body.fchap-live .fscope__col{opacity:0;transform:translateY(24px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}
+body.fchap-live .fscope__col.in{opacity:1;transform:none}
+
+/* static fallback: station cards stack instead of overlapping */
+body:not(.fchap-live) .fstation{position:relative}
+body:not(.fchap-live) .fstation__card{position:relative;border-bottom:1px solid var(--line)}
+
+/* mobile: program + scope are too tall to pin one-screen — flow them static (station stays
+   pinned; one card fits). HUD goes inline, rows/cols all visible. */
+@media(max-width:820px){
+  body.fchap-live .fchap--program, body.fchap-live .fchap--scope{height:auto}
+  body.fchap-live .fchap--program .fchap__pin, body.fchap-live .fchap--scope .fchap__pin{position:relative;height:auto;display:block}
+  body.fchap-live .fchap--program .fprog__row, body.fchap-live .fchap--scope .fscope__col{opacity:1;transform:none}
+  body.fchap-live .fchap--program .fchap__rail, body.fchap-live .fchap--scope .fchap__rail{display:none}
+  body.fchap-live .fchap--program .fchap__hud, body.fchap-live .fchap--scope .fchap__hud{position:relative;top:auto;left:auto;right:auto;margin-bottom:22px}
+}
