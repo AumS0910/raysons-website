@@ -64,10 +64,12 @@
      acts: the "lighting states" the film was missing (warm forge → cool precision → clinical →
      warm climax → cool verification → ember close). Subtle: rides over the pour, never hides
      it. body[data-scene] is set by the acts observer. */
-  .cine-grade{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.5;mix-blend-mode:soft-light;
+  .cine-grade{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.58;mix-blend-mode:soft-light;
     transition:background 1.25s ease, opacity 1.25s ease;
-    background:radial-gradient(120% 92% at 50% 44%, rgba(255,138,58,.55), transparent 70%)}
-  body[data-scene="1"] .cine-grade{background:radial-gradient(120% 96% at 50% 56%, rgba(255,92,22,.62), transparent 68%);opacity:.6}
+    background:radial-gradient(120% 92% at 50% 44%, rgba(255,142,54,.66), transparent 72%)}
+  /* Act 0 + 1 are the pour — the film's one moment of pure awe. Grade them hotter and
+     brighter than the cool precision scenes so the fire actually reads as loud. */
+  body[data-scene="1"] .cine-grade{background:radial-gradient(120% 98% at 50% 56%, rgba(255,88,18,.72), transparent 70%);opacity:.7}
   body[data-scene="2"] .cine-grade,
   body[data-scene="3"] .cine-grade{background:radial-gradient(120% 100% at 50% 40%, rgba(120,152,212,.5), transparent 72%);opacity:.42}
   body[data-scene="4"] .cine-grade{background:radial-gradient(120% 100% at 50% 34%, rgba(152,178,222,.52), transparent 74%);opacity:.4}
@@ -83,6 +85,38 @@
     font-size:clamp(58px,12.5vw,190px);text-shadow:0 4px 60px rgba(255,106,26,.32),0 2px 18px rgba(7,5,4,.92)}
   .peak-num--xl{font-size:clamp(62px,15vw,250px);letter-spacing:-.03em;color:var(--ink)}
   .peak-num--xl .u{color:var(--molten-hot)}
+
+  /* CHAPTER HUD — a film-timecode instrument (bottom-left) that carries the position
+     readout OFF the film. This replaces the on-screen "Scene 0X" storyboard labels:
+     the reel is grouped into four chapters (Ignition · Control · Consequence · Invitation)
+     and the HUD reads which chapter + shot you're on. HUD = instrument, never storyboard. */
+  .film-hud{position:fixed;left:clamp(16px,3vw,40px);bottom:clamp(16px,3vw,30px);z-index:30;
+    pointer-events:none;font-family:var(--mono);opacity:0;transition:opacity .6s ease;
+    display:flex;flex-direction:column;gap:5px}
+  .film-hud.on{opacity:1}
+  .film-hud .fh-chapter{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--molten-hot);
+    text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  .film-hud .fh-count{font-size:10px;letter-spacing:.2em;color:var(--ink-faint);font-variant-numeric:tabular-nums;
+    text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  .film-hud .fh-count b{color:var(--ink);font-weight:500}
+
+  /* PROGRESS RAIL — molten fill + four chapter ticks (right edge). The map the film was
+     missing: where you are, how far to go, and the four chapters it moves through. */
+  .film-rail{position:fixed;right:clamp(12px,2vw,26px);top:50%;transform:translateY(-50%);z-index:30;
+    height:min(46vh,340px);width:2px;background:var(--line);pointer-events:none;
+    opacity:0;transition:opacity .6s ease;border-radius:2px}
+  .film-rail.on{opacity:1}
+  .film-rail__fill{position:absolute;left:0;top:0;width:100%;height:0;border-radius:2px;
+    background:linear-gradient(180deg,var(--molten-hot),var(--molten-deep));
+    box-shadow:0 0 12px rgba(255,106,26,.5);transition:height .12s linear}
+  .film-rail__knob{position:absolute;left:50%;width:7px;height:7px;border-radius:50%;top:0;
+    background:var(--molten-hot);box-shadow:0 0 12px var(--molten-hot);
+    transform:translate(-50%,-50%);transition:top .12s linear}
+  .film-rail__tick{position:absolute;left:50%;width:9px;height:1px;background:var(--ink-faint);
+    transform:translate(-50%,0);opacity:.5}
+  @media(max-width:640px){.film-rail{height:38vh;right:9px}
+    .film-hud{bottom:max(14px,env(safe-area-inset-bottom,14px))}}
+  @media(prefers-reduced-motion:reduce){.film-rail__fill,.film-rail__knob{transition:none}}
 
   /* loader */
   #cloader{position:fixed;inset:0;z-index:100;background:#050302;display:flex;flex-direction:column;
@@ -169,7 +203,7 @@
 
 <noscript>
   <style>
-    #cloader,.ccue,#ccta,.cine-vig,.cine-floor,.grain,#stage{display:none!important}
+    #cloader,.ccue,#ccta,.cine-vig,.cine-floor,.grain,#stage,.film-hud,.film-rail{display:none!important}
     #acts,.act{position:static!important;opacity:1!important;visibility:visible!important;display:block!important;height:auto!important;padding:0!important}
     .act .inner .rise{opacity:1!important;transform:none!important}
     .ns-fallback{max-width:760px;margin:0 auto;padding:120px 24px 80px;color:var(--ink);font-family:var(--sans)}
@@ -192,6 +226,18 @@
 <div class="cine-floor"></div>
 <div class="cine-grade"></div>
 <div class="grain"></div>
+
+<!-- Chapter HUD + progress rail — the film's instruments. Position readout lives here,
+     off the frame, so the scenes themselves carry no "Scene 0X" storyboard labels.
+     Populated by the chrome script below; hidden under no-JS via the noscript block. -->
+<div class="film-hud" id="filmHud" aria-hidden="true">
+  <span class="fh-chapter" id="fhChapter">Ignition</span>
+  <span class="fh-count"><b id="fhNum">01</b> / 08</span>
+</div>
+<div class="film-rail" id="filmRail" aria-hidden="true">
+  <span class="film-rail__fill" id="railFill"></span>
+  <span class="film-rail__knob" id="railKnob"></span>
+</div>
 
 <div id="cloader">
   <div class="loader-mark">RAYSONS&nbsp;SHELL&nbsp;CAST</div>
@@ -230,7 +276,7 @@
   <!-- 0 · The Pour (fire / hero) -->
   <section class="act center">
     <div class="inner">
-      <div class="eyebrow rise" style="justify-content:center;color:var(--bronze-lite)">Through the Foundry · Scene 01</div>
+      <div class="eyebrow rise" style="justify-content:center;color:var(--bronze-lite)">Through the Foundry</div>
       <h1 class="display rise" data-split>We are <em>precision.</em></h1>
       <p class="valueprop rise">Shell&nbsp;moulded iron castings · 0.5&nbsp;kg–500&nbsp;kg · Kolhapur, India · ISO&nbsp;9001:2015</p>
     </div>
@@ -239,8 +285,8 @@
   <!-- 1 · Fire becomes the part — 1450°C is the hero number of the pour -->
   <section class="act center">
     <div class="inner">
-      <div class="eyebrow rise cool" style="justify-content:center;color:var(--bronze-lite)">Scene 02 · Shaped by fire</div>
-      <div class="peak-num rise" style="margin:8px 0 6px">1450°C</div>
+      <div class="eyebrow rise cool" style="justify-content:center;color:var(--bronze-lite)">Shaped by fire</div>
+      <div class="peak-num rise" data-peak style="margin:8px 0 6px">1450°C</div>
       <h2 class="display cool rise" style="font-size:clamp(26px,3.6vw,54px)">From pour to <em>finished part.</em></h2>
     </div>
   </section>
@@ -248,18 +294,18 @@
   <!-- 2 · Deconstruct -->
   <section class="act bottom">
     <div class="inner">
-      <div class="eyebrow rise cool" style="color:var(--bronze-lite)">Scene 03 · Engineered to spec</div>
-      <h2 class="display cool rise" style="font-size:clamp(40px,6.6vw,100px)">Built to come <em>apart.</em></h2>
-      <p class="lede rise" style="margin-top:24px">Every casting leaves our facility dimensionally certified, spectrometer-verified and assembly-ready — shell moulded to ±0.3&nbsp;mm.</p>
+      <div class="eyebrow rise cool" style="color:var(--bronze-lite)">Engineered to spec</div>
+      <h2 class="display cool rise" style="font-size:clamp(40px,6.4vw,96px)">Built to come <em>apart.</em></h2>
+      <p class="lede rise" style="margin-top:24px">Cored, cavitied and shell moulded to assemble clean — every casting leaves dimensionally certified and ready to drop straight into your build.</p>
     </div>
   </section>
 
   <!-- 3 · Reassemble -->
   <section class="act bottom">
     <div class="inner">
-      <div class="eyebrow rise cool" style="color:var(--bronze-lite)">Scene 04 · And back, better</div>
-      <h2 class="display cool rise" style="font-size:clamp(40px,6.6vw,100px)">And go back<br/><em>better.</em></h2>
-      <p class="lede rise" style="margin-top:24px">Engineered to spec. Verified before it ships. Every dimension checked against your drawing, every heat spectrometer-verified — nothing leaves without sign-off.</p>
+      <div class="eyebrow rise cool" style="color:var(--bronze-lite)">Assembled true</div>
+      <h2 class="display cool rise" style="font-size:clamp(40px,6.4vw,96px)">And go back<br/><em>better.</em></h2>
+      <p class="lede rise" style="margin-top:24px">Every dimension checked against your drawing. Every heat spectrometer-verified. Nothing leaves the floor without sign-off.</p>
     </div>
   </section>
 
@@ -267,8 +313,8 @@
   <section class="act">
     <div class="inner" style="display:flex;align-items:flex-end;min-height:100%">
       <div style="margin-top:auto">
-        <div class="eyebrow rise cool" style="color:var(--bronze-lite)">Scene 05 · Every side</div>
-        <h2 class="display cool rise" style="font-size:clamp(40px,6.6vw,100px)">Machined to<br/>drawing. <em>Verified.</em></h2>
+        <div class="eyebrow rise cool" style="color:var(--bronze-lite)">Every side, to drawing</div>
+        <h2 class="display cool rise" style="font-size:clamp(40px,6.4vw,96px)">Machined to<br/>drawing. <em>Every side.</em></h2>
         <div class="chips rise" style="margin-top:26px">
           <span>Grey CI · IS 210</span><span>SG / Ductile · IS 1865</span><span>SiMo Ductile</span><span>ADI</span>
         </div>
@@ -279,8 +325,8 @@
   <!-- 5 · Bridge -->
   <section class="act center">
     <div class="inner">
-      <div class="eyebrow rise cool" style="justify-content:center;color:var(--bronze-lite)">Scene 06</div>
-      <h2 class="display cool rise" style="font-size:clamp(38px,5.8vw,86px)">The part inside<br/>the <em>machine.</em></h2>
+      <div class="eyebrow rise cool" style="justify-content:center;color:var(--bronze-lite)">Where it ends up</div>
+      <h2 class="display cool rise" style="font-size:clamp(40px,6.4vw,96px)">The part inside<br/>the <em>machine.</em></h2>
       <p class="lede rise" style="margin-top:24px;text-align:center;max-width:52ch;margin-left:auto;margin-right:auto">Inside Caterpillar excavator arms. Inside Halliburton pump heads. Inside Schwing concrete delivery systems.</p>
     </div>
   </section>
@@ -288,9 +334,9 @@
   <!-- 6 · Detail — the bore + capability spec sheet (the substance a buyer needs) -->
   <section class="act bottom">
     <div class="inner">
-      <div class="eyebrow rise cool" style="color:var(--bronze-lite)">Scene 07 · Honed to the last micron</div>
-      <div class="peak-num peak-num--xl rise">±0.3<span class="u"> mm</span></div>
-      <p class="lede rise" style="margin-top:16px">Shell moulded, machined to drawing on HMC · VMC · CNC, and spectrometer-verified before it ever ships — across the full casting program.</p>
+      <div class="eyebrow rise cool" style="color:var(--bronze-lite)">Honed to the last micron</div>
+      <div class="peak-num peak-num--xl rise" data-peak>±0.3<span class="u"> mm</span></div>
+      <p class="lede rise" style="margin-top:16px">Shell moulded, then machined to drawing on HMC · VMC · CNC — across the full casting program.</p>
       <div class="specs rise" style="grid-template-columns:1fr 1fr;margin-top:26px">
         <div class="sp"><span class="k">Shell Moulding</span><span class="v"><b>500 g — 150 kg</b> · CT8–CT10</span></div>
         <div class="sp"><span class="k">No-Bake Casting</span><span class="v"><b>50 — 500 kg</b> · multi-core</span></div>
@@ -306,8 +352,8 @@
   <!-- 7 · The close — a final shot, not a support widget. (FAQ moved to enquire.html.) -->
   <section class="act center">
     <div class="inner">
-      <div class="eyebrow rise cool" style="justify-content:center;color:var(--bronze-lite)">Scene 08 · The close</div>
-      <h2 class="display cool rise" style="font-size:clamp(36px,5.8vw,90px)">The part inside<br/><em>your machine.</em></h2>
+      <div class="eyebrow rise cool" style="justify-content:center;color:var(--bronze-lite)">Cast with us</div>
+      <h2 class="display cool rise" style="font-size:clamp(40px,6.4vw,96px)">Your drawing,<br/><em>our fire.</em></h2>
       <p class="valueprop rise" style="margin-top:24px">Shell Cast · Raysons Group · MIDC Shiroli, Kolhapur · ISO&nbsp;9001:2015</p>
       <div class="rise" style="pointer-events:auto;display:flex;gap:clamp(16px,2.6vw,34px);justify-content:center;flex-wrap:wrap;align-items:center;margin-top:32px;font-family:var(--mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase">
         <a href="mailto:industries@raysonsgroup.com" style="color:var(--bronze-lite)">industries@raysonsgroup.com</a>
@@ -327,23 +373,52 @@
 <script src="cinema.js"></script>
 <script src="premium.js"></script>
 <script>
-/* ── Atmospheric grade: mirror the active .act into body[data-scene] so the fixed
-   .cine-grade wash cross-fades per scene (cinema.js toggles .on; we just read it).
-   Pure CSS transition does the fade — type never animates, the light does. ── */
+/* ── Film instruments: atmospheric grade + chapter HUD + progress rail ──
+   The active .act (cinema.js toggles .on) drives body[data-scene] for the grade wash
+   AND the HUD's chapter/shot readout; scroll position drives the rail fill. All are
+   read-only mirrors of the engine — the position lives here, off the film, which is why
+   the scenes themselves carry no "Scene 0X" storyboard labels. The eight shots group
+   into four chapters: Ignition · Control · Consequence · Invitation. ── */
 (function(){
   var acts = Array.from(document.querySelectorAll('#acts .act'));
   if(!acts.length) return;
-  function sync(){
-    for(var i=0;i<acts.length;i++){
-      if(acts[i].classList.contains('on')){
-        if(document.body.dataset.scene !== String(i)) document.body.dataset.scene = String(i);
-        return;
-      }
-    }
+  var CHAP = ['Ignition','Ignition','Control','Control','Control','Consequence','Consequence','Invitation'];
+  var hud=document.getElementById('filmHud'), rail=document.getElementById('filmRail'),
+      fhChapter=document.getElementById('fhChapter'), fhNum=document.getElementById('fhNum'),
+      fill=document.getElementById('railFill'), knob=document.getElementById('railKnob');
+  var N=acts.length, lastScene=-1;
+
+  // chapter ticks — the start of each of the four chapters, as scroll % (from SEGMENT spans)
+  if(rail){ [0, 27.1, 64.6, 87.5].forEach(function(pct){
+    var t=document.createElement('span'); t.className='film-rail__tick'; t.style.top=pct+'%'; rail.appendChild(t);
+  }); }
+
+  function setScene(i){
+    if(i===lastScene) return; lastScene=i;
+    if(document.body.dataset.scene !== String(i)) document.body.dataset.scene=String(i);
+    if(fhChapter) fhChapter.textContent = CHAP[i] || '';
+    if(fhNum) fhNum.textContent = String(i+1).padStart(2,'0');
   }
-  var mo = new MutationObserver(sync);
-  acts.forEach(function(a){ mo.observe(a, { attributes:true, attributeFilter:['class'] }); });
+  function sync(){ for(var i=0;i<N;i++){ if(acts[i].classList.contains('on')){ setScene(i); return; } } }
+  var mo=new MutationObserver(sync);
+  acts.forEach(function(a){ mo.observe(a,{attributes:true,attributeFilter:['class']}); });
   sync();
+
+  // rail fill + knob follow overall scroll progress through the film
+  function onScroll(){
+    var max=Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    var p=Math.min(1, Math.max(0, scrollY/max));
+    if(fill) fill.style.height=(p*100).toFixed(2)+'%';
+    if(knob) knob.style.top=(p*100).toFixed(2)+'%';
+  }
+  addEventListener('scroll', onScroll, {passive:true});
+  addEventListener('resize', onScroll); onScroll();
+
+  // reveal the instruments once the film has booted (cinema.js adds body.entered)
+  function showChrome(){ if(hud) hud.classList.add('on'); if(rail) rail.classList.add('on'); }
+  if(document.body.classList.contains('entered')) showChrome();
+  else { var bo=new MutationObserver(function(){ if(document.body.classList.contains('entered')){ showChrome(); bo.disconnect(); } });
+    bo.observe(document.body,{attributes:true,attributeFilter:['class']}); }
 })();
 </script>
 <script>

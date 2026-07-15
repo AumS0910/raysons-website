@@ -249,6 +249,10 @@
           const op = local < 0.20 ? local/0.20 : local > 0.80 ? (1-local)/0.20 : 1;
           inner.style.opacity = clamp(op,0,1).toFixed(3);
         }
+        // DIFFERENTIAL PARALLAX: the scene's peak number (1450°C / ±0.3mm) travels a
+        // touch further than its witness text — one hero element breathes, the rest holds.
+        const peakEl = inner.querySelector('[data-peak]');
+        if(peakEl) peakEl.style.transform = 'translate3d(0,'+((0.5-local)*54).toFixed(1)+'px,0)';
       }
     }
 
