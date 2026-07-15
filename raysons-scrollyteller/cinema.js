@@ -181,7 +181,52 @@
   const _grade = REDUCED ? '' : 'brightness(1.10) contrast(1.07) saturate(1.16)';
   let lastAct = -1, breathT = 0, lastGood = null;
 
-  function paint(im, vel){
+  // ============================================================
+  //  2.5D SCROLL CAMERA
+  //  The footage is flat, but the FRAME is not: a per-scene dolly (scale), tilt (y)
+  //  and pan (x) move a virtual camera through each shot — the Ken-Burns / parallax
+  //  approach the reference sites get from a real 3D camera, authored over the
+  //  frame-captured film. Moves are eased-out so they SETTLE at the end of a beat
+  //  (precision feels locked), scale is chained scene-to-scene so cuts don't pop, and
+  //  the whole thing is lerp-smoothed so the camera lags the scroll a few frames for
+  //  weight. Base scale stays >=1.06 so translation never reveals a frame edge.
+  //  Reduced-motion holds a still, gently-scaled frame. Mobile damps pan/tilt only.
+  // ============================================================
+  const CAM_AMP = REDUCED ? 0 : (MOBILE ? 0.72 : 1);       // pan/tilt amplitude (dolly unaffected)
+  const easeOut = (t)=> 1 - Math.pow(1 - clamp(t,0,1), 3);
+  const lerp = (a,b,t)=> a + (b-a)*t;
+  // per-act: dolly scale [from,to] (chained continuous), tilt y [from,to] as a fraction
+  // of canvas height, and lateral pan amplitude (a there-and-back sine → 0 at every
+  // boundary, so a pan never pops between scenes).
+  const CAMERA = [
+    { s:[1.06,1.16], y:[ 0.015,-0.010], pan:0     },  // 0 pour        push in, tilt up to the ladle
+    { s:[1.16,1.22], y:[-0.010,-0.020], pan:0.010 },  // 1 forge       press toward the heat
+    { s:[1.22,1.06], y:[-0.020, 0.006], pan:0     },  // 2 deconstruct pull back — the part opens up
+    { s:[1.06,1.12], y:[ 0.006, 0.000], pan:0     },  // 3 reassemble  settle back in
+    { s:[1.12,1.10], y:[ 0.000, 0.000], pan:0.022 },  // 4 orbit       lateral pan around the part
+    { s:[1.10,1.06], y:[ 0.000, 0.015], pan:0     },  // 5 bridge      open out — the film widens
+    { s:[1.06,1.22], y:[ 0.015,-0.015], pan:0     },  // 6 bore        push in hard, then LOCK
+    { s:[1.22,1.06], y:[-0.015, 0.010], pan:0     },  // 7 finale      pull back farther than expected
+  ];
+  let smCam = { scale:1.06, x:0, y:0 }, curCam = { scale:1.06, x:0, y:0 };
+  function camTarget(act, local){
+    if(REDUCED) return { scale:1.06, x:0, y:0 };
+    // hero, before the first scroll: a slow ambient drift that never hard-resets
+    if(autoplay && act===0){
+      const a = autoT*0.6;
+      return { scale: 1.09 + Math.sin(a)*0.035, x: Math.sin(a*0.5)*0.006*CAM_AMP, y: Math.cos(a*0.7)*0.008*CAM_AMP };
+    }
+    const k = CAMERA[act] || CAMERA[0], te = easeOut(local);
+    return { scale: lerp(k.s[0],k.s[1],te), x: Math.sin(Math.PI*local)*(k.pan||0)*CAM_AMP, y: lerp(k.y[0],k.y[1],te)*CAM_AMP };
+  }
+  function stepCam(act, local){
+    const t = camTarget(act, local);
+    if(REDUCED){ smCam = t; }
+    else smCam = { scale: lerp(smCam.scale,t.scale,0.18), x: lerp(smCam.x,t.x,0.18), y: lerp(smCam.y,t.y,0.18) };
+    curCam = smCam; return smCam;
+  }
+
+  function paint(im, vel, cam){
     if(!im || !im.complete || !im.naturalWidth) return false;
     const cw=canvas.width, ch=canvas.height;
     ctx.clearRect(0,0,cw,ch);
@@ -189,9 +234,9 @@
     const breathe = 1 + (REDUCED?0:Math.sin(breathT*0.6)*0.012);
     const blur = REDUCED ? 0 : Math.min(4, vel*4);
     ctx.filter = _grade + (blur>0.2? ` blur(${blur.toFixed(1)}px)`:'');
-    const s = Math.max(cw/im.naturalWidth, ch/im.naturalHeight) * breathe;
+    const s = Math.max(cw/im.naturalWidth, ch/im.naturalHeight) * breathe * (cam?cam.scale:1);
     const w = im.naturalWidth*s, h = im.naturalHeight*s;
-    ctx.drawImage(im, (cw-w)/2, (ch-h)/2, w, h);
+    ctx.drawImage(im, (cw-w)/2 + (cam?cam.x*cw:0), (ch-h)/2 + (cam?cam.y*ch:0), w, h);
     ctx.filter = 'none';
     lastGood = im;
     return true;
@@ -202,8 +247,9 @@
     const cw=canvas.width, ch=canvas.height;
     ctx.clearRect(0,0,cw,ch);
     ctx.filter = _grade;
-    const s=Math.max(cw/im.naturalWidth,ch/im.naturalHeight);
-    ctx.drawImage(im,(cw-im.naturalWidth*s)/2,(ch-im.naturalHeight*s)/2,im.naturalWidth*s,im.naturalHeight*s);
+    const s=Math.max(cw/im.naturalWidth,ch/im.naturalHeight)*(curCam?curCam.scale:1);
+    const w=im.naturalWidth*s, h=im.naturalHeight*s;
+    ctx.drawImage(im,(cw-w)/2+(curCam?curCam.x*cw:0),(ch-h)/2+(curCam?curCam.y*ch:0),w,h);
     ctx.filter='none';
   }
 
@@ -216,11 +262,12 @@
       acc+=s.span;
     }
     const arr = frames[seg.clip];
+    const cam = stepCam(seg.act, local);
     let drew=false;
     if(arr && arr.length){
       const u = seg.reverse ? (1-local) : local;
       const fi = clamp(Math.round(u*(arr.length-1)), 0, arr.length-1);
-      drew = paint(arr[fi], vel);
+      drew = paint(arr[fi], vel, cam);
     }
     if(!drew) paintFallback();
 
