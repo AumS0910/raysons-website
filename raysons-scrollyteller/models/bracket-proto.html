@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bracket · WebGL prototype</title>
+<style>
+  :root{ --bg:#0a0807; --molten:#ff6a1a; }
+  *{margin:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--bg);overflow:hidden}
+  #gl{position:fixed;inset:0;width:100%;height:100%;display:block}
+  .cap{position:fixed;left:28px;bottom:24px;z-index:5;font-family:ui-monospace,Menlo,Consolas,monospace;
+    color:#ff8a3a;font-size:11px;letter-spacing:.24em;text-transform:uppercase;pointer-events:none;
+    text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  .cap b{display:block;color:#ece6dc;font-family:Georgia,serif;font-size:24px;letter-spacing:-.01em;
+    text-transform:none;margin-top:6px;font-style:italic}
+  .hint{position:fixed;right:28px;bottom:24px;z-index:5;font-family:ui-monospace,monospace;font-size:10px;
+    letter-spacing:.18em;text-transform:uppercase;color:#6b6156;pointer-events:none}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div class="cap">The Object · 11CX065C01<b>A real Raysons casting.</b></div>
+<div class="hint">Drag to inspect</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const canvas = document.getElementById('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.32;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0807);
+
+// environment for realistic metal reflections
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(34, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(2.4, 1.4, 3.2);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.9;
+controls.enablePan = false;
+controls.minDistance = 2.2; controls.maxDistance = 6;
+
+// ---- lighting: molten key + cool rim + soft fill (the film's light) ----
+scene.add(new THREE.HemisphereLight(0x8ea6c4, 0x2a1a10, 0.7));
+const key = new THREE.DirectionalLight(0xff8a3a, 4.1);      // molten key, upper-left
+key.position.set(-4, 5, 3); key.castShadow = true;
+key.shadow.mapSize.set(2048,2048); key.shadow.bias = -0.0004;
+key.shadow.camera.near = 1; key.shadow.camera.far = 20;
+key.shadow.camera.left=-4; key.shadow.camera.right=4; key.shadow.camera.top=4; key.shadow.camera.bottom=-4;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x9cc3ff, 2.2);       // cool rim, back-right
+rim.position.set(5, 3, -4); scene.add(rim);
+const fill = new THREE.DirectionalLight(0xffd9b0, 0.6);
+fill.position.set(2, -1, 4); scene.add(fill);
+
+// ---- cast-iron material ----
+const iron = new THREE.MeshStandardMaterial({
+  color: 0x34343b, metalness: 0.9, roughness: 0.5,
+  envMapIntensity: 1.4
+});
+
+// contact-shadow floor
+const floorMat = new THREE.ShadowMaterial({ opacity: 0.5 });
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(40,40), floorMat);
+floor.rotation.x = -Math.PI/2; floor.receiveShadow = true;
+
+const root = new THREE.Group(); scene.add(root);
+
+const draco = new DRACOLoader();
+draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
+const loader = new GLTFLoader(); loader.setDRACOLoader(draco);
+loader.load('bracket.glb', (gltf) => {
+  const obj = gltf.scene;
+  obj.traverse(c => { if(c.isMesh){ c.material = iron; c.castShadow = true; c.receiveShadow = true; } });
+  // FreeCAD is Z-up → stand the part up (Z→Y)
+  obj.rotation.x = -Math.PI/2;
+  // center + normalize to a unit-ish size, drop onto the floor
+  const box = new THREE.Box3().setFromObject(obj);
+  const size = new THREE.Vector3(); box.getSize(size);
+  const center = new THREE.Vector3(); box.getCenter(center);
+  const scale = 2.4 / Math.max(size.x, size.y, size.z);
+  obj.scale.setScalar(scale);
+  obj.position.sub(center.multiplyScalar(scale));
+  root.add(obj);
+  // reposition floor to the model's new base
+  const box2 = new THREE.Box3().setFromObject(obj);
+  floor.position.y = box2.min.y - 0.001;
+  scene.add(floor);
+  controls.target.set(0, (box2.min.y+box2.max.y)/2, 0);
+  window.__ready = true;
+}, undefined, (e)=>{ window.__error = String(e); });
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
