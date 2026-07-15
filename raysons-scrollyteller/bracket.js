@@ -49,12 +49,25 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     }
     geo.setAttribute('uv', new THREE.BufferAttribute(uv,2));
   }
+  // a DARK FOUNDRY environment for reflections — not a neutral studio. Emissive strips act as
+  // area lights: a big molten-warm key, a cool steel rim, a dim warm ceiling. This is what makes
+  // the metal read like it belongs in the pour/valve footage instead of a clean product render.
+  function makeEnv(){
+    const s = new THREE.Scene(); s.background = new THREE.Color(0x040303);
+    const strip=(w,h,color,x,y,z)=>{ const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({color})); m.position.set(x,y,z); m.lookAt(0,0,0); s.add(m); };
+    strip(12,26, 0xff6a1a, -11, 6, 3);   // molten key (left, warm)
+    strip(7,18,  0x35507e,  12, 5, -3);  // steel rim (right, cool)
+    strip(16,14, 0x120f0b,   0, 14, 0);  // dim warm ceiling
+    strip(22,12, 0x030202,   0, -7, 9);  // dark floor front
+    return s;
+  }
 
   const canvas  = document.getElementById('bracketGL');
   const spacer  = document.getElementById('bracketScroll');
   const cap     = document.getElementById('bracketCap');
   const hint    = document.getElementById('bracketHint');
   const next    = document.getElementById('bracketNext');
+  const fx      = document.getElementById('bracketFx');
   const cscroll = document.getElementById('cscroll');
   const acts    = document.getElementById('acts');
   const hud     = document.getElementById('filmHud');
@@ -87,9 +100,10 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0a0807);
+  scene.background = new THREE.Color(0x080605);
+  scene.fog = new THREE.FogExp2(0x0a0807, 0.032);          // subtle depth haze — the footage has atmosphere
   const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.035).texture;
+  scene.environment = pmrem.fromScene(makeEnv(), 0.5).texture;
 
   const camera = new THREE.PerspectiveCamera(34, innerWidth/innerHeight, 0.1, 100);
   const target = new THREE.Vector3(0,0,0);
@@ -107,9 +121,9 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   // machined cast-iron: physical metal with sand-cast surface grain + a faint machined sheen
   const grain = makeNoiseTex(256);
   const iron = new THREE.MeshPhysicalMaterial({
-    color:0x44443e, metalness:0.94, roughness:0.55,
-    clearcoat:0.2, clearcoatRoughness:0.5, envMapIntensity:1.55,
-    bumpMap:grain, bumpScale:0.35, roughnessMap:grain,
+    color:0x3a342c, metalness:0.95, roughness:0.5,          // dark warm iron
+    clearcoat:0.28, clearcoatRoughness:0.42, envMapIntensity:1.35,
+    bumpMap:grain, bumpScale:0.32, roughnessMap:grain,
     emissive:0xff4d12, emissiveIntensity:0.0, transparent:true, opacity:0.0
   });
   const wireMat = new THREE.LineBasicMaterial({ color:0xff8a3a, transparent:true, opacity:0.0, depthTest:true });      // bright feature outline
@@ -143,10 +157,10 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     if(!MOBILE){
       // wet reflective floor — matches the pour/valve footage (part mirrored on a dark, damp
       // studio floor). Dark-tinted so the reflection reads subtle, and the molten cast glows in it.
-      const mirror = new Reflector(new THREE.PlaneGeometry(80,80), { textureWidth:1024, textureHeight:1024, color:0x0e0d11 });
+      const mirror = new Reflector(new THREE.PlaneGeometry(120,120), { textureWidth:1024, textureHeight:1024, color:0x050406 });
       mirror.rotation.x=-Math.PI/2; mirror.position.y=b2.min.y-0.002; scene.add(mirror); floor=mirror;
       // a soft contact shadow on top of the reflection grounds the part
-      const sh = new THREE.Mesh(new THREE.PlaneGeometry(40,40), new THREE.ShadowMaterial({opacity:0.4}));
+      const sh = new THREE.Mesh(new THREE.PlaneGeometry(40,40), new THREE.ShadowMaterial({opacity:0.5}));
       sh.rotation.x=-Math.PI/2; sh.position.y=b2.min.y+0.001; sh.receiveShadow=true; scene.add(sh); shadowPlane=sh;
     }
     modelReady = true;
@@ -214,6 +228,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   function setChrome(zp){
     const vis = smooth(0.0,0.05,zp);                                    // clear the film fast → clean drawing on black
     canvas.style.opacity = vis.toFixed(3);
+    if(fx) fx.style.opacity = vis.toFixed(3);                          // grade the 3D like the film
     canvas.style.pointerEvents = zp>0.46 ? 'auto' : 'none';             // drag only once it's the solid object
     if(acts) acts.style.opacity = zp>0.001 ? (1-vis).toFixed(3) : '';
     if(cap)  cap.style.opacity  = smooth(0.05,0.13,zp).toFixed(3);
