@@ -41,6 +41,13 @@
 }
 </script>
 <link rel="stylesheet" href="styles.css" />
+<!-- three.js for the WebGL finale ("The Object" — the real casting in 3D; see bracket.js) -->
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
 <!-- prioritise the hero so first paint is instant: poster decodes immediately,
      pour clip starts downloading before cinema.js runs -->
 <link rel="preload" as="image" href="valve/pour-poster.jpg" fetchpriority="high" />
@@ -117,6 +124,32 @@
   @media(max-width:640px){.film-rail{height:38vh;right:9px}
     .film-hud{bottom:max(14px,env(safe-area-inset-bottom,14px))}}
   @media(prefers-reduced-motion:reduce){.film-rail__fill,.film-rail__knob{transition:none}}
+
+  /* "THE OBJECT" — WebGL finale: the real casting in 3D (bracket.js). Its own scroll zone
+     appended after the film; the part materialises over the held last frame and orbits.
+     Gated: no WebGL / reduced-motion → bracket.js removes the zone and the film ends as before. */
+  #bracketGL{position:fixed;inset:0;width:100%;height:100%;z-index:20;opacity:0;
+    pointer-events:none;background:#0a0807;touch-action:pan-y}
+  #bracketCap{position:fixed;left:clamp(20px,6vw,110px);bottom:clamp(64px,13vh,130px);z-index:21;
+    opacity:0;pointer-events:none;max-width:520px}
+  #bracketCap .k{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--molten-hot);text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  #bracketCap h2{font-family:var(--serif);font-weight:600;font-size:clamp(30px,4.8vw,68px);line-height:.98;
+    letter-spacing:-.01em;color:var(--ink);margin:12px 0 0;text-shadow:0 2px 30px rgba(7,5,4,.92)}
+  #bracketCap h2 em{font-style:italic;color:var(--bronze-lite)}
+  #bracketCap p{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--bronze-lite);margin-top:16px;text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  #bracketHint{position:fixed;right:clamp(20px,4vw,44px);bottom:clamp(24px,5vh,48px);z-index:21;
+    font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-faint);opacity:0;pointer-events:none;text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  #bracketScroll{position:relative;z-index:5;pointer-events:none;height:300vh}
+  .bracket-next{position:fixed;left:50%;bottom:clamp(88px,16vh,160px);transform:translateX(-50%);z-index:22;
+    font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);
+    text-decoration:none;opacity:0;pointer-events:none;padding:12px 24px;border:1px solid var(--line);
+    border-radius:999px;background:rgba(7,5,4,.45);white-space:nowrap;transition:border-color .3s ease}
+  .bracket-next span{color:var(--molten-hot);margin-left:8px}
+  .bracket-next:hover{border-color:var(--molten)}
+  @media(max-width:640px){#bracketScroll{height:240vh}#bracketCap{bottom:max(90px,16vh)}}
 
   /* loader */
   #cloader{position:fixed;inset:0;z-index:100;background:#050302;display:flex;flex-direction:column;
@@ -203,7 +236,7 @@
 
 <noscript>
   <style>
-    #cloader,.ccue,#ccta,.cine-vig,.cine-floor,.grain,#stage,.film-hud,.film-rail{display:none!important}
+    #cloader,.ccue,#ccta,.cine-vig,.cine-floor,.grain,#stage,.film-hud,.film-rail,#bracketGL,#bracketCap,#bracketHint,.bracket-next,#bracketScroll{display:none!important}
     #acts,.act{position:static!important;opacity:1!important;visibility:visible!important;display:block!important;height:auto!important;padding:0!important}
     .act .inner .rise{opacity:1!important;transform:none!important}
     .ns-fallback{max-width:760px;margin:0 auto;padding:120px 24px 80px;color:var(--ink);font-family:var(--sans)}
@@ -239,6 +272,18 @@
   <span class="film-rail__knob" id="railKnob"></span>
 </div>
 
+<!-- "THE OBJECT" — the real Raysons casting in WebGL (bracket.js drives it). Fixed layer
+     that fades in over the film's held last frame during the appended bracket scroll zone. -->
+<canvas id="bracketGL" aria-hidden="true"></canvas>
+<div id="bracketCap" aria-hidden="true">
+  <div class="k">The Drawing · 11CX065C01</div>
+  <h2>Your <em>drawing.</em></h2>
+  <p>Your part, in our language</p>
+</div>
+<div id="bracketHint" aria-hidden="true">Drag to inspect</div>
+<!-- finale → About handoff: nav-transition.js intercepts this and dips to ember-black before navigating -->
+<a class="bracket-next" id="bracketNext" href="About Us.html" aria-label="Continue to the group story">Enter the group story <span aria-hidden="true">→</span></a>
+
 <div id="cloader">
   <div class="loader-mark">RAYSONS&nbsp;SHELL&nbsp;CAST</div>
   <div class="cbar"><i></i></div>
@@ -261,14 +306,6 @@
 <div class="cta-dock" id="ccta">
   <a class="cta-quote mag" href="enquire.html">Request a Quote <span class="arrow">→</span></a>
 </div>
-
-<!-- product-lift hero clip: scroll scrubs the part rising → its last frame is About's hero -->
-<video id="liftvid" muted playsinline preload="none" poster="valve/lift-poster.jpg" aria-hidden="true">
-  <source src="https://cdn.jsdelivr.net/gh/AumS0910/raysons-website@media-v1/raysons-scrollyteller/valve/lift.mp4" type="video/mp4">
-</video>
-<a class="handoff" id="handoff" href="About Us.html?from=lift" aria-label="Keep scrolling to enter the group story">
-  <span class="cue"></span>
-</a>
 
 <!-- ===================== ACTS (storyline · fire to finished part) ===================== -->
 <div id="acts">
@@ -369,6 +406,9 @@
 <div class="legal">© 2026 Raysons Shell Cast · Precision Foundry · Kolhapur, Maharashtra, India</div>
 
 <div id="cscroll"></div>
+<!-- extra scroll runway for the WebGL finale — the film holds its last frame while this
+     zone drives the bracket orbit. bracket.js removes it when WebGL/motion isn't available. -->
+<div id="bracketScroll"></div>
 
 <script src="cinema.js"></script>
 <script src="premium.js"></script>
@@ -440,13 +480,12 @@
 })();
 </script>
 <script>
-/* PRODUCT LIFT (Cartier-style): at the end of the film, continued scroll SCRUBS a
-   bespoke hero clip (valve/lift.mp4) — the part rises, turns under a champagne light
-   and holds. ep (0..1) maps to the clip's timeline; the clip's last frame is About's
-   hero, so the part never cuts. A lerp between scroll ticks keeps the scrub buttery on
-   a mouse wheel. Scroll-driven + reversible: past ~88% it settles in and commits;
-   below it eases back to the film. Reduced-motion just navigates. */
+/* PRODUCT LIFT (Cartier-style) — DISABLED. The valve-video lift that used to end the film
+   and hand off to About has been REPLACED by the WebGL bracket finale ("The Object",
+   bracket.js): a real 3D casting the viewer orbits and drags. This block bails immediately
+   (its #liftvid / #handoff elements were removed); the body is kept dormant for reference. */
 (function(){
+  return;
   var RED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var stage=document.getElementById('stage'), acts=document.getElementById('acts'),
       vid=document.getElementById('liftvid'), handoff=document.getElementById('handoff'),
@@ -553,6 +592,7 @@
   if(RED) addEventListener('wheel', function(e){ if(atEnd&&e.deltaY>6&&!gone){ gone=true; location.href='About Us.html'; } }, {passive:true});
 })();
 </script>
+<script type="module" src="bracket.js"></script>
 <script src="nav-transition.js"></script>
 </body>
 </html>
