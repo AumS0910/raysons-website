@@ -246,6 +246,33 @@
   </div>
 </div>
 
+<!-- ── FAQ — relocated here from the Overview finale. The index close is now a final shot,
+     not a support widget; buyer Q&A belongs next to the enquiry form where it answers
+     the questions people have while filling it in. ── -->
+<style>
+  .eq-faq{position:relative;z-index:5;max-width:860px;margin:0 auto;padding:8px 24px 20px}
+  .eq-faq__k{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze-lite);margin-bottom:10px}
+  .eq-faq__h{font-family:var(--serif);font-weight:600;line-height:1;letter-spacing:-.01em;font-size:clamp(28px,4vw,52px);color:var(--ink);margin-bottom:20px}
+  .eq-faq details{border-top:1px solid var(--line);padding:0}
+  .eq-faq details:last-child{border-bottom:1px solid var(--line)}
+  .eq-faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;
+    padding:20px 2px;font-family:var(--serif);font-size:clamp(17px,1.9vw,22px);color:var(--ink);font-weight:500;transition:color .2s}
+  .eq-faq summary::-webkit-details-marker{display:none}
+  .eq-faq summary:hover{color:var(--bronze-lite)}
+  .eq-faq summary .pl{font-family:var(--mono);font-size:22px;color:var(--bronze-lite);transition:transform .28s cubic-bezier(.2,.7,.2,1);flex-shrink:0}
+  .eq-faq details[open] summary .pl{transform:rotate(45deg)}
+  .eq-faq .a{padding:0 2px 22px;max-width:64ch;color:var(--ink-dim);font-size:clamp(14px,1.5vw,16px);line-height:1.7}
+  @media(prefers-reduced-motion:reduce){.eq-faq summary .pl{transition:none}}
+</style>
+<section class="eq-faq">
+  <div class="eq-faq__k">Before you send</div>
+  <h2 class="eq-faq__h">Common questions from OEM buyers.</h2>
+  <details><summary>What casting processes do you offer?<span class="pl">+</span></summary><div class="a">Shell moulded casting (500&nbsp;g – 150&nbsp;kg) and no-bake casting (50 – 500&nbsp;kg) — both run in-house at our Kolhapur facility.</div></details>
+  <details><summary>What materials can you cast?<span class="pl">+</span></summary><div class="a">Grey CI (IS&nbsp;210), SG / Ductile (IS&nbsp;1865), SiMo Ductile and ADI. Every heat is spectrometer-verified before pouring.</div></details>
+  <details><summary>Do you machine and export?<span class="pl">+</span></summary><div class="a">Yes — in-house HMC · VMC · CNC, dimensionally verified and assembly-ready. Already shipped to Italy, the UK, Japan and the USA.</div></details>
+  <details><summary>How do I get a quote?<span class="pl">+</span></summary><div class="a">Send your drawing (PDF/DXF), material grade and annual quantity to industries@raysonsgroup.com — or use the form above. We respond within 48 hours.</div></details>
+</section>
+
 <div class="eq-foot">© 2026 Raysons Shell Cast · Precision Foundry · Kolhapur, Maharashtra, India</div>
 
 <script>

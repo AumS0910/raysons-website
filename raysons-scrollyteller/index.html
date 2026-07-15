@@ -60,6 +60,30 @@
   .cine-floor{position:fixed;left:0;right:0;bottom:0;height:42vh;z-index:1;pointer-events:none;
     background:radial-gradient(60% 120% at 50% 130%, rgba(166,121,46,.18), transparent 70%)}
 
+  /* ATMOSPHERIC GRADE — a per-scene colour wash that crossfades as the film moves between
+     acts: the "lighting states" the film was missing (warm forge → cool precision → clinical →
+     warm climax → cool verification → ember close). Subtle: rides over the pour, never hides
+     it. body[data-scene] is set by the acts observer. */
+  .cine-grade{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.5;mix-blend-mode:soft-light;
+    transition:background 1.25s ease, opacity 1.25s ease;
+    background:radial-gradient(120% 92% at 50% 44%, rgba(255,138,58,.55), transparent 70%)}
+  body[data-scene="1"] .cine-grade{background:radial-gradient(120% 96% at 50% 56%, rgba(255,92,22,.62), transparent 68%);opacity:.6}
+  body[data-scene="2"] .cine-grade,
+  body[data-scene="3"] .cine-grade{background:radial-gradient(120% 100% at 50% 40%, rgba(120,152,212,.5), transparent 72%);opacity:.42}
+  body[data-scene="4"] .cine-grade{background:radial-gradient(120% 100% at 50% 34%, rgba(152,178,222,.52), transparent 74%);opacity:.4}
+  body[data-scene="5"] .cine-grade{background:radial-gradient(96% 82% at 50% 52%, rgba(214,92,30,.55), transparent 66%);opacity:.5}
+  body[data-scene="6"] .cine-grade{background:radial-gradient(120% 100% at 50% 42%, rgba(150,180,216,.5), transparent 74%);opacity:.4}
+  body[data-scene="7"] .cine-grade{background:radial-gradient(120% 92% at 50% 46%, rgba(255,132,52,.55), transparent 70%);opacity:.5}
+  @media(prefers-reduced-motion:reduce){.cine-grade{transition:none}}
+
+  /* TYPOGRAPHY PEAKS — the two claims that carry the film get dominant scale (1450°C at the
+     pour, ±0.3mm at the specs). Fluid so they stay huge but never overflow on phones. */
+  .peak-num{font-family:var(--serif);font-weight:600;line-height:.86;letter-spacing:-.02em;
+    color:var(--molten-hot);font-variant-numeric:tabular-nums;
+    font-size:clamp(58px,12.5vw,190px);text-shadow:0 4px 60px rgba(255,106,26,.32),0 2px 18px rgba(7,5,4,.92)}
+  .peak-num--xl{font-size:clamp(62px,15vw,250px);letter-spacing:-.03em;color:var(--ink)}
+  .peak-num--xl .u{color:var(--molten-hot)}
+
   /* loader */
   #cloader{position:fixed;inset:0;z-index:100;background:#050302;display:flex;flex-direction:column;
     align-items:center;justify-content:center;transition:opacity .9s ease, visibility .9s}
@@ -166,6 +190,7 @@
 <canvas id="stage" role="img" aria-label="Molten iron poured and forged into a precision hydraulic valve casting — a scroll-driven foundry film."></canvas>
 <div class="cine-vig"></div>
 <div class="cine-floor"></div>
+<div class="cine-grade"></div>
 <div class="grain"></div>
 
 <div id="cloader">
@@ -211,11 +236,12 @@
     </div>
   </section>
 
-  <!-- 1 · Fire becomes the part -->
+  <!-- 1 · Fire becomes the part — 1450°C is the hero number of the pour -->
   <section class="act center">
     <div class="inner">
-      <div class="eyebrow rise cool" style="justify-content:center;color:var(--bronze-lite)">Scene 02 · Shaped by fire · 1450°C</div>
-      <h2 class="display cool rise">From pour to<br/><em>finished part.</em></h2>
+      <div class="eyebrow rise cool" style="justify-content:center;color:var(--bronze-lite)">Scene 02 · Shaped by fire</div>
+      <div class="peak-num rise" style="margin:8px 0 6px">1450°C</div>
+      <h2 class="display cool rise" style="font-size:clamp(26px,3.6vw,54px)">From pour to <em>finished part.</em></h2>
     </div>
   </section>
 
@@ -262,9 +288,9 @@
   <!-- 6 · Detail — the bore + capability spec sheet (the substance a buyer needs) -->
   <section class="act bottom">
     <div class="inner">
-      <div class="eyebrow rise cool" style="color:var(--bronze-lite)">Scene 07 · To the last micron</div>
-      <h2 class="display cool rise" style="font-size:clamp(38px,5.8vw,86px)">Honed to <em>±0.3 mm.</em></h2>
-      <p class="lede rise" style="margin-top:20px">Shell moulded, machined to drawing on HMC · VMC · CNC, and spectrometer-verified before it ever ships — across the full casting program.</p>
+      <div class="eyebrow rise cool" style="color:var(--bronze-lite)">Scene 07 · Honed to the last micron</div>
+      <div class="peak-num peak-num--xl rise">±0.3<span class="u"> mm</span></div>
+      <p class="lede rise" style="margin-top:16px">Shell moulded, machined to drawing on HMC · VMC · CNC, and spectrometer-verified before it ever ships — across the full casting program.</p>
       <div class="specs rise" style="grid-template-columns:1fr 1fr;margin-top:26px">
         <div class="sp"><span class="k">Shell Moulding</span><span class="v"><b>500 g — 150 kg</b> · CT8–CT10</span></div>
         <div class="sp"><span class="k">No-Bake Casting</span><span class="v"><b>50 — 500 kg</b> · multi-core</span></div>
@@ -277,18 +303,13 @@
     </div>
   </section>
 
-  <!-- 7 · Finale — common questions (customers/trust now live on the About page) -->
+  <!-- 7 · The close — a final shot, not a support widget. (FAQ moved to enquire.html.) -->
   <section class="act center">
     <div class="inner">
-      <div class="eyebrow rise cool" style="justify-content:center;color:var(--bronze-lite)">Scene 08 · Questions &amp; Answers</div>
-      <h2 class="display cool rise" style="font-size:clamp(32px,5vw,72px)">Common questions from<br/>OEM <em>buyers.</em></h2>
-      <div class="faq rise" style="margin:32px auto 0;text-align:left;pointer-events:auto">
-        <details><summary>What casting processes do you offer?<span class="pl">+</span></summary><div class="a">Shell moulded casting (500&nbsp;g – 150&nbsp;kg) and no-bake casting (50 – 500&nbsp;kg) — both run in-house at our Kolhapur facility.</div></details>
-        <details><summary>What materials can you cast?<span class="pl">+</span></summary><div class="a">Grey CI (IS&nbsp;210), SG / Ductile (IS&nbsp;1865), SiMo Ductile and ADI. Every heat is spectrometer-verified before pouring.</div></details>
-        <details><summary>Do you machine and export?<span class="pl">+</span></summary><div class="a">Yes — in-house HMC · VMC · CNC, dimensionally verified and assembly-ready. Already shipped to Italy, the UK, Japan and the USA.</div></details>
-        <details><summary>How do I get a quote?<span class="pl">+</span></summary><div class="a">Send your drawing (PDF/DXF), material grade and annual quantity to industries@raysonsgroup.com — we respond within 48 hours.</div></details>
-      </div>
-      <div class="rise" style="pointer-events:auto;display:flex;gap:clamp(16px,2.6vw,34px);justify-content:center;flex-wrap:wrap;align-items:center;margin-top:28px;font-family:var(--mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase">
+      <div class="eyebrow rise cool" style="justify-content:center;color:var(--bronze-lite)">Scene 08 · The close</div>
+      <h2 class="display cool rise" style="font-size:clamp(36px,5.8vw,90px)">The part inside<br/><em>your machine.</em></h2>
+      <p class="valueprop rise" style="margin-top:24px">Shell Cast · Raysons Group · MIDC Shiroli, Kolhapur · ISO&nbsp;9001:2015</p>
+      <div class="rise" style="pointer-events:auto;display:flex;gap:clamp(16px,2.6vw,34px);justify-content:center;flex-wrap:wrap;align-items:center;margin-top:32px;font-family:var(--mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase">
         <a href="mailto:industries@raysonsgroup.com" style="color:var(--bronze-lite)">industries@raysonsgroup.com</a>
         <a href="tel:+919999999999" style="color:var(--bronze-lite)">+91&nbsp;XXXXX&nbsp;XXXXX</a>
         <a href="https://wa.me/919999999999" style="color:var(--bronze-lite)">WhatsApp</a>
@@ -305,6 +326,26 @@
 
 <script src="cinema.js"></script>
 <script src="premium.js"></script>
+<script>
+/* ── Atmospheric grade: mirror the active .act into body[data-scene] so the fixed
+   .cine-grade wash cross-fades per scene (cinema.js toggles .on; we just read it).
+   Pure CSS transition does the fade — type never animates, the light does. ── */
+(function(){
+  var acts = Array.from(document.querySelectorAll('#acts .act'));
+  if(!acts.length) return;
+  function sync(){
+    for(var i=0;i<acts.length;i++){
+      if(acts[i].classList.contains('on')){
+        if(document.body.dataset.scene !== String(i)) document.body.dataset.scene = String(i);
+        return;
+      }
+    }
+  }
+  var mo = new MutationObserver(sync);
+  acts.forEach(function(a){ mo.observe(a, { attributes:true, attributeFilter:['class'] }); });
+  sync();
+})();
+</script>
 <script>
 /* ── Mobile nav burger ── */
 (function(){
