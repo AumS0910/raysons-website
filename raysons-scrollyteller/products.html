@@ -209,7 +209,9 @@
     <h2 class="pclose__t rv" data-split>Yours isn't<br/><em>here yet.</em></h2>
     <p class="pclose__b rv">Every part on this page started as somebody's drawing. Send us yours — material grade, weight, annual quantity — and we'll tell you within 48 hours whether it belongs on this floor.</p>
     <div class="pclose__cta rv">
-      <a class="cta-quote mag" href="enquire.html" style="margin-top:0">Send the drawing <span class="arrow">→</span></a>
+      <!-- .mag, not .cta-quote: .cta-quote is opacity:0 by default and only revealed by
+           .visible on the fixed dock, so used standalone here it renders invisible. -->
+      <a class="mag" href="enquire.html" style="margin-top:0">Send the drawing <span class="arrow">→</span></a>
       <span class="pclose__meta">ISO&nbsp;9001:2015 · MIDC Shiroli, Kolhapur</span>
     </div>
   </div>

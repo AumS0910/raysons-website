@@ -459,3 +459,21 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
   opacity:0;transform:translateY(8px);transition:opacity .38s ease .12s,transform .42s cubic-bezier(.2,.7,.2,1) .12s}
 .nav-xfade.on .nav-xfade__k{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.nav-xfade{transition:none}.nav-xfade__k{transition:none}}
+
+/* ── SITE FOOTER ───────────────────────────────────────────────────────────────
+   Shared by every page. This lived ONLY in about-cinema.css and foundry.css (identical
+   copies), so products.html — which loads just this sheet — rendered the footer with no
+   styling at all. Same trap as .brandmark: page-specific sheets holding site-wide chrome.
+   :is() keeps the legacy class names working without touching their markup. */
+:is(.about-footer,.foundry-footer,.site-footer){position:relative;z-index:10;border-top:1px solid var(--line);padding:clamp(48px,8vh,90px) clamp(20px,6vw,110px) 40px;background:#070504}
+:is(.about-footer,.foundry-footer,.site-footer) .ft-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px;padding-bottom:34px;border-bottom:1px solid var(--line);max-width:1280px;margin:0 auto}
+:is(.about-footer,.foundry-footer,.site-footer) .ft-logo{font-weight:700;letter-spacing:.02em;font-size:17px}
+:is(.about-footer,.foundry-footer,.site-footer) .ft-logo span{color:var(--molten)}
+:is(.about-footer,.foundry-footer,.site-footer) .ft-iso{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--bronze-lite);border:1px solid var(--bronze-deep);padding:7px 13px;border-radius:3px}
+:is(.about-footer,.foundry-footer,.site-footer) .ft-mid{display:grid;grid-template-columns:repeat(3,1fr);gap:34px;padding:34px 0;max-width:1280px;margin:0 auto}
+:is(.about-footer,.foundry-footer,.site-footer) .ft-col h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:14px}
+:is(.about-footer,.foundry-footer,.site-footer) .ft-col li{list-style:none;font-size:13.5px;color:var(--ink-dim);line-height:2;font-weight:300}
+:is(.about-footer,.foundry-footer,.site-footer) .ft-col a:hover{color:var(--molten-hot)}
+:is(.about-footer,.foundry-footer,.site-footer) .ft-bot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-top:26px;max-width:1280px;margin:0 auto;
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+@media(max-width:760px){:is(.about-footer,.foundry-footer,.site-footer) .ft-mid{grid-template-columns:1fr;gap:24px}}
