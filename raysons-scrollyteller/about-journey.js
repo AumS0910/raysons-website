@@ -50,6 +50,9 @@
     if(active !== lastA){
       eras.forEach((e,i)=> e.classList.toggle('on', i === active));
       marks.forEach((m,i)=> m.classList.toggle('on', i === active));
+      // ENVIRONMENTAL GRADE: the light tells the forty-year story — warm sand (1987) →
+      // bronze (2005) → MOLTEN as the foundry is lit (2021) → cool steel (2027). CSS crossfades it.
+      document.body.dataset.era = String(active);
       lastA = active;
     }
     // drift the active watermark as you move through its era (parallax life)

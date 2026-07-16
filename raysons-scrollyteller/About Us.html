@@ -40,16 +40,22 @@
   "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
 }}
 </script>
-<!-- Arriving from the index lift: flag it before first paint so the valve match-cut frame
-     is held on load (the film then dissolves it on scroll — a continuous shot, not a blip). -->
-<script>
-  if(/[?&]from=lift\b/.test(location.search)){
-    document.documentElement.classList.add('from-lift');
-    var _l=document.createElement('link'); _l.rel='preload'; _l.as='image';
-    _l.href='valve/lift-poster.jpg'; _l.setAttribute('fetchpriority','high'); document.head.appendChild(_l);
-  }
-</script>
+<!-- (The index valve-lift match-cut was retired when index's ending became the WebGL bracket
+     finale — it no longer sends ?from=lift, so the match-cut frame is gone and About now opens
+     on its own film. The handoff is nav-transition's ember-black dip.) -->
 <style>
+  /* ENVIRONMENTAL GRADE — the light tells the forty-year story as the journey ticks
+     1987 → 2027. body[data-era] is set by about-journey.js; this crossfades under it.
+     Same instrument as index's .cine-grade, so the two pages read as one film. */
+  .stage__grade{position:absolute;inset:0;mix-blend-mode:soft-light;opacity:.5;
+    transition:background 1.4s ease, opacity 1.4s ease;
+    background:radial-gradient(120% 92% at 50% 46%, rgba(201,154,78,.5), transparent 72%)}
+  body[data-era="0"] .stage__grade{background:radial-gradient(120% 96% at 50% 50%, rgba(216,166,88,.55), transparent 70%);opacity:.5}   /* 1987 · warm sand */
+  body[data-era="1"] .stage__grade{background:radial-gradient(120% 96% at 50% 46%, rgba(188,126,60,.52), transparent 70%);opacity:.5}   /* 2005 · bronze */
+  body[data-era="2"] .stage__grade{background:radial-gradient(120% 100% at 50% 56%, rgba(255,96,20,.68), transparent 66%);opacity:.74}  /* 2021 · the foundry is LIT */
+  body[data-era="3"] .stage__grade{background:radial-gradient(120% 100% at 50% 40%, rgba(140,175,220,.5), transparent 74%);opacity:.44} /* 2027 · cool steel */
+  @media(prefers-reduced-motion:reduce){.stage__grade{transition:none}}
+
   #cloader{position:fixed;inset:0;z-index:100;background:#050302;display:flex;flex-direction:column;
     align-items:center;justify-content:center;transition:opacity .9s ease, visibility .9s}
   #cloader.done{opacity:0;visibility:hidden}
@@ -71,6 +77,7 @@
 <!-- fixed cinematic stage -->
 <div class="stage">
   <div class="stage__glow"></div>
+  <div class="stage__grade"></div>
   <div class="stage__embers" id="embers"></div>
   <div class="stage__vig"></div>
 </div>
@@ -114,10 +121,6 @@
            poster="valve/about-film-poster.jpg" aria-hidden="true">
       <source src="valve/about-film.mp4" type="video/mp4" />
     </video>
-    <!-- MATCH-CUT: the index lift ends on the valve — About opens on that exact frame, then
-         dissolves into the casting film so the handoff never hard-cuts. (On a direct visit the
-         loader hides this; arriving from the lift, the loader is skipped so the dissolve shows.) -->
-    <img class="film__matchcut" src="valve/lift-poster.jpg" alt="" aria-hidden="true" />
     <div class="film__vig"></div>
     <div class="film__floor"></div>
     <div class="film__overlays">
@@ -220,6 +223,34 @@
   </div>
 </section>
 
+<!-- ===================== REACH — the payoff ===================================
+     Moved UP to sit directly after the Journey: forty years of heritage → who it earned.
+     The proof (people, standards) now SUPPORTS the payoff instead of delaying it, and the
+     page ends on a final shot rather than a customer grid. -->
+<section class="sec finale" id="reach"><div class="wrap">
+  <div class="eyebrow-badge rv" style="margin-left:auto;margin-right:auto"><span class="dot"></span> Global Customers</div>
+  <h2 class="display cool rv" style="font-size:clamp(34px,5.4vw,80px)">Trusted by companies that<br/>don't compromise on <em>quality.</em></h2>
+  <!-- STATIC named grid (was an infinite marquee — it scrolled your strongest trust
+       signals past the eye before a buyer could read them). Names are stationary and
+       deliberate; hover/touch reveals country + the part we cast for them.
+       NOTE: the part-application line per client is a PLACEHOLDER — confirm each with
+       the client before this goes to production (country is already factual). -->
+  <div class="clients rv">
+    <div class="client" style="--i:0"><span class="client__name">Caterpillar</span><span class="client__meta">USA · Hydraulic valve bodies</span></div>
+    <div class="client" style="--i:1"><span class="client__name">Halliburton</span><span class="client__meta">USA · Flow-control castings</span></div>
+    <div class="client" style="--i:2"><span class="client__name">Schwing Stetter</span><span class="client__meta">Germany · Concrete-pump components</span></div>
+    <div class="client" style="--i:3"><span class="client__name">Faster Hydraulics</span><span class="client__meta">Italy · Hydraulic manifolds</span></div>
+    <div class="client" style="--i:4"><span class="client__name">Wikov</span><span class="client__meta">Czech Republic · Gearbox housings</span></div>
+    <div class="client" style="--i:5"><span class="client__name">SAS Sanwa</span><span class="client__meta">Japan · Pump castings</span></div>
+    <div class="client" style="--i:6"><span class="client__name">Tata Hendrikson</span><span class="client__meta">India · Commercial-vehicle castings</span></div>
+    <div class="client" style="--i:7"><span class="client__name">Vanaz Engineering</span><span class="client__meta">India · Precision components</span></div>
+  </div>
+  <div class="trust-row rv" style="justify-content:center">
+    <span class="iso-seal">ISO<br/><b>9001:2015</b></span>
+    <span class="kicker">Italy · United Kingdom · Japan · USA — shipped from Kolhapur</span>
+  </div>
+</div></section>
+
 <!-- ===================== PURPOSE ===================== -->
 <section class="sec"><div class="wrap">
   <div class="eyebrow-badge rv"><span class="dot"></span> Purpose</div>
@@ -275,29 +306,13 @@
   </div>
 </div></section>
 
-<!-- ===================== FINALE — GLOBAL CUSTOMERS + CTA ===================== -->
+<!-- ===================== THE CLOSE — a final shot, not a contact footer ==================
+     Bookends the opening: the film began in 1987, and the fire is still lit. Mirrors the
+     Overview's "Your drawing, our fire." close so the two pages end as one movie. -->
 <section class="sec finale"><div class="wrap">
-  <div class="eyebrow-badge rv" style="margin-left:auto;margin-right:auto"><span class="dot"></span> Global Customers</div>
-  <h2 class="display cool rv" style="font-size:clamp(34px,5.4vw,80px)">Trusted by companies that<br/>don't compromise on <em>quality.</em></h2>
-  <!-- STATIC named grid (was an infinite marquee — it scrolled your strongest trust
-       signals past the eye before a buyer could read them). Names are stationary and
-       deliberate; hover/touch reveals country + the part we cast for them.
-       NOTE: the part-application line per client is a PLACEHOLDER — confirm each with
-       the client before this goes to production (country is already factual). -->
-  <div class="clients rv">
-    <div class="client"><span class="client__name">Caterpillar</span><span class="client__meta">USA · Hydraulic valve bodies</span></div>
-    <div class="client"><span class="client__name">Halliburton</span><span class="client__meta">USA · Flow-control castings</span></div>
-    <div class="client"><span class="client__name">Schwing Stetter</span><span class="client__meta">Germany · Concrete-pump components</span></div>
-    <div class="client"><span class="client__name">Faster Hydraulics</span><span class="client__meta">Italy · Hydraulic manifolds</span></div>
-    <div class="client"><span class="client__name">Wikov</span><span class="client__meta">Czech Republic · Gearbox housings</span></div>
-    <div class="client"><span class="client__name">SAS Sanwa</span><span class="client__meta">Japan · Pump castings</span></div>
-    <div class="client"><span class="client__name">Tata Hendrikson</span><span class="client__meta">India · Commercial-vehicle castings</span></div>
-    <div class="client"><span class="client__name">Vanaz Engineering</span><span class="client__meta">India · Precision components</span></div>
-  </div>
-  <div class="trust-row rv" style="justify-content:center">
-    <span class="iso-seal">ISO<br/><b>9001:2015</b></span>
-    <span class="kicker">Italy · United Kingdom · Japan · USA — shipped from Kolhapur</span>
-  </div>
+  <div class="eyebrow-badge rv" style="margin-left:auto;margin-right:auto"><span class="dot"></span> Cast with us</div>
+  <h2 class="display rv" style="font-size:clamp(40px,6.6vw,104px)">Since 1987.<br/><em>Still pouring.</em></h2>
+  <p class="rv" style="margin-top:22px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--bronze-lite)">Shell Cast · Raysons Group · MIDC Shiroli, Kolhapur · ISO&nbsp;9001:2015</p>
   <div class="finale-contact rv">
     <a href="mailto:industries@raysonsgroup.com">industries@raysonsgroup.com</a>
     <a href="tel:+919999999999">+91&nbsp;XXXXX&nbsp;XXXXX</a>
