@@ -56,6 +56,23 @@
   body[data-era="3"] .stage__grade{background:radial-gradient(120% 100% at 50% 40%, rgba(140,175,220,.5), transparent 74%);opacity:.44} /* 2027 · cool steel */
   @media(prefers-reduced-motion:reduce){.stage__grade{transition:none}}
 
+  /* PORTRAIT — the clip is a 16:9 brand film with its logo + captions BURNED IN, and
+     .film__vid is object-fit:cover with no portrait rule. On a phone (0.46 aspect) cover
+     crops ~74% of the frame's width, so the film's own text was being guillotined —
+     "RAYSONS GROUP | SINCE 1987" rendered as "YSONS GROUP | SINCE 19".
+     Show the WHOLE frame instead: letterbox it (a cinema screen, which suits the dark
+     stage) parked in the upper area, and drop the hero copy beneath it so the type gets
+     its own room instead of fighting the burned-in captions. Landscape/desktop keep the
+     immersive full-bleed cover, where the aspect is wide enough not to cut the text. */
+  @media(max-aspect-ratio:13/10){
+    /* park the film high so its burned-in caption clears the hero block below it */
+    .film__vid{object-fit:contain;object-position:50% 14%}
+    .film .fact{justify-content:flex-end}
+    /* the film's floor glow assumes a full-bleed frame — pull it in so it doesn't
+       wash over the letterboxed band's lower edge */
+    .film__floor{height:26vh}
+  }
+
   /* MOBILE — the trust row had no phone rule: .kicker is a fixed 12px/.2em, so the long
      "Italy · United Kingdom · Japan · USA — shipped from Kolhapur" line ran edge-to-edge
      and wrapped mid-word. Tighten it, shrink the seal, and let the contact row breathe. */
