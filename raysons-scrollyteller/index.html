@@ -205,9 +205,8 @@
   .act .valueprop{color:var(--bronze-lite)}
   .act .faq summary,.act .faq .a{text-shadow:0 1px 10px rgba(7,5,4,.92)}
 
-  #ccta{opacity:0;transform:translateY(16px);transition:opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1)}
-  #ccta.on{opacity:1;transform:none}
-  #ccta .cta-quote{opacity:1;transform:none}
+  /* the dock's fade-in now lives in styles.css (.cta-dock); only the bracket handoff,
+     which is this page's alone, stays here. #id beats .cta-dock.on, so it still wins. */
   #ccta.handoff-hide{opacity:0;transform:translateY(16px);pointer-events:none}
 
   /* HANDOFF — at the end of the film, continue into the About reel (one movie) */
