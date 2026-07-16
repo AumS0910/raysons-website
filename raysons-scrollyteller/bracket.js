@@ -33,9 +33,9 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     const img=x.createImageData(size,size);
     for(let i=0;i<size*size;i++){ const v=170+Math.random()*80|0; img.data[i*4]=img.data[i*4+1]=img.data[i*4+2]=v; img.data[i*4+3]=255; }
     x.putImageData(img,0,0);
-    x.globalAlpha=0.35;                                   // low-freq mottle = the cast skin
-    for(let i=0;i<60;i++){ x.fillStyle=Math.random()>0.5?'#fff':'#4a4a4a'; x.beginPath();
-      x.arc(Math.random()*size,Math.random()*size,size*(0.03+Math.random()*0.10),0,7); x.fill(); }
+    x.globalAlpha=0.22;                                   // low-freq mottle = the cast skin (kept fine —
+    for(let i=0;i<90;i++){ x.fillStyle=Math.random()>0.5?'#fff':'#4a4a4a'; x.beginPath();  // big soft blobs read
+      x.arc(Math.random()*size,Math.random()*size,size*(0.015+Math.random()*0.05),0,7); x.fill(); }  // as leopard print up close
     const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; return t;
   }
   function boxUV(geo, scale){                              // box/triplanar-ish UVs from object space
@@ -117,6 +117,42 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   const rim  = new THREE.DirectionalLight(0xaaccff, 2.6); rim.position.set(5,3.5,-4); scene.add(rim);
   const rim2 = new THREE.DirectionalLight(0xff7a2a, 1.3); rim2.position.set(-2,1,-5); scene.add(rim2);  // warm back kicker
   const fill = new THREE.DirectionalLight(0xffe0c0, 0.5); fill.position.set(2,-1,4); scene.add(fill);
+  // the heat of the pour, cast onto the world: a point light inside the part that burns
+  // while the metal floods, so the floor and reflection catch the glow (added at init at
+  // zero intensity — adding a light mid-scroll would force a shader recompile hitch)
+  const heatLight = new THREE.PointLight(0xff5a14, 0, 9, 2); scene.add(heatLight);
+
+  // ---- atmosphere: embers during the cast, dust motes in the light the rest of the time ----
+  function makeSprite(soft){
+    const c=document.createElement('canvas'); c.width=c.height=32; const x=c.getContext('2d');
+    const g=x.createRadialGradient(16,16,0,16,16,16);
+    g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(soft?0.25:0.5,'rgba(255,255,255,.5)'); g.addColorStop(1,'rgba(255,255,255,0)');
+    x.fillStyle=g; x.fillRect(0,0,32,32);
+    return new THREE.CanvasTexture(c);
+  }
+  function makeParticles(n, size, color, opacity){
+    const pos=new Float32Array(n*3), seed=new Float32Array(n);
+    for(let i=0;i<n;i++){ pos[i*3]=(Math.random()-0.5)*4.5; pos[i*3+1]=Math.random()*3.4-0.9; pos[i*3+2]=(Math.random()-0.5)*4.5; seed[i]=Math.random()*100; }
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    const m=new THREE.PointsMaterial({ size, color, map:makeSprite(true), transparent:true, opacity,
+      blending:THREE.AdditiveBlending, depthWrite:false, sizeAttenuation:true });
+    const p=new THREE.Points(g,m); p.visible=false; p.userData.seed=seed; scene.add(p);
+    return p;
+  }
+  const embers = makeParticles(MOBILE?50:120, 0.05, 0xffa040, 1);   // sparks of the pour
+  const dust   = makeParticles(MOBILE?30:80,  0.03, 0xc9b89a, 0.10); // motes hanging in the key light
+  function driftParticles(p, t, rise, wander){
+    const a=p.geometry.attributes.position, s=p.userData.seed, n=a.count;
+    for(let i=0;i<n;i++){
+      let y=a.getY(i) + rise*(0.6+((s[i]*7)%1));
+      if(y>2.6) y=-0.9;
+      a.setY(i,y);
+      a.setX(i, a.getX(i) + Math.sin(t*0.7+s[i])*wander);
+      a.setZ(i, a.getZ(i) + Math.cos(t*0.5+s[i]*1.3)*wander);
+    }
+    a.needsUpdate=true;
+  }
 
   // machined cast-iron: physical metal with sand-cast surface grain + a faint machined sheen
   const grain = makeNoiseTex(256);
@@ -124,8 +160,44 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     color:0x3a342c, metalness:0.95, roughness:0.5,          // dark warm iron
     clearcoat:0.28, clearcoatRoughness:0.42, envMapIntensity:1.35,
     bumpMap:grain, bumpScale:0.32, roughnessMap:grain,
-    emissive:0xff4d12, emissiveIntensity:0.0, transparent:true, opacity:0.0
+    transparent:true, opacity:1.0
   });
+  // THE POUR, made literal: instead of the whole part fading in uniformly (an opacity
+  // slider), molten iron FLOODS the mould bottom-up — a per-fragment fill level with a
+  // white-hot front line where the metal is rising, and a blackbody ramp so it cools
+  // white → orange → dull red → iron. Injected into the physical material so the glow
+  // still receives the same lighting, fog and bloom as everything else.
+  const uni = {
+    uFill : { value: 0 },   // 0..1 — how high the metal has risen (world-Y, normalised)
+    uHeat : { value: 0 },   // 0..1 — how hot the flooded metal still is
+    uGhost: { value: 0 },   // faint volume fill while it's still the drawing
+    uSolid: { value: 0 },   // master solidity (drives per-fragment alpha with uFill)
+    uMinY : { value: -1 },
+    uMaxY : { value:  1 }
+  };
+  iron.onBeforeCompile = (sh)=>{
+    Object.assign(sh.uniforms, uni);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying float vWY;')
+      .replace('#include <project_vertex>', 'vWY = (modelMatrix * vec4(transformed,1.0)).y;\n#include <project_vertex>');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', `#include <common>
+        varying float vWY;
+        uniform float uFill, uHeat, uGhost, uSolid, uMinY, uMaxY;
+        vec3 blackbody(float t){
+          return mix(vec3(0.55,0.05,0.01),
+                     mix(vec3(1.0,0.42,0.08), vec3(1.0,0.88,0.62), smoothstep(0.55,1.0,t)),
+                     smoothstep(0.0,0.5,t)); }`)
+      .replace('vec4 diffuseColor = vec4( diffuse, opacity );', `
+        float hN = clamp((vWY - uMinY) / max(0.0001, uMaxY - uMinY), 0.0, 1.0);
+        float below = 1.0 - smoothstep(uFill - 0.04, uFill + 0.04, hN);   // metal exists up to the fill line
+        float front = exp(-abs(hN - uFill) * 16.0);                       // the rising pour-front
+        vec4 diffuseColor = vec4( diffuse, max(uGhost, uSolid * below) );`)
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+        float trail = below * exp(-max(0.0, uFill - hN) * 6.0);   // glow TRAILS the front — lower metal has cooled longer
+        float glow = min(1.2, uHeat * (trail * 0.4 + front * 1.5));
+        totalEmissiveRadiance += blackbody(uHeat) * glow * 1.6;`);
+  };
   const wireMat = new THREE.LineBasicMaterial({ color:0xff8a3a, transparent:true, opacity:0.0, depthTest:true });      // bright feature outline
   const meshWireMat = new THREE.LineBasicMaterial({ color:0xcf8a48, transparent:true, opacity:0.0, depthWrite:false }); // full mesh wireframe (the "complete" drawing)
 
@@ -154,6 +226,9 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     root.add(obj);
     const b2 = new THREE.Box3().setFromObject(obj);
     target.set(0,(b2.min.y+b2.max.y)/2,0);
+    uni.uMinY.value = b2.min.y - 0.02;                 // the pour-front shader's world-Y bounds
+    uni.uMaxY.value = b2.max.y + 0.02;
+    heatLight.position.set(0, (b2.min.y+b2.max.y)/2, 0);
     if(!MOBILE){
       // wet reflective floor — matches the pour/valve footage (part mirrored on a dark, damp
       // studio floor). Dark-tinted so the reflection reads subtle, and the molten cast glows in it.
@@ -193,10 +268,13 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     const rad = lerp(3.6, 2.75, smooth(0.30,0.62,zp)) + lerp(0, 0.7, smooth(0.62,1,zp));
     return { az, el:clamp(el,-0.3,1.2), rad:clamp(rad,2.4,6) };
   }
-  function applyCamera(zp){
-    const p = poseFor(zp), ce=Math.cos(p.el), se=Math.sin(p.el);
-    camera.position.set(target.x+p.rad*ce*Math.sin(p.az), target.y+p.rad*se, target.z+p.rad*ce*Math.cos(p.az));
-    camera.lookAt(target);
+  function applyCamera(zp, t){
+    const p = poseFor(zp);
+    // operator's breathing — micro handheld drift so the move feels shot, not computed
+    const az = p.az + Math.sin(t*0.13)*0.010 + Math.sin(t*0.047)*0.006;
+    const el = p.el + Math.sin(t*0.09+1.7)*0.006;
+    camera.position.set(target.x+p.rad*Math.cos(el)*Math.sin(az), target.y+p.rad*Math.sin(el), target.z+p.rad*Math.cos(el)*Math.cos(az));
+    camera.lookAt(target.x, target.y + Math.sin(t*0.11+0.6)*0.008, target.z);
   }
 
   // grab-and-hold: pointer delta rotates the part 1:1; release holds the pose with a touch
@@ -214,15 +292,24 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   function reveal(zp){
     const wire  = smooth(0.02,0.10,zp) * (1 - smooth(0.26,0.44,zp));     // in, then out
     const solid = smooth(0.26,0.46,zp);                                  // iron floods in
-    const heat  = smooth(0.24,0.36,zp) * (1 - smooth(0.36,0.58,zp));     // molten flash, then cools
+    const heat  = smooth(0.24,0.34,zp) * (1 - smooth(0.38,0.58,zp));     // molten flash, then cools
     wireMat.opacity = wire;
     meshWireMat.opacity = wire * 0.16;                                   // faint full mesh behind the outline
-    iron.opacity = Math.max(solid, wire*0.14);                           // faint ghost fill → the drawing has volume
-    iron.emissiveIntensity = heat * 2.0;                                 // glowing hot → bloom picks it up
+    uni.uGhost.value = wire * 0.14;                                      // faint volume fill → the drawing has volume
+    uni.uSolid.value = solid;                                            // per-fragment: metal exists up to the fill line
+    uni.uFill.value  = smooth(0.24,0.42,zp) * 1.18;                      // the pour rises bottom-up and crests PAST the top
+                                                                         // fast — the flat top face all sits at one height, so
+                                                                         // a lingering front would light the whole face at once
+    uni.uHeat.value  = heat;                                             // blackbody ramp: white-hot → orange → dull red
     iron.roughness = lerp(0.42, 0.55, smooth(0.36,0.7,zp));              // shiny-hot → matte cast-cool
+    if(bloom) bloom.strength = 0.55 + heat * 0.35;                       // the flash blooms; the cooled iron doesn't
     if(floor) floor.visible = solid > 0.02;                              // reflection only once it's cast — a drawing has none
     if(shadowPlane) shadowPlane.material.opacity = 0.42 * solid;         // shadow fades in with the solid
+    // atmosphere: sparks ride the heat; dust hangs in the light once the object is real
+    embers.visible = heat > 0.015; embers.material.opacity = Math.min(1, heat*1.6);
+    dust.visible = zp > 0.30; dust.material.opacity = 0.10 * smooth(0.30,0.5,zp);
     setCopy(zp < 0.32 ? 'drawing' : 'object');
+    return heat;
   }
 
   function setChrome(zp){
@@ -243,8 +330,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     renderer.setSize(innerWidth,innerHeight); if(composer) composer.setSize(innerWidth,innerHeight); }
   addEventListener('resize', onResize);
 
-  renderer.setAnimationLoop(()=>{
-    const zp = zoneProg();
+  renderer.setAnimationLoop((tm)=>{
+    const zp = zoneProg(), t = tm * 0.001;
     active = zp > 0.02;
     if(zp !== curZp){ setChrome(zp); curZp = zp; }
     if(!active) return;
@@ -252,10 +339,13 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     if(!dragging){ dragAz += velAz; dragEl = clamp(dragEl+velEl,-0.6,0.9); velAz*=0.90; velEl*=0.90; }  // release inertia settles; pose HELD
 
     if(modelReady){
-      reveal(zp);
+      const heat = reveal(zp);
       root.scale.setScalar(lerp(0.92, 1.0, smooth(0,0.12,zp)));
+      if(embers.visible) driftParticles(embers, t, 0.012 + heat*0.010, 0.0011);  // sparks climb with the heat
+      if(dust.visible)   driftParticles(dust,   t, 0.0009,             0.0004); // motes barely move
+      heatLight.intensity = heat * (7 + Math.sin(t*9)*1.2 + Math.sin(t*23)*0.6); // the fire flickers
     }
-    applyCamera(zp);
+    applyCamera(zp, t);
     if(composer) composer.render(); else renderer.render(scene, camera);
   });
 })();

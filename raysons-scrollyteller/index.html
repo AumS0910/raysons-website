@@ -137,6 +137,9 @@
       radial-gradient(120% 92% at 50% 44%, transparent 34%, rgba(7,5,4,.74) 100%),
       radial-gradient(62% 58% at 50% 118%, rgba(255,120,40,.16), transparent 60%)}
   body.bracket-on .grain{z-index:21;opacity:.07}                 /* film grain carries onto the finale */
+  /* the finale owns the frame — the persistent dock yields to the caption + "Enter the group
+     story" CTA so there's one call-to-action on screen at a time */
+  body.bracket-on .cta-dock{opacity:0;pointer-events:none}
   #bracketCap{position:fixed;left:clamp(20px,6vw,110px);bottom:clamp(64px,13vh,130px);z-index:23;
     opacity:0;pointer-events:none;max-width:520px}
   #bracketCap .k{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;
