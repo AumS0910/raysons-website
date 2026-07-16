@@ -56,6 +56,18 @@
   body[data-era="3"] .stage__grade{background:radial-gradient(120% 100% at 50% 40%, rgba(140,175,220,.5), transparent 74%);opacity:.44} /* 2027 · cool steel */
   @media(prefers-reduced-motion:reduce){.stage__grade{transition:none}}
 
+  /* MOBILE — the trust row had no phone rule: .kicker is a fixed 12px/.2em, so the long
+     "Italy · United Kingdom · Japan · USA — shipped from Kolhapur" line ran edge-to-edge
+     and wrapped mid-word. Tighten it, shrink the seal, and let the contact row breathe. */
+  @media(max-width:640px){
+    .trust-row{gap:14px;margin-top:26px}
+    .trust-row .kicker{font-size:10px;letter-spacing:.1em;line-height:1.8;
+      max-width:32ch;margin-left:auto;margin-right:auto}
+    .iso-seal{width:64px;height:64px}
+    .finale-contact{gap:14px;font-size:12px}
+    .finale .wrap{padding-left:18px;padding-right:18px}
+  }
+
   #cloader{position:fixed;inset:0;z-index:100;background:#050302;display:flex;flex-direction:column;
     align-items:center;justify-content:center;transition:opacity .9s ease, visibility .9s}
   #cloader.done{opacity:0;visibility:hidden}
