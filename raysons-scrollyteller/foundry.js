@@ -1,8 +1,9 @@
 // ============================================================
 //  RAYSONS — Foundry page engine
-//  Lenis smooth scroll + GSAP ScrollTrigger reveals +
-//  interactive process image crossfade.
-//  ZERO video scrub, ZERO canvas — lag-free by design.
+//  Native scroll + GSAP ScrollTrigger reveals + drifting embers.
+//  No Lenis (it double-smoothed the chapters' own lerp), no video scrub — lag-free by design.
+//  The hero's molten heat-field lives in foundry-heat.js; the pinned chapters in
+//  foundry-chapters.js.
 // ============================================================
 (function(){
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -90,19 +91,15 @@
   }
 
   // ============================================================
-  //  GSAP + Lenis
+  //  GSAP reveals (native scroll)
   // ============================================================
   const { gsap } = window;
   gsap.registerPlugin(ScrollTrigger);
 
-  // Lenis smooth scroll
-  let lenis = null;
-  if(window.Lenis){
-    lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((t) => lenis.raf(t * 1000));
-    gsap.ticker.lagSmoothing(0);
-  }
+  // NO Lenis. foundry-chapters.js already lerps scroll→scrub for the pinned chapters;
+  // stacking Lenis's smoothing on top double-filtered every input — the same double-smooth
+  // that WAS the reported "lag" on About, where it was removed for exactly this reason.
+  // Native scroll + the single per-engine lerp matches index.html's tight feel.
 
   // staggered reveals
   ScrollTrigger.batch('.rv', {

@@ -43,8 +43,8 @@
 </script>
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="foundry.css" />
-<!-- Preload hero image for instant LCP -->
-<link rel="preload" as="image" href="valve/pour-poster.jpg" fetchpriority="high" />
+<!-- (No hero preload: the hero is generated in canvas, not fetched. Foundry deliberately
+     borrows no imagery from the Overview/About films — see foundry-heat.js.) -->
 <style>
   #cloader{position:fixed;inset:0;z-index:100;background:#050302;display:flex;flex-direction:column;
     align-items:center;justify-content:center;transition:opacity .9s ease, visibility .9s}
@@ -56,6 +56,84 @@
     font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase}
   #ccta{opacity:0;transform:translateY(16px);transition:opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1)}
   #ccta.on{opacity:1;transform:none}
+
+  /* ── PROCEDURAL HERO ───────────────────────────────────────────────────────
+     Generated molten heat-field (foundry-heat.js) — Foundry's own signature, made of
+     code rather than borrowed from the Overview's film. */
+  .fhero__bg canvas{width:100%;height:100%;display:block}
+  /* The hero scrim was built to knock back a BRIGHT photo — its bottom stop (95% black)
+     sat exactly where the furnace mouth glows and crushed it. Nothing to dim now, and the
+     title carries its own shadow, so let the fire through. */
+  .fhero__bg::after{background:
+    radial-gradient(88% 68% at 50% 46%, transparent 44%, rgba(7,5,4,.52) 100%),
+    linear-gradient(180deg, rgba(7,5,4,.5), transparent 26%, transparent 74%, rgba(7,5,4,.42))}
+
+  /* ── SPEC PLATE — the honest visual ────────────────────────────────────────
+     Pillars 01/02 captioned the pour still as "shell moulding" and "no-bake" (it is
+     neither), and 03/04 had no visual at all. Rather than caption a wrong photo, each
+     pillar now carries its own numbers as the visual — the page's real proof, at scale. */
+  .pillar__plate{position:relative;border:1px solid var(--line);border-radius:6px;
+    background:linear-gradient(160deg, rgba(255,138,58,.06), rgba(7,5,4,.5));
+    padding:clamp(24px,3vw,38px);display:flex;flex-direction:column;justify-content:center;
+    min-height:clamp(260px,34vw,380px);overflow:hidden}
+  .pillar__plate::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(80% 60% at 50% 0%, rgba(255,138,58,.10), transparent 70%)}
+  .pillar__plate-k{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--bronze-lite);margin-bottom:14px}
+  .pillar__peak{font-family:var(--serif);font-weight:600;line-height:.86;letter-spacing:-.02em;
+    color:var(--molten-hot);font-variant-numeric:tabular-nums;
+    font-size:clamp(40px,5.4vw,86px);text-shadow:0 4px 50px rgba(255,106,26,.28)}
+  .pillar__peak small{display:block;font-size:.34em;letter-spacing:.02em;color:var(--ink);margin-top:10px;line-height:1.3}
+  .pillar__plate-f{margin-top:auto;padding-top:22px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
+    border-top:1px solid var(--line)}
+
+  /* ── THE INVITATION — replaces the process walkthrough ─────────────────────
+     The client's call: the floor is not a photo gallery — serious buyers come and stand
+     on it. So the page doesn't fake a process reel; it invites. This is the emotional
+     peak AND the highest-intent conversion on the site. */
+  .finvite{position:relative;z-index:10;min-height:100svh;display:flex;align-items:center;
+    padding:clamp(80px,12vh,140px) clamp(20px,6vw,110px);overflow:hidden}
+  .finvite::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(90% 80% at 50% 58%, rgba(255,96,20,.20), transparent 68%)}
+  .finvite__inner{max-width:900px;margin:0 auto;text-align:center}
+  .finvite__k{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--molten-hot);margin-bottom:26px}
+  .finvite__t{font-family:var(--serif);font-weight:600;line-height:.94;letter-spacing:-.02em;
+    font-size:clamp(44px,8vw,128px);text-shadow:0 4px 50px rgba(7,5,4,.9)}
+  .finvite__t em{font-style:italic;font-weight:500;color:var(--molten-hot)}
+  .finvite__b{margin:32px auto 0;max-width:56ch;font-size:clamp(15px,1.6vw,19px);line-height:1.65;
+    color:#d8cdbe;font-weight:300}
+  .finvite__cta{margin-top:44px;display:flex;gap:24px;justify-content:center;align-items:center;flex-wrap:wrap}
+  .finvite__meta{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+
+  /* ── CLIENT GRID — the marquee is retired here too ─────────────────────────
+     An auto-scrolling track moved your strongest names past the eye before a buyer
+     could read them. Same static, named, readable grid the About page now uses. */
+  .fclients{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:44px}
+  .fclient{background:#0b0908;padding:26px 20px;display:flex;flex-direction:column;gap:8px;
+    align-items:center;justify-content:center;text-align:center;min-height:118px;transition:background .35s ease}
+  .fclient:hover{background:#120e0b}
+  .fclient__name{font-family:var(--serif);font-size:clamp(16px,1.5vw,20px);color:var(--ink)}
+  .fclient__meta{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink-faint);line-height:1.5}
+  @media(max-width:900px){.fclients{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:480px){.fclients{grid-template-columns:1fr}.fclient{min-height:0;padding:20px}}
+
+  /* ── ENVIRONMENTAL GRADE — the light walks the process ─────────────────────
+     Same instrument as index's .cine-grade and About's .stage__grade, so all three
+     pages read as one film: sand → molten → cool steel → clean export.
+     body[data-fsec] is set by the section observer at the foot of this page. */
+  .stage__grade{position:absolute;inset:0;mix-blend-mode:soft-light;opacity:.5;
+    transition:background 1.4s ease, opacity 1.4s ease;
+    background:radial-gradient(120% 92% at 50% 46%, rgba(255,138,58,.5), transparent 72%)}
+  body[data-fsec="shell"] .stage__grade{background:radial-gradient(120% 96% at 50% 50%, rgba(214,166,92,.52), transparent 70%);opacity:.5}   /* sand */
+  body[data-fsec="nobake"] .stage__grade{background:radial-gradient(120% 96% at 50% 48%, rgba(190,128,62,.5), transparent 70%);opacity:.5}    /* bonded sand */
+  body[data-fsec="machining"] .stage__grade{background:radial-gradient(120% 100% at 50% 40%, rgba(140,175,220,.5), transparent 74%);opacity:.44} /* cool steel */
+  body[data-fsec="export"] .stage__grade{background:radial-gradient(120% 100% at 50% 42%, rgba(170,196,226,.46), transparent 74%);opacity:.4}    /* clean */
+  body[data-fsec="invite"] .stage__grade{background:radial-gradient(110% 92% at 50% 56%, rgba(255,92,18,.72), transparent 66%);opacity:.76}      /* the fire — the peak */
+  body[data-fsec="finale"] .stage__grade{background:radial-gradient(120% 92% at 50% 46%, rgba(255,132,52,.5), transparent 70%);opacity:.5}
+  @media(prefers-reduced-motion:reduce){.stage__grade{transition:none}}
 </style>
 </head>
 <body>
@@ -67,6 +145,7 @@
 <!-- fixed cinematic stage -->
 <div class="stage">
   <div class="stage__glow"></div>
+  <div class="stage__grade"></div>
   <div class="stage__embers" id="embers"></div>
   <div class="stage__vig"></div>
 </div>
@@ -97,8 +176,14 @@
 
 <!-- ===================== HERO ===================== -->
 <section class="fhero" id="hero">
+  <!-- PROCEDURAL HERO — Foundry owns no footage of its own, and every clip/still in this
+       project belongs to Overview or About. Rather than borrow the Overview's pour (a frozen
+       or replayed frame of a film the visitor just watched), this hero is GENERATED: a molten
+       furnace-glow and rising heat plumes drawn in canvas (foundry-heat.js). It costs no
+       bytes, it can never be "the same asset", and it matches this page's thesis — we don't
+       show you a picture of the fire, we make one. -->
   <div class="fhero__bg">
-    <img src="valve/pour-poster.jpg" alt="Molten iron pouring in the foundry" fetchpriority="high" width="1920" height="1080" />
+    <canvas id="fheat" aria-hidden="true"></canvas>
   </div>
   <div class="inner">
     <div class="eyebrow-badge rv"><span class="dot"></span> The Foundry</div>
@@ -129,9 +214,13 @@
         <span class="pillar__pill">ADI</span>
       </div>
     </div>
-    <div class="pillar__visual rv">
-      <img src="valve/pour-poster.jpg" alt="Shell moulding process" loading="lazy" width="800" height="600" />
-      <div class="tint"></div>
+    <!-- was the pour still captioned "shell moulding process" — it is neither shell moulding
+         nor a different file from the hero. Until real process stills exist, the honest
+         visual is the capability itself, at scale. -->
+    <div class="pillar__plate rv">
+      <div class="pillar__plate-k">Shell moulding · capability</div>
+      <div class="pillar__peak">500 g — 150 kg<small>CT8–CT10 · Ra 6.3 · heated metal patterns</small></div>
+      <div class="pillar__plate-f">In-house resin-coated sand plant</div>
     </div>
   </div>
 </section>
@@ -152,9 +241,11 @@
         <div class="pillar__row"><span class="pillar__dot"></span><span>Suitable for customised industrial components</span></div>
       </div>
     </div>
-    <div class="pillar__visual rv">
-      <img src="valve/hero.jpg" alt="No-bake casting process" loading="lazy" width="800" height="600" />
-      <div class="tint"></div>
+    <!-- was valve/hero.jpg (a 1.4MB still of the valve) captioned "no-bake casting process" -->
+    <div class="pillar__plate rv">
+      <div class="pillar__plate-k">No-bake · capability</div>
+      <div class="pillar__peak">50 — 500 kg<small>CT9–CT11 · multi-core · heavy-walled housings</small></div>
+      <div class="pillar__plate-f">Continuous sand reclamation</div>
     </div>
   </div>
 </section>
@@ -219,54 +310,20 @@
   </div>
 </section>
 
-<!-- ===================== CHAPTER · STATIONS (was the 6-step process) ===================== -->
-<!-- Pinned; scrubbing advances station 01→06 — the station frame crossfades full-bleed, the
-     HUD reads the station, one sentence each. Real footage drops into images/process/0N-*.jpg. -->
-<section class="fchap fchap--station" id="process" data-chap="station">
-  <div class="fchap__pin">
-    <div class="fstation" aria-hidden="false">
-      <article class="fstation__card on" data-i="0" data-hud="Station 01 · Raw Material" data-src="images/process/01-raw.jpg">
-        <span class="fstation__n">Station 01</span>
-        <h3 class="fstation__t">Raw Material Inspection</h3>
-        <p class="fstation__s">Incoming metal and sand inspected and tested — consistent quality from the very first heat.</p>
-        <span class="fstation__k">Footage pending</span>
-      </article>
-      <article class="fstation__card" data-i="1" data-hud="Station 02 · Sand &amp; Shell" data-src="images/process/02-sand.jpg">
-        <span class="fstation__n">Station 02</span>
-        <h3 class="fstation__t">Sand Preparation &amp; Shell Formation</h3>
-        <p class="fstation__s">Controlled sand properties and precise shell formation — mould strength and dimensional accuracy locked in here.</p>
-        <span class="fstation__k">Footage pending</span>
-      </article>
-      <article class="fstation__card" data-i="2" data-hud="Station 03 · Melting · 1450°C" data-src="images/process/03-melt.jpg">
-        <span class="fstation__n">Station 03</span>
-        <h3 class="fstation__t">Melting &amp; Metallurgical Control</h3>
-        <p class="fstation__s">Monitored melting and metallurgical control to hit the required chemistry and mechanical properties.</p>
-        <span class="fstation__k">Footage pending</span>
-      </article>
-      <article class="fstation__card" data-i="3" data-hud="Station 04 · Pouring · 1450°C" data-src="images/process/04-pour.jpg">
-        <span class="fstation__n">Station 04</span>
-        <h3 class="fstation__t">Precision Pouring</h3>
-        <p class="fstation__s">Optimised pouring parameters and process discipline — defect-free, reliable castings, every heat.</p>
-        <span class="fstation__k">Footage pending</span>
-      </article>
-      <article class="fstation__card" data-i="4" data-hud="Station 05 · Fettling" data-src="images/process/05-fettle.jpg">
-        <span class="fstation__n">Station 05</span>
-        <h3 class="fstation__t">Fettling &amp; Surface Finishing</h3>
-        <p class="fstation__s">Controlled fettling and finishing for clean surfaces and dimensional consistency.</p>
-        <span class="fstation__k">Footage pending</span>
-      </article>
-      <article class="fstation__card" data-i="5" data-hud="Station 06 · Machining · Dispatch" data-src="images/process/06-dispatch.jpg">
-        <span class="fstation__n">Station 06</span>
-        <h3 class="fstation__t">Machining, Inspection &amp; Dispatch</h3>
-        <p class="fstation__s">Final machining, inspection and dispatch — to your specification and delivery requirement.</p>
-        <span class="fstation__k">Footage pending</span>
-      </article>
+<!-- ===================== THE INVITATION (replaces the 6-station process walkthrough) =======
+     Client's call, and the right one: the floor is not a photo gallery. Serious buyers come
+     and stand on it. So this page no longer fakes a process reel behind "footage pending"
+     placeholders — it refuses to, on purpose, and invites instead. That makes the absence
+     the page's most confident beat AND its highest-intent conversion. -->
+<section class="finvite" id="visit" data-fsec="invite">
+  <div class="finvite__inner">
+    <p class="finvite__k rv">The Process</p>
+    <h2 class="finvite__t rv" data-split>Some things don't<br/><em>photograph.</em></h2>
+    <p class="finvite__b rv">1450°C doesn't fit in a picture. Neither does the sound of a pour, the heat coming off a shakeout at three metres, or the moment a shell breaks away clean. We could show you a process gallery. We'd rather hand you the safety glasses.</p>
+    <div class="finvite__cta rv">
+      <a class="btn--fill mag" href="enquire.html">Book a foundry visit</a>
+      <span class="finvite__meta">MIDC Shiroli, Kolhapur · Maharashtra</span>
     </div>
-    <div class="fchap__hud">
-      <span class="fchap__hud-k" data-hud>Station 01 · Raw Material</span>
-      <span class="fchap__hud-i" data-count>01 / 06</span>
-    </div>
-    <div class="fchap__rail" aria-hidden="true"><span class="fchap__rail-fill"></span></div>
   </div>
 </section>
 
@@ -309,11 +366,19 @@
   <div class="wrap">
     <div class="eyebrow-badge rv" style="margin-left:auto;margin-right:auto"><span class="dot"></span> Global Customers</div>
     <h2 class="display cool rv" style="font-size:clamp(34px,5.4vw,80px)">Trusted by companies that<br/>don't compromise on <em>quality.</em></h2>
-    <div class="marquee rv">
-      <div class="marquee-track">
-        <span>Tata Hendrikson</span><span>Schwing Stetter</span><span>Caterpillar</span><span>Halliburton</span><span>Faster Hydraulics · Italy</span><span>Wikov · Czech Republic</span><span>SAS Sanwa · Japan</span><span>Vanaz Engineering</span>
-        <span aria-hidden="true">Tata Hendrikson</span><span aria-hidden="true">Schwing Stetter</span><span aria-hidden="true">Caterpillar</span><span aria-hidden="true">Halliburton</span><span aria-hidden="true">Faster Hydraulics · Italy</span><span aria-hidden="true">Wikov · Czech Republic</span><span aria-hidden="true">SAS Sanwa · Japan</span><span aria-hidden="true">Vanaz Engineering</span>
-      </div>
+    <!-- STATIC named grid — the auto-scrolling marquee moved your strongest trust signals
+         past the eye before a buyer could read them (retired on About for the same reason).
+         NOTE: the application line per client is a PLACEHOLDER — confirm each with the
+         client before production (country is already factual). -->
+    <div class="fclients rv">
+      <div class="fclient"><span class="fclient__name">Caterpillar</span><span class="fclient__meta">USA · Hydraulic valve bodies</span></div>
+      <div class="fclient"><span class="fclient__name">Halliburton</span><span class="fclient__meta">USA · Flow-control castings</span></div>
+      <div class="fclient"><span class="fclient__name">Schwing Stetter</span><span class="fclient__meta">Germany · Concrete-pump components</span></div>
+      <div class="fclient"><span class="fclient__name">Faster Hydraulics</span><span class="fclient__meta">Italy · Hydraulic manifolds</span></div>
+      <div class="fclient"><span class="fclient__name">Wikov</span><span class="fclient__meta">Czech Republic · Gearbox housings</span></div>
+      <div class="fclient"><span class="fclient__name">SAS Sanwa</span><span class="fclient__meta">Japan · Pump castings</span></div>
+      <div class="fclient"><span class="fclient__name">Tata Hendrikson</span><span class="fclient__meta">India · Commercial-vehicle castings</span></div>
+      <div class="fclient"><span class="fclient__name">Vanaz Engineering</span><span class="fclient__meta">India · Precision components</span></div>
     </div>
     <div class="trust-row rv" style="justify-content:center">
       <span class="iso-seal">ISO<br/><b>9001:2015</b></span>
@@ -343,9 +408,32 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
 <script src="foundry.js"></script>
+<script src="foundry-heat.js"></script>
 <script src="foundry-chapters.js"></script>
+<script>
+/* ── Environmental grade: the light walks the process ──
+   Marks which section owns the frame so .stage__grade can crossfade under it —
+   sand → bonded sand → cool steel → clean export → THE FIRE (the invitation) → close.
+   Same instrument as index's .cine-grade and About's era grade, so all three pages
+   read as one film. Read-only: it just observes, it never drives scroll. ── */
+(function(){
+  var map = [['#shell-moulding','shell'],['#no-bake','nobake'],['#machining','machining'],
+             ['#export-quality','export'],['#specifications','export'],['#visit','invite'],
+             ['#capabilities','machining'],['.finale','finale']];
+  var secs = map.map(function(m){ var el=document.querySelector(m[0]); return el?{el:el,k:m[1]}:null; }).filter(Boolean);
+  if(!secs.length || !('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){
+        var hit = secs.filter(function(s){ return s.el===e.target; })[0];
+        if(hit && document.body.dataset.fsec !== hit.k) document.body.dataset.fsec = hit.k;
+      }
+    });
+  }, { rootMargin:'-45% 0px -45% 0px' });          // fires when a section owns the middle of the frame
+  secs.forEach(function(s){ io.observe(s.el); });
+})();
+</script>
 <script src="premium.js"></script>
 <script src="nav-transition.js"></script>
 </body>
