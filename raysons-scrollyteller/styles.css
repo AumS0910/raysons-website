@@ -105,6 +105,10 @@ a{color:inherit;text-decoration:none}
 .nav .brand{display:flex;align-items:center;gap:12px;font-weight:600;letter-spacing:.02em;font-size:15px}
 .nav .brand b{font-weight:700}
 .nav .brand span{font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:#fff;opacity:.6;border:1px solid rgba(255,255,255,.4);padding:3px 7px;border-radius:2px}
+/* the nav logomark. Lives HERE (the shared nav stylesheet) rather than being re-declared
+   per page — it was duplicated in index.html, about-cinema.css and foundry.css, so any page
+   loading only styles.css rendered the logo at its natural size. */
+.brand .brandmark{width:28px;height:28px;display:block;flex:0 0 auto}
 .nav-links{display:flex;gap:30px;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
 .nav-links a{position:relative;opacity:.85;transition:opacity .3s}
 .nav-links a:hover{opacity:1}

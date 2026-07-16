@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Products — Raysons Shell Cast · Real castings from our floor</title>
+<meta name="description" content="Twenty-three real iron castings from the Raysons Shell Cast floor — shell moulded and no-bake, Grey CI, SG ductile, SiMo and ADI, 0.5 kg to 500 kg, machined to drawing. ISO 9001:2015 · Kolhapur, India." />
+<meta name="theme-color" content="#0a0807" />
+<link rel="canonical" href="https://raysons-website.vercel.app/raysons-scrollyteller/products.html" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0807'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23c9a24e'/%3E%3C/svg%3E" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Products — Raysons Shell Cast · Real castings from our floor" />
+<meta property="og:description" content="Twenty-three real iron castings, photographed as they left the floor. Shell moulded & no-bake, 0.5 kg–500 kg, machined to drawing. ISO 9001:2015." />
+<meta property="og:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/products/part-01.webp" />
+<meta property="og:site_name" content="Raysons Shell Cast" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/products/part-01.webp" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="preload" as="image" href="products/part-01.webp" fetchpriority="high" />
+<style>
+  /* ══════════════════════════════════════════════════════════════════════════
+     PRODUCTS — "The Catalogue"
+     Every part on this page is a REAL Raysons casting, photographed as it left the
+     floor and cut out of its studio background so it can live in the same ember-dark
+     as the rest of the film. Nothing is rendered, nothing is stock.
+     No part carries a fabricated name: we don't have the names, and inventing them
+     would caption a real object with a lie. They're numbered instead — the range IS
+     the argument. Give me the real names/materials and each becomes a labelled entry.
+     ══════════════════════════════════════════════════════════════════════════ */
+  html{scroll-behavior:auto}
+  body{background:var(--bg);cursor:auto}
+
+  /* ── stage: ember dark + the molten pool the parts pass through ── */
+  .pstage{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .pstage__grade{position:absolute;inset:0;transition:background 1.2s ease, opacity 1.2s ease;
+    background:radial-gradient(120% 92% at 50% 50%, rgba(255,138,58,.42), transparent 72%);
+    opacity:.5;mix-blend-mode:soft-light}
+  body[data-psec="index"] .pstage__grade{background:radial-gradient(120% 100% at 50% 42%, rgba(150,180,216,.44), transparent 74%);opacity:.4}
+  body[data-psec="close"] .pstage__grade{background:radial-gradient(110% 92% at 50% 54%, rgba(255,96,20,.6), transparent 68%);opacity:.66}
+  .pstage__vig{position:absolute;inset:0;background:
+    linear-gradient(180deg, rgba(7,5,4,.88) 0%, transparent 22%, transparent 78%, rgba(7,5,4,.92) 100%),
+    radial-gradient(125% 95% at 50% 50%, transparent 44%, rgba(7,5,4,.62) 100%)}
+  @media(prefers-reduced-motion:reduce){.pstage__grade{transition:none}}
+
+  /* ── hero ── */
+  .phero{position:relative;z-index:10;min-height:100svh;display:flex;align-items:center;
+    justify-content:center;text-align:center;padding:clamp(90px,14vh,150px) clamp(20px,6vw,110px)}
+  .phero__k{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--bronze-lite);margin-bottom:26px}
+  .phero__t{font-family:var(--serif);font-weight:600;line-height:.92;letter-spacing:-.02em;
+    font-size:clamp(48px,9vw,150px);text-shadow:0 4px 50px rgba(7,5,4,.9)}
+  .phero__t em{font-style:italic;font-weight:500;color:var(--molten-hot)}
+  .phero__s{margin:32px auto 0;max-width:60ch;font-family:var(--mono);font-size:clamp(11px,1.15vw,13px);
+    letter-spacing:.14em;text-transform:uppercase;color:var(--bronze-lite);line-height:1.9}
+
+  /* ── THE PROCESSION — the page's camera ──
+     A pinned rig: the parts travel up through a molten pool of light, one at a time.
+     The lit one is full scale and full brightness; its neighbours recede above and below
+     in depth. Scroll drives it, a lerp smooths it, so it reads as a slow dolly down a
+     rack of castings rather than a slideshow. ── */
+  .pline{position:relative;z-index:10;height:640vh}
+  .pline__pin{position:sticky;top:0;height:100svh;overflow:hidden}
+  .pline__pool{position:absolute;left:50%;top:50%;width:min(120vw,1100px);height:min(120vw,1100px);
+    transform:translate(-50%,-50%);pointer-events:none;
+    background:radial-gradient(circle at 50% 50%, rgba(255,132,44,.22), rgba(255,96,20,.07) 42%, transparent 68%)}
+  .pline__floor{position:absolute;left:0;right:0;bottom:0;height:34vh;pointer-events:none;
+    background:radial-gradient(58% 120% at 50% 132%, rgba(255,120,40,.16), transparent 70%)}
+  .pline__rig{position:absolute;inset:0}
+  .ppart{position:absolute;left:50%;top:50%;width:min(52vw,470px);
+    transform:translate(-50%,-50%);will-change:transform,opacity;opacity:0;visibility:hidden}
+  .ppart img{width:100%;height:auto;display:block;
+    filter:drop-shadow(0 40px 60px rgba(0,0,0,.75)) drop-shadow(0 0 40px rgba(255,106,26,.10))}
+  @media(max-width:760px){.ppart{width:min(74vw,380px)}}
+
+  /* HUD — instrument, same language as the Overview's chapter HUD */
+  .phud{position:fixed;left:clamp(16px,3vw,40px);bottom:clamp(16px,3vw,30px);z-index:30;
+    pointer-events:none;font-family:var(--mono);opacity:0;transition:opacity .6s ease;
+    display:flex;flex-direction:column;gap:5px}
+  .phud.on{opacity:1}
+  .phud__k{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--molten-hot);
+    text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  .phud__i{font-size:10px;letter-spacing:.2em;color:var(--ink-faint);font-variant-numeric:tabular-nums;
+    text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  .phud__i b{color:var(--ink);font-weight:500}
+  .prail{position:fixed;right:clamp(12px,2vw,26px);top:50%;transform:translateY(-50%);z-index:30;
+    height:min(46vh,340px);width:2px;background:var(--line);pointer-events:none;opacity:0;
+    transition:opacity .6s ease;border-radius:2px}
+  .prail.on{opacity:1}
+  .prail__fill{position:absolute;left:0;top:0;width:100%;height:0;border-radius:2px;
+    background:linear-gradient(180deg,var(--molten-hot),var(--molten-deep));
+    box-shadow:0 0 12px rgba(255,106,26,.5)}
+  @media(max-width:640px){.prail{height:38vh;right:9px}
+    .phud{bottom:max(14px,env(safe-area-inset-bottom,14px))}}
+
+  /* ── THE INDEX — the whole catalogue at once ── */
+  .pindex{position:relative;z-index:10;padding:clamp(90px,14vh,150px) clamp(20px,6vw,110px)}
+  .pindex__head{max-width:1280px;margin:0 auto clamp(40px,6vh,68px)}
+  .pindex__k{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--molten);margin-bottom:18px}
+  .pindex__t{font-family:var(--serif);font-weight:600;line-height:1;letter-spacing:-.015em;
+    font-size:clamp(34px,5.4vw,80px)}
+  .pindex__t em{font-style:italic;font-weight:500;color:var(--bronze-lite)}
+  .pindex__l{margin-top:20px;max-width:62ch;color:var(--ink-dim);font-size:clamp(15px,1.5vw,18px);line-height:1.65}
+  .pgrid{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);
+    gap:clamp(10px,1.4vw,20px)}
+  .pcell{position:relative;aspect-ratio:1;border:1px solid var(--line);border-radius:6px;
+    background:linear-gradient(170deg, rgba(255,138,58,.05), rgba(7,5,4,.5));
+    display:flex;align-items:center;justify-content:center;padding:12%;overflow:hidden;
+    transition:border-color .4s ease, background .4s ease}
+  .pcell img{width:100%;height:100%;object-fit:contain;
+    filter:drop-shadow(0 14px 22px rgba(0,0,0,.7));transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+  .pcell:hover{border-color:rgba(255,106,26,.4);background:linear-gradient(170deg, rgba(255,138,58,.12), rgba(7,5,4,.5))}
+  .pcell:hover img{transform:scale(1.07)}
+  .pcell__n{position:absolute;left:10px;top:9px;font-family:var(--mono);font-size:9px;
+    letter-spacing:.16em;color:var(--ink-faint)}
+  @media(max-width:900px){.pgrid{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:560px){.pgrid{grid-template-columns:repeat(2,1fr)}}
+
+  /* ── close ── */
+  .pclose{position:relative;z-index:10;min-height:92svh;display:flex;align-items:center;
+    justify-content:center;text-align:center;padding:clamp(80px,12vh,140px) clamp(20px,6vw,110px)}
+  .pclose__t{font-family:var(--serif);font-weight:600;line-height:.94;letter-spacing:-.02em;
+    font-size:clamp(42px,7.4vw,116px);text-shadow:0 4px 50px rgba(7,5,4,.9)}
+  .pclose__t em{font-style:italic;font-weight:500;color:var(--molten-hot)}
+  .pclose__b{margin:30px auto 0;max-width:54ch;font-size:clamp(15px,1.6vw,19px);line-height:1.65;
+    color:#d8cdbe;font-weight:300}
+  .pclose__cta{margin-top:42px;display:flex;gap:22px;justify-content:center;align-items:center;flex-wrap:wrap}
+  .pclose__meta{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+</style>
+</head>
+<body>
+
+<noscript>
+  <style>.pstage,.cue,#ccta,.grain,.phud,.prail{display:none!important}
+    .pline{height:auto!important}.pline__pin{position:static!important;height:auto!important}
+    .pline__rig{position:static!important}
+    .ppart{position:static!important;transform:none!important;opacity:1!important;visibility:visible!important;
+      width:auto!important;max-width:340px;margin:0 auto 40px}
+  </style>
+</noscript>
+
+<div class="pstage">
+  <div class="pstage__grade"></div>
+  <div class="pstage__vig"></div>
+</div>
+<div class="grain"></div>
+
+<nav class="nav">
+  <a class="brand" href="index.html"><img src="images/raysons-logo.png" alt="" class="brandmark" /> <b>RAYSONS</b> <span>SHELL CAST</span></a>
+  <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-links">
+    <a href="index.html">Overview</a>
+    <a href="About Us.html">About</a>
+    <a href="foundry.html">Foundry</a>
+    <a href="products.html" aria-current="page">Products</a>
+    <a href="enquire.html">Enquire</a>
+  </div>
+</nav>
+
+<div class="cue ccue"><span>Scroll</span><span class="line"></span></div>
+
+<div class="cta-dock" id="ccta">
+  <a class="cta-quote mag" href="enquire.html">Request a Quote <span class="arrow">→</span></a>
+</div>
+
+<!-- HUD + rail: which part you're on, how far through the rack -->
+<div class="phud" id="phud" aria-hidden="true">
+  <span class="phud__k" id="phudK">The Catalogue</span>
+  <span class="phud__i"><b id="phudN">01</b> / 23</span>
+</div>
+<div class="prail" id="prail" aria-hidden="true"><span class="prail__fill" id="prailFill"></span></div>
+
+<!-- ===================== HERO ===================== -->
+<section class="phero" data-psec="hero">
+  <div>
+    <p class="phero__k rv">The Catalogue</p>
+    <h1 class="phero__t rv" data-split>Twenty-three parts.<br/><em>One floor.</em></h1>
+    <p class="phero__s rv">Grey CI · SG Ductile · SiMo · ADI — shell moulded &amp; no-bake · 0.5&nbsp;kg – 500&nbsp;kg · machined to drawing</p>
+  </div>
+</section>
+
+<!-- ===================== THE PROCESSION — every part, through the light ==================
+     23 real castings on a pinned rig. products.js drives it. -->
+<section class="pline" id="line" data-psec="line">
+  <div class="pline__pin">
+    <div class="pline__pool" aria-hidden="true"></div>
+    <div class="pline__rig" id="rig" aria-label="Twenty-three real iron castings from the Raysons floor">
+      <!-- parts injected by products.js from products/part-01..23.webp -->
+    </div>
+    <div class="pline__floor" aria-hidden="true"></div>
+  </div>
+</section>
+
+<!-- ===================== THE INDEX ===================== -->
+<section class="pindex" id="index" data-psec="index">
+  <div class="pindex__head">
+    <p class="pindex__k rv">The Index</p>
+    <h2 class="pindex__t rv">Twenty-three of a few <em>hundred.</em></h2>
+    <p class="pindex__l rv">Every one of these is a real Raysons casting, photographed as it left our floor — not a render, not stock. This is a sample of the program, not the whole of it.</p>
+  </div>
+  <div class="pgrid" id="pgrid">
+    <!-- cells injected by products.js -->
+  </div>
+</section>
+
+<!-- ===================== THE CLOSE ===================== -->
+<section class="pclose" data-psec="close">
+  <div>
+    <h2 class="pclose__t rv" data-split>Yours isn't<br/><em>here yet.</em></h2>
+    <p class="pclose__b rv">Every part on this page started as somebody's drawing. Send us yours — material grade, weight, annual quantity — and we'll tell you within 48 hours whether it belongs on this floor.</p>
+    <div class="pclose__cta rv">
+      <a class="cta-quote mag" href="enquire.html" style="margin-top:0">Send the drawing <span class="arrow">→</span></a>
+      <span class="pclose__meta">ISO&nbsp;9001:2015 · MIDC Shiroli, Kolhapur</span>
+    </div>
+  </div>
+</section>
+
+<footer class="about-footer">
+  <div class="ft-top">
+    <span class="ft-logo">RAYSONS <span>SHELL CAST</span></span>
+    <span class="ft-iso">ISO 9001:2015</span>
+  </div>
+  <div class="ft-mid">
+    <div class="ft-col"><h4>Programs</h4><ul><li>Shell Moulding</li><li>No-Bake Casting</li><li>In-House Machining</li><li>Export-Ready Quality</li></ul></div>
+    <div class="ft-col"><h4>Navigate</h4><ul><li><a href="index.html">Overview</a></li><li><a href="About Us.html">About</a></li><li><a href="foundry.html">Foundry</a></li><li><a href="products.html">Products</a></li><li><a href="enquire.html">Enquire</a></li></ul></div>
+    <div class="ft-col"><h4>Contact</h4><ul><li>MIDC Shiroli, Kolhapur</li><li>Maharashtra 416122</li><li><a href="mailto:industries@raysonsgroup.com">industries@raysonsgroup.com</a></li><li><a href="tel:+919999999999">+91 XXXXX XXXXX</a></li></ul></div>
+  </div>
+  <div class="ft-bot"><span>© 2026 Raysons Shell Cast · All rights reserved</span><span>Precision Foundry · Kolhapur, India</span></div>
+</footer>
+
+<script src="products.js"></script>
+<script src="premium.js"></script>
+<script src="nav-transition.js"></script>
+</body>
+</html>
