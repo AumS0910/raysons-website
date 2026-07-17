@@ -128,7 +128,35 @@
   body[data-fsec="invite"] .stage__grade{background:radial-gradient(110% 92% at 50% 56%, rgba(255,92,18,.72), transparent 66%);opacity:.76}      /* the fire — the peak */
   body[data-fsec="finale"] .stage__grade{background:radial-gradient(120% 92% at 50% 46%, rgba(255,132,52,.5), transparent 70%);opacity:.5}
   body[data-fsec="metal"] .stage__grade{background:radial-gradient(120% 100% at 50% 45%, rgba(150,175,210,.4), transparent 74%);opacity:.34}  /* cool lab light behind the specimen */
+  body[data-fsec="furnace"] .stage__grade{background:radial-gradient(110% 96% at 50% 62%, rgba(255,110,26,.6), transparent 68%);opacity:.6}  /* the melt — hot */
   @media(prefers-reduced-motion:reduce){.stage__grade{transition:none}}
+
+  /* ── THE FURNACE — Power's sustained beat: numbers igniting out of the heat ── */
+  .furnace{position:relative;z-index:10;height:240vh}
+  .furnace__pin{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .furnace__heat{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+  .furnace__grad{position:absolute;inset:0;pointer-events:none;z-index:1;
+    background:radial-gradient(92% 82% at 50% 60%, transparent 38%, rgba(7,5,4,.62) 100%),
+      linear-gradient(180deg, rgba(7,5,4,.7) 0%, transparent 24%, transparent 72%, rgba(7,5,4,.9) 100%)}
+  .furnace__hud{position:absolute;left:clamp(16px,3vw,40px);bottom:clamp(16px,3vw,30px);z-index:3;
+    font-family:var(--mono);display:flex;flex-direction:column;gap:5px;pointer-events:none}
+  .furnace__hud-k{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--molten-hot);text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  .furnace__hud-i{font-size:10px;letter-spacing:.2em;color:var(--ink-faint);font-variant-numeric:tabular-nums;text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  .furnace__stack{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;pointer-events:none;padding:0 20px}
+  .furnace__fig{position:absolute;text-align:center;opacity:0;transform:translateY(30px) scale(.96);
+    transition:opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1)}
+  .furnace__fig.on{opacity:1;transform:none}
+  .furnace__num{display:block;font-family:var(--serif);font-weight:600;line-height:.86;letter-spacing:-.02em;
+    color:var(--molten-hot);font-variant-numeric:tabular-nums;font-size:clamp(72px,16vw,236px);
+    text-shadow:0 4px 60px rgba(255,106,26,.5),0 2px 20px rgba(7,5,4,.6)}
+  .furnace__num small{font-size:.26em;letter-spacing:.02em;color:var(--ink);font-weight:500}
+  .furnace__fig.on .furnace__num{animation:furnaceBurn 2.6s ease-in-out infinite}
+  @keyframes furnaceBurn{0%,100%{text-shadow:0 4px 60px rgba(255,106,26,.5),0 2px 20px rgba(7,5,4,.6)}
+    50%{text-shadow:0 6px 92px rgba(255,146,54,.78),0 2px 20px rgba(7,5,4,.6)}}
+  .furnace__lbl{display:block;margin-top:clamp(14px,2vw,26px);font-family:var(--mono);font-size:clamp(11px,1.3vw,14px);
+    letter-spacing:.18em;text-transform:uppercase;color:#d8cdbe;text-shadow:0 1px 16px rgba(7,5,4,.9)}
+  @media(prefers-reduced-motion:reduce){.furnace__fig.on .furnace__num{animation:none}}
+  @media(max-width:640px){.furnace{height:220vh}}
 
   /* ── CHAPTER V · THE METALLURGY — the procedural iron specimen + material cards ── */
   .metal{position:relative;z-index:10;height:400vh}
@@ -175,7 +203,13 @@
     .metal__canvas,.metal__cue{display:none!important}
     .metal__head{position:static!important}
     .metal__cards{position:static!important;display:flex;flex-direction:column;align-items:center;gap:30px;margin-top:40px}
-    .metal__card{position:static!important;opacity:1!important;transform:none!important;left:auto!important}</style>
+    .metal__card{position:static!important;opacity:1!important;transform:none!important;left:auto!important}
+    /* Furnace: no JS → flatten to the three figures stacked */
+    .furnace{height:auto!important}
+    .furnace__pin{position:static!important;height:auto!important;display:block!important;overflow:visible!important;padding:80px 24px!important}
+    .furnace__heat{display:none!important}
+    .furnace__stack{position:static!important;display:flex;flex-direction:column;align-items:center;gap:50px}
+    .furnace__fig{position:static!important;opacity:1!important;transform:none!important}</style>
 </noscript>
 
 <!-- fixed cinematic stage -->
@@ -220,12 +254,42 @@
        bytes, it can never be "the same asset", and it matches this page's thesis — we don't
        show you a picture of the fire, we make one. -->
   <div class="fhero__bg">
-    <canvas id="fheat" aria-hidden="true"></canvas>
+    <canvas id="fheat" class="fheat" aria-hidden="true"></canvas>
   </div>
   <div class="inner">
     <div class="eyebrow-badge rv"><span class="dot"></span> The Foundry</div>
     <h1 class="fhero__title rv" data-split>Precision casting,<br/><em>engineered to spec.</em></h1>
     <p class="fhero__sub rv">Shell Moulded · No-Bake · In-House Machining · ISO&nbsp;9001:2015 · 0.5&nbsp;kg&nbsp;–&nbsp;500&nbsp;kg</p>
+  </div>
+</section>
+
+<!-- ===================== THE FURNACE — Power's sustained beat ==========================
+     The hero names the foundry; this lets you STAND in it. Pinned while three furnace figures
+     ignite one at a time out of the heat — the melt, the pour temperature, the capacity
+     growing. Procedural heat (foundry-heat.js runs on every .fheat), zero assets. This is the
+     "sustained shot" the heat needed: Power gets duration before the capability pillars. -->
+<section class="furnace" id="furnace" data-fsec="furnace">
+  <div class="furnace__pin">
+    <canvas class="fheat furnace__heat" id="fheat2" aria-hidden="true"></canvas>
+    <div class="furnace__grad"></div>
+    <div class="furnace__hud">
+      <span class="furnace__hud-k">The Furnace</span>
+      <span class="furnace__hud-i" id="furnaceCount">01 / 03</span>
+    </div>
+    <div class="furnace__stack" aria-label="Foundry furnace capability">
+      <div class="furnace__fig on" data-f="0">
+        <span class="furnace__num">500<small>&nbsp;kg</small></span>
+        <span class="furnace__lbl">Medium-frequency induction melt</span>
+      </div>
+      <div class="furnace__fig" data-f="1">
+        <span class="furnace__num">1450<small>&nbsp;°C</small></span>
+        <span class="furnace__lbl">Poured at a controlled temperature</span>
+      </div>
+      <div class="furnace__fig" data-f="2">
+        <span class="furnace__num">500<small>&nbsp;→&nbsp;700 MT</small></span>
+        <span class="furnace__lbl">Annual capacity — and growing</span>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -472,7 +536,7 @@
    Same instrument as index's .cine-grade and About's era grade, so all three pages
    read as one film. Read-only: it just observes, it never drives scroll. ── */
 (function(){
-  var map = [['#shell-moulding','shell'],['#no-bake','nobake'],['#machining','machining'],
+  var map = [['#furnace','furnace'],['#shell-moulding','shell'],['#no-bake','nobake'],['#machining','machining'],
              ['#export-quality','export'],['#specifications','export'],
              ['#capabilities','machining'],['#metallurgy','metal'],['#visit','invite']];
   var secs = map.map(function(m){ var el=document.querySelector(m[0]); return el?{el:el,k:m[1]}:null; }).filter(Boolean);
@@ -486,6 +550,28 @@
     });
   }, { rootMargin:'-45% 0px -45% 0px' });          // fires when a section owns the middle of the frame
   secs.forEach(function(s){ io.observe(s.el); });
+})();
+
+/* ── The Furnace: ignite one figure at a time across the pinned scroll ──
+   Power's sustained beat — the melt, the pour temperature, the growing capacity burn in
+   out of the heat one by one as the section is scrubbed. Read-only mirror of scroll,
+   rAF-throttled; idle when the section isn't moving. ── */
+(function(){
+  var sec = document.getElementById('furnace'); if(!sec) return;
+  var figs = [].slice.call(sec.querySelectorAll('.furnace__fig'));
+  var count = document.getElementById('furnaceCount');
+  var N = figs.length, last = 0, ticking = false;
+  function upd(){
+    ticking = false;
+    var max = sec.offsetHeight - innerHeight;
+    var p = Math.min(1, Math.max(0, -sec.getBoundingClientRect().top / Math.max(1, max)));
+    var idx = Math.min(N-1, Math.max(0, Math.floor(p * N)));
+    if(idx === last) return; last = idx;
+    figs.forEach(function(f,i){ f.classList.toggle('on', i === idx); });
+    if(count) count.textContent = '0'+(idx+1)+' / 0'+N;
+  }
+  addEventListener('scroll', function(){ if(!ticking){ ticking = true; requestAnimationFrame(upd); } }, { passive:true });
+  addEventListener('resize', upd); upd();
 })();
 </script>
 <script src="premium.js"></script>
