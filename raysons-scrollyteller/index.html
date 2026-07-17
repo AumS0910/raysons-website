@@ -129,6 +129,17 @@
   #bracketHint{position:fixed;right:clamp(20px,4vw,44px);bottom:clamp(24px,5vh,48px);z-index:23;
     font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
     color:var(--ink-faint);opacity:0;pointer-events:none;text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  /* TOLERANCE OVERLAY — grab the casting and the drawing returns to inspect it: a champagne
+     callout with the tolerance it's held to. Fades in while dragging (bracket.js toggles .on). */
+  #bracketTol{position:fixed;right:clamp(20px,4vw,44px);top:clamp(88px,14vh,140px);z-index:23;
+    display:flex;flex-direction:column;align-items:flex-end;gap:5px;text-align:right;
+    opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .4s ease, transform .4s ease}
+  #bracketTol.on{opacity:1;transform:none}
+  #bracketTol .k{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze-lite);text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  #bracketTol .v{font-family:var(--serif);font-weight:600;font-size:clamp(30px,4vw,52px);line-height:.9;color:var(--molten-hot);
+    font-variant-numeric:tabular-nums;text-shadow:0 2px 24px rgba(230,196,131,.35),0 2px 20px rgba(7,5,4,.9)}
+  #bracketTol .p{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  @media(max-width:640px){#bracketTol{top:auto;bottom:clamp(140px,26vh,220px);right:16px}#bracketTol .v{font-size:34px}}
   #bracketScroll{position:relative;z-index:5;pointer-events:none;height:300vh}
   .bracket-next{position:fixed;left:50%;bottom:clamp(88px,16vh,160px);transform:translateX(-50%);z-index:23;
     font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);
@@ -221,7 +232,7 @@
 
 <noscript>
   <style>
-    #cloader,.ccue,#ccta,.cine-vig,.cine-floor,.grain,#stage,.film-hud,.film-rail,#bracketGL,#bracketFx,#bracketCap,#bracketHint,.bracket-next,#bracketScroll{display:none!important}
+    #cloader,.ccue,#ccta,.cine-vig,.cine-floor,.grain,#stage,.film-hud,.film-rail,#bracketGL,#bracketFx,#bracketCap,#bracketHint,#bracketTol,.bracket-next,#bracketScroll{display:none!important}
     #acts,.act{position:static!important;opacity:1!important;visibility:visible!important;display:block!important;height:auto!important;padding:0!important}
     .act .inner .rise{opacity:1!important;transform:none!important}
     .ns-fallback{max-width:760px;margin:0 auto;padding:120px 24px 80px;color:var(--ink);font-family:var(--sans)}
@@ -269,6 +280,12 @@
   <p>Your part, in our language</p>
 </div>
 <div id="bracketHint" aria-hidden="true">Drag to inspect</div>
+<!-- tolerance readout — appears while you grab the casting (bracket.js) -->
+<div id="bracketTol" aria-hidden="true">
+  <span class="k">Held to</span>
+  <span class="v">±0.3&nbsp;mm</span>
+  <span class="p">Machined to drawing</span>
+</div>
 <!-- finale → About handoff: nav-transition.js intercepts this and dips to ember-black before navigating -->
 <a class="bracket-next" id="bracketNext" href="About Us.html?from=finale" aria-label="Continue to the group story">Enter the group story <span aria-hidden="true">→</span></a>
 

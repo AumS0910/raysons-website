@@ -66,6 +66,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   const spacer  = document.getElementById('bracketScroll');
   const cap     = document.getElementById('bracketCap');
   const hint    = document.getElementById('bracketHint');
+  const tol     = document.getElementById('bracketTol');
   const next    = document.getElementById('bracketNext');
   const fx      = document.getElementById('bracketFx');
   const cscroll = document.getElementById('cscroll');
@@ -81,7 +82,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   const capEl = { k: cap && cap.querySelector('.k'), h: cap && cap.querySelector('h2'), p: cap && cap.querySelector('p') };
   const COPY = {
     drawing: { k:'The Drawing · 11CX065C01', h:'Your <em>drawing.</em>', p:'Your part, in our language' },
-    object:  { k:'The Object · 11CX065C01',  h:'Our <em>fire.</em>',     p:'Rear bracket · shell moulded · machined to drawing' }
+    object:  { k:'The Object · 11CX065C01',  h:'Our <em>fire.</em>',     p:'Rear bracket · shell moulded · machined to drawing' },
+    section: { k:'Section · 11CX065C01',      h:'Every <em>wall.</em>',   p:'Sectioned to the drawing · wall thickness held' }
   };
   let capPhase = '';
   function setCopy(phase){ if(phase===capPhase || !capEl.h) return; capPhase=phase; const c=COPY[phase];
@@ -98,6 +100,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   renderer.toneMappingExposure = 1.28;
   renderer.shadowMap.enabled = !MOBILE;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.localClippingEnabled = true;                    // section-cut interaction (see below)
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x080605);
@@ -121,6 +124,9 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   // while the metal floods, so the floor and reflection catch the glow (added at init at
   // zero intensity — adding a light mid-scroll would force a shader recompile hitch)
   const heatLight = new THREE.PointLight(0xff5a14, 0, 9, 2); scene.add(heatLight);
+  // section-cut: a champagne light that warms the freshly-exposed interior when the part is
+  // sectioned (added at init at 0 intensity, same no-recompile reason)
+  const cutLight = new THREE.PointLight(0xe6c483, 0, 6, 2); scene.add(cutLight);
 
   // ---- atmosphere: embers during the cast, dust motes in the light the rest of the time ----
   function makeSprite(soft){
@@ -154,13 +160,20 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     a.needsUpdate=true;
   }
 
+  // SECTION CUT: a camera-tracking plane that slices the near half away to reveal wall
+  // thickness. Starts with a huge constant so it clips nothing until the section phase; set
+  // on the material at creation so the shader compiles WITH the clipping chunks.
+  const clipPlane = new THREE.Plane(new THREE.Vector3(0,0,1), 100);
+  const _v = new THREE.Vector3(), _p = new THREE.Vector3();
+
   // machined cast-iron: physical metal with sand-cast surface grain + a faint machined sheen
   const grain = makeNoiseTex(256);
   const iron = new THREE.MeshPhysicalMaterial({
     color:0x3a342c, metalness:0.95, roughness:0.5,          // dark warm iron
     clearcoat:0.28, clearcoatRoughness:0.42, envMapIntensity:1.35,
     bumpMap:grain, bumpScale:0.32, roughnessMap:grain,
-    transparent:true, opacity:1.0
+    transparent:true, opacity:1.0,
+    clippingPlanes:[clipPlane], clipShadows:true            // section cut; DoubleSide toggled only while cutting
   });
   // THE POUR, made literal: instead of the whole part fading in uniformly (an opacity
   // slider), molten iron FLOODS the mould bottom-up — a per-fragment fill level with a
@@ -308,8 +321,26 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     // atmosphere: sparks ride the heat; dust hangs in the light once the object is real
     embers.visible = heat > 0.015; embers.material.opacity = Math.min(1, heat*1.6);
     dust.visible = zp > 0.30; dust.material.opacity = 0.10 * smooth(0.30,0.5,zp);
-    setCopy(zp < 0.32 ? 'drawing' : 'object');
     return heat;
+  }
+
+  // SECTION CUT — sweep a camera-facing plane through the solid part (near the end of the
+  // object zone) to reveal wall thickness, then retract before the "group story" CTA. The
+  // freshly-cut interior catches a champagne light. Plane tracks the camera so the section
+  // always opens toward the viewer, even as the orbit turns.
+  function section(zp){
+    const sec = smooth(0.56,0.70,zp) * (1 - smooth(0.80,0.88,zp));   // in → hold → out
+    if(sec > 0.002){
+      iron.side = THREE.DoubleSide;                                  // see the inner walls (cheap: side is render-state, no recompile)
+      const camToTarget = _v.subVectors(target, camera.position).normalize();
+      const point = _p.copy(target).addScaledVector(camToTarget, 1.3*(sec-1));   // front face → centre as sec 0→1
+      clipPlane.setFromNormalAndCoplanarPoint(camToTarget, point);
+      cutLight.position.copy(point).addScaledVector(camToTarget, -0.35);          // just behind the cut face
+      cutLight.intensity = sec * 3.2;
+    } else if(cutLight.intensity !== 0 || iron.side !== THREE.FrontSide){
+      iron.side = THREE.FrontSide; clipPlane.constant = 100; cutLight.intensity = 0;   // no clip
+    }
+    return sec;
   }
 
   function setChrome(zp){
@@ -338,14 +369,25 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
     if(!dragging){ dragAz += velAz; dragEl = clamp(dragEl+velEl,-0.6,0.9); velAz*=0.90; velEl*=0.90; }  // release inertia settles; pose HELD
 
+    applyCamera(zp, t);   // pose the camera BEFORE the section plane reads it
+
     if(modelReady){
       const heat = reveal(zp);
       root.scale.setScalar(lerp(0.92, 1.0, smooth(0,0.12,zp)));
       if(embers.visible) driftParticles(embers, t, 0.012 + heat*0.010, 0.0011);  // sparks climb with the heat
       if(dust.visible)   driftParticles(dust,   t, 0.0009,             0.0004); // motes barely move
       heatLight.intensity = heat * (7 + Math.sin(t*9)*1.2 + Math.sin(t*23)*0.6); // the fire flickers
+
+      const sec = section(zp);
+      // caption: drawing → object, overridden by the section beat while it's open
+      setCopy(sec > 0.45 ? 'section' : (zp < 0.32 ? 'drawing' : 'object'));
+
+      // TOLERANCE OVERLAY — grab the casting and the drawing returns to inspect it: a
+      // champagne readout of the tolerance, and the metal catches more champagne light.
+      const inspecting = dragging && zp > 0.5 && sec < 0.3;   // not while it's sectioned
+      if(tol) tol.classList.toggle('on', inspecting);
+      iron.envMapIntensity = lerp(iron.envMapIntensity, inspecting ? 2.15 : 1.35, 0.12);
     }
-    applyCamera(zp, t);
     if(composer) composer.render(); else renderer.render(scene, camera);
   });
 })();
