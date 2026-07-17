@@ -127,13 +127,55 @@
   body[data-fsec="export"] .stage__grade{background:radial-gradient(120% 100% at 50% 42%, rgba(170,196,226,.46), transparent 74%);opacity:.4}    /* clean */
   body[data-fsec="invite"] .stage__grade{background:radial-gradient(110% 92% at 50% 56%, rgba(255,92,18,.72), transparent 66%);opacity:.76}      /* the fire — the peak */
   body[data-fsec="finale"] .stage__grade{background:radial-gradient(120% 92% at 50% 46%, rgba(255,132,52,.5), transparent 70%);opacity:.5}
+  body[data-fsec="metal"] .stage__grade{background:radial-gradient(120% 100% at 50% 45%, rgba(150,175,210,.4), transparent 74%);opacity:.34}  /* cool lab light behind the specimen */
   @media(prefers-reduced-motion:reduce){.stage__grade{transition:none}}
+
+  /* ── CHAPTER V · THE METALLURGY — the procedural iron specimen + material cards ── */
+  .metal{position:relative;z-index:10;height:400vh}
+  .metal__pin{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .metal__canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .metal__vig{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 50%, transparent 44%, rgba(7,5,4,.72) 100%),
+      linear-gradient(180deg, rgba(7,5,4,.86) 0%, transparent 20%, transparent 78%, rgba(7,5,4,.92) 100%)}
+  .metal__head{position:absolute;top:clamp(78px,12vh,132px);left:0;right:0;text-align:center;pointer-events:none;padding:0 20px}
+  .metal__k{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--bronze-lite)}
+  .metal__title{font-family:var(--serif);font-weight:600;font-size:clamp(30px,5vw,66px);line-height:1;margin-top:12px;color:var(--ink);text-shadow:0 2px 30px rgba(7,5,4,.9)}
+  .metal__title em{font-style:italic;color:var(--molten-hot)}
+  .metal__cards{position:absolute;left:0;right:0;bottom:clamp(58px,11vh,104px);pointer-events:none;padding:0 20px}
+  .metal__card{position:absolute;left:50%;bottom:0;width:min(540px,88vw);text-align:center;opacity:0;
+    transform:translate(-50%,14px);transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1)}
+  .metal__card.on{opacity:1;transform:translate(-50%,0)}
+  /* the section owns the frame — the floating quote dock yields (as the Overview finale does)
+     so it never collides with the material cards; the invitation right after carries the CTA */
+  body[data-fsec="metal"] .cta-dock{opacity:0;pointer-events:none}
+  .metal__no{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+  .metal__name{font-family:var(--serif);font-weight:600;font-size:clamp(26px,3.8vw,46px);line-height:1.02;margin:9px 0 4px;color:var(--ink);text-shadow:0 2px 24px rgba(7,5,4,.9)}
+  .metal__std{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--molten-hot);
+    border:1px solid var(--bronze-deep);border-radius:40px;padding:5px 13px;display:inline-block;margin-bottom:15px}
+  .metal__prop{font-size:clamp(15px,1.55vw,18px);line-height:1.6;color:#d8cdbe;max-width:46ch;margin:0 auto;text-shadow:0 1px 16px rgba(7,5,4,.9)}
+  .metal__cue{position:absolute;bottom:24px;left:0;right:0;text-align:center;font-family:var(--mono);
+    font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);opacity:.7}
+  @media(max-width:640px){.metal{height:360vh}.metal__cue{display:none}}
+  /* no-canvas / no-JS: flatten to a readable stacked list of the four grades */
+  .metal--flat{height:auto}
+  .metal--flat .metal__pin{position:static;height:auto;display:block;overflow:visible;padding:clamp(60px,10vh,110px) clamp(20px,6vw,80px)}
+  .metal--flat .metal__canvas,.metal--flat .metal__cue{display:none}
+  .metal--flat .metal__head{position:static}
+  .metal--flat .metal__cards{position:static;display:flex;flex-direction:column;align-items:center;gap:30px;margin-top:40px}
+  .metal--flat .metal__card{position:static;opacity:1;transform:none;left:auto}
 </style>
 </head>
 <body>
 
 <noscript>
-  <style>#cloader,.cue,#ccta,.stage,.grain{display:none!important}.rv{opacity:1!important;transform:none!important}</style>
+  <style>#cloader,.cue,#ccta,.stage,.grain{display:none!important}.rv{opacity:1!important;transform:none!important}
+    /* Metallurgy: no JS → flatten the pinned canvas beat to a readable stacked list */
+    .metal{height:auto!important}
+    .metal__pin{position:static!important;height:auto!important;display:block!important;overflow:visible!important;padding:70px 24px!important}
+    .metal__canvas,.metal__cue{display:none!important}
+    .metal__head{position:static!important}
+    .metal__cards{position:static!important;display:flex;flex-direction:column;align-items:center;gap:30px;margin-top:40px}
+    .metal__card{position:static!important;opacity:1!important;transform:none!important;left:auto!important}</style>
 </noscript>
 
 <!-- fixed cinematic stage -->
@@ -339,6 +381,50 @@
   </div>
 </section>
 
+<!-- ===================== CHAPTER V · THE METALLURGY (the Innovation beat) ==============
+     One iron, four grades. A polished specimen turns under a raking light while its
+     microstructure walks the material spectrum on scroll — flake graphite (Grey CI) drawing
+     into spheres (Ductile), warming through SiMo to the austempered brightness of ADI.
+     Procedural (metallurgy.js) — zero new assets. Sits between the capability proof and the
+     invitation: process → specs → the material science → "come stand on it." -->
+<section class="metal" id="metallurgy" data-fsec="metal">
+  <div class="metal__pin">
+    <canvas class="metal__canvas" id="metalCanvas" aria-hidden="true"></canvas>
+    <div class="metal__vig"></div>
+    <div class="metal__head">
+      <p class="metal__k">Chapter V · The Metallurgy</p>
+      <h2 class="metal__title">One iron, <em>four grades.</em></h2>
+    </div>
+    <div class="metal__cards" aria-label="Iron grades cast at Raysons">
+      <article class="metal__card on" data-m="0">
+        <span class="metal__no">01 / 04</span>
+        <h3 class="metal__name">Grey Cast Iron</h3>
+        <span class="metal__std">IS 210</span>
+        <p class="metal__prop">Flake graphite that soaks up vibration — the machine-base workhorse.</p>
+      </article>
+      <article class="metal__card" data-m="1">
+        <span class="metal__no">02 / 04</span>
+        <h3 class="metal__name">SG / Ductile Iron</h3>
+        <span class="metal__std">IS 1865</span>
+        <p class="metal__prop">Graphite pulled into spheres — it flexes before it fails.</p>
+      </article>
+      <article class="metal__card" data-m="2">
+        <span class="metal__no">03 / 04</span>
+        <h3 class="metal__name">SiMo Ductile</h3>
+        <span class="metal__std">High-temperature grade</span>
+        <p class="metal__prop">Silicon and molybdenum hold their shape at manifold heat.</p>
+      </article>
+      <article class="metal__card" data-m="3">
+        <span class="metal__no">04 / 04</span>
+        <h3 class="metal__name">ADI</h3>
+        <span class="metal__std">Austempered · ASTM&nbsp;A897</span>
+        <p class="metal__prop">Austempered to steel's strength at iron's cost — gears, wear parts, weight saved.</p>
+      </article>
+    </div>
+    <div class="metal__cue rv">Scroll — the graphite draws into spheres</div>
+  </div>
+</section>
+
 <!-- ===================== THE CLOSE · THE INVITATION ===================================
      (Global Customers removed — the customer roster is About's job; Foundry is the process
      and capability page, and it was restating About's trust grid.)
@@ -378,6 +464,7 @@
 <script src="foundry.js"></script>
 <script src="foundry-heat.js"></script>
 <script src="foundry-chapters.js"></script>
+<script src="metallurgy.js"></script>
 <script>
 /* ── Environmental grade: the light walks the process ──
    Marks which section owns the frame so .stage__grade can crossfade under it —
@@ -387,7 +474,7 @@
 (function(){
   var map = [['#shell-moulding','shell'],['#no-bake','nobake'],['#machining','machining'],
              ['#export-quality','export'],['#specifications','export'],
-             ['#capabilities','machining'],['#visit','invite']];
+             ['#capabilities','machining'],['#metallurgy','metal'],['#visit','invite']];
   var secs = map.map(function(m){ var el=document.querySelector(m[0]); return el?{el:el,k:m[1]}:null; }).filter(Boolean);
   if(!secs.length || !('IntersectionObserver' in window)) return;
   var io = new IntersectionObserver(function(es){
