@@ -21,10 +21,14 @@
   /* ── Enquire page: reuses the molten tokens from styles.css ── */
   html{scroll-behavior:smooth}
   body{cursor:auto;overflow-x:hidden}
+  /* Continuity of room: the finale ends on black with an ember floor glow (#bracketFx).
+     The Commission opens in the SAME building — carry that exact floor glow so arriving
+     from "Enter the group story" / "Send the drawing" feels like walking off the foundry
+     floor into the office, not loading a new site. */
   .eq-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
     background:
-      radial-gradient(60% 50% at 18% 10%, rgba(201,162,78,.14), transparent 60%),
-      radial-gradient(50% 60% at 90% 100%, rgba(194,48,10,.16), transparent 60%),
+      radial-gradient(72% 56% at 50% 118%, rgba(255,120,40,.15), transparent 60%),
+      radial-gradient(55% 46% at 14% 4%, rgba(201,162,78,.12), transparent 60%),
       var(--bg);}
   .eq-grain{position:fixed;inset:-50%;z-index:1;pointer-events:none;opacity:.045;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
@@ -87,14 +91,18 @@
   .eq-submit:active{transform:translateY(1px)}
   .eq-submit[disabled]{opacity:.6;cursor:wait}
 
-  /* success state */
-  .eq-success{display:none;text-align:center;padding:24px 8px}
-  .eq-success.show{display:block;animation:eqfade .6s ease}
+  /* success state — overlays the sealed (blurred) form so the card keeps its height and
+     the molten border stays framed around the confirmation. */
+  .eq-success{position:absolute;inset:0;z-index:7;display:none;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:24px;
+    background:radial-gradient(120% 90% at 50% 42%, rgba(16,11,7,.9), rgba(7,5,4,.95));border-radius:18px}
+  .eq-success.show{display:flex;animation:eqfade .6s ease .35s both}
   @keyframes eqfade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-  .eq-success .tick{width:64px;height:64px;border-radius:50%;margin:0 auto 22px;
+  .eq-success .tick{width:60px;height:60px;border-radius:50%;margin:0 auto 22px;
     display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(180deg,var(--molten-hot),var(--molten));color:#180c03;font-size:30px}
-  .eq-success h3{font-family:var(--serif);font-size:30px;font-weight:500;letter-spacing:-.02em}
+    background:linear-gradient(180deg,var(--molten-hot),var(--molten));color:#180c03}
+  .eq-success .tick svg{width:26px;height:26px}
+  .eq-success h3{font-family:var(--serif);font-size:clamp(26px,3.4vw,32px);font-weight:500;letter-spacing:-.02em}
   .eq-success p{color:var(--ink-dim);margin-top:12px;font-size:15px;line-height:1.6;max-width:40ch;margin-left:auto;margin-right:auto}
 
   .eq-foot{position:relative;z-index:5;text-align:center;padding:26px 14px;
@@ -116,6 +124,42 @@
   }
   @media(max-width:480px){.eq-contact{grid-template-columns:1fr;gap:18px}}
   @media(max-width:480px){.eq-wrap{padding-top:max(90px,12vh)}}
+
+  /* ── THE COMMISSION — the form staged as a drawing-intake job card ──
+     The card carries a docket header and its fields are grouped into the three things a
+     foundry actually needs to open a job: who's commissioning, what the casting is, and
+     the brief. On submit a molten line traces the card border (the pour sealing the job)
+     before the confirmation reads back. Purely staging — the form logic is untouched. */
+  .eq-form{position:relative;overflow:hidden}
+  .eq-docket{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+    padding-bottom:16px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+  .eq-docket .dk{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim)}
+  .eq-docket .dk b{color:var(--bronze-lite);font-weight:400}
+  .eq-docket .tag{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--molten-hot);border:1px solid var(--bronze-deep);border-radius:40px;padding:5px 12px;white-space:nowrap;transition:color .4s,border-color .4s}
+  .eq-form.sealed .eq-docket .tag{color:var(--ink);border-color:var(--bronze-lite)}
+
+  .eq-set{border:0;margin:0 0 8px;padding:0}
+  .eq-set+.eq-set{margin-top:22px;padding-top:22px;border-top:1px solid var(--line)}
+  .eq-set legend{display:flex;align-items:center;gap:11px;padding:0;margin-bottom:16px;width:100%;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint)}
+  .eq-set legend .no{color:var(--molten);font-weight:700}
+  .eq-set legend::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  /* the pour that seals the job: a molten line traces the card's border on submit.
+     pathLength normalises the perimeter to 1 so no pixel math is needed; the rect's
+     size is set from the card at submit time. Decorative — success shows even if it no-ops. */
+  .eq-seal{position:absolute;inset:0;width:100%;height:100%;z-index:6;pointer-events:none;opacity:0}
+  .eq-form.sealing .eq-seal{opacity:1}
+  .eq-seal rect{fill:none;stroke:url(#moltenSeal);stroke-width:2.5;stroke-dasharray:1;stroke-dashoffset:1;
+    filter:drop-shadow(0 0 6px rgba(255,106,26,.7))}
+  .eq-form.sealing .eq-seal rect{animation:eqSeal 1.15s cubic-bezier(.4,.1,.2,1) forwards}
+  @keyframes eqSeal{to{stroke-dashoffset:0}}
+  .eq-form.sealing form{transition:opacity .5s ease .5s,filter .5s ease .5s;opacity:.25;filter:blur(1px)}
+  @media(prefers-reduced-motion:reduce){
+    .eq-form.sealing .eq-seal rect{animation:none;stroke-dashoffset:0}
+    .eq-form.sealing form{transition:none;opacity:.25}}
+  .eq-success p em{font-style:normal;color:var(--bronze-lite)}
 </style>
 </head>
 <body>
@@ -146,9 +190,9 @@
 <div class="eq-wrap">
   <!-- ── left: pitch + contact ── -->
   <div>
-    <div class="eq-eyebrow">Request a Quote</div>
-    <h1 class="eq-title">Let's build the<br/><em>casting brief.</em></h1>
-    <p class="eq-sub">Share your drawing, material grade, weight range and annual requirement. Our engineering team responds within 48 hours.</p>
+    <div class="eq-eyebrow">The Commission</div>
+    <h1 class="eq-title">Send us the<br/><em>drawing.</em></h1>
+    <p class="eq-sub">Every part on this floor started as somebody's drawing. Share yours — grade, weight, annual quantity — and within 48 hours you'll know whether it belongs here. An engineer replies, not an autoresponder.</p>
 
     <div class="eq-contact">
       <div>
@@ -174,78 +218,109 @@
     </div>
   </div>
 
-  <!-- ── right: RFQ form ── -->
-  <div class="eq-form">
+  <!-- ── right: the job card (drawing intake) ── -->
+  <div class="eq-form" id="eqForm">
+    <div class="eq-docket">
+      <span class="dk">Job card · <b>drawing intake</b></span>
+      <span class="tag" id="eqTag">New</span>
+    </div>
     <form id="rfq" novalidate>
-      <div class="eq-grid">
-        <div class="field">
-          <label>Name <span class="req">*</span></label>
-          <input type="text" name="name" autocomplete="name" required />
-          <span class="err">Please enter your name.</span>
+      <fieldset class="eq-set">
+        <legend><span class="no">01</span> Who's commissioning</legend>
+        <div class="eq-grid">
+          <div class="field">
+            <label>Name <span class="req">*</span></label>
+            <input type="text" name="name" autocomplete="name" required />
+            <span class="err">Please enter your name.</span>
+          </div>
+          <div class="field">
+            <label>Company</label>
+            <input type="text" name="company" autocomplete="organization" />
+            <span class="err"></span>
+          </div>
+          <div class="field">
+            <label>Email <span class="req">*</span></label>
+            <input type="email" name="email" autocomplete="email" required />
+            <span class="err">Please enter a valid email.</span>
+          </div>
+          <div class="field">
+            <label>Phone</label>
+            <input type="tel" name="phone" autocomplete="tel" />
+            <span class="err"></span>
+          </div>
         </div>
-        <div class="field">
-          <label>Company</label>
-          <input type="text" name="company" autocomplete="organization" />
-          <span class="err"></span>
-        </div>
-        <div class="field">
-          <label>Email <span class="req">*</span></label>
-          <input type="email" name="email" autocomplete="email" required />
-          <span class="err">Please enter a valid email.</span>
-        </div>
-        <div class="field">
-          <label>Phone</label>
-          <input type="tel" name="phone" autocomplete="tel" />
-          <span class="err"></span>
-        </div>
-        <div class="field">
-          <label>Material grade</label>
-          <select name="material">
-            <option value="">Select…</option>
-            <option>Grey CI · IS 210</option>
-            <option>SG / Ductile · IS 1865</option>
-            <option>SiMo Ductile</option>
-            <option>ADI</option>
-            <option>Not sure — advise me</option>
-          </select>
-          <span class="err"></span>
-        </div>
-        <div class="field">
-          <label>Process</label>
-          <select name="process">
-            <option value="">Select…</option>
-            <option>Shell moulding</option>
-            <option>No-bake casting</option>
-            <option>Not sure — advise me</option>
-          </select>
-          <span class="err"></span>
-        </div>
-        <div class="field">
-          <label>Weight range</label>
-          <input type="text" name="weight" placeholder="e.g. 5–25 kg" />
-          <span class="err"></span>
-        </div>
-        <div class="field">
-          <label>Annual quantity</label>
-          <input type="text" name="quantity" placeholder="e.g. 5,000 pcs / yr" />
-          <span class="err"></span>
-        </div>
-        <div class="field full">
-          <label>Project details <span class="req">*</span></label>
-          <textarea name="message" required placeholder="Part description, tolerances, machining needs, target timeline…"></textarea>
-          <span class="err">Tell us a little about the part.</span>
-          <p class="eq-note">Have a drawing (PDF / STEP / DWG)? Mention it here — we'll reply with a secure upload link, or email it directly to industries@raysonsgroup.com.</p>
-        </div>
-      </div>
+      </fieldset>
 
-      <button type="submit" class="eq-submit" id="rfq-submit">Send enquiry <span>→</span></button>
+      <fieldset class="eq-set">
+        <legend><span class="no">02</span> The casting</legend>
+        <div class="eq-grid">
+          <div class="field">
+            <label>Material grade</label>
+            <select name="material">
+              <option value="">Select…</option>
+              <option>Grey CI · IS 210</option>
+              <option>SG / Ductile · IS 1865</option>
+              <option>SiMo Ductile</option>
+              <option>ADI</option>
+              <option>Not sure — advise me</option>
+            </select>
+            <span class="err"></span>
+          </div>
+          <div class="field">
+            <label>Process</label>
+            <select name="process">
+              <option value="">Select…</option>
+              <option>Shell moulding</option>
+              <option>No-bake casting</option>
+              <option>Not sure — advise me</option>
+            </select>
+            <span class="err"></span>
+          </div>
+          <div class="field">
+            <label>Weight range</label>
+            <input type="text" name="weight" placeholder="e.g. 5–25 kg" />
+            <span class="err"></span>
+          </div>
+          <div class="field">
+            <label>Annual quantity</label>
+            <input type="text" name="quantity" placeholder="e.g. 5,000 pcs / yr" />
+            <span class="err"></span>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="eq-set">
+        <legend><span class="no">03</span> The brief</legend>
+        <div class="eq-grid">
+          <div class="field full">
+            <label>Project details <span class="req">*</span></label>
+            <textarea name="message" required placeholder="Part description, tolerances, machining needs, target timeline…"></textarea>
+            <span class="err">Tell us a little about the part.</span>
+            <p class="eq-note">Have a drawing (PDF / STEP / DWG)? Mention it here — we'll reply with a secure upload link, or email it directly to industries@raysonsgroup.com.</p>
+          </div>
+        </div>
+      </fieldset>
+
+      <button type="submit" class="eq-submit" id="rfq-submit">Send the drawing <span>→</span></button>
     </form>
 
-    <!-- success panel -->
+    <!-- the pour that seals the job card — border traced on submit (sized from JS) -->
+    <svg class="eq-seal" id="eqSeal" aria-hidden="true" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="moltenSeal" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#8a6a2e"/>
+          <stop offset="0.5" stop-color="#ff6a1a"/>
+          <stop offset="1" stop-color="#e6c483"/>
+        </linearGradient>
+      </defs>
+      <rect id="eqSealRect" pathLength="1" x="1.5" y="1.5" width="0" height="0" rx="16" ry="16"/>
+    </svg>
+
+    <!-- confirmation: the drawing is on the floor -->
     <div class="eq-success" id="rfq-success">
-      <div class="tick">✓</div>
-      <h3>Enquiry received.</h3>
-      <p>Thank you — our engineering team will review your brief and respond within 48 hours.</p>
+      <div class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5 11-11"/></svg></div>
+      <h3>The drawing is on the floor.</h3>
+      <p>Received. An engineer is reviewing your brief now — you'll hear back <em>within 48 hours</em>.</p>
     </div>
   </div>
 </div>
@@ -341,10 +416,31 @@
       console.log('RFQ (no endpoint wired):', Object.fromEntries(data.entries()));
     }
 
-    form.style.display = 'none';
-    success.classList.add('show');
-    success.scrollIntoView({ behavior:'smooth', block:'center' });
+    seal();
   });
+
+  // ── the pour that seals the job card ──
+  // Trace a molten line around the card border (sized from the card now, so the rounded
+  // rect matches), then read back the confirmation over the dimmed form. Decorative: the
+  // success panel always shows, even if the animation no-ops. Reduced-motion → instant.
+  function seal(){
+    const card = document.getElementById('eqForm');
+    const rect = document.getElementById('eqSealRect');
+    const tag  = document.getElementById('eqTag');
+    const RED  = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(card && rect){
+      const w = card.clientWidth, h = card.clientHeight;
+      rect.setAttribute('width',  Math.max(0, w - 3));
+      rect.setAttribute('height', Math.max(0, h - 3));
+      card.classList.add('sealing');
+    }
+    setTimeout(()=>{
+      if(card){ card.classList.add('sealed'); }
+      if(tag) tag.textContent = 'Received';
+      success.classList.add('show');
+      success.scrollIntoView({ behavior:'smooth', block:'center' });
+    }, RED ? 0 : 1000);
+  }
 })();
 </script>
 <script>
