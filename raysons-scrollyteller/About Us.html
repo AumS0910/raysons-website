@@ -6,6 +6,9 @@
 <!-- One opening title per session: flag re-entries so the loader is skipped instantly
      (see html.reentry in styles.css + about.js boot). Runs before the stylesheet. -->
 <script>try{if(sessionStorage.getItem('rc_entered'))document.documentElement.classList.add('reentry');sessionStorage.setItem('rc_entered','1');}catch(e){}</script>
+<!-- Cut 02 weld: arriving from the Overview finale (?from=finale) paints an arrival veil that
+     matches the bracket's last frame (see .finale-arrival), so the two pages read as one shot. -->
+<script>try{if(/[?&]from=finale\b/.test(location.search))document.documentElement.classList.add('from-finale');}catch(e){}</script>
 <title>About Us — Raysons Shell Cast · Forged over forty years</title>
 <meta name="description" content="A forty-year industrial house from Kolhapur — from the first resin-coated sand in Maharashtra (1987) to a full-service precision foundry. Shell moulded & no-bake iron castings, ISO 9001:2015." />
 <meta name="theme-color" content="#0a0807" />
@@ -97,9 +100,26 @@
   #cloader .loader-foot{display:flex;justify-content:space-between;width:min(340px,60vw);margin-top:16px;
     font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase}
   /* dock fade-in: see .cta-dock in styles.css */
+
+  /* Cut 02 weld — the heirloom handoff. The Overview finale ends on the cast bracket over
+     ember-black with an orange floor glow (#bracketFx). Arriving here from it (?from=finale),
+     About paints the SAME frame first, then dissolves it into the group film — the camera
+     pulling back from the object into the foundry, one continuous shot. Matches #bracketFx. */
+  .finale-arrival{position:fixed;inset:0;z-index:95;pointer-events:none;opacity:0;
+    background:
+      linear-gradient(180deg, rgba(7,5,4,.9) 0%, transparent 22%, transparent 72%, rgba(7,5,4,.95) 100%),
+      radial-gradient(120% 92% at 50% 44%, transparent 34%, rgba(7,5,4,.9) 100%),
+      radial-gradient(62% 58% at 50% 118%, rgba(255,120,40,.2), transparent 60%),
+      #050302;}
+  html.from-finale .finale-arrival{opacity:1;animation:finaleClear 1.5s ease .35s forwards}
+  @keyframes finaleClear{to{opacity:0;visibility:hidden}}
+  @media(prefers-reduced-motion:reduce){html.from-finale .finale-arrival{animation:none;opacity:0;visibility:hidden}}
 </style>
 </head>
 <body>
+
+<!-- arrival veil from the Overview finale (only visible when html.from-finale) -->
+<div class="finale-arrival" aria-hidden="true"></div>
 
 <noscript>
   <style>#cloader,.cue,#ccta,.stage,.grain{display:none!important}.ahero__bg img{opacity:.3}.rv{opacity:1!important;transform:none!important}</style>
@@ -342,15 +362,41 @@
 <!-- ===================== THE CLOSE — a final shot, not a contact footer ==================
      Bookends the opening: the film began in 1987, and the fire is still lit. Mirrors the
      Overview's "Your drawing, our fire." close so the two pages end as one movie. -->
+<style>
+  /* Cut 03 weld — the close is still lit: embers rise off the word "pouring", and the page
+     hands to the Foundry, which opens already burning (its heat-field). The nav-transition
+     ember dip carries the same ember-black between the two, so About ends and Foundry begins
+     as one continuous shot rather than two pages. */
+  .finale .igw{position:relative;display:inline-block}
+  .finale .igw em{color:var(--molten-hot);text-shadow:0 0 22px rgba(255,106,26,.5),0 3px 36px rgba(255,106,26,.32)}
+  .finale .ember-jet{position:absolute;left:0;right:0;top:12%;height:0;pointer-events:none}
+  .finale .ember-jet i{position:absolute;bottom:0;width:3px;height:3px;border-radius:50%;background:var(--molten-hot);
+    box-shadow:0 0 7px var(--molten-hot);opacity:0;animation:emberRise 3.4s ease-in infinite}
+  .finale .ember-jet i:nth-child(1){left:14%;animation-delay:0s}
+  .finale .ember-jet i:nth-child(2){left:34%;animation-delay:.9s}
+  .finale .ember-jet i:nth-child(3){left:53%;animation-delay:1.7s}
+  .finale .ember-jet i:nth-child(4){left:72%;animation-delay:2.4s}
+  .finale .ember-jet i:nth-child(5){left:88%;animation-delay:1.2s}
+  @keyframes emberRise{0%{opacity:0;transform:translateY(0) scale(1)}12%{opacity:.95}100%{opacity:0;transform:translateY(-88px) scale(.35)}}
+  .finale-next{display:inline-flex;align-items:center;gap:9px;margin-top:30px;font-family:var(--mono);
+    font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);
+    border:1px solid var(--line);border-radius:999px;padding:12px 22px;transition:border-color .3s,color .3s}
+  .finale-next span{color:var(--molten-hot);transition:transform .3s}
+  .finale-next:hover{border-color:var(--molten);color:var(--ink)}
+  .finale-next:hover span{transform:translateX(4px)}
+  @media(prefers-reduced-motion:reduce){.finale .ember-jet{display:none}}
+</style>
 <section class="sec finale"><div class="wrap">
   <div class="eyebrow-badge rv" style="margin-left:auto;margin-right:auto"><span class="dot"></span> Cast with us</div>
-  <h2 class="display rv" style="font-size:clamp(40px,6.6vw,104px)">Since 1987.<br/><em>Still pouring.</em></h2>
+  <h2 class="display rv" style="font-size:clamp(40px,6.6vw,104px)">Since 1987.<br/><span class="igw"><span class="ember-jet" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><em>Still pouring.</em></span></h2>
   <p class="rv" style="margin-top:22px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--bronze-lite)">Shell Cast · Raysons Group · MIDC Shiroli, Kolhapur · ISO&nbsp;9001:2015</p>
   <div class="finale-contact rv">
     <a href="mailto:industries@raysonsgroup.com">industries@raysonsgroup.com</a>
     <a href="tel:+919999999999">+91&nbsp;XXXXX&nbsp;XXXXX</a>
     <a class="mag" href="enquire.html">Send the drawing <span class="arrow">→</span></a>
   </div>
+  <!-- the pour is still going — step onto the floor (Foundry opens already burning) -->
+  <div class="rv" style="margin-top:6px"><a class="finale-next" href="foundry.html">The pour is still going — step onto the floor <span aria-hidden="true">→</span></a></div>
 </div></section>
 
 <footer class="about-footer">
