@@ -26,6 +26,12 @@
   // autoplay via play() without a gesture. (Costs the ~8.5MB clip on mobile data — accepted.)
   function play(){ if(!vid || REDUCED) return; try{ vid.muted = true; vid.playsInline = true; const p = vid.play(); if(p && p.catch) p.catch(()=>{}); }catch(_){ } }
   if(vid && !REDUCED){
+    // Phones get a lighter 540p / ~490kbps cut (4.8MB vs 8.5MB, audio stripped — it plays
+    // muted) so mobile data + LCP don't carry the desktop clip. It's a vignetted, graded
+    // background behind text, so 540p is invisible in context. The src lives in data-* and is
+    // set here (never in HTML) so ONLY the chosen file is fetched; desktop keeps the 720p clip.
+    const src = (matchMedia('(max-width:760px)').matches && vid.dataset.srcMobile) || vid.dataset.src;
+    if(src) vid.src = src;
     vid.preload = 'auto'; try{ vid.load(); }catch(_){}          // fetch + play (desktop AND mobile)
     if(vid.readyState >= 2) play(); else vid.addEventListener('canplay', play, { once:true });
   }

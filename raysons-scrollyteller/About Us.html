@@ -147,12 +147,13 @@
     <!-- ONE looping casting clip plays behind the beats (molten iron → the part) — index's
          molten world. It PLAYS, never scrubs, so it stays light. SWAP: drop any 720p/1080p
          H.264 clip at valve/about-film.mp4 to re-skin this whole section. -->
-    <!-- preload=none: phones show only the poster (~100KB) — about-film.js upgrades
-         to auto + plays on desktop, so the 8.5MB clip never downloads on mobile -->
+    <!-- The clip plays on every device (muted/inline). The src is NOT in the HTML — it lives
+         in data-* and about-film.js sets the one chosen file (phones get the lighter 540p
+         about-film-mobile.mp4, ~4.8MB vs 8.5MB), so only that file is ever fetched. No-JS →
+         poster only. -->
     <video id="filmvid" class="film__vid" muted playsinline loop preload="none"
-           poster="valve/about-film-poster.jpg" aria-hidden="true">
-      <source src="valve/about-film.mp4" type="video/mp4" />
-    </video>
+           poster="valve/about-film-poster.jpg" aria-hidden="true"
+           data-src="valve/about-film.mp4" data-src-mobile="valve/about-film-mobile.mp4"></video>
     <div class="film__vig"></div>
     <div class="film__floor"></div>
     <div class="film__overlays">
