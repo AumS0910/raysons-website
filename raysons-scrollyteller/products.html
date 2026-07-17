@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- One opening title per session: this page has no loader, but it still marks the session
+     so the NEXT page skips its loader (see html.reentry in styles.css). -->
+<script>try{if(sessionStorage.getItem('rc_entered'))document.documentElement.classList.add('reentry');sessionStorage.setItem('rc_entered','1');}catch(e){}</script>
 <title>Products — Raysons Shell Cast · Real castings from our floor</title>
 <meta name="description" content="Twenty-three real iron castings from the Raysons Shell Cast floor — shell moulded and no-bake, Grey CI, SG ductile, SiMo and ADI, 0.5 kg to 500 kg, machined to drawing. ISO 9001:2015 · Kolhapur, India." />
 <meta name="theme-color" content="#0a0807" />

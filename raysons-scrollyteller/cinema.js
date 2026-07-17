@@ -362,7 +362,10 @@
   } else {
     // reveal FAST behind the pour poster; capture the clips in scroll order in the
     // background. Scrubbing holds the last good frame / poster until each is ready.
-    posterReady().then(()=> setTimeout(start, 600));
+    // Re-entry within the session (html.reentry): the loader is already hidden by CSS and
+    // the poster is cached, so boot the film with no artificial delay — one opening title.
+    const REENTRY = document.documentElement.classList.contains('reentry');
+    posterReady().then(()=> setTimeout(start, REENTRY ? 0 : 600));
     setTimeout(()=>{ if(!started) start(); }, 4000);   // ceiling
     // Each clip restores from IndexedDB if cached (instant, decode-free);
     // only a cache miss falls through to the one-time video capture.

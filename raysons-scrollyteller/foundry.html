@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- One opening title per session: flag re-entries so the loader is skipped instantly
+     (see html.reentry in styles.css + foundry.js boot). Runs before the stylesheet. -->
+<script>try{if(sessionStorage.getItem('rc_entered'))document.documentElement.classList.add('reentry');sessionStorage.setItem('rc_entered','1');}catch(e){}</script>
 <title>Foundry — Raysons Shell Cast · Precision Casting, Engineered to Spec</title>
 <meta name="description" content="Raysons Shell Cast is a shell moulded and no-bake foundry producing cast iron and ductile iron castings from 0.5 kg to 500 kg. In-house machining, spectrometer-verified quality. ISO 9001:2015. Kolhapur, India." />
 <meta name="theme-color" content="#0a0807" />

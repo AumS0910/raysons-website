@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- One opening title per session: flag re-entries so the loader is skipped instantly
+     (see html.reentry in styles.css + about.js boot). Runs before the stylesheet. -->
+<script>try{if(sessionStorage.getItem('rc_entered'))document.documentElement.classList.add('reentry');sessionStorage.setItem('rc_entered','1');}catch(e){}</script>
 <title>About Us — Raysons Shell Cast · Forged over forty years</title>
 <meta name="description" content="A forty-year industrial house from Kolhapur — from the first resin-coated sand in Maharashtra (1987) to a full-service precision foundry. Shell moulded & no-bake iron castings, ISO 9001:2015." />
 <meta name="theme-color" content="#0a0807" />

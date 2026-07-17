@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- One opening title per session: this page has no loader, but it still marks the session
+     so any later page skips its loader (see html.reentry in styles.css). -->
+<script>try{if(sessionStorage.getItem('rc_entered'))document.documentElement.classList.add('reentry');sessionStorage.setItem('rc_entered','1');}catch(e){}</script>
 <title>Request a Quote — Raysons Shell Cast</title>
 <meta name="description" content="Request a casting quote from Raysons Shell Cast — shell moulded & no-bake iron castings, 0.5 kg to 500 kg. Engineering response within 48 hours. Kolhapur, India." />
 <meta property="og:type" content="website" />

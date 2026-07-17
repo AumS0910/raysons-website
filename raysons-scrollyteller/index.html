@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- One opening title per session: flag re-entries so the loader is skipped instantly
+     (see html.reentry in styles.css + each engine's boot). Runs before the stylesheet so
+     the loader never flashes on the second page. -->
+<script>try{if(sessionStorage.getItem('rc_entered'))document.documentElement.classList.add('reentry');sessionStorage.setItem('rc_entered','1');}catch(e){}</script>
 <title>Raysons Shell Cast — Through the Foundry · Fire to Finished Part</title>
 <meta name="description" content="Molten iron, poured and forged into a precision hydraulic valve casting — scroll-scrubbed frame by frame. Shell moulded & no-bake iron castings 0.5 kg–500 kg, machined to drawing, ISO 9001:2015. Kolhapur, India." />
 <meta name="theme-color" content="#0a0807" />

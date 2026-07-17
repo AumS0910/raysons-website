@@ -70,6 +70,13 @@ a{color:inherit;text-decoration:none}
 /* ============================================================
    LOADER
    ============================================================ */
+/* Re-entry within a session: the film shows its opening title ONCE. On every page after
+   the first, the head snippet sets html.reentry from sessionStorage before first paint, and
+   the loader is hidden instantly (no fade, no progress ritual) — the page arrives through
+   the ember dip nav-transition.js already performs. Each engine's boot reads the same class
+   and sets body.entered immediately so the chrome doesn't wait. Covers both loader ids. */
+html.reentry #loader,html.reentry #cloader{transition:none!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+
 #loader{
   position:fixed;inset:0;z-index:100;background:#050302;
   display:flex;flex-direction:column;align-items:center;justify-content:center;

@@ -27,8 +27,10 @@
     if(loader) loader.classList.add('done');
     document.body.classList.add('entered');
   }
-  addEventListener('load', ()=> setTimeout(reveal, 300));
-  setTimeout(reveal, 1600);   // ceiling: never trap user
+  // Re-entry within the session (html.reentry): the loader is already hidden by CSS — reveal
+  // the chrome now so the page arrives hot, no progress ritual. One opening title per session.
+  if(document.documentElement.classList.contains('reentry')){ reveal(); }
+  else { addEventListener('load', ()=> setTimeout(reveal, 300)); setTimeout(reveal, 1600); }   // ceiling: never trap user
 
   // ---- drifting embers ----
   if(!REDUCED){

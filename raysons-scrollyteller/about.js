@@ -18,7 +18,11 @@
   // Arriving from the index product-lift? The part is already on screen — skip the
   // loader entirely so the handoff reads as one continuous shot (no loading curtain).
   const FROM_LIFT = /[?&]from=lift\b/.test(location.search);
+  // Re-entry within the session (html.reentry): the loader is already hidden by CSS — reveal
+  // the chrome now so the page arrives hot, no progress ritual. One opening title per session.
+  const REENTRY = document.documentElement.classList.contains('reentry');
   if(FROM_LIFT){ if(loader){ loader.classList.add('done'); loader.style.display='none'; } document.body.classList.add('entered'); }
+  else if(REENTRY){ reveal(); }
   else { addEventListener('load', ()=> setTimeout(reveal, 350)); setTimeout(reveal, 1800); }
 
   // ---- drifting embers ----
