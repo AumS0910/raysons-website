@@ -66,5 +66,46 @@
     new IntersectionObserver((es)=>{ visible = es[0].isIntersecting; if(visible) kick(); },
       { rootMargin:'12% 0px' }).observe(sec);
   }
+
+  // ── GRABBABLE TIMELINE ──────────────────────────────────────────────────────
+  // The rail isn't just a readout — grab it and scrub the forty years by hand. A drag maps
+  // pointer-x to the section's scroll position, so the year counter, eras and watermark all
+  // update through the same frame() (one source of truth). Keyboard steps era to era.
+  const rail = sec.querySelector('.journey__rail');
+  if(rail){
+    const hit = document.createElement('div');           // a taller transparent grab strip over the 1px line
+    hit.className = 'journey__scrub';
+    hit.setAttribute('role','slider');
+    hit.setAttribute('tabindex','0');
+    hit.setAttribute('aria-label','Timeline — drag to travel 1987 to ' + YEARS[YEARS.length-1]);
+    hit.setAttribute('aria-valuemin', String(YEARS[0]));
+    hit.setAttribute('aria-valuemax', String(YEARS[YEARS.length-1]));
+    rail.appendChild(hit);
+    rail.removeAttribute('aria-hidden');
+
+    let scrubbing = false;
+    function railP(clientX){ const r = rail.getBoundingClientRect(); return clamp((clientX - r.left) / Math.max(1, r.width), 0, 1); }
+    function goTo(p){
+      const total = sec.offsetHeight - innerHeight;
+      const docTop = sec.getBoundingClientRect().top + scrollY;
+      const y = docTop + p * total;
+      sy = y; target = y; window.scrollTo(0, y);          // drive scroll; frame() renders exactly at p
+      hit.setAttribute('aria-valuenow', String(Math.round(YEARS[0] + (YEARS[YEARS.length-1]-YEARS[0]) * p)));
+      kick();
+    }
+    hit.addEventListener('pointerdown', (e)=>{ scrubbing = true; hit.classList.add('grabbing');
+      try{ hit.setPointerCapture(e.pointerId); }catch(_){}; goTo(railP(e.clientX)); e.preventDefault(); }, { passive:false });
+    hit.addEventListener('pointermove', (e)=>{ if(scrubbing){ goTo(railP(e.clientX)); e.preventDefault(); } }, { passive:false });
+    const end = ()=>{ scrubbing = false; hit.classList.remove('grabbing'); };
+    hit.addEventListener('pointerup', end); hit.addEventListener('pointercancel', end);
+    hit.addEventListener('keydown', (e)=>{
+      const step = (e.key==='ArrowRight'||e.key==='ArrowDown') ? 1 : (e.key==='ArrowLeft'||e.key==='ArrowUp') ? -1 : 0;
+      if(!step) return; e.preventDefault();
+      const total = sec.offsetHeight - innerHeight, docTop = sec.getBoundingClientRect().top + scrollY;
+      const curP = total > 0 ? clamp((sy - docTop) / total, 0, 1) : 0;
+      goTo(clamp((Math.round(curP*(N-1)) + step) / (N-1), 0, 1));
+    });
+  }
+
   kick();
 })();

@@ -248,6 +248,15 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
   font-size:9.5px;font-weight:400;letter-spacing:.14em;color:var(--ink-faint);font-variant-numeric:tabular-nums;white-space:nowrap}
 .journey__tick:first-child b{left:0;transform:none}
 .journey__tick:last-child b{left:auto;right:0;transform:none}
+/* grabbable timeline — a taller transparent strip over the 1px rail so it can be dragged;
+   the knob grows on hover/drag so the affordance reads. */
+.journey__scrub{position:absolute;left:0;right:0;top:-16px;bottom:-16px;z-index:4;cursor:grab;touch-action:none}
+.journey__scrub.grabbing{cursor:grabbing}
+.journey__scrub:focus-visible{outline:2px solid var(--bronze-lite);outline-offset:6px;border-radius:4px}
+.journey__rail:hover .journey__rail-knob,
+.journey__rail:has(.journey__scrub.grabbing) .journey__rail-knob,
+.journey__rail:has(.journey__scrub:focus-visible) .journey__rail-knob{width:13px;height:13px;margin:-6.5px 0 0 -6.5px}
+.journey__rail-knob{transition:width .2s ease,height .2s ease,margin .2s ease}
 
 /* entry choreography — eyebrow → headline reveal in sequence as each era lights (cards stagger already) */
 .journey__k,.journey__h{opacity:0;transform:translateY(16px);
