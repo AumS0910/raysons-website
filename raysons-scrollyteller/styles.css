@@ -498,10 +498,17 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 /* ── EXIT TRANSITIONS — internal nav dips to ember-black + types the destination, so the
    four pages cut like scenes of one film. The dip colour matches the loaders (#050302) so it
    flows straight into the next page's title card. Shared across all pages (nav-transition.js). ── */
-.nav-xfade{position:fixed;inset:0;z-index:9999;background:#050302;opacity:0;visibility:hidden;pointer-events:none;
+/* The curtain RISES like poured metal rather than cross-fading: the body stays ember-black
+   (#050302 — still matching the loaders and the finale, so arrival continuity is intact) and
+   only its leading edge is molten, so you see a hot line sweep up and the dark fill behind it. */
+.nav-xfade{position:fixed;inset:0;z-index:9999;pointer-events:none;visibility:hidden;
+  background:linear-gradient(0deg,#050302 0%,#050302 90%,#c2300a 96.5%,#ffb24a 100%);
+  transform:translateY(101%);
   display:flex;align-items:center;justify-content:center;
-  transition:opacity .46s cubic-bezier(.4,0,.2,1),visibility .46s}
-.nav-xfade.on{opacity:1;visibility:visible;pointer-events:auto}
+  transition:transform .44s cubic-bezier(.7,0,.25,1),visibility .44s}
+.nav-xfade.on{transform:translateY(0);visibility:visible;pointer-events:auto}
+@media(prefers-reduced-motion:reduce){.nav-xfade{transform:none;opacity:0}
+  .nav-xfade.on{opacity:1}}
 .nav-xfade__k{font-family:var(--mono);font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--molten);
   opacity:0;transform:translateY(8px);transition:opacity .38s ease .12s,transform .42s cubic-bezier(.2,.7,.2,1) .12s}
 .nav-xfade.on .nav-xfade__k{opacity:1;transform:none}

@@ -160,6 +160,12 @@
     .eq-form.sealing .eq-seal rect{animation:none;stroke-dashoffset:0}
     .eq-form.sealing form{transition:none;opacity:.25}}
   .eq-success p em{font-style:normal;color:var(--bronze-lite)}
+
+  /* premium.js brings the reactive cursor + magnetic buttons here too (this page had none).
+     But a form needs real cursors: keep the I-beam on text fields and the pointer on controls,
+     overriding pc-on's blanket cursor:none (more specific selector, so it wins). */
+  html.pc-on input,html.pc-on textarea{cursor:auto!important}
+  html.pc-on select,html.pc-on summary,html.pc-on button{cursor:pointer!important}
 </style>
 </head>
 <body>
@@ -470,6 +476,7 @@
   });
 })();
 </script>
+<script src="premium.js"></script>
 <script src="nav-transition.js"></script>
 </body>
 </html>

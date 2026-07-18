@@ -80,6 +80,7 @@
     hit.setAttribute('aria-label','Timeline — drag to travel 1987 to ' + YEARS[YEARS.length-1]);
     hit.setAttribute('aria-valuemin', String(YEARS[0]));
     hit.setAttribute('aria-valuemax', String(YEARS[YEARS.length-1]));
+    hit.setAttribute('data-cursor','Scrub');            // contextual cursor label (premium.js)
     rail.appendChild(hit);
     rail.removeAttribute('aria-hidden');
 

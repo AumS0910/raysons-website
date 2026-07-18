@@ -40,6 +40,7 @@
   if(grid){
     for(let i=0;i<N;i++){
       const c = document.createElement('div'); c.className = 'pcell';
+      c.setAttribute('data-cursor','View');            // contextual cursor label (premium.js)
       const n = document.createElement('span'); n.className = 'pcell__n';
       n.textContent = String(i+1).padStart(2,'0');
       const im = document.createElement('img');

@@ -62,7 +62,8 @@
   document.addEventListener('mouseover', e => {
     const el = e.target.closest(HOT); if(!el) return;
     cur.classList.add('is-hot');
-    label.textContent = el.getAttribute('data-cursor') || (el.matches('.mag,.cta-quote') ? 'Enquire' : 'View');
+    label.textContent = el.getAttribute('data-cursor')
+      || (el.matches('.mag,.cta-quote,.btn--fill,.eq-submit') ? 'Enquire' : 'View');
   });
   document.addEventListener('mouseout', e => {
     if(e.target.closest(HOT) && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(HOT))){
@@ -72,7 +73,7 @@
 
   // ---- magnetic pull (CTAs + nav links) ----
   if(!REDUCED){
-    const mags = Array.from(document.querySelectorAll('[data-magnetic], .mag, .cta-quote, .nav-links a'));
+    const mags = Array.from(document.querySelectorAll('[data-magnetic], .mag, .cta-quote, .nav-links a, .btn--fill, .eq-submit, .finale-next, .bracket-next'));
     const R = 90;          // activation radius beyond the element box
     addEventListener('mousemove', e => {
       for(const el of mags){
@@ -133,6 +134,10 @@
   // ---- MOLTEN PAGE-TRANSITION (leave wipe; the enter is each page's loader) ----
   const pt = document.createElement('div'); pt.className = 'ptrans'; document.body.appendChild(pt);
   document.addEventListener('click', e => {
+    // nav-transition.js listens on CAPTURE and owns internal navigation (it types the
+    // destination and handles the finale handoff). Without this guard BOTH curtains fired
+    // and scheduled their own navigation — two transitions stacked on every link.
+    if(e.defaultPrevented) return;
     const a = e.target.closest('a'); if(!a) return;
     const href = a.getAttribute('href'); if(!href) return;
     if(a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
