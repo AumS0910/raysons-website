@@ -156,6 +156,19 @@
     letter-spacing:.18em;text-transform:uppercase;color:#d8cdbe;text-shadow:0 1px 16px rgba(7,5,4,.9)}
   @media(prefers-reduced-motion:reduce){.furnace__fig.on .furnace__num{animation:none}}
   @media(max-width:640px){.furnace{height:220vh}}
+
+  /* ── ON THE FLOOR AT THESE OEMS (client docx) — a compact name strip, not About's
+     detailed country/part grid, so it proves the floor without restating the full roster. */
+  .foems{position:relative;z-index:10;padding:clamp(80px,12vh,140px) clamp(20px,6vw,110px);text-align:center}
+  .foems__k{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--molten-hot);margin-bottom:22px}
+  .foems__t{font-family:var(--serif);font-weight:600;line-height:1;letter-spacing:-.015em;font-size:clamp(32px,5.4vw,78px);color:var(--ink);text-shadow:0 2px 30px rgba(7,5,4,.9)}
+  .foems__t em{font-style:italic;color:var(--molten-hot)}
+  .foems__row{margin:clamp(34px,5vw,54px) auto 0;max-width:920px;display:flex;flex-wrap:wrap;justify-content:center;gap:14px 30px}
+  .foems__row span{font-family:var(--serif);font-size:clamp(18px,2.3vw,30px);color:var(--ink-dim);
+    padding-bottom:6px;border-bottom:1px solid var(--line);transition:color .3s ease, border-color .3s ease}
+  .foems__row span:hover{color:var(--ink);border-color:var(--molten)}
+  .foems__meta{margin-top:clamp(28px,4vw,44px);font-family:var(--mono);font-size:10px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink-faint)}
 </style>
 </head>
 <body>
@@ -403,6 +416,21 @@
   </div>
 </section>
 
+<!-- ===================== ON THE FLOOR AT THESE OEMS (client docx · Website file 3) =====
+     Client-requested on the Foundry page. Restored (it was removed earlier to avoid
+     restating About's roster) as a compact name strip — proof before the invitation. -->
+<section class="foems" id="oems" data-fsec="export">
+  <div class="foems__inner">
+    <p class="foems__k rv">Proven in production</p>
+    <h2 class="foems__t rv" data-split>On the floor at <em>these OEMs.</em></h2>
+    <div class="foems__row rv" aria-label="OEMs Raysons Shell Cast supplies">
+      <span>Caterpillar</span><span>Halliburton</span><span>Schwing Stetter</span>
+      <span>John Deere</span><span>Ingersoll Rand</span><span>Turbo Energy</span>
+    </div>
+    <p class="foems__meta rv">ISO 9001:2015 · shipped to Europe · United Kingdom · USA</p>
+  </div>
+</section>
+
 <!-- ===================== THE CLOSE · THE INVITATION ===================================
      (Global Customers removed — the customer roster is About's job; Foundry is the process
      and capability page, and it was restating About's trust grid.)
@@ -451,7 +479,7 @@
 (function(){
   var map = [['#furnace','furnace'],['#shell-moulding','shell'],['#no-bake','nobake'],['#machining','machining'],
              ['#export-quality','export'],['#specifications','export'],
-             ['#capabilities','machining'],['#visit','invite']];
+             ['#capabilities','machining'],['#oems','export'],['#visit','invite']];
   var secs = map.map(function(m){ var el=document.querySelector(m[0]); return el?{el:el,k:m[1]}:null; }).filter(Boolean);
   if(!secs.length || !('IntersectionObserver' in window)) return;
   var io = new IntersectionObserver(function(es){
