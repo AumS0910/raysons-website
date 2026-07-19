@@ -522,6 +522,25 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
   ::view-transition-old(root),::view-transition-new(root){ animation-duration:.01ms }
 }
 
+/* PERSISTENT CHROME — this is what turns a page change into a cut within one film
+   rather than a change of film. Anything given a view-transition-name is tracked as
+   the SAME element across documents: the browser moves it instead of cross-fading it
+   out and a duplicate back in. So the nav and the wordmark simply stay on screen and
+   never blink, while only the content beneath them changes — which is exactly how a
+   continuous piece behaves. Names must be unique per document, and each of these is. */
+@supports (view-transition-name: none){
+  .nav,.eq-nav{ view-transition-name:site-nav }
+  .nav .brand,.eq-nav .brand{ view-transition-name:site-mark }
+  .grain{ view-transition-name:film-grain }        /* the grain never re-seeds mid-cut */
+  ::view-transition-group(site-nav),
+  ::view-transition-group(site-mark),
+  ::view-transition-group(film-grain){ animation-duration:.42s }
+  /* the chrome holds still; only the page under it dissolves */
+  ::view-transition-old(site-nav),::view-transition-new(site-nav),
+  ::view-transition-old(site-mark),::view-transition-new(site-mark),
+  ::view-transition-old(film-grain),::view-transition-new(film-grain){ animation:none;opacity:1 }
+}
+
 .nav-xfade{position:fixed;inset:0;z-index:9999;pointer-events:none;visibility:hidden;
   background:linear-gradient(0deg,#050302 0%,#050302 90%,#c2300a 96.5%,#ffb24a 100%);
   transform:translateY(101%);

@@ -62,13 +62,19 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 /* MATCH-CUT — About opens on the EXACT frame the index lift ended on (same valve),
    so this is barely a move: a whisper of scale + a brief noir wash to mask the page
    swap, then the part is simply here and the reel begins. */
-@media(prefers-reduced-motion:no-preference){
-  .film #stage,.film__vid{animation:filmEmerge 1.1s cubic-bezier(.16,.84,.28,1) both}
-  @keyframes filmEmerge{0%{transform:scale(1.05);opacity:.5}100%{transform:scale(1);opacity:1}}
-  /* one-shot noir wash that lifts as the part settles — hides the navigation instant */
-  .film__pin::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
-    background:#050302;animation:filmVoidLift .8s ease-out both}
-  @keyframes filmVoidLift{0%{opacity:.55}100%{opacity:0}}
+/* ONLY where the browser cannot dissolve pages itself. This wash exists to hide a hard
+   navigation — "the navigation instant", as the note above says. With cross-document
+   view transitions there IS no hard navigation to hide, so it stops being a mask and
+   becomes a second transition stacked on the first: you dissolve into About, and About
+   immediately fades up from black again. That double beat was the cut. */
+@supports not (view-transition-name: none){
+  @media(prefers-reduced-motion:no-preference){
+    .film #stage,.film__vid{animation:filmEmerge 1.1s cubic-bezier(.16,.84,.28,1) both}
+    @keyframes filmEmerge{0%{transform:scale(1.05);opacity:.5}100%{transform:scale(1);opacity:1}}
+    .film__pin::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+      background:#050302;animation:filmVoidLift .8s ease-out both}
+    @keyframes filmVoidLift{0%{opacity:.55}100%{opacity:0}}
+  }
 }
 .film__vig{position:absolute;inset:0;z-index:1;pointer-events:none;background:
   radial-gradient(125% 95% at 50% 50%, transparent 42%, rgba(7,5,4,.66) 100%),
