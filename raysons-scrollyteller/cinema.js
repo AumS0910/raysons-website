@@ -253,6 +253,13 @@
     ctx.filter='none';
   }
 
+  // Which acts hand the frame to the live casting (valve-gl.js). If that script is
+  // absent or WebGL2 is unavailable, valveReady() stays false and every act plays as
+  // footage — the experiment removes itself rather than breaking the film.
+  const WEBGL_ACTS = [2,3,4,6,7];
+  let valveLive = false;
+  const valveReady = ()=> !!(window.RaysonsValve && window.RaysonsValve.ok);
+
   function render(progress, vel){
     const t = progress * TOTAL;
     let acc=0, seg=SEGMENTS[0], local=0;
@@ -261,10 +268,26 @@
       if(t <= acc+s.span || i===SEGMENTS.length-1){ seg=s; local=clamp((t-acc)/s.span,0,1); break; }
       acc+=s.span;
     }
+    // ── LIVE OBJECT vs FOOTAGE ───────────────────────────────────────────────
+    // Acts 2/3/4/6/7 show an OBJECT being examined; 0/1/5 are EVENTS (pour, forge,
+    // bridge) and stay on film — footage of real molten iron beats any shader.
+    // The SEGMENTS array, spans, act indices and total scroll runway are untouched,
+    // so captions, HUD, rail and grade all keep working exactly as before. This is
+    // one branch, not a restructure.
+    const liveAct = WEBGL_ACTS.indexOf(seg.act) >= 0 && valveReady();
+    if(liveAct !== valveLive){
+      valveLive = liveAct;
+      document.body.classList.toggle('valve-live', liveAct);
+      window.RaysonsValve.setLive(liveAct);
+    }
+
     const arr = frames[seg.clip];
     const cam = stepCam(seg.act, local);
     let drew=false;
-    if(arr && arr.length){
+    if(liveAct){
+      window.RaysonsValve.render(seg.act, local);
+      drew = true;                       // the canvas film yields the frame this pass
+    } else if(arr && arr.length){
       const u = seg.reverse ? (1-local) : local;
       const fi = clamp(Math.round(u*(arr.length-1)), 0, arr.length-1);
       drew = paint(arr[fi], vel, cam);
