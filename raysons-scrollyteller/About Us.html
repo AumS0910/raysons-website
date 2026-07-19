@@ -317,18 +317,15 @@
   <!-- The generic 5-value grid (Innovation/Quality/Sustainability/Integrity/Teamwork) was
        cut per the PRD — those words are on every foundry site alive, and the card grid read
        as the SaaS pattern the brief said to avoid. Mission + Vision carry the purpose. -->
-  <div class="purpose">
-    <div class="purpose__copy">
-      <div class="mvv">
-        <div class="m rv"><h4>Our Mission</h4><p>To produce superior castings through advanced technologies, long-term partnerships, and a culture of excellence, safety, and continuous improvement.</p></div>
-        <div class="m rv"><h4>Our Vision</h4><p>To be a globally recognised, trusted partner delivering innovative, sustainable, and high-quality casting solutions.</p></div>
-      </div>
-    </div>
-    <!-- The portrait is decorative here — the words carry the meaning and are already
-         in the copy above, so it takes an empty alt rather than repeating them to a
-         screen reader. Drops out cleanly if the file is missing. -->
-    <!-- WebP first: 45 KB against 1.2 MB for the same alpha cut-out. The PNG stays as
-         the fallback for anything that cannot decode WebP. -->
+  <!-- The portrait sits INSIDE .mvv so it anchors to the vision column itself: it begins
+       exactly where that column ends and stands exactly as tall as it. Anchored to the
+       section instead, it sat far right with a gap and read as unrelated to the words. -->
+  <div class="mvv">
+    <div class="m rv"><h4>Our Mission</h4><p>To produce superior castings through advanced technologies, long-term partnerships, and a culture of excellence, safety, and continuous improvement.</p></div>
+    <div class="m rv"><h4>Our Vision</h4><p>To be a globally recognised, trusted partner delivering innovative, sustainable, and high-quality casting solutions.</p></div>
+    <!-- Decorative: the words are already in the copy beside it, so an empty alt rather
+         than repeating them to a screen reader. Removes itself if the file is missing.
+         WebP first — 45 KB against 1.2 MB for the same alpha cut-out. -->
     <figure class="purpose__figure rv">
       <picture>
         <source srcset="images/leadership.webp" type="image/webp" />
