@@ -67,6 +67,20 @@
   /* the product stage — the bespoke film */
   #stage{position:fixed;inset:0;z-index:0;display:block;width:100vw;height:100vh}
 
+  /* TURNTABLE — the orbit act is grabbable (cinema.js). The cursor is the whole
+     affordance: nothing else on the film invites a hand, so when it changes here
+     it reads as "this one you can hold". touch-action keeps vertical scrolling
+     working on a phone while horizontal drags turn the part. */
+  body.turntable #stage{cursor:grab;touch-action:pan-y}
+  body.turntable.turning #stage{cursor:grabbing}
+  .turn-hint{position:fixed;left:50%;bottom:clamp(86px,15vh,150px);transform:translateX(-50%) translateY(10px);
+    z-index:24;font-family:var(--mono);font-size:10px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--ink-faint);pointer-events:none;opacity:0;white-space:nowrap;
+    text-shadow:0 1px 12px rgba(7,5,4,.95);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+  body.turntable .turn-hint{opacity:1;transform:translateX(-50%)}
+  body.turning .turn-hint{opacity:0}
+  @media(prefers-reduced-motion:reduce){.turn-hint{transition:none}}
+
   /* edge-only darkening — centre of the product stays bright (RIFT technique) */
   .cine-vig{position:fixed;inset:0;z-index:1;pointer-events:none;
     background:
@@ -315,6 +329,8 @@
 </nav>
 
 <div class="cue ccue"><span>Scroll</span><span class="line"></span></div>
+<!-- shown only while the orbit act owns the frame (body.turntable) -->
+<div class="turn-hint" aria-hidden="true">Drag to turn it</div>
 
 <div class="cta-dock" id="ccta">
   <a class="cta-quote mag" href="enquire.html">Request a Quote <span class="arrow">→</span></a>

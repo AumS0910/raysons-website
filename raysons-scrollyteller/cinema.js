@@ -253,6 +253,58 @@
     ctx.filter='none';
   }
 
+  // ══ TURNTABLE ══════════════════════════════════════════════════════════════
+  // Act 4's clip is a full 360° orbit, and every one of its frames is already
+  // captured to an Image. So the frame index is randomly addressable: drag
+  // horizontally, offset the index, and the part turns. Past the last frame it
+  // WRAPS to the first, because a full circle has no seam — which is what makes
+  // this read as a turntable rather than a video being scrubbed to its end.
+  //
+  // This is the one interaction footage can honestly support. Every angle the
+  // viewer asks for is an angle that was actually filmed; nothing is invented.
+  const TURN_ACT = 4;
+  let turnOff = 0, turnV = 0, turning = false, tX = 0, tY = 0, tAxis = 0, tLast = 0;
+  let curAct = -1;
+  const turnAlive = ()=> curAct === TURN_ACT && (turning || Math.abs(turnV) > 0.02);
+
+  function onDown(e){
+    if(curAct !== TURN_ACT) return;
+    if(e.target.closest && e.target.closest('a,button')) return;
+    turning = true; tAxis = 0; tX = e.clientX; tY = e.clientY; tLast = performance.now();
+    turnV = 0;
+    document.body.classList.add('turning');
+  }
+  function onMove(e){
+    if(!turning) return;
+    const dx = e.clientX - tX, dy = e.clientY - tY;
+    // On touch, decide ONCE whether this gesture is a turn or a scroll. Without
+    // this a vertical swipe would fight the page scroll and the film would feel
+    // broken on a phone.
+    if(tAxis === 0){
+      if(Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+      tAxis = Math.abs(dx) > Math.abs(dy) ? 1 : -1;
+      if(tAxis === -1){ turning = false; document.body.classList.remove('turning'); return; }
+    }
+    if(e.cancelable) e.preventDefault();
+    const now = performance.now(), dt = Math.max(1, now - tLast);
+    const step = dx * 0.16;                       // px -> frames
+    turnOff += step;
+    turnV = step * Math.min(3, 16 / dt);          // frames per frame, for the coast
+    tX = e.clientX; tY = e.clientY; tLast = now;
+    settledFrames = 0;                            // wake the loop
+  }
+  function onUp(){ turning = false; document.body.classList.remove('turning'); }
+  addEventListener('pointerdown', onDown);
+  addEventListener('pointermove', onMove, { passive:false });
+  addEventListener('pointerup', onUp);
+  addEventListener('pointercancel', onUp);
+
+  // ground truth for testing: the frame index actually painted, and the live turn
+  // offset. Screenshot diffing cannot verify this — the breathing zoom changes pixels
+  // every frame whether or not the drag is connected.
+  window.__cine = ()=>({ act: curAct, off: +turnOff.toFixed(2), v: +turnV.toFixed(3), fi: lastFi });
+  let lastFi = -1;
+
   function render(progress, vel){
     const t = progress * TOTAL;
     let acc=0, seg=SEGMENTS[0], local=0;
@@ -263,13 +315,29 @@
     }
     const arr = frames[seg.clip];
     const cam = stepCam(seg.act, local);
+    curAct = seg.act;
     let drew=false;
     if(arr && arr.length){
       const u = seg.reverse ? (1-local) : local;
-      const fi = clamp(Math.round(u*(arr.length-1)), 0, arr.length-1);
+      let fi;
+      if(seg.act === TURN_ACT){
+        // scroll still advances the orbit; the drag is an OFFSET on top of it, so
+        // letting go never snaps the part back to where the scroll says it should be
+        fi = Math.round(u*(arr.length-1) + turnOff);
+        fi = ((fi % arr.length) + arr.length) % arr.length;    // wrap — it's a circle
+      } else {
+        fi = clamp(Math.round(u*(arr.length-1)), 0, arr.length-1);
+      }
+      lastFi = fi;
       drew = paint(arr[fi], vel, cam);
     }
     if(!drew) paintFallback();
+
+    // hand the part its momentum back when released
+    if(!turning && Math.abs(turnV) > 0.02){ turnOff += turnV; turnV *= 0.94; }
+    else if(!turning) turnV = 0;
+    if(document.body.classList.contains('turntable') !== (seg.act === TURN_ACT))
+      document.body.classList.toggle('turntable', seg.act === TURN_ACT);
 
     if(seg.act !== lastAct){ overlays.forEach((o,i)=> o.classList.toggle('on', i===seg.act)); lastAct=seg.act; }
 
@@ -333,7 +401,10 @@
     const moving = Math.abs(target-sy) > 0.4 || Math.abs(sy-prev) > 0.1;
     // Idle: once the scroll has settled and the breathing has been painted a
     // few frames, stop the full-screen canvas repaint entirely (battery/GPU).
-    if(!moving){ if(settledFrames > 6) return; settledFrames++; } else { settledFrames=0; }
+    // The idle gate stops the repaint once scroll settles — correct for a static
+    // painted frame. But a turntable that is being dragged, or still coasting, has
+    // a new frame to show every tick, so it has to keep the loop alive.
+    if(!moving && !turnAlive()){ if(settledFrames > 6) return; settledFrames++; } else { settledFrames=0; }
     const max = Math.max(1, scrollSpace.offsetHeight - innerHeight);
     const p = clamp(sy/max, 0, 1);
     const vel = Math.min(1, Math.abs(p-prevP)*60); prevP=p;
