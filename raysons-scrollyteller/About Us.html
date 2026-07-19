@@ -317,9 +317,20 @@
   <!-- The generic 5-value grid (Innovation/Quality/Sustainability/Integrity/Teamwork) was
        cut per the PRD — those words are on every foundry site alive, and the card grid read
        as the SaaS pattern the brief said to avoid. Mission + Vision carry the purpose. -->
-  <div class="mvv">
-    <div class="m rv"><h4>Our Mission</h4><p>To produce superior castings through advanced technologies, long-term partnerships, and a culture of excellence, safety, and continuous improvement.</p></div>
-    <div class="m rv"><h4>Our Vision</h4><p>To be a globally recognised, trusted partner delivering innovative, sustainable, and high-quality casting solutions.</p></div>
+  <div class="purpose">
+    <div class="purpose__copy">
+      <div class="mvv">
+        <div class="m rv"><h4>Our Mission</h4><p>To produce superior castings through advanced technologies, long-term partnerships, and a culture of excellence, safety, and continuous improvement.</p></div>
+        <div class="m rv"><h4>Our Vision</h4><p>To be a globally recognised, trusted partner delivering innovative, sustainable, and high-quality casting solutions.</p></div>
+      </div>
+    </div>
+    <!-- The portrait is decorative here — the words carry the meaning and are already
+         in the copy above, so it takes an empty alt rather than repeating them to a
+         screen reader. Drops out cleanly if the file is missing. -->
+    <figure class="purpose__figure rv">
+      <img src="images/leadership.png" alt="" loading="lazy" decoding="async"
+           onerror="this.closest('.purpose__figure').style.display='none'" />
+    </figure>
   </div>
 </div></section>
 
