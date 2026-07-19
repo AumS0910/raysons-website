@@ -404,8 +404,8 @@
     <!-- confirmation: the drawing is on the floor -->
     <div class="eq-success" id="rfq-success">
       <div class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5 11-11"/></svg></div>
-      <h3>The drawing is on the floor.</h3>
-      <p>Received. An engineer is reviewing your brief now — you'll hear back <em>within 48 hours</em>.</p>
+      <h3 id="rfq-success-h">The drawing is on the floor.</h3>
+      <p id="rfq-success-p">Received. An engineer is reviewing your brief now — you'll hear back <em>within 48 hours</em>.</p>
     </div>
   </div>
 </div>
@@ -451,6 +451,9 @@
   //  (Formspree accepts the FormData below as-is and emails it to you.)
   // ────────────────────────────────────────────────────────────────
   const ENDPOINT = '';
+  // set true when the enquiry was handed to the visitor's mail client rather than
+  // POSTed, so the confirmation can tell them the truth about what still has to happen
+  let viaMail = false;
 
   const form    = document.getElementById('rfq');
   const success = document.getElementById('rfq-success');
@@ -497,8 +500,37 @@
         return;
       }
     } else {
-      // No endpoint yet — log the payload so you can verify the shape.
-      console.log('RFQ (no endpoint wired):', Object.fromEntries(data.entries()));
+      // ── NO ENDPOINT: hand the enquiry to the visitor's mail client ──────────
+      // This branch used to console.log the payload and then call seal() anyway,
+      // so a real customer filled the form, watched the success animation, and
+      // believed their RFQ had been sent — while it had gone nowhere but their own
+      // browser console. Silent lost business, and worse, they do not chase it
+      // because as far as they know they already made contact.
+      //
+      // Until a real endpoint exists, compose the enquiry as an email and open it.
+      // The visitor still has to press send in their client, so the confirmation
+      // copy below says exactly that rather than claiming it is already delivered.
+      const g = k => (data.get(k) || '').toString().trim();
+      const lines = [
+        ['Name',            g('name')],
+        ['Company',         g('company')],
+        ['Email',           g('email')],
+        ['Phone',           g('phone')],
+        ['Material',        g('material')],
+        ['Process',         g('process')],
+        ['Weight',          g('weight')],
+        ['Annual quantity', g('quantity')],
+      ].filter(([, v]) => v).map(([k, v]) => k + ': ' + v);
+      if (g('message')) lines.push('', 'Details:', g('message'));
+
+      const subject = 'RFQ — ' + (g('company') || g('name') || 'New enquiry');
+      const body = lines.join('\n');
+      // mailto URLs are length-limited in some clients; keep well inside it
+      const href = 'mailto:industries@raysonsgroup.com'
+                 + '?subject=' + encodeURIComponent(subject)
+                 + '&body='    + encodeURIComponent(body.slice(0, 1600));
+      viaMail = true;
+      try { window.location.href = href; } catch (_) { viaMail = false; }
     }
 
     seal();
@@ -509,6 +541,16 @@
   // rect matches), then read back the confirmation over the dimmed form. Decorative: the
   // success panel always shows, even if the animation no-ops. Reduced-motion → instant.
   function seal(){
+    // Tell the truth about what actually happened. Handing the enquiry to a mail
+    // client is NOT the same as delivering it — the visitor still has to press send,
+    // and a message that says "received" when nothing was received is how an RFQ
+    // gets lost by someone who thinks they already sent it.
+    if(viaMail){
+      const h = document.getElementById('rfq-success-h');
+      const t = document.getElementById('rfq-success-p');
+      if(h) h.textContent = 'Your email is ready to send.';
+      if(t) t.innerHTML = 'We’ve opened your mail app with the enquiry filled in — <em>press send</em> and an engineer replies within 48 hours. Nothing arrived? Write to <a href="mailto:industries@raysonsgroup.com" style="color:var(--bronze-lite)">industries@raysonsgroup.com</a>.';
+    }
     const card = document.getElementById('eqForm');
     const rect = document.getElementById('eqSealRect');
     const tag  = document.getElementById('eqTag');
