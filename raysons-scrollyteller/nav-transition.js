@@ -5,6 +5,36 @@
 //  / Enquire cut like scenes of one film and flow straight into the next page's title
 //  card. Reduced-motion navigates instantly. No dependencies. Style in styles.css (.nav-xfade).
 // ============================================================
+// ── PRERENDER THE NEXT PAGE ──────────────────────────────────────────────────
+// The dissolve was smooth but you still landed on a page that then had to BOOT —
+// capture its clips, load its libraries, start its engine. That work happening
+// after arrival is the last thing that reads as "a new page" rather than a cut.
+//
+// Speculation rules move it earlier: on hover or touch-start over a nav link the
+// browser builds the whole destination in the background — scripts run, canvas
+// boots, first frame paints — and the click simply reveals what is already alive.
+// Combined with the view transition, that is how a multi-page site gets the feel
+// people associate with a single-page app, without becoming one.
+//
+// "moderate" eagerness is deliberate: prerendering ALL five on load would run five
+// WebGL engines at once. Hover is intent, and intent arrives early enough.
+(function(){
+  if(!HTMLScriptElement.supports || !HTMLScriptElement.supports('speculationrules')) return;
+  const rules = {
+    prerender: [{
+      where: { and: [
+        { href_matches: '/raysons-scrollyteller/*.html' },
+        { not: { selector_matches: '[download], [target="_blank"]' } }
+      ]},
+      eagerness: 'moderate'
+    }]
+  };
+  const s = document.createElement('script');
+  s.type = 'speculationrules';
+  s.textContent = JSON.stringify(rules);
+  document.head.appendChild(s);
+})();
+
 (function(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;   // instant nav, no dip
   if(!document.body) return;
