@@ -27,9 +27,7 @@
     pour:        'valve/pour.mp4',
     forge:       'valve/forge.mp4',
     deconstruct: 'valve/deconstruct.mp4',
-    // Shot as a turntable rather than a story beat: locked subject, fixed studio
-    // lighting, constant camera speed. orbit.mp4 is kept on disk for rollback.
-    orbit:       'valve/turntable.mp4',
+    orbit:       'valve/orbit.mp4',
     bridge:      'valve/bridge.mp4',
     macro:       'valve/macro.mp4',
   };
@@ -81,7 +79,7 @@
   //  restores from disk with zero video decode. Partial captures from
   //  a stalled decode are never written.
   // ============================================================
-  const DB_NAME = 'raysons-cinema', STORE = 'frames', CACHE_VER = 'v3';  // bump = invalidate any stale cached captures
+  const DB_NAME = 'raysons-cinema', STORE = 'frames', CACHE_VER = 'v2';  // bump = invalidate any stale cached captures
   const cacheKey = (key)=> `${CACHE_VER}|${key}|${MOBILE?'m':'d'}`;
   let dbP = null;
   function openDB(){
@@ -324,19 +322,9 @@
       let fi;
       if(seg.act === TURN_ACT){
         // scroll still advances the orbit; the drag is an OFFSET on top of it, so
-        // letting go never snaps the part back to where the scroll says it should be.
-        //
-        // PING-PONG, not wrap. The clip is about a half turn, not a full circle —
-        // measured, the last frame sits at 87% of the maximum difference from the
-        // first, where a true 360 would be near zero. Wrapping it would slam from
-        // the end angle back to the start angle every lap. Bouncing instead plays
-        // the arc forwards then backwards, and reversing a turntable simply looks
-        // like turning it the other way, so there is no seam to see. Rocking an
-        // object back and forth is also how people actually inspect one by hand.
-        const N = arr.length, period = Math.max(1, 2*N - 2);
-        let t = Math.round(u*(N-1) + turnOff) % period;
-        if(t < 0) t += period;
-        fi = t < N ? t : period - t;
+        // letting go never snaps the part back to where the scroll says it should be
+        fi = Math.round(u*(arr.length-1) + turnOff);
+        fi = ((fi % arr.length) + arr.length) % arr.length;    // wrap — it's a circle
       } else {
         fi = clamp(Math.round(u*(arr.length-1)), 0, arr.length-1);
       }
