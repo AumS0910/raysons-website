@@ -66,13 +66,6 @@
 
   /* the product stage — the bespoke film */
   #stage{position:fixed;inset:0;z-index:0;display:block;width:100vw;height:100vh}
-  /* the live casting shares the stage layer; opacity is the only thing that swaps them,
-     so the grade, vignette, grain and acts above keep working on either source */
-  #valveGL{position:fixed;inset:0;z-index:0;display:block;width:100vw;height:100vh;
-    opacity:0;background:#0a0807;touch-action:pan-y;transition:opacity .45s ease}
-  body.valve-live #stage{opacity:0}
-  body.valve-live #valveGL{cursor:grab}
-  body.valve-live #valveGL:active{cursor:grabbing}
 
   /* edge-only darkening — centre of the product stays bright (RIFT technique) */
   .cine-vig{position:fixed;inset:0;z-index:1;pointer-events:none;
@@ -265,11 +258,6 @@
 </noscript>
 
 <canvas id="stage" role="img" aria-label="Molten iron poured and forged into a precision hydraulic valve casting — a scroll-driven foundry film."></canvas>
-<!-- EXPERIMENT — the object acts (deconstruct / reassemble / orbit / bore / reveal) rendered
-     live instead of scrubbed, so the viewer can actually turn the casting. Sits at the same
-     layer as #stage and only one of the two is ever visible. cinema.js owns the switch;
-     delete the valve-gl.js script tag and the film reverts to footage untouched. -->
-<canvas id="valveGL" aria-hidden="true" data-cursor="Drag"></canvas>
 <div class="cine-vig"></div>
 <div class="cine-floor"></div>
 <div class="cine-grade"></div>
@@ -436,7 +424,6 @@
      zone drives the bracket orbit. bracket.js removes it when WebGL/motion isn't available. -->
 <div id="bracketScroll"></div>
 
-<script src="valve-gl.js"></script>
 <script src="cinema.js"></script>
 <script src="premium.js"></script>
 <script>
