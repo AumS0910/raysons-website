@@ -49,16 +49,19 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     }
     geo.setAttribute('uv', new THREE.BufferAttribute(uv,2));
   }
-  // a DARK FOUNDRY environment for reflections — not a neutral studio. Emissive strips act as
-  // area lights: a big molten-warm key, a cool steel rim, a dim warm ceiling. This is what makes
-  // the metal read like it belongs in the pour/valve footage instead of a clean product render.
+  // A STUDIO, not a furnace. The old environment's key light was a large molten-orange
+  // panel (0xff6a1a), and because a metal's colour IS its reflection, the finished part
+  // reflected that orange from every facet and read as bronze rather than machined iron.
+  // This is the flanged hub's lighting on the main site: a bright neutral key, a cool
+  // rim, a soft ceiling. The molten warmth now belongs to the pour beat alone — where
+  // the shader's own emissive supplies it — not to the metal's permanent colour.
   function makeEnv(){
-    const s = new THREE.Scene(); s.background = new THREE.Color(0x040303);
+    const s = new THREE.Scene(); s.background = new THREE.Color(0x0a0a0b);
     const strip=(w,h,color,x,y,z)=>{ const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({color})); m.position.set(x,y,z); m.lookAt(0,0,0); s.add(m); };
-    strip(12,26, 0xff6a1a, -11, 6, 3);   // molten key (left, warm)
-    strip(7,18,  0x35507e,  12, 5, -3);  // steel rim (right, cool)
-    strip(16,14, 0x120f0b,   0, 14, 0);  // dim warm ceiling
-    strip(22,12, 0x030202,   0, -7, 9);  // dark floor front
+    strip(14,26, 0xdfe4ec, -11, 6, 3);   // key — bright neutral softbox
+    strip(9,18,  0x6e7480,  12, 5, -3);  // rim — cool steel
+    strip(18,14, 0x8d939e,   0, 14, 0);  // ceiling bounce, neutral
+    strip(22,12, 0x14161a,   0, -7, 9);  // dark floor front
     return s;
   }
 
@@ -97,29 +100,29 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   renderer.setSize(innerWidth, innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.28;
+  renderer.toneMappingExposure = 1.12;
   renderer.shadowMap.enabled = !MOBILE;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.localClippingEnabled = true;                    // section-cut interaction (see below)
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x080605);
-  scene.fog = new THREE.FogExp2(0x0a0807, 0.032);          // subtle depth haze — the footage has atmosphere
+  scene.fog = new THREE.FogExp2(0x0b0b0c, 0.030);          // subtle depth haze — the footage has atmosphere
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(makeEnv(), 0.5).texture;
 
   const camera = new THREE.PerspectiveCamera(34, innerWidth/innerHeight, 0.1, 100);
   const target = new THREE.Vector3(0,0,0);
 
-  scene.add(new THREE.HemisphereLight(0x9fb6d6, 0x2a1a10, 0.65));
-  const key = new THREE.DirectionalLight(0xffa04a, 4.4); key.position.set(-4,5,3); key.castShadow=!MOBILE;
+  scene.add(new THREE.HemisphereLight(0xcbcdd2, 0x2e2c29, 0.6));
+  const key = new THREE.DirectionalLight(0xf6f2ec, 3.6); key.position.set(-4,5,3); key.castShadow=!MOBILE;
   if(!MOBILE){ key.shadow.mapSize.set(2048,2048); key.shadow.bias=-0.0004;
     key.shadow.camera.near=1; key.shadow.camera.far=20;
     key.shadow.camera.left=-4; key.shadow.camera.right=4; key.shadow.camera.top=4; key.shadow.camera.bottom=-4; }
   scene.add(key);
-  const rim  = new THREE.DirectionalLight(0xaaccff, 2.6); rim.position.set(5,3.5,-4); scene.add(rim);
-  const rim2 = new THREE.DirectionalLight(0xff7a2a, 1.3); rim2.position.set(-2,1,-5); scene.add(rim2);  // warm back kicker
-  const fill = new THREE.DirectionalLight(0xffe0c0, 0.5); fill.position.set(2,-1,4); scene.add(fill);
+  const rim  = new THREE.DirectionalLight(0xcfd6e0, 1.9); rim.position.set(5,3.5,-4); scene.add(rim);
+  const rim2 = new THREE.DirectionalLight(0xd8a06a, 0.7); rim2.position.set(-2,1,-5); scene.add(rim2);  // warm back kicker
+  const fill = new THREE.DirectionalLight(0xeeeae4, 0.5); fill.position.set(2,-1,4); scene.add(fill);
   // the heat of the pour, cast onto the world: a point light inside the part that burns
   // while the metal floods, so the floor and reflection catch the glow (added at init at
   // zero intensity — adding a light mid-scroll would force a shader recompile hitch)
@@ -169,8 +172,12 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   // machined cast-iron: physical metal with sand-cast surface grain + a faint machined sheen
   const grain = makeNoiseTex(256);
   const iron = new THREE.MeshPhysicalMaterial({
-    color:0x3a342c, metalness:0.95, roughness:0.5,          // dark warm iron
-    clearcoat:0.28, clearcoatRoughness:0.42, envMapIntensity:1.35,
+    // Matched to the flanged hub on the main site (hubScene.js bodyMat): a neutral
+    // grey-steel base at 0x8a847b rather than the old warm brown 0x3a342c. On a metal
+    // the base colour tints every reflection, so a warm base plus a warm environment
+    // compounded into bronze. Neutral base + neutral studio = machined iron.
+    color:0x8a847b, metalness:0.86, roughness:0.34,
+    clearcoat:0.35, clearcoatRoughness:0.40, envMapIntensity:1.75,
     bumpMap:grain, bumpScale:0.32, roughnessMap:grain,
     transparent:true, opacity:1.0,
     clippingPlanes:[clipPlane], clipShadows:true            // section cut; DoubleSide toggled only while cutting
@@ -259,10 +266,10 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
       // the part mirror properly, like wet black glass. Plane trimmed 120→46 so the fog
       // (FogExp2 0.032) shapes a natural falloff instead of swallowing the whole surface,
       // and the buffer doubled so the reflected edges stay crisp rather than mushy.
-      const mirror = new Reflector(new THREE.PlaneGeometry(46,46), { textureWidth:2048, textureHeight:2048, color:0x38323a });
+      const mirror = new Reflector(new THREE.PlaneGeometry(46,46), { textureWidth:2048, textureHeight:2048, color:0x3c3e42 });
       mirror.rotation.x=-Math.PI/2; mirror.position.y=b2.min.y-0.002; scene.add(mirror); floor=mirror;
       // a soft contact shadow on top of the reflection grounds the part
-      const sh = new THREE.Mesh(new THREE.PlaneGeometry(40,40), new THREE.ShadowMaterial({opacity:0.5}));
+      const sh = new THREE.Mesh(new THREE.PlaneGeometry(40,40), new THREE.ShadowMaterial({opacity:0.5, color:0x000000}));
       sh.rotation.x=-Math.PI/2; sh.position.y=b2.min.y+0.001; sh.receiveShadow=true; scene.add(sh); shadowPlane=sh;
     }
     modelReady = true;
@@ -331,7 +338,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     iron.roughness = lerp(0.42, 0.55, smooth(0.36,0.7,zp));              // shiny-hot → matte cast-cool
     if(bloom) bloom.strength = 0.55 + heat * 0.35;                       // the flash blooms; the cooled iron doesn't
     if(floor) floor.visible = solid > 0.02;                              // reflection only once it's cast — a drawing has none
-    if(shadowPlane) shadowPlane.material.opacity = 0.42 * solid;         // shadow fades in with the solid
+    if(shadowPlane) shadowPlane.material.opacity = 0.66 * solid;         // shadow fades in with the solid
     // atmosphere: sparks ride the heat; dust hangs in the light once the object is real
     embers.visible = heat > 0.015; embers.material.opacity = Math.min(1, heat*1.6);
     dust.visible = zp > 0.30; dust.material.opacity = 0.10 * smooth(0.30,0.5,zp);
