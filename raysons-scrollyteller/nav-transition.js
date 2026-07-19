@@ -9,6 +9,14 @@
   if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;   // instant nav, no dip
   if(!document.body) return;
 
+  // STAND DOWN where the browser can do this natively. Cross-document view
+  // transitions (styles.css, @view-transition) hold the outgoing page's last
+  // painted frame and dissolve it into the incoming one — no gap at all. This
+  // curtain has to dip through black BECAUSE it cannot see the next page yet, so
+  // running both would mean dipping to black and then cross-fading from black.
+  // Firefox has no support today and still gets the wipe.
+  if(CSS.supports('view-transition-name','none') && 'startViewTransition' in document) return;
+
   const NAMES = { 'index.html':'Overview', 'about us.html':'About',
                   'foundry.html':'Foundry', 'enquire.html':'Enquire' };
   const here = decodeURIComponent(location.pathname.split('/').pop() || 'index.html').toLowerCase();

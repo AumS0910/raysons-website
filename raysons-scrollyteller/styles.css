@@ -501,6 +501,27 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 /* The curtain RISES like poured metal rather than cross-fading: the body stays ember-black
    (#050302 — still matching the loaders and the finale, so arrival continuity is intact) and
    only its leading edge is molten, so you see a hot line sweep up and the dark fill behind it. */
+/* ── ONE FILM ACROSS PAGES ────────────────────────────────────────────────────
+   The site is five documents, so every link used to mean: wipe to black (440ms),
+   tear the page down, rebuild it, fade the content up from zero. Over a second of
+   nothing, which reads as a chapter break rather than a cut.
+
+   Cross-document view transitions remove the gap entirely — the browser holds the
+   outgoing page's last painted frame and dissolves it into the incoming one, so
+   the film never goes dark. No SPA rewrite, no router, no rebuild of any engine.
+
+   Progressive enhancement: browsers without it (Firefox today) fall through to the
+   molten wipe below, exactly as before. nav-transition.js checks for support and
+   stands down when the browser can do it natively. */
+@view-transition{ navigation:auto }
+::view-transition-old(root),
+::view-transition-new(root){ animation-duration:.42s; animation-timing-function:cubic-bezier(.2,.7,.2,1) }
+/* the incoming page arrives fractionally later so the two overlap rather than swap */
+::view-transition-new(root){ animation-delay:.05s }
+@media(prefers-reduced-motion:reduce){
+  ::view-transition-old(root),::view-transition-new(root){ animation-duration:.01ms }
+}
+
 .nav-xfade{position:fixed;inset:0;z-index:9999;pointer-events:none;visibility:hidden;
   background:linear-gradient(0deg,#050302 0%,#050302 90%,#c2300a 96.5%,#ffb24a 100%);
   transform:translateY(101%);
@@ -531,3 +552,38 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 :is(.about-footer,.foundry-footer,.site-footer) .ft-bot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-top:26px;max-width:1280px;margin:0 auto;
   font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
 @media(max-width:760px){:is(.about-footer,.foundry-footer,.site-footer) .ft-mid{grid-template-columns:1fr;gap:24px}}
+
+/* ══ TOUCH TARGETS ═══════════════════════════════════════════════════════════
+   Audited across five pages at phone and tablet widths: no horizontal overflow
+   anywhere, but a number of controls were well under the 44px minimum a finger
+   needs — the brand mark at 28px tall, footer links at 16px, contact links at 17px.
+
+   Scoped to (pointer:coarse) so DESKTOP LAYOUT IS UNTOUCHED. The visual size of
+   everything here is unchanged too: the box grows, the type does not, so nothing
+   is redesigned — there is simply more of it to hit. Anchors inside flowing
+   paragraphs are deliberately excluded; padding them would break the line
+   rhythm of the sentence they sit in.
+   ────────────────────────────────────────────────────────────────────────── */
+@media(pointer:coarse){
+  /* brand + primary nav. Enquire ships its own nav (.eq-nav / #eqBurger) rather than
+     the shared one, so it needs naming explicitly or it is the only page left short. */
+  .nav .brand,.eq-nav .brand{min-height:44px;display:inline-flex;align-items:center}
+  .nav .nav-links a,.eq-nav a{min-height:44px;display:inline-flex;align-items:center}
+  .nav-burger,#eqBurger{min-width:44px;min-height:44px}
+
+  /* CTAs — 38px was close but still short of a thumb */
+  .cta-dock .cta-quote,.btn--fill,.btn--text,.bracket-next,.finale-next,.eq-submit{
+    min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+
+  /* footer link columns: 16px rows are the worst offenders on the whole site */
+  :is(.about-footer,.foundry-footer,.site-footer) .ft-col a,
+  :is(.about-footer,.foundry-footer,.site-footer) .ft-col li{
+    min-height:40px;display:flex;align-items:center}
+
+  /* standalone contact links (email / phone / WhatsApp rows) */
+  a[href^="mailto:"],a[href^="tel:"],a[href*="wa.me"]{
+    min-height:40px;display:inline-flex;align-items:center}
+  /* …but not when they are inside a running sentence */
+  p a[href^="mailto:"],p a[href^="tel:"],li a[href^="mailto:"],li a[href^="tel:"]{
+    min-height:0;display:inline}
+}
