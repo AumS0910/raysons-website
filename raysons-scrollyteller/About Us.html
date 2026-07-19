@@ -280,33 +280,15 @@
   </div>
 </section>
 
-<!-- ===================== REACH — the payoff ===================================
-     Moved UP to sit directly after the Journey: forty years of heritage → who it earned.
-     The proof (people, standards) now SUPPORTS the payoff instead of delaying it, and the
-     page ends on a final shot rather than a customer grid. -->
-<section class="sec finale" id="reach"><div class="wrap">
-  <div class="eyebrow-badge rv" style="margin-left:auto;margin-right:auto"><span class="dot"></span> Global Customers</div>
-  <h2 class="display cool rv" style="font-size:clamp(34px,5.4vw,80px)">Supplying OEMs on<br/>four <em>continents.</em></h2>
-  <!-- STATIC named grid (was an infinite marquee — it scrolled your strongest trust
-       signals past the eye before a buyer could read them). Names are stationary and
-       deliberate; hover/touch reveals country + the part we cast for them.
-       NOTE: the part-application line per client is a PLACEHOLDER — confirm each with
-       the client before this goes to production (country is already factual). -->
-  <div class="clients rv">
-    <div class="client" style="--i:0"><span class="client__name">Caterpillar</span><span class="client__meta">USA · Hydraulic valve bodies</span></div>
-    <div class="client" style="--i:1"><span class="client__name">Halliburton</span><span class="client__meta">USA · Flow-control castings</span></div>
-    <div class="client" style="--i:2"><span class="client__name">Schwing Stetter</span><span class="client__meta">Germany · Concrete-pump components</span></div>
-    <div class="client" style="--i:3"><span class="client__name">Faster Hydraulics</span><span class="client__meta">Italy · Hydraulic manifolds</span></div>
-    <div class="client" style="--i:4"><span class="client__name">John Deere</span><span class="client__meta">USA · Drivetrain castings</span></div>
-    <div class="client" style="--i:5"><span class="client__name">Ingersoll Rand</span><span class="client__meta">USA · Compressor castings</span></div>
-    <div class="client" style="--i:6"><span class="client__name">Tata Hendrikson</span><span class="client__meta">India · Commercial-vehicle castings</span></div>
-    <div class="client" style="--i:7"><span class="client__name">Turbo Energy (TEL)</span><span class="client__meta">India · Turbocharger castings</span></div>
-  </div>
-  <div class="trust-row rv" style="justify-content:center">
-    <span class="iso-seal">ISO<br/><b>9001:2015</b></span>
-    <span class="kicker">Europe · United Kingdom · USA — shipped from Kolhapur</span>
-  </div>
-</div></section>
+<!-- The "Global Customers" grid (Caterpillar, Halliburton, Schwing Stetter, Faster,
+     John Deere, Ingersoll Rand, Tata Hendrikson, TEL) was removed at the client's
+     request. Worth noting for anyone considering restoring it: the per-client part
+     line was always flagged in-file as a PLACEHOLDER awaiting confirmation, so it
+     should not go back without those applications being verified. The customer roster
+     still appears on Foundry as the OEM logo strip, and ISO 9001:2015 is unaffected —
+     it carries in the hero sub-line and the certifications block below.
+     Its styling (.finale, .clients, .client__name/__meta) is left in about-cinema.css
+     so restoring the section is markup-only. -->
 
 <!-- ===================== PURPOSE ===================== -->
 <section class="sec"><div class="wrap">
