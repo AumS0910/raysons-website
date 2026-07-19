@@ -663,11 +663,17 @@ void main(){
     }
   }
 
+  let drawn = 0;
   window.RaysonsValve = {
     ok: true,
     // cinema.js owns the scroll; this only ever draws what it is told to draw
-    render: (act, local)=> render(act, local, (performance.now()-t0)/1000),
+    render: (act, local)=>{ drawn++; render(act, local, (performance.now()-t0)/1000); },
     setLive: (b)=>{ live = b; cv.style.opacity = b ? '1' : '0'; if(!b){ dragging=false; } },
-    dragged: ()=> touched
+    dragged: ()=> touched,
+    // ground truth for testing: frames actually drawn, and the live camera yaw.
+    // Screenshot diffing cannot verify this page — grain reseeds every frame, so two
+    // captures always differ whether or not anything is animating.
+    frames: ()=> drawn,
+    yaw: ()=> dY
   };
 })();

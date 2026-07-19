@@ -356,7 +356,12 @@
     const moving = Math.abs(target-sy) > 0.4 || Math.abs(sy-prev) > 0.1;
     // Idle: once the scroll has settled and the breathing has been painted a
     // few frames, stop the full-screen canvas repaint entirely (battery/GPU).
-    if(!moving){ if(settledFrames > 6) return; settledFrames++; } else { settledFrames=0; }
+    // The idle gate exists because a painted VIDEO FRAME is static — once scroll settles
+    // there is nothing new to draw, so stopping saves battery and GPU. A live object is
+    // the opposite: it has to keep drawing to answer a drag, coast on its inertia and
+    // turn its rotors. Idling it is what made the casting freeze the moment you stopped
+    // scrolling. So the gate stays for footage and lifts while the valve owns the frame.
+    if(!moving && !valveLive){ if(settledFrames > 6) return; settledFrames++; } else { settledFrames=0; }
     const max = Math.max(1, scrollSpace.offsetHeight - innerHeight);
     const p = clamp(sy/max, 0, 1);
     const vel = Math.min(1, Math.abs(p-prevP)*60); prevP=p;
