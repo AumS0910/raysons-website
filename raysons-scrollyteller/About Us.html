@@ -327,9 +327,14 @@
     <!-- The portrait is decorative here — the words carry the meaning and are already
          in the copy above, so it takes an empty alt rather than repeating them to a
          screen reader. Drops out cleanly if the file is missing. -->
+    <!-- WebP first: 45 KB against 1.2 MB for the same alpha cut-out. The PNG stays as
+         the fallback for anything that cannot decode WebP. -->
     <figure class="purpose__figure rv">
-      <img src="images/leadership.png" alt="" loading="lazy" decoding="async"
-           onerror="this.closest('.purpose__figure').style.display='none'" />
+      <picture>
+        <source srcset="images/leadership.webp" type="image/webp" />
+        <img src="images/leadership.png" alt="" loading="lazy" decoding="async"
+             onerror="this.closest('.purpose__figure').style.display='none'" />
+      </picture>
     </figure>
   </div>
 </div></section>
