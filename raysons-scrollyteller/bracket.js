@@ -81,9 +81,9 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   // ---- caption copy per phase (drawing → casting) ----
   const capEl = { k: cap && cap.querySelector('.k'), h: cap && cap.querySelector('h2'), p: cap && cap.querySelector('p') };
   const COPY = {
-    drawing: { k:'The Drawing · 11CX065C01', h:'Your <em>drawing.</em>', p:'Your part, in our language' },
-    object:  { k:'The Object · 11CX065C01',  h:'Our <em>fire.</em>',     p:'Rear bracket · shell moulded · machined to drawing' },
-    section: { k:'Section · 11CX065C01',      h:'Every <em>wall.</em>',   p:'Sectioned to the drawing · wall thickness held' }
+    drawing: { k:'The Drawing · 0050-351-2000-000', h:'Your <em>drawing.</em>', p:'Your part, in our language' },
+    object:  { k:'The Object · 0050-351-2000-000',  h:'Our <em>fire.</em>',     p:'Shell moulded · machined to drawing' },
+    section: { k:'Section · 0050-351-2000-000',     h:'Every <em>wall.</em>',   p:'Sectioned to the drawing · wall thickness held' }
   };
   let capPhase = '';
   function setCopy(phase){ if(phase===capPhase || !capEl.h) return; capPhase=phase; const c=COPY[phase];
@@ -219,7 +219,11 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
   const draco = new DRACOLoader(); draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
   const loader = new GLTFLoader(); loader.setDRACOLoader(draco);
-  loader.load('models/bracket.glb', (gltf)=>{
+  // THE OBJECT — the client's real production casting (drawing 0050_351_2000_000),
+  // supplied as a raw CAD glTF: 1,625 primitives / 1.89 MB. Processed with gltf-transform
+  // (join + weld + prune + Draco) to 1 draw call / 153 KB before shipping.
+  // Previous asset kept for rollback:  loader.load('models/bracket.glb', …)
+  loader.load('models/valve-part.glb', (gltf)=>{
     const obj = gltf.scene;
     obj.traverse(c=>{ if(c.isMesh){
       boxUV(c.geometry, 0.09);                           // box-projected UVs for the cast grain
@@ -234,18 +238,28 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     const box = new THREE.Box3().setFromObject(obj);
     const size = new THREE.Vector3(); box.getSize(size);
     const center = new THREE.Vector3(); box.getCenter(center);
-    obj.scale.setScalar(2.4 / Math.max(size.x,size.y,size.z));
-    obj.position.sub(center.multiplyScalar(2.4 / Math.max(size.x,size.y,size.z)));
+    // Fit on the bounding DIAGONAL, not the longest edge. Max-edge works for a roughly
+    // cubic part (the old bracket) but over-scales a flat, elongated one like this
+    // casting — it filled the frame and cropped. The diagonal normalises both shapes.
+    const fit = 1.70 / size.length();
+    obj.scale.setScalar(fit);
+    obj.position.sub(center.multiplyScalar(fit));
     root.add(obj);
     const b2 = new THREE.Box3().setFromObject(obj);
     target.set(0,(b2.min.y+b2.max.y)/2,0);
     uni.uMinY.value = b2.min.y - 0.02;                 // the pour-front shader's world-Y bounds
     uni.uMaxY.value = b2.max.y + 0.02;
     heatLight.position.set(0, (b2.min.y+b2.max.y)/2, 0);
+    cutDepth = Math.max(0.25, (b2.max.z - b2.min.z) * 0.38);
     if(!MOBILE){
       // wet reflective floor — matches the pour/valve footage (part mirrored on a dark, damp
       // studio floor). Dark-tinted so the reflection reads subtle, and the molten cast glows in it.
-      const mirror = new Reflector(new THREE.PlaneGeometry(120,120), { textureWidth:1024, textureHeight:1024, color:0x050406 });
+      // The tint IS the reflection's brightness. At 0x050406 it was effectively black and
+      // the casting read as floating in a void; 0x1c191e keeps the floor dark while letting
+      // the part mirror properly, like wet black glass. Plane trimmed 120→46 so the fog
+      // (FogExp2 0.032) shapes a natural falloff instead of swallowing the whole surface,
+      // and the buffer doubled so the reflected edges stay crisp rather than mushy.
+      const mirror = new Reflector(new THREE.PlaneGeometry(46,46), { textureWidth:2048, textureHeight:2048, color:0x38323a });
       mirror.rotation.x=-Math.PI/2; mirror.position.y=b2.min.y-0.002; scene.add(mirror); floor=mirror;
       // a soft contact shadow on top of the reflection grounds the part
       const sh = new THREE.Mesh(new THREE.PlaneGeometry(40,40), new THREE.ShadowMaterial({opacity:0.5}));
@@ -328,12 +342,21 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   // object zone) to reveal wall thickness, then retract before the "group story" CTA. The
   // freshly-cut interior catches a champagne light. Plane tracks the camera so the section
   // always opens toward the viewer, even as the orbit turns.
+  let cutDepth = 1.3;                 // overwritten from the loaded bounds
+  // SECTION BEAT: off. Tuned for the old bracket (a simple solid). This casting has real
+  // internal cores, and slicing them open reads as a render fault rather than a section.
+  const SECTION_ON = false;
   function section(zp){
+    if(!SECTION_ON) return 0;
     const sec = smooth(0.56,0.70,zp) * (1 - smooth(0.80,0.88,zp));   // in → hold → out
     if(sec > 0.002){
       iron.side = THREE.DoubleSide;                                  // see the inner walls (cheap: side is render-state, no recompile)
       const camToTarget = _v.subVectors(target, camera.position).normalize();
-      const point = _p.copy(target).addScaledVector(camToTarget, 1.3*(sec-1));   // front face → centre as sec 0→1
+      // Depth derives from the loaded part (see cutDepth), not a constant. A fixed 1.3
+      // was tuned to the old bracket; on a part with real internal cavities it cut well
+      // past centre and opened every core, which reads as a render fault rather than
+      // a section. Shaving to just short of the mid-plane keeps it a wall-thickness cut.
+      const point = _p.copy(target).addScaledVector(camToTarget, cutDepth*(sec-1));
       clipPlane.setFromNormalAndCoplanarPoint(camToTarget, point);
       cutLight.position.copy(point).addScaledVector(camToTarget, -0.35);          // just behind the cut face
       cutLight.intensity = sec * 3.2;

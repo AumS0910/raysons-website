@@ -18,6 +18,10 @@
 <meta property="og:description" content="A scroll-scrubbed product film: molten iron poured and forged into a precision hydraulic valve casting. Shell moulded iron castings 0.5 kg–500 kg, ISO 9001:2015, Kolhapur, India." />
 <meta property="og:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/valve/pour-poster.jpg" />
 <meta property="og:site_name" content="Raysons Shell Cast" />
+<meta property="og:url" content="https://raysons-website.vercel.app/raysons-scrollyteller/" />
+<meta property="og:locale" content="en_IN" />
+<meta name="geo.region" content="IN-MH" />
+<meta name="geo.placename" content="Kolhapur, Maharashtra" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Raysons Shell Cast — Through the Foundry" />
 <meta name="twitter:description" content="Molten iron forged into a precision valve casting, scroll-scrubbed frame by frame. ISO 9001:2015 · Kolhapur, India." />
@@ -110,8 +114,11 @@
   /* the film's grade over the 3D: edge vignette + warm floor glow (matches .cine-vig/.cine-floor) */
   #bracketFx{position:fixed;inset:0;z-index:21;pointer-events:none;opacity:0;
     background:
-      linear-gradient(180deg, rgba(7,5,4,.9) 0%, transparent 20%, transparent 72%, rgba(7,5,4,.95) 100%),
-      radial-gradient(120% 92% at 50% 44%, transparent 34%, rgba(7,5,4,.74) 100%),
+      /* the bottom stop used to hit 95% black at exactly the height the mirror floor
+         occupies — it was crushing the reflection out of the frame. Lifted, and the
+         vignette eased, so the casting reads as standing on wet black glass. */
+      linear-gradient(180deg, rgba(7,5,4,.9) 0%, transparent 22%, transparent 84%, rgba(7,5,4,.5) 100%),
+      radial-gradient(120% 92% at 50% 44%, transparent 36%, rgba(7,5,4,.6) 100%),
       radial-gradient(62% 58% at 50% 118%, rgba(255,120,40,.16), transparent 60%)}
   body.bracket-on .grain{z-index:21;opacity:.07}                 /* film grain carries onto the finale */
   /* the finale owns the frame — the persistent dock yields to the caption + "Enter the group
@@ -275,9 +282,9 @@
      film (the footage's look), not a clean studio render. Film grain also carries over (CSS below). -->
 <div id="bracketFx" aria-hidden="true"></div>
 <div id="bracketCap" aria-hidden="true">
-  <div class="k">The Drawing · 11CX065C01</div>
+  <div class="k">The Drawing · 0050&#8209;351&#8209;2000&#8209;000</div>
   <h2>Your <em>drawing.</em></h2>
-  <p>Your part, in our language</p>
+  <p>Shell moulded · machined to drawing</p>
 </div>
 <div id="bracketHint" aria-hidden="true">Drag to inspect</div>
 <!-- tolerance readout — appears while you grab the casting (bracket.js) -->

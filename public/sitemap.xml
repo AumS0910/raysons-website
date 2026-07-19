@@ -1,29 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Swap the domain to the production URL (e.g. raysonsgroup.com) when live. -->
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<!--
+  Raysons Shell Cast — sitemap
+  The canonical site is the scroll film under /raysons-scrollyteller/. The legacy pages at the
+  domain root (about.html, technology.html, …) still resolve but are deliberately NOT listed:
+  they target the same keywords and would cannibalise the real pages. Redirect or noindex them
+  once the production domain is decided.
+  Swap the domain to the production URL (e.g. raysonsgroup.com) when live.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
   <url>
-    <loc>https://raysons-website.vercel.app/</loc>
+    <loc>https://raysons-website.vercel.app/raysons-scrollyteller/</loc>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://raysons-website.vercel.app/raysons-scrollyteller/valve/pour-poster.jpg</image:loc>
+      <image:title>Molten iron poured into a shell mould at Raysons Shell Cast, Kolhapur</image:title>
+    </image:image>
   </url>
+
   <url>
-    <loc>https://raysons-website.vercel.app/about.html</loc>
+    <loc>https://raysons-website.vercel.app/raysons-scrollyteller/foundry.html</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://raysons-website.vercel.app/raysons-scrollyteller/valve/exploded.jpg</image:loc>
+      <image:title>Shell moulded and no-bake iron casting process — Raysons Shell Cast foundry</image:title>
+    </image:image>
   </url>
+
   <url>
-    <loc>https://raysons-website.vercel.app/technology.html</loc>
+    <loc>https://raysons-website.vercel.app/raysons-scrollyteller/products.html</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://raysons-website.vercel.app/raysons-scrollyteller/products/part-01.webp</image:loc>
+      <image:title>Precision iron castings produced by Raysons Shell Cast</image:title>
+    </image:image>
   </url>
+
   <url>
-    <loc>https://raysons-website.vercel.app/products.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://raysons-website.vercel.app/enquire.html</loc>
+    <loc>https://raysons-website.vercel.app/raysons-scrollyteller/enquire.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
+
+  <url>
+    <loc>https://raysons-website.vercel.app/raysons-scrollyteller/About%20Us.html</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
 </urlset>
