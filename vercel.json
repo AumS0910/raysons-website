@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "//": "The scrollyteller under /raysons-scrollyteller/ is the site now. The old v1 pages at the domain root are retired — kept in the repo for reference, but every root path 301s to its scrollyteller equivalent so nothing v1 is reachable or crawlable, and no v1 page competes with the real one for ranking. 301 (permanent) so search engines transfer the old pages' authority to the new ones.",
+  "redirects": [
+    { "source": "/", "destination": "/raysons-scrollyteller/", "permanent": true },
+    { "source": "/index.html", "destination": "/raysons-scrollyteller/", "permanent": true },
+    { "source": "/about.html", "destination": "/raysons-scrollyteller/About%20Us.html", "permanent": true },
+    { "source": "/technology.html", "destination": "/raysons-scrollyteller/foundry.html", "permanent": true },
+    { "source": "/products.html", "destination": "/raysons-scrollyteller/products.html", "permanent": true },
+    { "source": "/enquire.html", "destination": "/raysons-scrollyteller/enquire.html", "permanent": true }
+  ]
+}
