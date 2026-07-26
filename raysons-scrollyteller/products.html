@@ -21,6 +21,15 @@
 <meta name="twitter:description" content="Twenty-three real iron castings, photographed as they left the floor. Shell moulded &amp; no-bake, 0.5 kg–500 kg, machined to drawing. ISO 9001:2015." />
 <meta name="twitter:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/products/part-01.webp" />
 <link rel="stylesheet" href="styles.css" />
+<!-- three.js import map — present on EVERY page so module engines (bracket.js,
+     about-corridor.js) resolve "three" no matter which page you entered on and then
+     flow to via the seamless router (spa.js). Harmless on pages that do not use it. -->
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three.160.0/examples/jsm/"
+}}
+</script>
 <link rel="preload" as="image" href="products/part-01.webp" fetchpriority="high" />
 <style>
   /* ══════════════════════════════════════════════════════════════════════════

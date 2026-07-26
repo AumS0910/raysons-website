@@ -17,6 +17,15 @@
 <meta name="twitter:title" content="Request a Quote — Raysons Shell Cast" />
 <meta name="twitter:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/valve/hero.jpg" />
 <link rel="stylesheet" href="styles.css" />
+<!-- three.js import map — present on EVERY page so module engines (bracket.js,
+     about-corridor.js) resolve "three" no matter which page you entered on and then
+     flow to via the seamless router (spa.js). Harmless on pages that do not use it. -->
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three.160.0/examples/jsm/"
+}}
+</script>
 <style>
   /* ── Enquire page: reuses the molten tokens from styles.css ── */
   html{scroll-behavior:smooth}

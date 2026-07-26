@@ -13,8 +13,12 @@
 (function () {
   if (!window.history || !window.fetch || !document.querySelector) return;
 
-  const SEQ = ['index.html', 'about us.html', 'foundry.html', 'products.html', 'enquire.html'];
+  // REAL filenames, real case — used to build fetch URLs. Vercel's Linux filesystem
+  // is case-sensitive, so 'about us.html' would 404 in production while working on
+  // Windows; compare case-insensitively but always FETCH the true name.
+  const SEQ = ['index.html', 'About Us.html', 'foundry.html', 'products.html', 'enquire.html'];
   const fileOf = (url) => decodeURIComponent(new URL(url, location.href).pathname.split('/').pop() || 'index.html').toLowerCase();
+  const orderOf = (url) => SEQ.findIndex((f) => f.toLowerCase() === fileOf(url));
   let navigating = false;
 
   // Re-run the scripts in a freshly-swapped <body>. Nodes inserted as HTML never
@@ -54,7 +58,7 @@
     want.forEach((el, href) => { if (!have.has(href)) document.head.appendChild(el.cloneNode(true)); });
   }
 
-  async function go(url, push) {
+  async function go(url, push, landAtBottom) {
     if (navigating) return;
     navigating = true;
     nav++;
@@ -79,6 +83,23 @@
         swap();
       }
       await runScripts(document.body);
+
+      // Reverse entry lands at the BOTTOM of the previous page. Its height is set by
+      // that page's own scroll engine (GSAP ScrollTrigger, canvas sizing) and grows
+      // over several frames, so a fixed rAF is too early. Poll until the height stops
+      // changing (or a ceiling), pinning to the bottom each tick so the view ends up at
+      // the true end no matter when the engine finishes measuring.
+      if (landAtBottom) {
+        let last = -1, stable = 0, ticks = 0;
+        const pin = () => {
+          const h = document.documentElement.scrollHeight;
+          window.scrollTo(0, h);
+          stable = (h === last) ? stable + 1 : 0;
+          last = h;
+          if (stable < 4 && ticks++ < 90) requestAnimationFrame(pin);
+        };
+        requestAnimationFrame(pin);
+      }
     } catch (e) {
       // any failure → hard navigate, never leave the user stranded
       location.href = url;
@@ -102,4 +123,39 @@
   }, true);
 
   addEventListener('popstate', () => go(location.href, false));
+
+  // ── AUTO-ADVANCE — the site is one continuous scroll, no clicking ──────────
+  // At the bottom of a page, a little more downward intent flows into the NEXT page;
+  // at the top, upward intent flows back into the END of the previous one. The five
+  // documents read as a single uninterrupted scroll. Intent is accumulated past a
+  // threshold so it never fires on a stray wheel tick or bounce, and only ever at the
+  // very edges — normal scrolling in the middle of a page is untouched.
+  const order = () => orderOf(location.href);
+  const EDGE = 8, NEED = 380;          // px from edge to arm; wheel delta to commit
+  let acc = 0, lastT = 0;
+
+  function atBottom() { return innerHeight + Math.ceil(scrollY) >= document.documentElement.scrollHeight - EDGE; }
+  function atTop() { return scrollY <= EDGE; }
+
+  function intent(dy) {
+    if (navigating) return;
+    const now = performance.now();
+    if (now - lastT > 400) acc = 0;    // reset if they paused — must be a continuous push
+    lastT = now;
+    const i = order();
+    if (dy > 0 && atBottom() && i > -1 && i < SEQ.length - 1) {
+      acc += dy;
+      if (acc > NEED) { acc = 0; go(new URL(SEQ[i + 1], location.href).href, true, false); }
+    } else if (dy < 0 && atTop() && i > 0) {
+      acc += -dy;
+      if (acc > NEED) { acc = 0; go(new URL(SEQ[i - 1], location.href).href, true, true); }
+    } else {
+      acc = 0;
+    }
+  }
+
+  addEventListener('wheel', (e) => intent(e.deltaY), { passive: true });
+  let ty = 0;
+  addEventListener('touchstart', (e) => { ty = e.touches[0].clientY; }, { passive: true });
+  addEventListener('touchmove', (e) => { const y = e.touches[0].clientY; intent((ty - y) * 2.2); ty = y; }, { passive: true });
 })();
