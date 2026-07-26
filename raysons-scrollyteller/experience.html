@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Raysons Shell Cast — One Form · the single-film experience</title>
+<meta name="description" content="One continuous film: a single precision iron casting, followed from pour to finished part and back to the foundry that made it. Shell moulded & no-bake, 0.5 kg–500 kg, ISO 9001:2015. Kolhapur, India." />
+<meta name="theme-color" content="#0a0807" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0807'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23c9a24e'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css" />
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+<style>
+  html{scroll-behavior:auto}
+  body{background:var(--bg);color:var(--ink);cursor:auto;overflow-x:hidden}
+
+  /* THE PERSISTENT OBJECT — one canvas, fixed, never unmounts. Everything scrolls over it. */
+  #expGL{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;touch-action:pan-y}
+  body.exp-grab #expGL{cursor:grabbing}
+  #expGL{cursor:grab}
+  /* cinematic grade over the object, matched to the rest of the site */
+  .exp-vig{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(125% 95% at 50% 48%, transparent 46%, rgba(7,5,4,.66) 100%),
+      linear-gradient(180deg, rgba(7,5,4,.55) 0%, transparent 20%, transparent 78%, rgba(7,5,4,.6) 100%)}
+  .exp-floor{position:fixed;left:0;right:0;bottom:0;height:40vh;z-index:1;pointer-events:none;
+    background:radial-gradient(60% 120% at 50% 130%, rgba(166,121,46,.16), transparent 70%)}
+
+  /* CHAPTER CAPTIONS — fixed overlays, one visible at a time, alternating side */
+  #expCaps{position:fixed;inset:0;z-index:10;pointer-events:none}
+  .exp-cap{position:absolute;top:50%;transform:translateY(-50%);max-width:min(440px,40vw);
+    opacity:0;transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+  .exp-cap.left{left:0;padding-left:clamp(24px,6vw,96px);padding-right:24px;transform:translateY(-50%) translateX(-14px)}
+  /* right captions clear the chapter rail (which sits at the right edge) */
+  .exp-cap.right{right:0;text-align:right;padding-right:clamp(72px,8vw,132px);padding-left:24px;transform:translateY(-50%) translateX(14px)}
+  .exp-cap.on{opacity:1;transform:translateY(-50%)}
+  .exp-cap__k{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--molten-hot);margin-bottom:18px;text-shadow:0 1px 12px rgba(7,5,4,.95)}
+  .exp-cap__h{font-family:var(--serif);font-weight:600;line-height:.96;letter-spacing:-.02em;
+    font-size:clamp(38px,6vw,92px);color:var(--ink);text-shadow:0 3px 30px rgba(7,5,4,.92)}
+  .exp-cap__h em{font-style:italic;color:var(--bronze-lite)}
+  .exp-cap__p{margin-top:20px;font-size:clamp(14px,1.5vw,17px);line-height:1.7;color:#d8cdbe;font-weight:300;text-shadow:0 1px 14px rgba(7,5,4,.9)}
+  .exp-cap.right .exp-cap__p{margin-left:auto}
+  /* sized to fit "1450°C" on one line inside the caption column without clipping the edge */
+  .exp-cap__peak{font-family:var(--serif);font-weight:600;font-size:clamp(44px,7vw,104px);line-height:.86;
+    color:var(--molten-hot);letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap;
+    text-shadow:0 4px 60px rgba(255,106,26,.3)}
+  .exp-cap__cta{display:inline-block;margin-top:30px;padding:15px 32px;border:1px solid var(--line-strong);border-radius:999px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);
+    pointer-events:auto;transition:background .35s ease,color .35s ease,border-color .35s ease}
+  .exp-cap__cta:hover{background:var(--ink);color:#0a0807;border-color:var(--ink)}
+  @media(max-width:760px){
+    .exp-cap{max-width:86vw;top:auto;bottom:12vh;transform:none;text-align:left}
+    .exp-cap.right{text-align:left}
+    .exp-cap.on{transform:none}
+    .exp-cap.right .exp-cap__p{margin-left:0}
+  }
+
+  /* CHAPTER RAIL — jump anywhere. Right edge, vertically centred (site pattern). */
+  .exp-rail{position:fixed;right:clamp(16px,2.4vw,34px);top:50%;transform:translateY(-50%);z-index:30;
+    display:flex;flex-direction:column;gap:16px;align-items:flex-end}
+  .exp-rail__i{display:flex;align-items:center;gap:10px;cursor:pointer;pointer-events:auto;
+    font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);
+    background:none;border:0;transition:color .4s ease}
+  .exp-rail__i .lbl{opacity:0;transform:translateX(6px);transition:opacity .4s ease,transform .4s ease}
+  .exp-rail__i:hover .lbl,.exp-rail__i.on .lbl{opacity:1;transform:none}
+  .exp-rail__i .dot{width:7px;height:7px;border-radius:50%;background:currentColor;transition:transform .4s ease,background .4s ease}
+  .exp-rail__i.on{color:var(--molten-hot)}
+  .exp-rail__i.on .dot{transform:scale(1.5);background:var(--molten-hot);box-shadow:0 0 10px var(--molten)}
+  /* thin progress spine behind the rail */
+  .exp-prog{position:fixed;right:calc(clamp(16px,2.4vw,34px) + 3px);top:50%;transform:translateY(-50%);z-index:29;
+    width:1px;height:min(52vh,420px);background:var(--line);pointer-events:none}
+  .exp-prog__f{position:absolute;left:0;top:0;width:100%;height:100%;transform:scaleY(0);transform-origin:0 0;
+    background:linear-gradient(180deg,var(--molten-hot),var(--molten-deep))}
+  @media(max-width:760px){.exp-rail__i .lbl{display:none}.exp-prog{display:none}}
+
+  /* NAV — persistent, same as the rest of the site */
+  .exp-nav{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
+    padding:24px clamp(20px,4vw,56px);mix-blend-mode:difference}
+  .exp-nav a{color:#fff}
+  .exp-nav .brand{display:flex;align-items:center;gap:11px;font-weight:600;font-size:15px}
+  .exp-nav .brand span{font-family:var(--mono);font-size:10px;letter-spacing:.24em;border:1px solid rgba(255,255,255,.4);padding:3px 7px;border-radius:2px;opacity:.7}
+  .exp-nav__links{display:flex;gap:26px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  @media(max-width:760px){.exp-nav__links{display:none}}
+
+  /* SCROLL RUNWAY — one tall column; each chapter is one viewport of scroll distance.
+     The sections are just scroll drivers + anchors for the rail; the visuals are the
+     fixed canvas + captions above. */
+  #expScroll{position:relative;z-index:5;pointer-events:none}
+  .exp-sec{height:100vh}
+
+  .exp-hint{position:fixed;left:50%;bottom:clamp(22px,5vh,44px);transform:translateX(-50%);z-index:20;
+    font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-faint);
+    pointer-events:none;opacity:.9;transition:opacity .5s ease}
+  body.exp-scrolled .exp-hint{opacity:0}
+
+  /* no-WebGL / reduced fallback: the object can't live, so show the poster + let it read as a page */
+  body.no-webgl #expGL,body.no-webgl .exp-hint{display:none}
+  body.no-webgl .exp-cap{position:static;opacity:1;transform:none;max-width:70ch;margin:0 auto;padding:14vh 24px 0}
+  body.no-webgl #expScroll{display:none}
+</style>
+</head>
+<body>
+
+<canvas id="expGL" aria-label="A precision iron casting, followed through one continuous film — drag to turn it."></canvas>
+<div class="exp-vig"></div>
+<div class="exp-floor"></div>
+<div class="grain"></div>
+
+<nav class="exp-nav">
+  <a class="brand" href="experience.html"><b>RAYSONS</b> <span>SHELL CAST</span></a>
+  <div class="exp-nav__links">
+    <a href="products.html">Products</a>
+    <a href="enquire.html">Enquire</a>
+  </div>
+</nav>
+
+<!-- CHAPTER CAPTIONS — copy carried from the existing pages -->
+<div id="expCaps">
+  <div class="exp-cap left on" id="cap-overview">
+    <div class="exp-cap__k">Through the Foundry</div>
+    <h2 class="exp-cap__h">Shell moulded &amp; <em>no-bake</em> iron castings.</h2>
+    <p class="exp-cap__p">0.5&nbsp;kg – 500&nbsp;kg · machined to drawing · ISO&nbsp;9001:2015 · Kolhapur, India. One part, followed from fire to finished — drag it any time.</p>
+  </div>
+  <div class="exp-cap right" id="cap-fire">
+    <div class="exp-cap__k">Shaped by fire</div>
+    <div class="exp-cap__peak">1450°C</div>
+    <h2 class="exp-cap__h">Pattern to <em>pour.</em></h2>
+    <p class="exp-cap__p">500&nbsp;kg induction melt, poured at a controlled temperature. Chemistry locked before the ladle moves.</p>
+  </div>
+  <div class="exp-cap left" id="cap-object">
+    <div class="exp-cap__k">Every side, to drawing</div>
+    <h2 class="exp-cap__h">Machined to drawing. <em>Every side.</em></h2>
+    <p class="exp-cap__p">Grey CI · SG / Ductile · SiMo · ADI. Shell moulded, then cut on HMC · VMC · CNC and dimensionally verified against the drawing.</p>
+  </div>
+  <div class="exp-cap right" id="cap-foundry">
+    <div class="exp-cap__k">The Foundry</div>
+    <h2 class="exp-cap__h">Where it was <em>made.</em></h2>
+    <p class="exp-cap__p">Shell moulding 500&nbsp;g – 150&nbsp;kg, no-bake 50 – 500&nbsp;kg, in-house machining, spectrometer-verified. 500&nbsp;MT/yr → 700.</p>
+  </div>
+  <div class="exp-cap left" id="cap-products">
+    <div class="exp-cap__k">On the floor</div>
+    <h2 class="exp-cap__h">One of <em>many.</em></h2>
+    <p class="exp-cap__p">Real iron castings across the program — hydraulic bodies, housings, brackets, covers — shipped to Italy, the UK, Japan and the USA.</p>
+    <a class="exp-cap__cta" data-ui href="products.html">See the range <span aria-hidden="true">→</span></a>
+  </div>
+  <div class="exp-cap right" id="cap-enquire">
+    <div class="exp-cap__k">Your drawing, our fire</div>
+    <h2 class="exp-cap__h">Send us the <em>drawing.</em></h2>
+    <p class="exp-cap__p">Grade, weight, annual quantity — an engineer replies within 48 hours. MIDC Shiroli, Kolhapur · we meet clients across Pune's MIDC belt weekly.</p>
+    <a class="exp-cap__cta" data-ui href="enquire.html">Request a quote <span aria-hidden="true">→</span></a>
+  </div>
+</div>
+
+<!-- CHAPTER RAIL — jump anywhere -->
+<div class="exp-prog"><span class="exp-prog__f" id="expProgFill"></span></div>
+<div class="exp-rail" aria-label="Chapters">
+  <button class="exp-rail__i on" data-i="0"><span class="lbl">Overview</span><span class="dot"></span></button>
+  <button class="exp-rail__i" data-i="1"><span class="lbl">The Pour</span><span class="dot"></span></button>
+  <button class="exp-rail__i" data-i="2"><span class="lbl">The Part</span><span class="dot"></span></button>
+  <button class="exp-rail__i" data-i="3"><span class="lbl">Foundry</span><span class="dot"></span></button>
+  <button class="exp-rail__i" data-i="4"><span class="lbl">Products</span><span class="dot"></span></button>
+  <button class="exp-rail__i" data-i="5"><span class="lbl">Enquire</span><span class="dot"></span></button>
+</div>
+
+<div class="exp-hint">Scroll · or drag to turn</div>
+
+<!-- SCROLL RUNWAY — one viewport of distance per chapter -->
+<div id="expScroll">
+  <section class="exp-sec" id="sec-overview"></section>
+  <section class="exp-sec" id="sec-fire"></section>
+  <section class="exp-sec" id="sec-object"></section>
+  <section class="exp-sec" id="sec-foundry"></section>
+  <section class="exp-sec" id="sec-products"></section>
+  <section class="exp-sec" id="sec-enquire"></section>
+</div>
+
+<script type="module" src="experience.js"></script>
+</body>
+</html>
