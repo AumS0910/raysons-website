@@ -167,7 +167,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
   const railItems = [...document.querySelectorAll('.exp-rail__i')];
   const caps = CHAPTERS.map(c => document.getElementById('cap-' + c.id));
   const progFill = document.getElementById('expProgFill');
-  let lastChap = -1;
+  let lastChap = -1, lastHeat = -1;
   function setChapter(i) {
     if (i === lastChap) return; lastChap = i;
     railItems.forEach((r, k) => r.classList.toggle('on', k === i));
@@ -224,6 +224,15 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
     setChapter(Math.round(f));
     if (progFill) progFill.style.transform = 'scaleY(' + sp.toFixed(4) + ')';
+
+    // --heat — the connective tissue (Plan B). One 0..1 temperature, updated every
+    // frame, that CSS reads for grain, body warmth, rail colour and the vignette glow.
+    // It is what will make the coming video clips read as one continuous world rather
+    // than seven separate files, and it already unifies the live object with the page.
+    if (Math.abs(heat - lastHeat) > 0.002) {
+      document.documentElement.style.setProperty('--heat', heat.toFixed(3));
+      lastHeat = heat;
+    }
 
     renderer.render(scene, camera);
   }

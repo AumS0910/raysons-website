@@ -16,7 +16,13 @@
 </script>
 <style>
   html{scroll-behavior:auto}
+  /* --heat (0..1) is set every frame by experience.js — the plan's connective tissue.
+     Everything temperature-dependent reads from this ONE value, so the whole document
+     shares a single colour script instead of each section drifting on its own. */
+  :root{--heat:0}
   body{background:var(--bg);color:var(--ink);cursor:auto;overflow-x:hidden}
+  /* the film grain thickens with the heat — subtle, but it ties the frame together */
+  .grain{opacity:calc(0.045 + 0.05 * var(--heat))}
 
   /* THE PERSISTENT OBJECT — one canvas, fixed, never unmounts. Everything scrolls over it. */
   #expGL{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;touch-action:pan-y}
@@ -26,8 +32,11 @@
   .exp-vig{position:fixed;inset:0;z-index:1;pointer-events:none;
     background:radial-gradient(125% 95% at 50% 48%, transparent 46%, rgba(7,5,4,.66) 100%),
       linear-gradient(180deg, rgba(7,5,4,.55) 0%, transparent 20%, transparent 78%, rgba(7,5,4,.6) 100%)}
+  /* the floor glow warms and swells with --heat — cool ember at rest, molten at the pour */
   .exp-floor{position:fixed;left:0;right:0;bottom:0;height:40vh;z-index:1;pointer-events:none;
-    background:radial-gradient(60% 120% at 50% 130%, rgba(166,121,46,.16), transparent 70%)}
+    opacity:calc(0.5 + 0.5 * var(--heat));
+    background:radial-gradient(60% 120% at 50% 130%,
+      rgba(255,120,40,calc(0.10 + 0.22 * var(--heat))), transparent 70%)}
 
   /* CHAPTER CAPTIONS — fixed overlays, one visible at a time, alternating side */
   #expCaps{position:fixed;inset:0;z-index:10;pointer-events:none}
