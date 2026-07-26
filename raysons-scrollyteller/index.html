@@ -145,6 +145,13 @@
      Gated: no WebGL / reduced-motion → bracket.js removes the zone and the film ends as before. */
   #bracketGL{position:fixed;inset:0;width:100%;height:100%;z-index:20;opacity:0;
     pointer-events:none;background:#0a0807;touch-action:pan-y}
+  /* THE BRIDGE — name the finale casting only while it OWNS the frame (body.bracket-on),
+     so a cross-document view transition to Foundry flies this object into foundry's hero
+     poster (both share view-transition-name:casting). Scoped to bracket-on so navigating
+     from the top of the film — where this canvas is invisible — does not morph a blank
+     full-screen layer; those hops just take the normal page dissolve. */
+  body.bracket-on #bracketGL{view-transition-name:casting}
+  @media(prefers-reduced-motion:reduce){body.bracket-on #bracketGL{view-transition-name:none}}
   /* the film's grade over the 3D: edge vignette + warm floor glow (matches .cine-vig/.cine-floor) */
   #bracketFx{position:fixed;inset:0;z-index:21;pointer-events:none;opacity:0;
     background:

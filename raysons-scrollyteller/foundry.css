@@ -44,9 +44,40 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
    HERO — full viewport, centred text over still foundry image
    No canvas, no video — instant LCP
    ============================================================ */
+/* Title moved to the upper third so the arrived casting owns the lower two-thirds —
+   a magazine layout: claim on top, the part beneath it. Was vertically centred. */
 .fhero{position:relative;z-index:10;height:100svh;min-height:600px;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;text-align:center;padding:0 6vw;overflow:hidden}
+  align-items:center;justify-content:flex-start;text-align:center;
+  padding:clamp(104px,17vh,168px) 6vw 0;overflow:hidden}
 .fhero__bg{position:absolute;inset:0;z-index:-1;overflow:hidden}
+
+/* THE ARRIVED CASTING — bottom-anchored, filling the lower hero, behind the title.
+   view-transition-name is what makes the browser treat it as the SAME element as the
+   Overview finale's object and fly it here across the navigation (see index styles.css
+   body.bracket-on #bracketGL). The bottom edge is masked into the stage so it reads as
+   emerging from the foundry rather than pasted on a plate. */
+.fhero__object{position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+  z-index:0;margin:0;pointer-events:none;
+  height:min(66vh,600px);width:min(96vw,1000px);
+  display:flex;align-items:flex-end;justify-content:center;
+  view-transition-name:casting}
+/* Feather ALL FOUR edges, not just the bottom. The poster is a render on near-black,
+   and its rectangle was leaving a faint seam against the stage on the top and sides.
+   Two masks intersected — a vertical fade and a horizontal one — dissolve every margin
+   while leaving the centred object crisp. */
+.fhero__object img{width:100%;height:100%;object-fit:contain;object-position:bottom;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 10%,#000 74%,transparent 99%),
+                     linear-gradient(90deg,transparent 0%,#000 12%,#000 88%,transparent 100%);
+  -webkit-mask-composite:source-in;
+  mask-image:linear-gradient(180deg,transparent 0%,#000 10%,#000 74%,transparent 99%),
+             linear-gradient(90deg,transparent 0%,#000 12%,#000 88%,transparent 100%);
+  mask-composite:intersect}
+/* the title sits above the object; keep it clearly legible over the metal */
+.fhero .inner{position:relative;z-index:2}
+@media(max-width:760px){
+  .fhero__object{height:46vh;width:100vw}
+}
+@media(prefers-reduced-motion:reduce){.fhero__object{view-transition-name:none}}
 .fhero__bg img{width:100%;height:100%;object-fit:cover;opacity:.42;
   filter:brightness(.7) saturate(1.15) contrast(1.05);transform:scale(1.06)}
 .fhero__bg::after{content:"";position:absolute;inset:0;background:
