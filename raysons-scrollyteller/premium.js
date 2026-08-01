@@ -31,7 +31,13 @@
     background:linear-gradient(0deg,var(--molten-deep,#c2300a),var(--molten,#ff6a1a) 58%,var(--molten-hot,#ffb24a));
     transition:transform .55s cubic-bezier(.7,0,.25,1)}
   .ptrans.cover{transform:translateY(0)}`;
-  const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
+  // data-keep: this is runtime CSS, not page CSS — the SPA router (spa.js) replaces every
+  // other <head> style on a page swap. id guard: premium.js re-runs on each hop (the body
+  // is new, the cursor/split DOM must be rebuilt) but this sheet only needs injecting once.
+  if (!document.getElementById('pc-style')) {
+    const style = document.createElement('style'); style.id = 'pc-style';
+    style.setAttribute('data-keep', ''); style.textContent = css; document.head.appendChild(style);
+  }
   document.documentElement.classList.add('pc-on');
 
   // ---- cursor DOM ----

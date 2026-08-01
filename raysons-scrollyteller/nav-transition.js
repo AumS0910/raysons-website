@@ -20,6 +20,9 @@
 // WebGL engines at once. Hover is intent, and intent arrives early enough.
 (function(){
   if(!HTMLScriptElement.supports || !HTMLScriptElement.supports('speculationrules')) return;
+  // the rules live in <head> and outlast an SPA body swap — re-running this file on each
+  // hop must not stack a second (identical) rule set on top.
+  if(document.getElementById('nav-speculation')) return;
   const rules = {
     prerender: [{
       where: { and: [
@@ -30,6 +33,7 @@
     }]
   };
   const s = document.createElement('script');
+  s.id = 'nav-speculation';
   s.type = 'speculationrules';
   s.textContent = JSON.stringify(rules);
   document.head.appendChild(s);

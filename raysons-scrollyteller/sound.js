@@ -49,7 +49,11 @@
   .snd.on .eq i:nth-child(2){animation-delay:.2s}.snd.on .eq i:nth-child(3){animation-delay:.4s}.snd.on .eq i:nth-child(4){animation-delay:.1s}
   @keyframes sndeq{0%,100%{height:25%}50%{height:100%}}
   @media(prefers-reduced-motion:reduce){.snd.on .eq i{animation:none;height:60%}}`;
-  const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+  // data-keep — runtime CSS, survives an SPA page swap (see reconcileHead in spa.js)
+  if (!document.getElementById('snd-style')) {
+    const st = document.createElement('style'); st.id = 'snd-style';
+    st.setAttribute('data-keep', ''); st.textContent = css; document.head.appendChild(st);
+  }
 
   const btn = document.createElement('button');
   btn.className = 'snd' + (on ? ' on' : '');

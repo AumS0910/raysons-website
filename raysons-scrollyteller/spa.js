@@ -49,9 +49,14 @@
     })), Promise.resolve());
   }
 
-  // page-specific stylesheets differ per page (about-cinema.css, foundry.css …).
-  // Reconcile <head> links so the incoming page's CSS is present and the outgoing
-  // page's page-only CSS is dropped — styles.css (shared) stays put.
+  // Page-specific CSS lives in TWO places in every page's <head>: the stylesheet link
+  // (about-cinema.css, foundry.css …) AND a large inline <style> block — on Foundry and
+  // Products that inline block IS the page (hero, pillars, furnace, the whole catalogue
+  // grid). Only the links used to be reconciled, so hopping in kept the OUTGOING page's
+  // inline CSS and the new page rendered as bare text until a manual reload.
+  //
+  // Both are reconciled now. Runtime-injected <style> (premium.js, sound.js) is marked
+  // data-keep and survives the swap; anything else in <head> is page CSS and is replaced.
   function reconcileHead(doc) {
     const want = new Map();
     doc.head.querySelectorAll('link[rel="stylesheet"]').forEach((l) => want.set(l.getAttribute('href'), l));
@@ -59,6 +64,11 @@
     document.head.querySelectorAll('link[rel="stylesheet"]').forEach((l) => have.set(l.getAttribute('href'), l));
     have.forEach((el, href) => { if (!want.has(href)) el.remove(); });
     want.forEach((el, href) => { if (!have.has(href)) document.head.appendChild(el.cloneNode(true)); });
+
+    // inline page CSS — appended LAST so it keeps the cascade position it holds in the
+    // source document (after every link), exactly as a real page load would order it.
+    document.head.querySelectorAll('style:not([data-keep])').forEach((s) => s.remove());
+    doc.head.querySelectorAll('style').forEach((s) => document.head.appendChild(s.cloneNode(true)));
   }
 
   async function go(url, push, landAtBottom) {
