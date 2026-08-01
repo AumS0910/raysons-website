@@ -305,18 +305,26 @@
        exactly where that column ends and stands exactly as tall as it. Anchored to the
        section instead, it sat far right with a gap and read as unrelated to the words. -->
   <div class="mvv">
+    <!-- Two statements, the two people who hold them: MD beside the Mission (left),
+         Director beside the Vision (right). Each portrait removes itself if its file
+         is missing, so the section is never broken while an image is pending. -->
+    <figure class="purpose__figure purpose__figure--left rv">
+      <picture>
+        <source srcset="images/mission.webp" type="image/webp" />
+        <img src="images/mission.png" alt="Satish Raibage" loading="lazy" decoding="async"
+             onerror="this.closest('.purpose__figure').style.display='none'" />
+      </picture>
+      <figcaption><b>Satish Raibage</b><span>Managing Director</span></figcaption>
+    </figure>
     <div class="m rv"><h4>Our Mission</h4><p>To produce superior castings through advanced technologies, long-term partnerships, and a culture of excellence, safety, and continuous improvement.</p></div>
     <div class="m rv"><h4>Our Vision</h4><p>To be a globally recognised, trusted partner delivering innovative, sustainable, and high-quality casting solutions.</p></div>
-    <!-- Decorative: the words are already in the copy beside it, so an empty alt rather
-         than repeating them to a screen reader. Removes itself if the file is missing.
-         WebP first — 45 KB against 1.2 MB for the same alpha cut-out. -->
-    <figure class="purpose__figure rv">
+    <figure class="purpose__figure purpose__figure--right rv">
       <picture>
         <source srcset="images/leadership.webp" type="image/webp" />
         <img src="images/leadership.png" alt="Sujal Raibage" loading="lazy" decoding="async"
              onerror="this.closest('.purpose__figure').style.display='none'" />
       </picture>
-      <figcaption><b>Sujal Raibage</b><span>Kingmaker</span></figcaption>
+      <figcaption><b>Sujal Raibage</b><span>Director</span></figcaption>
     </figure>
   </div>
 </div></section>
