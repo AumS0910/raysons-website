@@ -14,7 +14,6 @@
 
   const rig   = document.getElementById('rig');
   const line  = document.getElementById('line');
-  const grid  = document.getElementById('pgrid');
   const hud   = document.getElementById('phud');
   const hudN  = document.getElementById('phudN');
   const rail  = document.getElementById('prail');
@@ -36,18 +35,39 @@
     d.appendChild(im); rig.appendChild(d); parts.push(d);
   }
 
-  // ---- build the index grid ----
-  if(grid){
-    for(let i=0;i<N;i++){
-      const c = document.createElement('div'); c.className = 'pcell';
-      c.setAttribute('data-cursor','View');            // contextual cursor label (premium.js)
-      const n = document.createElement('span'); n.className = 'pcell__n';
-      n.textContent = String(i+1).padStart(2,'0');
-      const im = document.createElement('img');
-      im.src = src(i); im.loading = 'lazy'; im.decoding = 'async';
-      im.alt = 'Raysons iron casting ' + String(i+1).padStart(2,'0');
-      c.appendChild(im); c.appendChild(n); grid.appendChild(c);
-    }
+  // ---- sectored product grids: staggered reveal ----
+  // The grids are in the HTML (Automobile / Hydraulic / Oil & Gas).
+  // Each .pgrid__item starts opacity:0 translateY(30px) and gets .in when visible.
+  const gridItems = document.querySelectorAll('.pgrid__item');
+  if('IntersectionObserver' in window && gridItems.length){
+    const gio = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){
+          // stagger: delay based on data-i within each grid
+          const idx = parseInt(e.target.getAttribute('data-i') || '0', 10);
+          e.target.style.transitionDelay = (idx * 0.08) + 's';
+          e.target.classList.add('in');
+          gio.unobserve(e.target);
+        }
+      });
+    }, { rootMargin:'0px 0px -8% 0px', threshold:0.1 });
+    gridItems.forEach(function(el){ gio.observe(el); });
+  } else {
+    // no IO → show all immediately
+    gridItems.forEach(function(el){ el.classList.add('in'); });
+  }
+
+  // ---- rv reveals (section headers, etc.) ----
+  const rvs = document.querySelectorAll('.rv');
+  if('IntersectionObserver' in window && rvs.length){
+    const rio = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){ e.target.classList.add('in'); rio.unobserve(e.target); }
+      });
+    }, { rootMargin:'0px 0px -12% 0px', threshold:0.05 });
+    rvs.forEach(function(el){ rio.observe(el); });
+  } else {
+    rvs.forEach(function(el){ el.classList.add('in'); });
   }
 
   // ---- the rig: place each part relative to the lit position ----
