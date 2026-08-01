@@ -340,9 +340,9 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 .purpose__figure{position:absolute;bottom:0;
   height:100%;width:clamp(150px,20vw,260px);
   display:flex;align-items:flex-end;pointer-events:none}
-/* Vision — Sujal, just to the RIGHT of the Vision text (not the far edge), so the gap
-   between the words and the man matches Mission's tight spacing */
-.purpose__figure--right{left:calc(100% - clamp(150px,19vw,300px));justify-content:flex-start}
+/* Vision — Sujal, to the right of the Vision text with a small breathing gap (not
+   overlapping the words, not stranded at the far edge) */
+.purpose__figure--right{left:calc(100% - clamp(70px,9vw,150px));justify-content:flex-start}
 /* Mission — Satish, to the RIGHT of the Mission column, standing just left of the central
    molten journey line — the same treatment as Sujal, mirrored across the divider. His
    right edge sits at the centre; he faces left into the mission text. */
