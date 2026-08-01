@@ -31,12 +31,15 @@
       const s = document.createElement('script');
       for (const a of old.attributes) s.setAttribute(a.name, a.value);
       if (old.src) {
-        // ES modules execute ONCE per URL — a plain re-insert of a module <script>
-        // does nothing on a revisit, so the page's engine would come back dead. A
-        // per-navigation cache-bust query makes it a "new" module URL, forcing it to
-        // re-run every time you return. (Classic scripts already re-run on insert.)
-        const bust = (old.src.includes('?') ? '&' : '?') + 'spa=' + nav;
-        s.setAttribute('src', old.getAttribute('src') + bust);
+        // ONLY modules get the cache-bust. ES modules execute once per URL, so a module
+        // <script> must get a fresh URL to re-run on a revisit — but classic scripts
+        // re-execute on insert regardless and are served from cache, so busting THEM just
+        // forced a needless re-download every hop (the lag). Classic scripts (and the
+        // three.js addons a module imports) now stay cached; only the small module
+        // entrypoint re-downloads.
+        const isModule = (old.getAttribute('type') || '').toLowerCase() === 'module';
+        const href = old.getAttribute('src');
+        s.setAttribute('src', isModule ? href + (href.includes('?') ? '&' : '?') + 'spa=' + nav : href);
         s.onload = s.onerror = () => resolve();
       } else {
         s.textContent = old.textContent;
@@ -100,6 +103,9 @@
         };
         requestAnimationFrame(pin);
       }
+      // arm the prefetch for whatever comes next from the page we just landed on
+      if ('requestIdleCallback' in window) requestIdleCallback(prefetchNext, { timeout: 3000 });
+      else setTimeout(prefetchNext, 1200);
     } catch (e) {
       // any failure → hard navigate, never leave the user stranded
       location.href = url;
@@ -123,6 +129,21 @@
   }, true);
 
   addEventListener('popstate', () => go(location.href, false));
+
+  // PREFETCH the next page in sequence once the current one is idle, so the fetch on
+  // auto-advance (or a nav click) is served from cache instead of a cold round-trip —
+  // this is most of the felt lag on a slow connection.
+  function prefetchNext() {
+    const i = order();
+    if (i < 0 || i >= SEQ.length - 1) return;
+    const href = new URL(SEQ[i + 1], location.href).href;
+    if (document.querySelector('link[data-prefetch="' + href + '"]')) return;
+    const l = document.createElement('link');
+    l.rel = 'prefetch'; l.href = href; l.setAttribute('data-prefetch', href);
+    document.head.appendChild(l);
+  }
+  if ('requestIdleCallback' in window) requestIdleCallback(prefetchNext, { timeout: 3000 });
+  else setTimeout(prefetchNext, 1500);
 
   // ── AUTO-ADVANCE — the site is one continuous scroll, no clicking ──────────
   // At the bottom of a page, a little more downward intent flows into the NEXT page;

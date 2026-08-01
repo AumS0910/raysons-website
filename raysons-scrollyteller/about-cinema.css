@@ -397,9 +397,10 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 /* centred, with room reserved on the RIGHT for Sujar (far right of Vision) */
 .mvv{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,64px);
   margin:clamp(40px,6vh,72px) auto 0;max-width:calc(100% - clamp(140px,16vw,240px))}
-/* the Mission text wraps before Satish (who stands at the right of its column) so his
-   figure never sits over the words; the Vision column is protected by .mvv's right margin */
-.mvv .m:first-of-type{padding-right:clamp(96px,13vw,190px)}
+/* BOTH columns carry the same right inset so the Mission and Vision text measure the
+   same width — Mission's clears Satish, Vision's keeps it symmetric (Sujal sits in the
+   block's right margin beyond it). Equal padding = equal text width. */
+.mvv .m{padding-right:clamp(96px,13vw,190px)}
 .mvv .m{padding-top:30px}   /* (glowing top hairlines removed per user) */
 .mvv .m h4{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--bronze-lite);margin-bottom:18px}
 .mvv .m p{font-size:clamp(16px,1.5vw,20px);line-height:1.6;color:#c9beb1;font-weight:300}
