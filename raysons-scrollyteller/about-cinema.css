@@ -254,6 +254,9 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
   font-size:9.5px;font-weight:400;letter-spacing:.14em;color:var(--ink-faint);font-variant-numeric:tabular-nums;white-space:nowrap}
 .journey__tick:first-child b{left:0;transform:none}
 .journey__tick:last-child b{left:auto;right:0;transform:none}
+/* 9.5px is legible on a desktop rail read at arm's length; on a phone it is not. The four
+   year labels have room to grow at this width without colliding. */
+@media(max-width:640px){.journey__tick b{font-size:10.5px;letter-spacing:.1em}}
 /* grabbable timeline — a taller transparent strip over the 1px rail so it can be dragged;
    the knob grows on hover/drag so the affordance reads. */
 .journey__scrub{position:absolute;left:0;right:0;top:-16px;bottom:-16px;z-index:4;cursor:grab;touch-action:none}
@@ -406,6 +409,17 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 .mvv .m h4{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--bronze-lite);margin-bottom:18px}
 .mvv .m p{font-size:clamp(16px,1.5vw,20px);line-height:1.6;color:#c9beb1;font-weight:300}
 @media(max-width:760px){.mvv{grid-template-columns:1fr;gap:10px}}
+/* ── SMALL SCREENS — restated HERE, after the desktop rules, because they were losing to
+   them. The 900px block further up already stacks these columns and takes the portraits
+   out of position, but it sits EARLIER in the file and a media query adds no specificity:
+   the plain .mvv rules above overrode it at every width. The result was a phone still
+   holding a right-hand gutter reserved for a portrait that is no longer there —
+   max-width minus 140px, plus 96px of padding-right per column — which squeezed the
+   Mission/Vision text into ~115px and pushed the block's own content outside its box. */
+@media(max-width:900px){
+  .mvv{display:flex;flex-direction:column;max-width:100%;gap:10px}
+  .mvv .m{padding-right:0;padding-top:22px}
+}
 .values{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:clamp(34px,5vh,56px)}
 .values .v{background:var(--bg);padding:28px 22px;min-height:180px;display:flex;flex-direction:column}
 .values .v .ix{font-family:var(--mono);font-size:11px;color:var(--molten);letter-spacing:.1em}
