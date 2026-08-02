@@ -800,8 +800,7 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
    and would have hidden Products' molten pool the same way. The dark ground belongs on the
    fixed backdrops (kept at #0a0807 below); these sections only need the dark TOKENS so
    their copy stays bone over the scene. */
-[data-theme="light"] :is(.film,.kinetic,.journey,.tl,
-  .phero,.pline,.pclose){
+[data-theme="light"] :is(.phero,.pline,.pclose){
   --bg:#0a0807; --ink:#f3ecdf; --ink-dim:#9a9081; --ink-faint:#b0a48f;
   --molten:#c9a24e; --molten-hot:#e6c483; --molten-deep:#8a6a2e;
   --bronze:#a6822e; --bronze-lite:#dcbd82; --bronze-deep:#6e561c;
@@ -832,24 +831,55 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
     border-bottom:1px solid rgba(22,18,14,.16)}
 }
 
-/* ---------- "Our Journey" stays the lit corridor ---------- */
-/* A bone corridor was built and reverted, and the blocker is worth recording so nobody
-   spends the day on it again. It is NOT the CSS and it is NOT the fog: about-corridor.js
-   renders through an EffectComposer + UnrealBloomPass, and RenderPass clears its render
-   target to OPAQUE BLACK. The canvas is therefore opaque wherever no geometry is drawn,
-   so alpha:true on the renderer buys nothing and no background placed behind it can ever
-   show — the "sky" is baked into the composer output.
-   Everything else did work: fog to bone, a pale floor, ink era cards, a halved scrim, and
-   the pillars kept their iron and their molten seams. Only the sky stayed black, and
-   fixing that means threading clear-alpha through the post chain and accepting bloom over
-   transparency (which fringes). That is scene re-engineering, not theming.
-   The corridor keeps its dark, stated explicitly so it can never half-inherit the page. */
-[data-theme="light"] :is(.journey,.tl){
+/* ---------- ABOUT goes light, except the opening film ----------
+   The corridor CAN be bone, and the earlier failures were all one misdiagnosis: I kept
+   trying to make the canvas transparent so a background could show through it. It never
+   needed to be. It needed to CLEAR bone — scene.background, painted by RenderPass — plus a
+   bloom threshold lifted above the page so the ground itself does not bloom
+   (about-corridor.js). With that, the pillars keep their cast iron and their molten seams
+   and simply stand in a bright hall.
+   The opening film stays dark: it is video footage shot on black, and no amount of theming
+   changes what is inside an mp4. */
+[data-theme="light"] :is(.kinetic,.journey,.tl){
+  --bg:#f4efe6;
+  --ink:#16120e; --ink-dim:#4c443a; --ink-faint:#6d6357;
+  --molten:#8a5a12; --molten-hot:#a06713; --molten-deep:#5d3d08;
+  --bronze:#7a5c14; --bronze-lite:#634c11; --bronze-deep:#b39a6d;
+  --line:rgba(22,18,14,.15); --line-strong:rgba(22,18,14,.30);
+  color:#16120e}
+[data-theme="light"] :is(.kinetic,.journey,.tl) :is(h1,h2,h3,h4,p,span,a,li,div,em,b,small){text-shadow:none}
+/* .journey itself must NOT paint — it is z-index:10 over the FIXED corridor canvas at
+   z-index:1, and any background here (bone or black) covers the scene. .tl has no canvas
+   over it, so it takes the page colour directly. */
+[data-theme="light"] :is(.kinetic,.tl){background:#f4efe6}
+[data-theme="light"] body:has(#journeyGL){background:#f4efe6}
+[data-theme="light"] body:has(#journeyGL) .stage{background:#f4efe6;--bg:#f4efe6}
+[data-theme="light"] body:has(#journeyGL) .stage__glow{background:
+  radial-gradient(120% 70% at 50% -8%, rgba(201,162,78,.10), transparent 52%),
+  radial-gradient(90% 60% at 50% 116%, rgba(166,121,46,.09), transparent 60%), #f4efe6}
+[data-theme="light"] body:has(#journeyGL) .stage__vig{
+  background:radial-gradient(125% 100% at 50% 42%, transparent 54%, rgba(22,18,14,.09) 100%)}
+[data-theme="light"] body:has(#journeyGL) .stage__embers{opacity:.18}
+/* THE OPENING FILM — dark footage, so the section keeps its black frame */
+[data-theme="light"] .film{background:#0a0807;
   --bg:#0a0807; --ink:#f3ecdf; --ink-dim:#9a9081; --ink-faint:#b0a48f;
-  --molten:#c9a24e; --molten-hot:#e6c483; --molten-deep:#8a6a2e;
-  --bronze:#a6822e; --bronze-lite:#dcbd82; --bronze-deep:#6e561c;
-  --line:rgba(244,236,226,.10); --line-strong:rgba(244,236,226,.22);
-  color:#f3ecdf}
+  --molten:#c9a24e; --molten-hot:#e6c483; --bronze-lite:#dcbd82;
+  --line:rgba(244,236,226,.10); --line-strong:rgba(244,236,226,.22); color:#f3ecdf}
+/* the era-copy scrim: same job, opposite colour, roughly half strength — dark ink needs
+   far less backing than bone did, and a heavy wash would hide the pillars behind it */
+[data-theme="light"] .journey-gl .journey__glow{
+  background:linear-gradient(90deg, rgba(244,239,230,.74) 0%, rgba(244,239,230,.44) 30%, rgba(244,239,230,.10) 52%, transparent 68%)}
+[data-theme="light"] .journey-gl .journey__pin::after{
+  background:radial-gradient(120% 90% at 50% 50%, transparent 58%, rgba(22,18,14,.07) 100%)}
+[data-theme="light"] .journey-gl .journey__items{background:rgba(138,90,18,.13);border-color:rgba(138,90,18,.22)}
+[data-theme="light"] .journey-gl .ji{background:rgba(255,255,255,.82)}
+[data-theme="light"] .ji{background:#faf6ef}
+[data-theme="light"] .ji h4{color:#16120e}
+[data-theme="light"] .ji p{color:#4c443a}
+[data-theme="light"] .journey__tick{background:rgba(22,18,14,.34)}
+[data-theme="light"] .journey__tick b{color:#4c443a}
+[data-theme="light"] .journey__rail{background:rgba(22,18,14,.16)}
+[data-theme="light"] .journey__rail-knob{background:#8a5a12;box-shadow:0 0 10px rgba(138,90,18,.45)}
 
 /* ---------- the finale, on a light ground ---------- */
 /* bracket.js swaps the WebGL clear colour itself (it owns scene.background); these are
@@ -986,3 +1016,7 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 [data-theme="light"] body:has(.pstage) .cue span{color:#4c443a}
 [data-theme="light"] body:has(.fheat) .cue .line,
 [data-theme="light"] body:has(.pstage) .cue .line{background:linear-gradient(rgba(22,18,14,.42),transparent)}
+/* the corridor's year read-out is large display type, so 4.13:1 already met the large-text
+   bar — taken to the deeper gold anyway so the whole page clears 4.5:1 on one standard */
+[data-theme="light"] .journey__hud-year{color:#8a5a12}
+[data-theme="light"] .journey__hud-k{color:#6d6357}

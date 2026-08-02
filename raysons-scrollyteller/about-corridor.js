@@ -41,27 +41,21 @@ function boot(){
   scene.fog = new THREE.FogExp2(PAL.fog, 0.012);
 
   // ── THEME ─────────────────────────────────────────────────────────────────
-  // This canvas renders with alpha:true — there is no scene.background, so the black
-  // corridor is made ENTIRELY by the fog: distant pillars fade to #0a0604. Put a light
-  // page behind it without touching that and the pillars dissolve into a dark haze on a
-  // bone ground, which is precisely the grey smear a light background produced.
+  // The corridor's black was never a background — it was the FOG colour plus an
+  // EffectComposer whose RenderPass clears opaque black. Chasing transparency was the
+  // wrong instinct: the canvas does not need to be see-through, it needs to CLEAR BONE.
+  // Setting scene.background does exactly that, because RenderPass paints it.
   //
-  // So light mode moves the fog to the page colour and lifts the ambient: the pillars
-  // stay exactly the cast iron they were, the molten seams stay the same orange, and the
-  // corridor recedes into white instead of into black. Iron reads as silhouette, the
-  // seams read as heat against it.
-  // ONLY THE FOG MOVES. First attempt also lifted the ambient (0.65 -> 1.45, warm-dark ->
-  // bone) on the theory that a light scene needs light. It does not: these pillars are
-  // CAST IRON, and brightening them to bone on a bone ground made them vanish completely —
-  // the corridor rendered empty. Their darkness is what makes them read. Leave the iron,
-  // the key light and the molten seams exactly as they are, and move only the colour the
-  // distance fades into: black becomes white, and the same hot pillars now stand against
-  // it as silhouettes with the heat still on them.
+  // The coupled catch is the bloom. UnrealBloomPass is built with threshold 0.16 — fine
+  // when the ground is black, catastrophic when it is bone at ~0.9 luminance, because the
+  // entire background would qualify as "bright" and bloom into a white-out. So light mode
+  // lifts the threshold above the page and eases the strength: only the molten seams and
+  // the year plates still glow, which is the whole point of them.
   const THEME = {
-    dark:  { fog:'#0a0604', floor:'#0b0805' },
-    light: { fog:'#0a0604', floor:'#0b0805' }   // reverted: composer clears opaque black — see styles.css
+    dark:  { bg:null,      fog:'#0a0604', floor:'#0b0805', bloomT:0.16, bloomS:0.92 },
+    light: { bg:'#f1ebe1', fog:'#efe9df', floor:'#d7cfc1', bloomT:0.86, bloomS:0.62 }
   };
-  let themeFloor = null;
+  let themeFloor = null, themeBloom = null;
   const themeNow = () => (document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
   let curTheme = themeNow();
   // PMREM environment — the single biggest "premium metal" lever: every standard
@@ -73,7 +67,13 @@ function boot(){
   camera.position.set(1.8, 1.6, -96);
 
   scene.add(new THREE.AmbientLight(PAL.amb, 0.65));
-  function paintTheme(t){ scene.fog.color.set(THEME[t].fog); if(themeFloor) themeFloor.color.set(THEME[t].floor); }
+  function paintTheme(t){
+    const c = THEME[t];
+    scene.background = c.bg ? new THREE.Color(c.bg) : null;   // null = the old transparent/black
+    scene.fog.color.set(c.fog);
+    if(themeFloor) themeFloor.color.set(c.floor);
+    if(themeBloom){ themeBloom.threshold = c.bloomT; themeBloom.strength = c.bloomS; }
+  }
   paintTheme(curTheme);
   new MutationObserver(function(){
     const t = themeNow(); if(t === curTheme) return; curTheme = t; paintTheme(t);
@@ -262,6 +262,7 @@ function boot(){
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight), 0.92, 0.75, 0.16);
   composer.addPass(bloom);
+  themeBloom = bloom; paintTheme(curTheme);   // ground, fog, floor and bloom now all exist
 
   const clock=new THREE.Clock();
   // Size the render buffer to the CANVAS BOX (not innerWidth/innerHeight) so iOS's dynamic
