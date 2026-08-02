@@ -407,6 +407,16 @@ html.reentry #loader,html.reentry #cloader{transition:none!important;opacity:0!i
 .cue .line::after{content:"";position:absolute;top:-50%;left:0;width:100%;height:50%;background:var(--ink);animation:drop 1.8s ease-in-out infinite}
 @keyframes drop{0%{top:-50%}100%{top:100%}}
 .cue.hide{opacity:0}
+/* PHONES — the cue is a fixed 67px stack (label + 12px gap + 42px line) sitting 30px off
+   the bottom, so on a short viewport its LABEL lands at roughly y=747 of 844: exactly
+   where a hero's last line of copy sits. It was printing over About's "Kolhapur,
+   Maharashtra · Since 1987" and over Foundry's assemble prompt. Nothing was reserving
+   space for it because it is fixed and out of flow, and it had no mobile rule at all.
+   Compacted and dropped closer to the edge so it clears page copy on both. */
+@media(max-width:640px){
+  .cue{bottom:14px;gap:7px;font-size:9px;letter-spacing:.24em}
+  .cue .line{height:26px}
+}
 
 /* group company cards (about) */
 .groupgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);width:100%;margin-top:34px}

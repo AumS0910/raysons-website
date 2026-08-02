@@ -246,7 +246,10 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
       c.geometry = g;
       c.material = iron;
     }});
-    uni.uSpread.value = spread;
+    // The frame is much tighter on a phone, which magnifies the scatter: at the desktop
+    // spread the fragments filled the whole band and stopped reading as one object coming
+    // together. Only the OPEN state shrinks — the assembled casting is unchanged.
+    uni.uSpread.value = spread * (MOBILE ? 0.5 : 1);
     obj.rotation.x = -Math.PI / 2;                          // FreeCAD Z-up → Y-up
     const b = new THREE.Box3().setFromObject(obj);
     const size = new THREE.Vector3(); b.getSize(size);
@@ -256,10 +259,12 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     root.add(obj);
     const sph = new THREE.Box3().setFromObject(obj).getBoundingSphere(new THREE.Sphere());
     target.copy(sph.center);
-    // frame for the DISMANTLED extent, not the assembled one, so the outermost fragments
-    // stay in shot — otherwise the camera would have to zoom as the part comes together,
-    // which pulls the eye away from the assembly itself
-    fitR = sph.radius + spread * (1.70 / size.length()) * 0.55;
+    // Frame the ASSEMBLED part. Padding this out to the dismantled extent permanently
+    // shrank the casting to reserve room for a state that lasts a couple of seconds — the
+    // finished object is what the visitor looks at for the rest of the visit, so it gets
+    // the frame. Fragments may drift past the edge while it is open; the canvas edges are
+    // masked, so they dissolve out rather than clip.
+    fitR = sph.radius;
     resize();
 
     // start where the finale left it — same angles, and a distance corrected for the fact
@@ -295,7 +300,10 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     // instead of a hand-tuned distance that crops on one shape and floats on another
     const halfV = FOV * Math.PI / 360;
     const halfH = Math.atan(Math.tan(halfV) * camera.aspect);
-    restRad = Math.max(fitR / Math.sin(halfV), fitR / Math.sin(halfH)) / 0.96;
+    // >1 deliberately: fitR is the BOUNDING SPHERE, and this casting is flat and elongated,
+    // so its silhouette never fills that sphere. Framing the sphere conservatively left a
+    // wide dead margin on every side. 1.15 sizes to the part you can actually see.
+    restRad = Math.max(fitR / Math.sin(halfV), fitR / Math.sin(halfH)) / 1.15;
     if (settle >= 1) pose.rad = restRad;
   }
 
