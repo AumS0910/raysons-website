@@ -81,6 +81,16 @@
       const html = await res.text();
       const doc = new DOMParser().parseFromString(html, 'text/html');
 
+      // NEUTRALISE <noscript>. A browser parsing a live page with scripting ON treats
+      // noscript contents as inert TEXT — but DOMParser always parses with scripting OFF, so
+      // every fallback <style> in there comes back as a REAL style element, and the instant
+      // this body is adopted its rules apply. Those blocks exist to flatten the site for
+      // no-JS visitors: display:none on the stage, the grain, the scroll cue, the CTA dock
+      // and the hero object; height:auto on Products' pinned procession. Arriving by link
+      // therefore got the no-JS layout, while a reload — real parser, scripting on — looked
+      // correct. Scripting is self-evidently on in this code path, so empty them.
+      doc.querySelectorAll('noscript').forEach((n) => { n.textContent = ''; });
+
       const swap = () => {
         reconcileHead(doc);
         document.title = doc.title;
