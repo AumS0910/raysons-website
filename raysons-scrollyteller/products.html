@@ -22,6 +22,7 @@
 <meta name="twitter:title" content="Products — Raysons Shell Cast" />
 <meta name="twitter:description" content="Shell moulded &amp; no-bake iron castings for automobile, hydraulic, and oil & gas. ISO 9001:2015 · Kolhapur, India." />
 <meta name="twitter:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/products/part-01.webp" />
+<script>try{var _t=localStorage.getItem('rc_theme');if(_t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
 <link rel="stylesheet" href="styles.css" />
 <!-- three.js import map — present on EVERY page so module engines (bracket.js,
      about-corridor.js) resolve "three" no matter which page you entered on and then
@@ -229,6 +230,10 @@
 
 <nav class="nav">
   <a class="brand" href="index.html"><img src="images/raysons-logo.png" alt="" class="brandmark" /> <b>RAYSONS</b> <span>SHELL CAST</span></a>
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+    <svg class="tt-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.1"/><path d="M12 2.2v2.5M12 19.3v2.5M21.8 12h-2.5M4.7 12H2.2M18.9 5.1l-1.8 1.8M6.9 17.1l-1.8 1.8M18.9 18.9l-1.8-1.8M6.9 6.9 5.1 5.1"/></svg>
+    <svg class="tt-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.7 13.2A8.6 8.6 0 1 1 10.8 3.3a6.8 6.8 0 0 0 9.9 9.9Z"/></svg>
+  </button>
   <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-links">
     <a href="index.html">Overview</a>
@@ -401,6 +406,7 @@
 <script src="products.js"></script>
 <script src="premium.js"></script>
 <script src="nav-transition.js"></script>
+<script src="theme.js"></script>
 <script src="spa.js"></script>
 </body>
 </html>

@@ -16,6 +16,7 @@
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Request a Quote — Raysons Shell Cast" />
 <meta name="twitter:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/valve/hero.jpg" />
+<script>try{var _t=localStorage.getItem('rc_theme');if(_t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
 <link rel="stylesheet" href="styles.css" />
 <!-- three.js import map — present on EVERY page so module engines (bracket.js,
      about-corridor.js) resolve "three" no matter which page you entered on and then
@@ -49,6 +50,32 @@
   @media(prefers-reduced-motion:reduce){.eq-grade{transition:none}}
   .eq-grain{position:fixed;inset:-50%;z-index:1;pointer-events:none;opacity:.045;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+  /* ── LIGHT THEME ──────────────────────────────────────────────────────────
+     This page is the one chapter that is ALL document — no film, no WebGL, no
+     scrubbed canvas — so unlike the others it flips wholesale rather than as
+     islands. The ember floor glow stays (warmed down), because it is the thing
+     that makes arriving here feel like walking off the foundry floor. */
+  [data-theme="light"] body{background:#f4efe6;color:#16120e}
+  [data-theme="light"] .eq-bg{background:
+      radial-gradient(72% 56% at 50% 118%, rgba(200,110,30,.13), transparent 60%),
+      radial-gradient(55% 46% at 14% 4%, rgba(160,120,40,.10), transparent 60%),
+      #f4efe6}
+  [data-theme="light"] .eq-grain{opacity:.03;mix-blend-mode:multiply}
+  [data-theme="light"] .eq-grade{mix-blend-mode:multiply;opacity:.16}
+  [data-theme="light"]{
+    --ink:#16120e; --ink-dim:#4c443a; --ink-faint:#6d6357;
+    --molten:#8a5a12; --molten-hot:#a06713; --molten-deep:#5d3d08;
+    --bronze:#7a5c14; --bronze-lite:#634c11; --bronze-deep:#b39a6d;
+    --line:rgba(22,18,14,.15); --line-strong:rgba(22,18,14,.30);
+  }
+  [data-theme="light"] .eq-sub{color:#4c443a}
+  [data-theme="light"] .eq-form{background:rgba(255,255,255,.72);
+    box-shadow:0 24px 60px rgba(22,18,14,.10)}
+  [data-theme="light"] .field input,
+  [data-theme="light"] .field select,
+  [data-theme="light"] .field textarea{background:#fff;color:#16120e}
+  [data-theme="light"] :is(.eq-title,.eq-sub,.eq-contact .v,.eq-faq summary,.eq-faq .a){text-shadow:none}
 
   .eq-nav{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
     padding:22px clamp(20px,4vw,56px);}
@@ -299,6 +326,10 @@
     <a href="products.html">Products</a>
     <a href="enquire.html" aria-current="page">Enquire</a>
   </div>
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+    <svg class="tt-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.1"/><path d="M12 2.2v2.5M12 19.3v2.5M21.8 12h-2.5M4.7 12H2.2M18.9 5.1l-1.8 1.8M6.9 17.1l-1.8 1.8M18.9 18.9l-1.8-1.8M6.9 6.9 5.1 5.1"/></svg>
+    <svg class="tt-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.7 13.2A8.6 8.6 0 1 1 10.8 3.3a6.8 6.8 0 0 0 9.9 9.9Z"/></svg>
+  </button>
   <a class="eq-back" href="index.html">← Back to the foundry</a>
 </nav>
 
@@ -658,6 +689,7 @@
 </script>
 <script src="premium.js"></script>
 <script src="nav-transition.js"></script>
+<script src="theme.js"></script>
 <script src="spa.js"></script>
 </body>
 </html>

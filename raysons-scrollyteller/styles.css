@@ -656,3 +656,152 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
   p a[href^="mailto:"],p a[href^="tel:"],li a[href^="mailto:"],li a[href^="tel:"]{
     min-height:0;display:inline}
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   LIGHT THEME  ·  "the cinema stays dark, the documents go light"
+   ------------------------------------------------------------------------------
+   The film, the WebGL scenes and the pinned canvas beats keep their black: they are
+   MEDIA — a lit screen you look at — and their scrims, vignettes and additive fire
+   only mean anything on a dark ground. Everything a visitor READS flips to light.
+
+   Mechanically: the root tokens stay dark, and light is applied as ISLANDS on the
+   document containers. Those sections are transparent by default (the fixed .stage
+   shows through), so painting them gives them a light surface that covers the stage
+   while the cinema sections keep letting the dark through. Because the tokens are
+   RE-DECLARED on the container, all ~695 var() uses inside inherit light values with
+   no per-rule edits.
+
+   State lives on <html data-theme>, never a class — spa.js assigns
+   documentElement.className wholesale on every hop and would wipe it (see theme.js).
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ---------- the toggle ---------- */
+.theme-toggle{margin-left:auto;margin-right:10px;display:inline-flex;align-items:center;
+  justify-content:center;width:40px;height:40px;border-radius:50%;border:1px solid var(--line-strong);
+  background:transparent;color:var(--ink);cursor:pointer;flex-shrink:0;
+  transition:border-color .3s ease,color .3s ease,background .3s ease}
+.theme-toggle:hover{border-color:var(--molten);color:var(--molten-hot)}
+.theme-toggle svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;display:block}
+.theme-toggle .tt-moon{display:none}
+[data-theme="light"] .theme-toggle .tt-sun{display:none}
+[data-theme="light"] .theme-toggle .tt-moon{display:block}
+@media(max-width:760px){.theme-toggle{width:36px;height:36px;margin-right:6px}}
+
+/* ---------- the light surfaces ---------- */
+[data-theme="light"] :is(
+  .sec, .pillar, .foems, .psectors, .pcat,
+  .about-footer, .foundry-footer, .site-footer
+){
+  --bg:#f4efe6;
+  --ink:#16120e;
+  --ink-dim:#4c443a;
+  --ink-faint:#6d6357;
+  /* the accents have to DARKEN to survive on a light ground — champagne gold on bone
+     is unreadable. Same hues, taken down until they hold 4.5:1 against the surface. */
+  --molten:#8a5a12;
+  --molten-hot:#a06713;
+  --molten-deep:#5d3d08;
+  --bronze:#7a5c14;
+  --bronze-lite:#634c11;
+  --bronze-deep:#b39a6d;
+  --iron:#cdc4b6;
+  --line:rgba(22,18,14,.15);
+  --line-strong:rgba(22,18,14,.30);
+  background:#f4efe6;
+  color:var(--ink);
+}
+/* every text-shadow on this site exists to lift bone type off black; on a light surface
+   they read as dirt. 73 of them, killed in one rule rather than 73 edits. */
+[data-theme="light"] :is(.sec,.pillar,.foems,.psectors,.pcat,
+  .about-footer,.foundry-footer,.site-footer) :is(h1,h2,h3,h4,h5,p,span,a,li,div,em,b,small){
+  text-shadow:none}
+
+/* the footer is the page's base — settle it a shade deeper so the closing frame still
+   reads as a distinct band rather than merging into the section above it */
+[data-theme="light"] :is(.about-footer,.foundry-footer,.site-footer){background:#ece5d9}
+
+/* ---------- components that carry their own dark gradients ---------- */
+/* Foundry spec plates + Products cards were warm-on-black; on light they invert to a
+   warm tint on bone, keeping the same material language. */
+[data-theme="light"] .pillar__plate{background:linear-gradient(160deg, rgba(138,90,18,.09), rgba(255,255,255,.55))}
+[data-theme="light"] .pillar__plate::after{background:radial-gradient(80% 60% at 50% 0%, rgba(138,90,18,.10), transparent 70%)}
+[data-theme="light"] .pgrid__frame{background:linear-gradient(170deg, rgba(138,90,18,.07), rgba(255,255,255,.6))}
+[data-theme="light"] .pgrid__item:hover .pgrid__frame{background:linear-gradient(170deg, rgba(138,90,18,.14), rgba(255,255,255,.6))}
+[data-theme="light"] .psector-card{background:linear-gradient(160deg, rgba(138,90,18,.08), rgba(255,255,255,.5))}
+[data-theme="light"] .psector-card:hover{background:linear-gradient(160deg, rgba(138,90,18,.15), rgba(255,255,255,.5))}
+/* the OEM plates were bone tiles chosen to sit on black — on a light page they vanish,
+   so they take a border and a white ground instead */
+[data-theme="light"] .foems__logo{background:#fff;border-color:rgba(22,18,14,.16)}
+[data-theme="light"] .foems__logo:hover{background:#fff;border-color:var(--molten)}
+/* pills, chips and dotted rows */
+[data-theme="light"] .pillar__pill:hover{border-color:var(--molten);color:var(--molten-deep)}
+[data-theme="light"] .pgrid__tag{border-color:rgba(22,18,14,.18)}
+
+/* ---------- the fixed nav over a light page ---------- */
+/* difference-blend inverts against whatever is behind it, so on desktop it adapts to
+   light on its own. The mobile scrim does not — it is a hard dark gradient — so it
+   flips to a light one. */
+@media(max-width:760px){
+  [data-theme="light"] .nav{
+    background:linear-gradient(180deg, rgba(244,239,230,.96) 0%, rgba(244,239,230,.72) 58%, transparent 100%)}
+  [data-theme="light"] .eq-nav{
+    background:linear-gradient(180deg, rgba(244,239,230,.96) 0%, rgba(244,239,230,.72) 58%, transparent 100%)}
+}
+[data-theme="light"] .nav-links a{color:#16120e}
+[data-theme="light"] .nav{mix-blend-mode:normal}
+[data-theme="light"] .nav .brand,[data-theme="light"] .nav .brand b{color:#16120e}
+[data-theme="light"] .nav-burger span{background:#16120e}
+
+/* The dark theme lets .nav ride on mix-blend-mode:difference, which inverts against
+   whatever is behind it and therefore needs no scrim. Light mode turns that off (the
+   inversion fights the darkened accents), which left the bar sitting bare on top of the
+   page — the brand and the links printed straight through the catalogue's product names.
+   So in light mode the nav carries its own surface at EVERY width, not just on phones. */
+[data-theme="light"] .nav{
+  background:linear-gradient(180deg, rgba(244,239,230,.97) 0%, rgba(244,239,230,.88) 62%, rgba(244,239,230,0) 100%);
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+[data-theme="light"] .nav .brand span{color:#16120e;opacity:.75;border-color:rgba(22,18,14,.32)}
+[data-theme="light"] .theme-toggle{color:#16120e;border-color:rgba(22,18,14,.28)}
+[data-theme="light"] .theme-toggle:hover{border-color:var(--molten);color:#8a5a12}
+/* the floating dock reads as a warm plate on light rather than a glowing pill */
+[data-theme="light"] .cta-quote{color:#16120e}
+
+/* ---------- body copy that was hardcoded for a dark ground ---------- */
+/* These are the literals the token system never covered: bone-grey body text (#ccc2b4,
+   #c9beb1, #d8cdbe, #b0a48f …) chosen to sit on black. On a light surface they wash out
+   to near-invisible — the copy was legible in the screenshot only as a grey ghost. They
+   have no token to flip, so the light surfaces restate them explicitly. */
+[data-theme="light"] :is(.pillar__body,.specs-sec__lede,.pcat__lede,.foems__meta,
+  .mvv .m p,.people .copy p,.fscope__col li,.fprog__d,.pillar__row span){color:#4c443a}
+[data-theme="light"] :is(.pillar__note,.pillar__plate-f,.pgrid__tag,.psector-card__count){color:#6d6357}
+[data-theme="light"] .pillar__note{opacity:1}
+/* headline emphasis: the italic accent is champagne on black — it needs to be the darkened
+   gold on light or the second line of every heading disappears */
+[data-theme="light"] :is(.pillar__name em,.pcat__title em,.psectors__t em,.foems__t em){color:#8a5a12}
+[data-theme="light"] .pillar__peak{color:#8a5a12}
+[data-theme="light"] .pillar__peak small{color:#4c443a}
+[data-theme="light"] .pillar__plate-k{color:#6d6357}
+[data-theme="light"] .pillar__tag,[data-theme="light"] .pcat__num,
+[data-theme="light"] .psectors__k,[data-theme="light"] .foems__k{color:#8a5a12}
+[data-theme="light"] .pillar__dot{background:#8a5a12;box-shadow:none}
+
+/* ---------- the cinema, made explicit ---------- */
+/* These scenes were relying on being TRANSPARENT over a dark fixed stage. That works in
+   dark mode but is ambiguous in light: a scrubbed rail or an era card could end up
+   reading against a light ground while its type still carried the dark theme's bone
+   tokens (About's journey year labels measured 2.1:1). So in light mode the cinema
+   paints its own black and restates the dark tokens — it is a screen, and it is now
+   unambiguously a screen. */
+[data-theme="light"] :is(.film,.kinetic,.journey,.tl,.fhero,.furnace,.fchap,.finvite,
+  .phero,.pline,.pclose,.fobj){
+  background:#0a0807;
+  --bg:#0a0807; --ink:#f3ecdf; --ink-dim:#9a9081; --ink-faint:#b0a48f;
+  --molten:#c9a24e; --molten-hot:#e6c483; --molten-deep:#8a6a2e;
+  --bronze:#a6822e; --bronze-lite:#dcbd82; --bronze-deep:#6e561c;
+  --line:rgba(244,236,226,.10); --line-strong:rgba(244,236,226,.22);
+  color:#f3ecdf;
+}
+/* the hero canvases and the fixed stage keep painting themselves; only make sure the
+   light page never shows through behind them */
+[data-theme="light"] :is(.stage,.pstage){background:#0a0807}
