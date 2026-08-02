@@ -274,9 +274,11 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
       from.az = caught.az; from.el = caught.el;
       from.rad = caught.rad * (Math.tan((caught.fov || 34) * Math.PI / 360) / Math.tan(FOV * Math.PI / 360));
       settle = 0;
+      openT = -0.75;      // land whole first — the catch has to register before it opens
     } else {
       from.az = REST.az - 0.42; from.el = REST.el + 0.06; from.rad = restRad * 1.16;
       settle = 0; SETTLE_MS = 1500;                         // a plain arrival for a cold visit
+      openT = -0.55;
     }
     Object.assign(pose, from);
     modelReady = true;
@@ -289,6 +291,10 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     document.body.classList.add('fobj-live');
     setTimeout(() => { if (!disposed) document.body.classList.add('fobj-swapped'); }, 700);
   }
+  // (A scale-up "fly in from the finale" was tried here and removed: blowing the band up to
+  //  cover the viewport threw a full-screen casting across the headline for a second, which
+  //  read as a glitch rather than as continuity. The handoff stays where it works — the
+  //  camera pose carries over, so the part is already turned the way you left it.)
 
   // ── sizing: the object's own box, not the window ──────────────────────────
   function resize() {
@@ -303,7 +309,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     // >1 deliberately: fitR is the BOUNDING SPHERE, and this casting is flat and elongated,
     // so its silhouette never fills that sphere. Framing the sphere conservatively left a
     // wide dead margin on every side. 1.15 sizes to the part you can actually see.
-    restRad = Math.max(fitR / Math.sin(halfV), fitR / Math.sin(halfH)) / 1.15;
+    restRad = Math.max(fitR / Math.sin(halfV), fitR / Math.sin(halfH)) / 1.45;
     if (settle >= 1) pose.rad = restRad;
   }
 
