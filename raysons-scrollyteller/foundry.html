@@ -201,7 +201,7 @@
 <body>
 
 <noscript>
-  <style>#cloader,.cue,#ccta,.stage,.grain,.fobj{display:none!important}.rv{opacity:1!important;transform:none!important}
+  <style>#cloader,.cue,#ccta,.stage,.grain,.fobj,.fobj-hint{display:none!important}.rv{opacity:1!important;transform:none!important}
     /* Furnace: no JS → flatten to the three figures stacked */
     .furnace{height:auto!important}
     .furnace__pin{position:static!important;height:auto!important;display:block!important;overflow:visible!important;padding:80px 24px!important}
@@ -274,8 +274,10 @@
        poster simply stays. -->
   <div class="fobj" id="fobj">
     <canvas class="fobj__gl" id="fobjGL"
-            aria-label="The Raysons production casting, carried over from the Overview finale."></canvas>
+            aria-label="The Raysons production casting, carried over from the Overview finale. Drag to assemble it."></canvas>
   </div>
+  <!-- the one instruction the beat needs: the part arrives, comes apart, and waits -->
+  <span class="fobj-hint" id="fobjHint" aria-hidden="true">Drag to assemble</span>
   <div class="inner">
     <div class="eyebrow-badge rv"><span class="dot"></span> The Foundry</div>
     <h1 class="fhero__title rv" data-split>Precision casting,<br/><em>engineered to spec.</em></h1>

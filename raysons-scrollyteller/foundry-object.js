@@ -104,13 +104,113 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
   const rim2 = new THREE.DirectionalLight(0xd8a06a, 0.7); rim2.position.set(-2, 1, -5); scene.add(rim2);
   const fillL= new THREE.DirectionalLight(0xeeeae4, 0.5); fillL.position.set(2, -1, 4); scene.add(fillL);
 
-  // ── the metal — bracket.js's iron, unchanged ──────────────────────────────
+  // ── THE FRAGMENTS ─────────────────────────────────────────────────────────
+  // The GLB is ONE welded mesh — a finished casting, not an assembly — so there are no
+  // components to take apart. Instead the triangles are clustered into fragments on load
+  // (a grid over the part's own bounding box, sized to its proportions so the pieces come
+  // out roughly cubic rather than as slabs), and each fragment gets its own outward vector,
+  // tumble axis and arrival delay baked into per-vertex attributes. The whole dismantle
+  // then runs in the vertex shader off a single uniform — so it is still ONE draw call, and
+  // costs nothing per frame beyond the uniform write.
+  function buildFragments(geo) {
+    const pos = geo.attributes.position;
+    const nv = pos.count, nt = nv / 3;                 // non-indexed → 3 verts per triangle
+    geo.computeBoundingBox();
+    const bb = geo.boundingBox;
+    const size = new THREE.Vector3(); bb.getSize(size);
+    const mid  = new THREE.Vector3(); bb.getCenter(mid);
+    // base 3, not 4: a finer grid shatters this casting into slivers that read as debris.
+    // Bigger clusters read as pieces of a part coming back together, which is the point.
+    const maxS = Math.max(size.x, size.y, size.z) || 1;
+    const gx = Math.max(2, Math.round(3 * size.x / maxS));
+    const gy = Math.max(2, Math.round(3 * size.y / maxS));
+    const gz = Math.max(2, Math.round(3 * size.z / maxS));
+
+    // pass 1 — bin every triangle by its centroid, accumulating each cell's centre
+    const triCell = new Int32Array(nt), cells = new Map();
+    for (let t = 0; t < nt; t++) {
+      let cx = 0, cy = 0, cz = 0;
+      for (let k = 0; k < 3; k++) { const i = t*3 + k; cx += pos.getX(i); cy += pos.getY(i); cz += pos.getZ(i); }
+      cx /= 3; cy /= 3; cz /= 3;
+      const ix = Math.min(gx-1, Math.max(0, Math.floor((cx - bb.min.x) / (size.x || 1) * gx)));
+      const iy = Math.min(gy-1, Math.max(0, Math.floor((cy - bb.min.y) / (size.y || 1) * gy)));
+      const iz = Math.min(gz-1, Math.max(0, Math.floor((cz - bb.min.z) / (size.z || 1) * gz)));
+      const id = (ix * gy + iy) * gz + iz;
+      triCell[t] = id;
+      let c = cells.get(id);
+      if (!c) { c = { sx:0, sy:0, sz:0, n:0 }; cells.set(id, c); }
+      c.sx += cx; c.sy += cy; c.sz += cz; c.n++;
+    }
+
+    // pass 2 — per fragment: where it sits, which way it flies, how it tumbles, when it lands
+    const hash = (s) => { const v = Math.sin(s * 127.1) * 43758.5453; return v - Math.floor(v); };
+    let maxD = 1e-6;
+    cells.forEach((c) => {
+      c.cx = c.sx/c.n; c.cy = c.sy/c.n; c.cz = c.sz/c.n;
+      c.d = Math.hypot(c.cx - mid.x, c.cy - mid.y, c.cz - mid.z);
+      if (c.d > maxD) maxD = c.d;
+    });
+    cells.forEach((c, id) => {
+      let dx = c.cx - mid.x, dy = c.cy - mid.y, dz = c.cz - mid.z;
+      let len = Math.hypot(dx, dy, dz);
+      if (len < 1e-5) { dx = hash(id)*2-1; dy = hash(id+7)*2-1; dz = hash(id+13)*2-1; len = Math.hypot(dx,dy,dz) || 1; }
+      // outer fragments travel further and land last — the classic exploded view, and it
+      // means the part resolves from the core outwards rather than all at once
+      const reach = 0.45 + 0.55 * (c.d / maxD) + hash(id + 31) * 0.22;
+      c.dx = dx/len*reach; c.dy = dy/len*reach; c.dz = dz/len*reach;
+      c.delay = c.d / maxD;
+      let ax = hash(id+3)*2-1, ay = hash(id+5)*2-1, az = hash(id+11)*2-1;
+      const al = Math.hypot(ax, ay, az) || 1;
+      c.ax = ax/al; c.ay = ay/al; c.az = az/al;
+      c.ang = (hash(id + 17) * 2 - 1) * 1.25;
+    });
+
+    const origin = new Float32Array(nv * 3), dir = new Float32Array(nv * 4), spin = new Float32Array(nv * 4);
+    for (let t = 0; t < nt; t++) {
+      const c = cells.get(triCell[t]);
+      for (let k = 0; k < 3; k++) {
+        const i = t*3 + k;
+        origin[i*3] = c.cx; origin[i*3+1] = c.cy; origin[i*3+2] = c.cz;
+        dir[i*4] = c.dx; dir[i*4+1] = c.dy; dir[i*4+2] = c.dz; dir[i*4+3] = c.delay;
+        spin[i*4] = c.ax; spin[i*4+1] = c.ay; spin[i*4+2] = c.az; spin[i*4+3] = c.ang;
+      }
+    }
+    geo.setAttribute('aOrigin', new THREE.BufferAttribute(origin, 3));
+    geo.setAttribute('aDir',    new THREE.BufferAttribute(dir, 4));
+    geo.setAttribute('aSpin',   new THREE.BufferAttribute(spin, 4));
+    return { spread: size.length() * 0.20, count: cells.size };
+  }
+
+  // ── the metal — bracket.js's iron, plus the dismantle ─────────────────────
   const grain = makeNoiseTex(256);
   const iron = new THREE.MeshPhysicalMaterial({
     color: 0x8a847b, metalness: 0.86, roughness: 0.34,
     clearcoat: 0.35, clearcoatRoughness: 0.40, envMapIntensity: 1.75,
     bumpMap: grain, bumpScale: 0.32, roughnessMap: grain
   });
+  const uni = { uAssemble: { value: 1 }, uSpread: { value: 0.5 } };
+  iron.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, uni);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', `#include <common>
+        attribute vec3 aOrigin; attribute vec4 aDir; attribute vec4 aSpin;
+        uniform float uAssemble, uSpread;
+        // Rodrigues — rotate v about a unit axis, used for both the position and the normal
+        // so a tumbled fragment is still lit correctly instead of shading like the whole part
+        vec3 rotAx(vec3 v, vec3 axis, float a){
+          float c = cos(a), s = sin(a);
+          return v*c + cross(axis, v)*s + axis*dot(axis, v)*(1.0-c);
+        }`)
+      // normals are computed BEFORE positions in three's vertex shader, so the fragment's
+      // openness is derived here and reused below
+      .replace('#include <beginnormal_vertex>', `#include <beginnormal_vertex>
+        float fOpen = 1.0 - clamp((uAssemble - aDir.w * 0.30) / 0.70, 0.0, 1.0);
+        fOpen = fOpen * fOpen * (3.0 - 2.0 * fOpen);
+        objectNormal = rotAx(objectNormal, aSpin.xyz, aSpin.w * fOpen);`)
+      .replace('#include <begin_vertex>', `#include <begin_vertex>
+        vec3 fLocal = transformed - aOrigin;
+        transformed = aOrigin + rotAx(fLocal, aSpin.xyz, aSpin.w * fOpen) + aDir.xyz * (uSpread * fOpen);`);
+  };
 
   // ── the pose we were left in ──────────────────────────────────────────────
   // Anything older than a minute is not a handoff, it is a stale tab — fall back to a plain
@@ -136,7 +236,17 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
   gltfLoader.load('models/valve-part.glb', (gltf) => {
     if (disposed) return;
     const obj = gltf.scene;
-    obj.traverse(c => { if (c.isMesh) { boxUV(c.geometry, 0.09); c.material = iron; } });
+    let spread = 0.5;
+    obj.traverse(c => { if (c.isMesh) {
+      // de-index first: fragments need every triangle to own its vertices, or a triangle on
+      // a fragment boundary would be torn between two destinations
+      const g = c.geometry.index ? c.geometry.toNonIndexed() : c.geometry;
+      boxUV(g, 0.09);
+      spread = buildFragments(g).spread;
+      c.geometry = g;
+      c.material = iron;
+    }});
+    uni.uSpread.value = spread;
     obj.rotation.x = -Math.PI / 2;                          // FreeCAD Z-up → Y-up
     const b = new THREE.Box3().setFromObject(obj);
     const size = new THREE.Vector3(); b.getSize(size);
@@ -146,7 +256,10 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     root.add(obj);
     const sph = new THREE.Box3().setFromObject(obj).getBoundingSphere(new THREE.Sphere());
     target.copy(sph.center);
-    fitR = sph.radius;
+    // frame for the DISMANTLED extent, not the assembled one, so the outermost fragments
+    // stay in shot — otherwise the camera would have to zoom as the part comes together,
+    // which pulls the eye away from the assembly itself
+    fitR = sph.radius + spread * (1.70 / size.length()) * 0.55;
     resize();
 
     // start where the finale left it — same angles, and a distance corrected for the fact
@@ -186,8 +299,12 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     if (settle >= 1) pose.rad = restRad;
   }
 
-  // ── the verb they arrive holding: turn it ─────────────────────────────────
+  // ── the verb they arrive holding: turn it — and turning it puts it back together ──
   let dragAz = 0, dragEl = 0, velAz = 0, velEl = 0, dragging = false, px = 0, py = 0;
+  const hintEl = document.getElementById('fobjHint');
+  const ASSEMBLE_PX = 1100;                 // pointer travel needed to fully reassemble
+  let openT = -0.45;                        // <0 = the beat where it is still whole (the catch lands first)
+  let dragProg = 0, assembled = false;
   const ac = new AbortController();
   const sig = { signal: ac.signal, passive: true };
 
@@ -199,9 +316,16 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
   }, sig);
   addEventListener('pointermove', (e) => {
     if (!dragging) return;
-    const dx = (e.clientX - px) * 0.006, dy = (e.clientY - py) * 0.005;
+    const rawX = e.clientX - px, rawY = e.clientY - py;
+    const dx = rawX * 0.006, dy = rawY * 0.005;
     dragAz += dx; dragEl = clamp(dragEl + dy, -0.5, 0.7); velAz = dx; velEl = dy;
     px = e.clientX; py = e.clientY;
+    // the same drag that turns the part also pulls it together. Monotonic: it never falls
+    // back apart, so the visitor is always making progress rather than fighting a decay.
+    if (!assembled) {
+      dragProg = clamp(dragProg + (Math.abs(rawX) + Math.abs(rawY)) / ASSEMBLE_PX, 0, 1);
+      if (hintEl && dragProg > 0.02) hintEl.classList.add('gone');
+    }
   }, sig);
   const drop = () => { dragging = false; holder.classList.remove('grabbing'); };
   addEventListener('pointerup', drop, sig);
@@ -236,6 +360,16 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
       pose.az  = lerp(from.az,  REST.az,  e);
       pose.el  = lerp(from.el,  REST.el,  e);
       pose.rad = lerp(from.rad, restRad,  e);
+    }
+
+    // THE DISMANTLE. The catch lands whole — it has to, or the handoff from the finale means
+    // nothing — and only then does the casting come apart, which is also what teaches the
+    // visitor that it can go back. From there their drag owns it.
+    if (!assembled) {
+      openT = Math.min(1, openT + dt / 1.15);
+      const o = openT <= 0 ? 0 : openT * openT * (3 - 2 * openT);
+      uni.uAssemble.value = Math.max(1 - o, dragProg);
+      if (dragProg >= 1) assembled = true;
     }
 
     // release inertia settles and the pose HOLDS — the finale's behaviour, continued
