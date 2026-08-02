@@ -31,15 +31,22 @@
     bridge:      'valve/bridge.mp4',
     macro:       'valve/macro.mp4',
   };
+  // THE EDIT. These spans were 7-6-6-6-6-5-6-6 — every act inside one unit of every other,
+  // so the establishing shot, the connective bridge and the climax all cost the viewer the
+  // same scroll. No cut works that way; an edit breathes. Reweighted so the pour gets room
+  // to be awe, the bridge stops charging climax rates for connective tissue, and the final
+  // reveal is the longest thing in the film.
+  // TOTAL IS UNCHANGED (48), so the page length, the scroll runway and every downstream
+  // measurement are identical — only the distribution moves.
   const SEGMENTS = [
-    { clip:'pour',        reverse:false, span:7, act:0 },  // The Pour (fire / hero)
+    { clip:'pour',        reverse:false, span:9, act:0 },  // The Pour — the one moment of pure awe, held
     { clip:'forge',       reverse:false, span:6, act:1 },  // Fire becomes the part
-    { clip:'deconstruct', reverse:false, span:6, act:2 },  // Deconstruct
-    { clip:'deconstruct', reverse:true,  span:6, act:3 },  // Reassemble (free)
+    { clip:'deconstruct', reverse:false, span:5, act:2 },  // Deconstruct
+    { clip:'deconstruct', reverse:true,  span:5, act:3 },  // Reassemble (free)
     { clip:'orbit',       reverse:false, span:6, act:4 },  // Orbit — every side
-    { clip:'bridge',      reverse:false, span:5, act:5 },  // Bridge
+    { clip:'bridge',      reverse:false, span:3, act:5 },  // Bridge — connective tissue, keep it moving
     { clip:'macro',       reverse:false, span:6, act:6 },  // Detail — the bore
-    { clip:'macro',       reverse:true,  span:6, act:7 },  // Reveal (free) — finale
+    { clip:'macro',       reverse:true,  span:8, act:7 },  // Reveal (free) — the payoff, the longest beat
   ];
   const TOTAL = SEGMENTS.reduce((s,x)=>s+x.span,0);
 

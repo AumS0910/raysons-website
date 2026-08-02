@@ -109,6 +109,14 @@ html.reentry #loader,html.reentry #cloader{transition:none!important;opacity:0!i
   padding:26px clamp(20px,4vw,56px);
   mix-blend-mode:difference;
 }
+/* PHONES: difference-blend is beautiful over film and unreadable over a text list — at the
+   foot of a page it was inverting straight through the footer's own headings. A phone has
+   no room to scroll the nav out of the way, so on mobile it drops the blend and carries a
+   scrim of its own: legible over the pour, over the metal and over type. */
+@media(max-width:760px){
+  .nav{mix-blend-mode:normal;
+    background:linear-gradient(180deg, rgba(7,5,4,.94) 0%, rgba(7,5,4,.66) 58%, transparent 100%)}
+}
 .nav .brand{display:flex;align-items:center;gap:12px;font-weight:600;letter-spacing:.02em;font-size:15px}
 .nav .brand b{font-weight:700}
 .nav .brand span{font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:#fff;opacity:.6;border:1px solid rgba(255,255,255,.4);padding:3px 7px;border-radius:2px}
@@ -580,7 +588,39 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 :is(.about-footer,.foundry-footer,.site-footer) .ft-col a:hover{color:var(--molten-hot)}
 :is(.about-footer,.foundry-footer,.site-footer) .ft-bot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-top:26px;max-width:1280px;margin:0 auto;
   font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
-@media(max-width:760px){:is(.about-footer,.foundry-footer,.site-footer) .ft-mid{grid-template-columns:1fr;gap:24px}}
+/* ── THE CHAPTER HANDOFF ───────────────────────────────────────────────────
+   The Overview ends like a film — on the object, with "Enter the group story". Every
+   other chapter ended on a sitemap. This is that same invitation, so About, Foundry and
+   Products close by pointing at what comes next instead of stopping dead. */
+:is(.about-footer,.foundry-footer,.site-footer) .ft-next{display:flex;align-items:center;
+  justify-content:space-between;gap:18px;max-width:1280px;margin:0 auto;padding:26px 0 2px;
+  text-decoration:none;border-top:1px solid var(--line)}
+.ft-next__k{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--ink-faint);white-space:nowrap}
+.ft-next__t{font-family:var(--serif);font-weight:600;font-size:clamp(21px,3vw,34px);
+  letter-spacing:-.01em;color:var(--ink)}
+.ft-next__t em{font-style:normal;color:var(--molten-hot);margin-left:12px;display:inline-block;
+  transition:transform .4s cubic-bezier(.2,.7,.2,1)}
+.ft-next:hover .ft-next__t{color:#fff}
+.ft-next:hover .ft-next__t em{transform:translateX(7px)}
+
+/* ── PHONES: a closing frame, not a directory ──────────────────────────────
+   Stacked, this footer measured 1019px — 121% of a 390x844 viewport — and it was the
+   last thing the visitor saw on three of the five chapters, identical every time. Two of
+   its three columns are also redundant on a phone: "Programs" restates the Foundry page,
+   "Navigate" restates the burger menu. Contact is the only column carrying something the
+   visitor cannot already reach, so on mobile the block closes the chapter instead of
+   indexing the site. The extra bottom padding is the Request-a-Quote dock's clearance —
+   it was printing over the copyright line. */
+@media(max-width:760px){
+  :is(.about-footer,.foundry-footer,.site-footer){padding-top:clamp(34px,5vh,56px);padding-bottom:116px}
+  :is(.about-footer,.foundry-footer,.site-footer) .ft-top{padding-bottom:24px}
+  :is(.about-footer,.foundry-footer,.site-footer) .ft-mid{grid-template-columns:1fr;gap:0;padding:22px 0}
+  :is(.about-footer,.foundry-footer,.site-footer) .ft-col:nth-child(-n+2){display:none}
+  :is(.about-footer,.foundry-footer,.site-footer) .ft-col li{line-height:1.7;font-size:13px}
+  :is(.about-footer,.foundry-footer,.site-footer) .ft-next{padding:20px 0 2px}
+  :is(.about-footer,.foundry-footer,.site-footer) .ft-bot{padding-top:20px;gap:4px}
+}
 
 /* ══ TOUCH TARGETS ═══════════════════════════════════════════════════════════
    Audited across five pages at phone and tablet widths: no horizontal overflow

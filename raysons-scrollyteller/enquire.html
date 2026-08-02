@@ -39,11 +39,26 @@
       radial-gradient(72% 56% at 50% 118%, rgba(255,120,40,.15), transparent 60%),
       radial-gradient(55% 46% at 14% 4%, rgba(201,162,78,.12), transparent 60%),
       var(--bg);}
+  /* same instrument as the other four chapters: a soft-light wash that crossfades as the
+     page changes hands. body[data-eqsec] is set by the observer at the foot of this file. */
+  .eq-grade{position:fixed;inset:0;z-index:0;pointer-events:none;mix-blend-mode:soft-light;
+    opacity:.42;transition:background 1.4s ease, opacity 1.4s ease;
+    background:radial-gradient(120% 92% at 50% 46%, rgba(255,138,58,.46), transparent 72%)}
+  body[data-eqsec="form"] .eq-grade{background:radial-gradient(120% 100% at 50% 40%, rgba(150,180,216,.46), transparent 74%);opacity:.34}
+  body[data-eqsec="docket"] .eq-grade{background:radial-gradient(110% 92% at 50% 56%, rgba(255,104,24,.56), transparent 68%);opacity:.6}
+  @media(prefers-reduced-motion:reduce){.eq-grade{transition:none}}
   .eq-grain{position:fixed;inset:-50%;z-index:1;pointer-events:none;opacity:.045;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
 
   .eq-nav{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
     padding:22px clamp(20px,4vw,56px);}
+  /* PHONES: this bar is fixed and transparent, so on a small screen the brand, the burger
+     and "Back to the Foundry" printed straight through the enquiry form's own fields. The
+     other four chapters carry a scrim on .nav for exactly this reason; .eq-nav is a
+     separate class and was missed by it. */
+  @media(max-width:760px){
+    .eq-nav{background:linear-gradient(180deg, rgba(7,5,4,.95) 0%, rgba(7,5,4,.7) 58%, transparent 100%)}
+  }
   .eq-nav .brand{display:flex;align-items:center;gap:12px;font-weight:600;font-size:15px;color:var(--ink)}
   .eq-nav .brand span{font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:var(--ink-dim);border:1px solid var(--line-strong);padding:3px 7px;border-radius:2px}
   .eq-back{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim);display:inline-flex;align-items:center;gap:8px;transition:color .3s}
@@ -259,6 +274,12 @@
 <body>
 
 <div class="eq-bg"></div>
+<!-- The environmental grade, carried into the destination. Every other chapter moves its
+     light through the process (index's .cine-grade, About's and Foundry's .stage__grade,
+     Products' .pstage__grade); this page was the one place the light stopped, which is
+     precisely why arriving here felt like leaving the film. It warms as the visitor moves
+     from the pitch into the form — the last beat of the same lighting story. -->
+<div class="eq-grade" id="eqGrade"></div>
 <div class="eq-grain"></div>
 
 <nav class="eq-nav">
@@ -612,6 +633,27 @@
       burger.querySelectorAll('span').forEach(function(s){ s.style.transform=''; s.style.opacity=''; });
     });
   });
+})();
+</script>
+<script>
+/* ── Environmental grade: the light finishes the journey ──
+   The same read-only observer the other four chapters use (index's acts -> data-scene,
+   Foundry's sections -> data-fsec, Products' -> data-psec). It only watches; it never
+   drives scroll. Warm pitch -> cool, clinical form -> warm again at the docket, so the
+   destination is lit like the rest of the film instead of going flat on arrival. ── */
+(function(){
+  var map = [['.eq-contact','pitch'], ['#eqForm','form'], ['.eq-docket','docket']];
+  var secs = map.map(function(m){ var el=document.querySelector(m[0]); return el?{el:el,k:m[1]}:null; }).filter(Boolean);
+  if(!secs.length || !('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){
+        var hit = secs.filter(function(s){ return s.el===e.target; })[0];
+        if(hit && document.body.dataset.eqsec !== hit.k) document.body.dataset.eqsec = hit.k;
+      }
+    });
+  }, { rootMargin:'-40% 0px -40% 0px' });
+  secs.forEach(function(s){ io.observe(s.el); });
 })();
 </script>
 <script src="premium.js"></script>

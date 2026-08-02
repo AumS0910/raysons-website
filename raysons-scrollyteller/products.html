@@ -109,7 +109,13 @@
      The lit one is full scale and full brightness; its neighbours recede above and below
      in depth. Scroll drives it, a lerp smooths it, so it reads as a slow dolly down a
      rack of castings rather than a slideshow. ── */
-  .pline{position:relative;z-index:10;height:640vh}
+  /* 640vh gave all 23 castings 28vh of scroll each — the longest page on the site and the
+     flattest rhythm on it, because a catalogue is not a democracy and every part was
+     weighted the same. 440vh keeps the same pinned rig (products.js derives its progress
+     from offsetHeight, so nothing else changes) and moves the reel along at a pace that
+     reaches the sectored grid — the page's actual payoff — while attention still holds. */
+  .pline{position:relative;z-index:10;height:440vh}
+  @media(max-width:760px){.pline{height:380vh}}
   .pline__pin{position:sticky;top:0;height:100svh;overflow:hidden}
   .pline__pool{position:absolute;left:50%;top:50%;width:min(120vw,1100px);height:min(120vw,1100px);
     transform:translate(-50%,-50%);pointer-events:none;
@@ -384,6 +390,11 @@
     <div class="ft-col"><h4>Navigate</h4><ul><li><a href="index.html">Overview</a></li><li><a href="About Us.html">About</a></li><li><a href="foundry.html">Foundry</a></li><li><a href="products.html">Products</a></li><li><a href="enquire.html">Enquire</a></li></ul></div>
     <div class="ft-col"><h4>Contact</h4><ul><li>MIDC Shiroli, Kolhapur</li><li>Maharashtra 416122</li><li><a href="mailto:industries@raysonsgroup.com">industries@raysonsgroup.com</a></li><li><a href="tel:+919145131333">+91 91451 31333</a></li></ul></div>
   </div>
+  <a class="ft-next" href="enquire.html">
+    <span class="ft-next__k">Next chapter</span>
+    <span class="ft-next__t">Send the drawing<em>&rarr;</em></span>
+  </a>
+
   <div class="ft-bot"><span>© 2026 Raysons Shell Cast · All rights reserved</span><span>Precision Foundry · Kolhapur, India</span></div>
 </footer>
 

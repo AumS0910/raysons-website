@@ -318,13 +318,20 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
   function applyCamera(zp, t){
     const p = poseFor(zp);
+    // PORTRAIT FIT — the pose was framed on a landscape window. A phone's horizontal field
+    // is barely half of it (aspect ~0.46 against ~1.6), so the casting cropped to a
+    // fragment at exactly the beat it is supposed to be read. Pull back in proportion to
+    // the aspect; at desktop aspects this resolves to 1 and nothing moves.
+    const rad = p.rad * clamp(0.95 / camera.aspect, 1, 1.7);
     // operator's breathing — micro handheld drift so the move feels shot, not computed
     const az = p.az + Math.sin(t*0.13)*0.010 + Math.sin(t*0.047)*0.006;
     const el = p.el + Math.sin(t*0.09+1.7)*0.006;
-    camera.position.set(target.x+p.rad*Math.cos(el)*Math.sin(az), target.y+p.rad*Math.sin(el), target.z+p.rad*Math.cos(el)*Math.cos(az));
+    camera.position.set(target.x+rad*Math.cos(el)*Math.sin(az), target.y+rad*Math.sin(el), target.z+rad*Math.cos(el)*Math.cos(az));
     camera.lookAt(target.x, target.y + Math.sin(t*0.11+0.6)*0.008, target.z);
-    // the settled pose, without the handheld drift — Foundry catches the intent, not the wobble
-    saveHandoff(p, t*1000);
+    // the settled pose, without the handheld drift — Foundry catches the intent, not the
+    // wobble. Hands over the PORTRAIT-corrected distance, so the catch stays continuous
+    // on a phone rather than jumping scale across the navigation.
+    saveHandoff({ az: p.az, el: p.el, rad: rad }, t*1000);
   }
 
   // grab-and-hold: pointer delta rotates the part 1:1; release holds the pose with a touch

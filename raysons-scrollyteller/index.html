@@ -198,7 +198,17 @@
     border-radius:999px;background:rgba(7,5,4,.45);white-space:nowrap;transition:border-color .3s ease}
   .bracket-next span{color:var(--molten-hot);margin-left:8px}
   .bracket-next:hover{border-color:var(--molten)}
-  @media(max-width:640px){#bracketScroll{height:240vh}#bracketCap{bottom:max(90px,16vh)}}
+  /* PHONES — the finale is the film's climax and on a phone it was stacking three text
+     layers on one spot: #bracketCap resolved to max(90px,16vh)=135px and .bracket-next to
+     clamp(88px,16vh,160px)=135px on a 390x844 screen, so the "Enter the group story" pill
+     printed straight through "Our fire." Caption lifts, CTA drops beneath it, and the two
+     stop competing for the same 40 pixels. */
+  @media(max-width:640px){
+    #bracketScroll{height:240vh}
+    #bracketCap{bottom:clamp(148px,21vh,196px);max-width:78vw}
+    #bracketCap h2{font-size:clamp(26px,7.6vw,40px)}
+    .bracket-next{bottom:clamp(62px,8.5vh,82px);font-size:10px;padding:11px 20px}
+  }
 
   /* loader */
   #cloader{position:fixed;inset:0;z-index:100;background:#050302;display:flex;flex-direction:column;
@@ -489,7 +499,11 @@
   var N=acts.length, lastScene=-1;
 
   // chapter ticks — the start of each of the four chapters, as scroll % (from SEGMENT spans)
-  if(rail){ [0, 27.1, 64.6, 87.5].forEach(function(pct){
+  // Chapter starts as a % of the reel, derived from the SEGMENT spans in cinema.js:
+  // Ignition act0 = 0, Control act2 = 15/48, Consequence act5 = 31/48, Invitation act7 = 40/48.
+  // (Was 0/27.1/64.6/87.5 against the old 7-6-6-6-6-5-6-6 spans — these MUST be recomputed
+  //  whenever a span changes or the rail ticks drift out of sync with the HUD.)
+  if(rail){ [0, 31.25, 64.58, 83.33].forEach(function(pct){
     var t=document.createElement('span'); t.className='film-rail__tick'; t.style.top=pct+'%'; rail.appendChild(t);
   }); }
 
