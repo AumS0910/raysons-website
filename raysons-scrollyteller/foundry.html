@@ -201,7 +201,7 @@
 <body>
 
 <noscript>
-  <style>#cloader,.cue,#ccta,.stage,.grain{display:none!important}.rv{opacity:1!important;transform:none!important}
+  <style>#cloader,.cue,#ccta,.stage,.grain,.fobj{display:none!important}.rv{opacity:1!important;transform:none!important}
     /* Furnace: no JS → flatten to the three figures stacked */
     .furnace{height:auto!important}
     .furnace__pin{position:static!important;height:auto!important;display:block!important;overflow:visible!important;padding:80px 24px!important}
@@ -266,6 +266,16 @@
            onerror="this.closest('.fhero__object').style.display='none'" />
     </picture>
   </figure>
+  <!-- THE CATCH — the poster above is only the placeholder now. The Overview finale ends with
+       the visitor holding a real 3D casting (bracket.js); it writes the pose it was left in,
+       and foundry-object.js picks that pose up and settles it into the hero. Same object,
+       same orientation, still moving — so crossing pages reads as one continuous shot rather
+       than two pages that happen to show the same part. No WebGL or reduced motion, and the
+       poster simply stays. -->
+  <div class="fobj" id="fobj">
+    <canvas class="fobj__gl" id="fobjGL"
+            aria-label="The Raysons production casting, carried over from the Overview finale."></canvas>
+  </div>
   <div class="inner">
     <div class="eyebrow-badge rv"><span class="dot"></span> The Foundry</div>
     <h1 class="fhero__title rv" data-split>Precision casting,<br/><em>engineered to spec.</em></h1>
@@ -515,6 +525,10 @@
 <script src="foundry.js"></script>
 <script src="foundry-heat.js"></script>
 <script src="foundry-chapters.js"></script>
+<!-- the live hero casting (module: needs the importmap in <head>). Loads three.js + the
+     150 KB casting only after the page's own engines are up, and bails silently on no-WebGL
+     or reduced motion, leaving the poster in place. -->
+<script type="module" src="foundry-object.js"></script>
 <script>
 /* ── Environmental grade: the light walks the process ──
    Marks which section owns the frame so .stage__grade can crossfade under it —

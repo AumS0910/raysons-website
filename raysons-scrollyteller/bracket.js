@@ -302,6 +302,20 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     const rad = lerp(3.6, 2.75, smooth(0.30,0.62,zp)) + lerp(0, 0.7, smooth(0.62,1,zp));
     return { az, el:clamp(el,-0.3,1.2), rad:clamp(rad,2.4,6) };
   }
+  // THE HANDOFF — leave the pose behind so Foundry can CATCH the same object.
+  // Foundry's hero runs the identical rig (foundry-object.js): it reads this, starts the
+  // casting exactly where the visitor left it — orientation, distance and all — and settles
+  // it into the hero pose. Without it the two pages merely show the same part; with it, the
+  // crossing reads as one continuous shot. Written on a throttle rather than on unload,
+  // because the seamless router (spa.js) swaps documents WITHOUT ever firing unload.
+  let lastSave = 0;
+  function saveHandoff(p, now){
+    if(now - lastSave < 220) return; lastSave = now;
+    try{ sessionStorage.setItem('rc_casting', JSON.stringify({
+      az: p.az, el: p.el, rad: p.rad, fov: camera.fov, t: Date.now()
+    })); }catch(_){}
+  }
+
   function applyCamera(zp, t){
     const p = poseFor(zp);
     // operator's breathing — micro handheld drift so the move feels shot, not computed
@@ -309,6 +323,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     const el = p.el + Math.sin(t*0.09+1.7)*0.006;
     camera.position.set(target.x+p.rad*Math.cos(el)*Math.sin(az), target.y+p.rad*Math.sin(el), target.z+p.rad*Math.cos(el)*Math.cos(az));
     camera.lookAt(target.x, target.y + Math.sin(t*0.11+0.6)*0.008, target.z);
+    // the settled pose, without the handheld drift — Foundry catches the intent, not the wobble
+    saveHandoff(p, t*1000);
   }
 
   // grab-and-hold: pointer delta rotates the part 1:1; release holds the pose with a touch
