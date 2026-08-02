@@ -58,9 +58,10 @@ function boot(){
   // distance fades into: black becomes white, and the same hot pillars now stand against
   // it as silhouettes with the heat still on them.
   const THEME = {
-    dark:  { fog:'#0a0604' },
-    light: { fog:'#0a0604' }   // reverted: see styles.css — the corridor is authored for black
+    dark:  { fog:'#0a0604', floor:'#0b0805' },
+    light: { fog:'#0a0604', floor:'#0b0805' }   // reverted: composer clears opaque black — see styles.css
   };
+  let themeFloor = null;
   const themeNow = () => (document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
   let curTheme = themeNow();
   // PMREM environment — the single biggest "premium metal" lever: every standard
@@ -72,7 +73,7 @@ function boot(){
   camera.position.set(1.8, 1.6, -96);
 
   scene.add(new THREE.AmbientLight(PAL.amb, 0.65));
-  function paintTheme(t){ scene.fog.color.set(THEME[t].fog); }
+  function paintTheme(t){ scene.fog.color.set(THEME[t].fog); if(themeFloor) themeFloor.color.set(THEME[t].floor); }
   paintTheme(curTheme);
   new MutationObserver(function(){
     const t = themeNow(); if(t === curTheme) return; curTheme = t; paintTheme(t);
@@ -187,9 +188,14 @@ function boot(){
   });
   const path = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 300), pathMat);
   path.rotation.x=-Math.PI/2; path.position.set(0,-2.97,-230); scene.add(path);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 520),
-    new THREE.MeshStandardMaterial({ color:'#0b0805', metalness:.72, roughness:.38, envMapIntensity:.5 }));
+  // 80 x 520 of near-black metal — the single biggest surface in the scene, and the dark
+  // mass that survived every earlier light attempt. It follows the theme too: a pale
+  // polished floor on light, so the corridor reads as a bright hall the pillars stand in
+  // rather than a lit object floating over a black slab.
+  const floorMat = new THREE.MeshStandardMaterial({ color:'#0b0805', metalness:.72, roughness:.38, envMapIntensity:.5 });
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 520), floorMat);
   floor.rotation.x=-Math.PI/2; floor.position.set(0,-3,-230); scene.add(floor);
+  themeFloor = floorMat; paintTheme(curTheme);        // catch the floor up to the live theme
 
   // (people-field capsule figures removed — the user read them as "glowing candles".
   //  The passage after the corridor is clean ember-lit fog; the seals are the next beat.)

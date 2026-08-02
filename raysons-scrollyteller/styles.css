@@ -833,20 +833,17 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 }
 
 /* ---------- "Our Journey" stays the lit corridor ---------- */
-/* A white corridor was attempted and reverted. The scene is not a section with a colour
-   behind it — about-corridor.js builds a dark ROOM: fog that fades to #0a0604, cast-iron
-   pillars lit by a single orange key, a ground plane, an ember field, and a 92%-opacity
-   scrim holding the era copy legible. Every one of those assumes black. Moving the fog
-   alone left a dark mass where the geometry is; brightening the ambient erased the
-   pillars entirely (bone iron on a bone ground). Making it genuinely work on white means
-   re-lighting the scene, not restyling it. It keeps its dark, stated explicitly so it can
-   never half-inherit the page. */
-/* NO BACKGROUND HERE. .journey is z-index:10 and #journeyGL is a FIXED canvas at
-   z-index:1, so ANY background on this section — bone or black — paints a flat slab over
-   the corridor. Bone erased it; black erased it just as completely, only invisibly, which
-   is how it survived the last review. The dark ground it needs already exists BEHIND the
-   canvas on .stage, which light mode keeps at #0a0807. The section only needs the dark
-   TOKENS so its copy stays bone over the scene. */
+/* A bone corridor was built and reverted, and the blocker is worth recording so nobody
+   spends the day on it again. It is NOT the CSS and it is NOT the fog: about-corridor.js
+   renders through an EffectComposer + UnrealBloomPass, and RenderPass clears its render
+   target to OPAQUE BLACK. The canvas is therefore opaque wherever no geometry is drawn,
+   so alpha:true on the renderer buys nothing and no background placed behind it can ever
+   show — the "sky" is baked into the composer output.
+   Everything else did work: fog to bone, a pale floor, ink era cards, a halved scrim, and
+   the pillars kept their iron and their molten seams. Only the sky stayed black, and
+   fixing that means threading clear-alpha through the post chain and accepting bloom over
+   transparency (which fringes). That is scene re-engineering, not theming.
+   The corridor keeps its dark, stated explicitly so it can never half-inherit the page. */
 [data-theme="light"] :is(.journey,.tl){
   --bg:#0a0807; --ink:#f3ecdf; --ink-dim:#9a9081; --ink-faint:#b0a48f;
   --molten:#c9a24e; --molten-hot:#e6c483; --molten-deep:#8a6a2e;
