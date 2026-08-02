@@ -39,6 +39,30 @@ function boot(){
   const PAL = { fog:'#0a0604', accent:'#ff7a26', hot:'#ffb24a', deep:'#c2300a', amb:'#2a1d12', rim:'#88a6ff' };
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(PAL.fog, 0.012);
+
+  // ── THEME ─────────────────────────────────────────────────────────────────
+  // This canvas renders with alpha:true — there is no scene.background, so the black
+  // corridor is made ENTIRELY by the fog: distant pillars fade to #0a0604. Put a light
+  // page behind it without touching that and the pillars dissolve into a dark haze on a
+  // bone ground, which is precisely the grey smear a light background produced.
+  //
+  // So light mode moves the fog to the page colour and lifts the ambient: the pillars
+  // stay exactly the cast iron they were, the molten seams stay the same orange, and the
+  // corridor recedes into white instead of into black. Iron reads as silhouette, the
+  // seams read as heat against it.
+  // ONLY THE FOG MOVES. First attempt also lifted the ambient (0.65 -> 1.45, warm-dark ->
+  // bone) on the theory that a light scene needs light. It does not: these pillars are
+  // CAST IRON, and brightening them to bone on a bone ground made them vanish completely —
+  // the corridor rendered empty. Their darkness is what makes them read. Leave the iron,
+  // the key light and the molten seams exactly as they are, and move only the colour the
+  // distance fades into: black becomes white, and the same hot pillars now stand against
+  // it as silhouettes with the heat still on them.
+  const THEME = {
+    dark:  { fog:'#0a0604' },
+    light: { fog:'#0a0604' }   // reverted: see styles.css — the corridor is authored for black
+  };
+  const themeNow = () => (document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
+  let curTheme = themeNow();
   // PMREM environment — the single biggest "premium metal" lever: every standard
   // material picks up soft studio reflections instead of flat shading
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -48,6 +72,11 @@ function boot(){
   camera.position.set(1.8, 1.6, -96);
 
   scene.add(new THREE.AmbientLight(PAL.amb, 0.65));
+  function paintTheme(t){ scene.fog.color.set(THEME[t].fog); }
+  paintTheme(curTheme);
+  new MutationObserver(function(){
+    const t = themeNow(); if(t === curTheme) return; curTheme = t; paintTheme(t);
+  }).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
   const key   = new THREE.PointLight(PAL.accent, 2.6, 150, 2.0); key.position.set(0,3,-120); scene.add(key);
   const rim   = new THREE.DirectionalLight(PAL.rim, 0.42); rim.position.set(-6,8,4); scene.add(rim);
   const flare = new THREE.PointLight(PAL.hot, 0, 80, 2.2); flare.position.set(0,2,-208); scene.add(flare); // 2021 ignition

@@ -106,8 +106,34 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   renderer.localClippingEnabled = true;                    // section-cut interaction (see below)
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x080605);
-  scene.fog = new THREE.FogExp2(0x0b0b0c, 0.030);          // subtle depth haze — the footage has atmosphere
+  // THEME-AWARE GROUND. This canvas is opaque — it owns its own clear colour, so unlike
+  // the Foundry object (which renders with alpha and inherits the page) it cannot simply
+  // be recoloured in CSS. The fog has to travel with it: haze tuned for black reads as a
+  // grey film over a bone ground. Re-read on every theme change rather than at boot, so
+  // toggling mid-scroll updates the finale live.
+  const GROUND = { dark: 0x080605, light: 0xefe9df };
+  const HAZE   = { dark: 0x0b0b0c, light: 0xe6ded1 };
+  const themeNow = () => (document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
+  let curTheme = themeNow();
+  scene.background = new THREE.Color(GROUND[curTheme]);
+  scene.fog = new THREE.FogExp2(HAZE[curTheme], 0.030);    // subtle depth haze — the footage has atmosphere
+  // the wet-black-glass floor is a Reflector: its tint IS the reflection's brightness, and
+  // it lives in a shader uniform, so it cannot be reached from CSS. Left dark on a bone
+  // ground it reads as a hole cut in the page rather than a floor.
+  const MIRROR = { dark: 0x3c3e42, light: 0xcfc7b8 };
+  function paintTheme(t) {
+    scene.background.setHex(GROUND[t]);
+    scene.fog.color.setHex(HAZE[t]);
+    if (floor && floor.material && floor.material.uniforms && floor.material.uniforms.color) {
+      floor.material.uniforms.color.value.setHex(MIRROR[t]);
+    }
+  }
+  new MutationObserver(function () {
+    const t = themeNow();
+    if (t === curTheme) return;
+    curTheme = t;
+    paintTheme(t);
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(makeEnv(), 0.5).texture;
 
@@ -268,6 +294,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
       // and the buffer doubled so the reflected edges stay crisp rather than mushy.
       const mirror = new Reflector(new THREE.PlaneGeometry(46,46), { textureWidth:2048, textureHeight:2048, color:0x3c3e42 });
       mirror.rotation.x=-Math.PI/2; mirror.position.y=b2.min.y-0.002; scene.add(mirror); floor=mirror;
+      paintTheme(curTheme);          // the floor is born after the theme was resolved — catch it up
       // a soft contact shadow on top of the reflection grounds the part
       const sh = new THREE.Mesh(new THREE.PlaneGeometry(40,40), new THREE.ShadowMaterial({opacity:0.5, color:0x000000}));
       sh.rotation.x=-Math.PI/2; sh.position.y=b2.min.y+0.001; sh.receiveShadow=true; scene.add(sh); shadowPlane=sh;

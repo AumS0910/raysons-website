@@ -805,3 +805,61 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 /* the hero canvases and the fixed stage keep painting themselves; only make sure the
    light page never shows through behind them */
 [data-theme="light"] :is(.stage,.pstage){background:#0a0807}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   LIGHT THEME · REVISION — a flat nav, and the journey joins the light
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ---------- nav: a surface and an edge, not a fade ---------- */
+/* The gradient scrim was doing two jobs badly — it never fully separated the bar from
+   the page, and it left a soft smear across the top of every screen. A flat surface with
+   a single hairline states the separation outright. */
+[data-theme="light"] .nav,
+[data-theme="light"] .eq-nav{
+  background:#f4efe6;
+  border-bottom:1px solid rgba(22,18,14,.16);
+  backdrop-filter:none;-webkit-backdrop-filter:none}
+@media(max-width:760px){
+  [data-theme="light"] .nav,
+  [data-theme="light"] .eq-nav{
+    background:#f4efe6;
+    border-bottom:1px solid rgba(22,18,14,.16)}
+}
+
+/* ---------- "Our Journey" stays the lit corridor ---------- */
+/* A white corridor was attempted and reverted. The scene is not a section with a colour
+   behind it — about-corridor.js builds a dark ROOM: fog that fades to #0a0604, cast-iron
+   pillars lit by a single orange key, a ground plane, an ember field, and a 92%-opacity
+   scrim holding the era copy legible. Every one of those assumes black. Moving the fog
+   alone left a dark mass where the geometry is; brightening the ambient erased the
+   pillars entirely (bone iron on a bone ground). Making it genuinely work on white means
+   re-lighting the scene, not restyling it. It keeps its dark, stated explicitly so it can
+   never half-inherit the page. */
+[data-theme="light"] :is(.journey,.tl){
+  background:#0a0807;
+  --bg:#0a0807; --ink:#f3ecdf; --ink-dim:#9a9081; --ink-faint:#b0a48f;
+  --molten:#c9a24e; --molten-hot:#e6c483; --molten-deep:#8a6a2e;
+  --bronze:#a6822e; --bronze-lite:#dcbd82; --bronze-deep:#6e561c;
+  --line:rgba(244,236,226,.10); --line-strong:rgba(244,236,226,.22);
+  color:#f3ecdf}
+
+/* ---------- the finale, on a light ground ---------- */
+/* bracket.js swaps the WebGL clear colour itself (it owns scene.background); these are
+   the DOM layers stacked over it. #bracketFx is a vignette built to crush the edges of a
+   black frame — on light it inverts to a soft bone falloff so the casting still sits in
+   a frame rather than floating on a flat field. */
+[data-theme="light"] #bracketGL{background:#efe9df}
+[data-theme="light"] #bracketFx{
+  background:
+    linear-gradient(180deg, rgba(244,239,230,.85) 0%, transparent 20%, transparent 84%, rgba(244,239,230,.6) 100%),
+    radial-gradient(120% 92% at 50% 44%, transparent 38%, rgba(214,205,190,.55) 100%),
+    radial-gradient(62% 58% at 50% 118%, rgba(160,140,110,.10), transparent 60%)}
+[data-theme="light"] :is(#bracketCap .k,#bracketTol .k){color:#8a5a12}
+[data-theme="light"] :is(#bracketCap h2,#bracketTol .v){color:#16120e}
+[data-theme="light"] #bracketCap h2 em{color:#8a5a12}
+[data-theme="light"] :is(#bracketCap p,#bracketHint,#bracketTol .p){color:#4c443a}
+[data-theme="light"] :is(#bracketCap,#bracketTol,#bracketHint) :is(h2,p,span){text-shadow:none}
+[data-theme="light"] .bracket-next{color:#16120e;background:rgba(255,255,255,.72);
+  border-color:rgba(22,18,14,.22)}
+[data-theme="light"] .bracket-next span{color:#8a5a12}
+[data-theme="light"] body.bracket-on .grain{opacity:.03}
