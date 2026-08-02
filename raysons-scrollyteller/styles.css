@@ -793,9 +793,15 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
    tokens (About's journey year labels measured 2.1:1). So in light mode the cinema
    paints its own black and restates the dark tokens — it is a screen, and it is now
    unambiguously a screen. */
+/* NO BACKGROUND ON THESE. Every one of them sits at z-index:10 over a FIXED full-viewport
+   backdrop — .stage on About and Foundry, .pstage on Products, #stage on the Overview —
+   and several have a fixed canvas between the two (#journeyGL at z-index:1). Painting the
+   SECTION therefore covers whatever is behind it: it blanked About's corridor completely,
+   and would have hidden Products' molten pool the same way. The dark ground belongs on the
+   fixed backdrops (kept at #0a0807 below); these sections only need the dark TOKENS so
+   their copy stays bone over the scene. */
 [data-theme="light"] :is(.film,.kinetic,.journey,.tl,.fhero,.furnace,.fchap,.finvite,
   .phero,.pline,.pclose,.fobj){
-  background:#0a0807;
   --bg:#0a0807; --ink:#f3ecdf; --ink-dim:#9a9081; --ink-faint:#b0a48f;
   --molten:#c9a24e; --molten-hot:#e6c483; --molten-deep:#8a6a2e;
   --bronze:#a6822e; --bronze-lite:#dcbd82; --bronze-deep:#6e561c;
@@ -835,8 +841,13 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
    pillars entirely (bone iron on a bone ground). Making it genuinely work on white means
    re-lighting the scene, not restyling it. It keeps its dark, stated explicitly so it can
    never half-inherit the page. */
+/* NO BACKGROUND HERE. .journey is z-index:10 and #journeyGL is a FIXED canvas at
+   z-index:1, so ANY background on this section — bone or black — paints a flat slab over
+   the corridor. Bone erased it; black erased it just as completely, only invisibly, which
+   is how it survived the last review. The dark ground it needs already exists BEHIND the
+   canvas on .stage, which light mode keeps at #0a0807. The section only needs the dark
+   TOKENS so its copy stays bone over the scene. */
 [data-theme="light"] :is(.journey,.tl){
-  background:#0a0807;
   --bg:#0a0807; --ink:#f3ecdf; --ink-dim:#9a9081; --ink-faint:#b0a48f;
   --molten:#c9a24e; --molten-hot:#e6c483; --molten-deep:#8a6a2e;
   --bronze:#a6822e; --bronze-lite:#dcbd82; --bronze-deep:#6e561c;
