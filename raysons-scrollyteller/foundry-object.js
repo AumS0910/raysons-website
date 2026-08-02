@@ -295,7 +295,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     // instead of a hand-tuned distance that crops on one shape and floats on another
     const halfV = FOV * Math.PI / 360;
     const halfH = Math.atan(Math.tan(halfV) * camera.aspect);
-    restRad = Math.max(fitR / Math.sin(halfV), fitR / Math.sin(halfH)) / 0.74;
+    restRad = Math.max(fitR / Math.sin(halfV), fitR / Math.sin(halfH)) / 0.96;
     if (settle >= 1) pose.rad = restRad;
   }
 

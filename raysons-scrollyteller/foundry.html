@@ -272,17 +272,20 @@
        same orientation, still moving — so crossing pages reads as one continuous shot rather
        than two pages that happen to show the same part. No WebGL or reduced motion, and the
        poster simply stays. -->
+  <div class="inner">
+    <div class="eyebrow-badge rv"><span class="dot"></span> The Foundry</div>
+    <h1 class="fhero__title rv" data-split>Precision casting,<br/><em>engineered to spec.</em></h1>
+    <p class="fhero__sub rv">Shell Moulded · No-Bake · In-House Machining · ISO&nbsp;9001:2015 · 0.5&nbsp;kg&nbsp;–&nbsp;500&nbsp;kg</p>
+  </div>
+  <!-- The casting sits AFTER the copy on purpose: the hero is a flex column, so the object
+       claims every pixel left under the type as its own band. It used to be bottom-anchored
+       at a fixed height, which ran it under the headline and forced it small to compensate. -->
   <div class="fobj" id="fobj">
     <canvas class="fobj__gl" id="fobjGL"
             aria-label="The Raysons production casting, carried over from the Overview finale. Drag to assemble it."></canvas>
   </div>
   <!-- the one instruction the beat needs: the part arrives, comes apart, and waits -->
   <span class="fobj-hint" id="fobjHint" aria-hidden="true">Drag to assemble</span>
-  <div class="inner">
-    <div class="eyebrow-badge rv"><span class="dot"></span> The Foundry</div>
-    <h1 class="fhero__title rv" data-split>Precision casting,<br/><em>engineered to spec.</em></h1>
-    <p class="fhero__sub rv">Shell Moulded · No-Bake · In-House Machining · ISO&nbsp;9001:2015 · 0.5&nbsp;kg&nbsp;–&nbsp;500&nbsp;kg</p>
-  </div>
 </section>
 
 <!-- ===================== THE FURNACE — Power's sustained beat ==========================

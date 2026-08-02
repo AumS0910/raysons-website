@@ -48,7 +48,7 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
    a magazine layout: claim on top, the part beneath it. Was vertically centred. */
 .fhero{position:relative;z-index:10;height:100svh;min-height:600px;display:flex;flex-direction:column;
   align-items:center;justify-content:flex-start;text-align:center;
-  padding:clamp(104px,17vh,168px) 6vw 0;overflow:hidden}
+  padding:clamp(76px,11vh,128px) 6vw 0;overflow:hidden}
 .fhero__bg{position:absolute;inset:0;z-index:-1;overflow:hidden}
 
 /* THE ARRIVED CASTING — bottom-anchored, filling the lower hero, behind the title.
@@ -84,9 +84,9 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
   radial-gradient(80% 60% at 50% 46%, transparent 30%, rgba(7,5,4,.8) 100%),
   linear-gradient(180deg, rgba(7,5,4,.6), transparent 30%, transparent 60%, rgba(7,5,4,.95))}
 .fhero__title{font-family:var(--serif);font-weight:600;line-height:.94;letter-spacing:-.015em;
-  font-size:clamp(54px,11vw,184px);text-wrap:balance;text-shadow:0 4px 40px rgba(7,5,4,.85)}
+  font-size:clamp(46px,8.6vw,148px);text-wrap:balance;text-shadow:0 4px 40px rgba(7,5,4,.85)}
 .fhero__title em{font-style:italic;font-weight:500;color:var(--molten-hot)}
-.fhero__sub{margin:30px auto 0;max-width:62ch;font-family:var(--mono);font-size:clamp(11px,1.15vw,13px);
+.fhero__sub{margin:20px auto 0;max-width:62ch;font-family:var(--mono);font-size:clamp(11px,1.15vw,13px);
   letter-spacing:.14em;text-transform:uppercase;color:var(--bronze-lite);line-height:1.9;
   text-shadow:0 1px 14px rgba(7,5,4,.9)}
 
@@ -95,9 +95,14 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
    Engine: foundry-object.js. Occupies the poster's box, so the hero's composition
    is the same whether the visitor gets the live object or the still.
    ============================================================ */
-.fobj{position:absolute;left:50%;bottom:0;transform:translateX(-50%);z-index:0;
-  height:min(52vh,470px);width:min(72vw,780px);
+/* A LAYOUT BAND, not an overlay. As an absolutely-positioned box at a fixed height this
+   ran underneath the headline, and the only way to keep it clear of the type was to shrink
+   it. In flow it is the hero's second flex row: it takes every pixel left below the copy,
+   down to the bottom edge — so it is both larger and incapable of colliding with the text. */
+.fobj{position:relative;z-index:0;flex:1 1 auto;min-height:0;
+  width:min(94vw,1180px);margin-top:clamp(4px,1.4vh,18px);
   opacity:0;pointer-events:none;transition:opacity .5s ease}
+.fhero .inner{flex:0 0 auto}
 /* the handover: the engine adds .fobj-live once the model is in memory (never before, so a
    slow connection keeps the poster rather than an empty hero), then .fobj-swapped after the
    crossfade. The view-transition name moves with the frame so the Overview finale still
@@ -110,11 +115,11 @@ body.fobj-swapped .fhero__object{display:none}
   cursor:grab;touch-action:pan-y;                      /* turn it sideways; vertical still scrolls */
   /* same two-mask feather as the poster — the base dissolves into the stage so the part
      reads as standing in the foundry rather than pasted onto it */
-  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 8%,#000 82%,transparent 100%),
-                     linear-gradient(90deg,transparent 0%,#000 10%,#000 90%,transparent 100%);
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 4%,#000 88%,transparent 100%),
+                     linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);
   -webkit-mask-composite:source-in;
-  mask-image:linear-gradient(180deg,transparent 0%,#000 8%,#000 82%,transparent 100%),
-             linear-gradient(90deg,transparent 0%,#000 10%,#000 90%,transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0%,#000 4%,#000 88%,transparent 100%),
+             linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);
   mask-composite:intersect}
 .fobj.grabbing .fobj__gl{cursor:grabbing}
 /* the invitation — same instrument as the Overview's .turn-hint, so the cue for "this one
@@ -125,7 +130,7 @@ body.fobj-swapped .fhero__object{display:none}
   text-shadow:0 1px 12px rgba(7,5,4,.95);transition:opacity .8s ease}
 body.fobj-live .fobj-hint{opacity:1}
 body.fobj-live .fobj-hint.gone{opacity:0}
-@media(max-width:760px){.fobj{height:42vh;width:100vw}.fobj-hint{bottom:clamp(64px,11vh,100px);letter-spacing:.18em}}
+@media(max-width:760px){.fobj{width:100vw}.fobj-hint{bottom:clamp(64px,11vh,100px);letter-spacing:.18em}}
 @media(prefers-reduced-motion:reduce){.fobj,.fobj-hint{display:none}}
 
 /* ============================================================
