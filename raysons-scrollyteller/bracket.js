@@ -120,10 +120,26 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   // the wet-black-glass floor is a Reflector: its tint IS the reflection's brightness, and
   // it lives in a shader uniform, so it cannot be reached from CSS. Left dark on a bone
   // ground it reads as a hole cut in the page rather than a floor.
-  const MIRROR = { dark: 0x3c3e42, light: 0xcfc7b8 };
+  // The light mirror was 0xcfc7b8 — nearly as bright as the page, so the floor read as a
+  // second light source and the whole finale came out glossy. Taken well down: a mid warm
+  // grey still reflects, but the casting sits ON something rather than floating on glare.
+  const MIRROR = { dark: 0x3c3e42, light: 0x8f8779 };
+  // A metal's appearance IS its environment reflection, so the SAME material that reads as
+  // machined iron on black reads as polished chrome on bone. Light mode therefore damps the
+  // reflection and adds roughness — same metal, matte instead of shiny.
+  const SURF = { dark: { env:1.35, envIn:2.15, rough:0 }, light: { env:0.72, envIn:1.15, rough:0.14 } };
+  const surf = () => SURF[curTheme];
+  // THE DRAWING. The finale opens on a feature-edge wireframe — "Your drawing" — drawn in
+  // molten orange because it has to GLOW out of black. On bone that same orange is nearly
+  // invisible, which is the beat the whole sequence is named after. Light mode inks it
+  // instead: a drawing on paper is dark line-work, so the edges go deep sepia and the mesh
+  // behind them goes graphite. Same geometry, same reveal, correct medium for the ground.
+  const WIRE = { dark: { edge:0xff8a3a, mesh:0xcf8a48 }, light: { edge:0x3d2a06, mesh:0x6f6252 } };
   function paintTheme(t) {
     scene.background.setHex(GROUND[t]);
     scene.fog.color.setHex(HAZE[t]);
+    if (typeof wireMat !== 'undefined' && wireMat) wireMat.color.setHex(WIRE[t].edge);
+    if (typeof meshWireMat !== 'undefined' && meshWireMat) meshWireMat.color.setHex(WIRE[t].mesh);
     if (floor && floor.material && floor.material.uniforms && floor.material.uniforms.color) {
       floor.material.uniforms.color.value.setHex(MIRROR[t]);
     }
@@ -249,6 +265,10 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
   const root = new THREE.Group(); scene.add(root);
   const wires = []; let floor=null, shadowPlane=null, modelReady=false;
+  // now that the wire materials AND `floor` exist, ink everything for the live theme.
+  // (Called here, not earlier: paintTheme reads `floor`, and a `let` before its declaration
+  //  is a temporal-dead-zone throw, not an undefined read.)
+  paintTheme(curTheme);
 
   const draco = new DRACOLoader(); draco.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
   const loader = new GLTFLoader(); loader.setDRACOLoader(draco);
@@ -385,7 +405,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
                                                                          // fast — the flat top face all sits at one height, so
                                                                          // a lingering front would light the whole face at once
     uni.uHeat.value  = heat;                                             // blackbody ramp: white-hot → orange → dull red
-    iron.roughness = lerp(0.42, 0.55, smooth(0.36,0.7,zp));              // shiny-hot → matte cast-cool
+    iron.roughness = lerp(0.42, 0.55, smooth(0.36,0.7,zp)) + surf().rough;   // shiny-hot → matte cast-cool (+ light-mode damping)
     if(bloom) bloom.strength = 0.55 + heat * 0.35;                       // the flash blooms; the cooled iron doesn't
     if(floor) floor.visible = solid > 0.02;                              // reflection only once it's cast — a drawing has none
     if(shadowPlane) shadowPlane.material.opacity = 0.66 * solid;         // shadow fades in with the solid
@@ -466,7 +486,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
       // champagne readout of the tolerance, and the metal catches more champagne light.
       const inspecting = dragging && zp > 0.5 && sec < 0.3;   // not while it's sectioned
       if(tol) tol.classList.toggle('on', inspecting);
-      iron.envMapIntensity = lerp(iron.envMapIntensity, inspecting ? 2.15 : 1.35, 0.12);
+      iron.envMapIntensity = lerp(iron.envMapIntensity, inspecting ? surf().envIn : surf().env, 0.12);
     }
     if(composer) composer.render(); else renderer.render(scene, camera);
   });

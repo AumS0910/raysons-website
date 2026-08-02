@@ -18,21 +18,29 @@
   const hudN  = document.getElementById('phudN');
   const rail  = document.getElementById('prail');
   const fill  = document.getElementById('prailFill');
-  if(!rig || !line) return;
+  // THE PROCESSION IS GONE (the pinned 23-part rig was removed from products.html), but
+  // this file also owns the catalogue's staggered grid reveal, the .rv reveals and the
+  // data-psec grade. Those used to sit AFTER an `if(!rig || !line) return;` early exit —
+  // so removing the rig would have returned before them and left every product card at
+  // opacity:0 on a page whose whole job is showing products. The procession is now scoped
+  // to its own guard instead, and everything else runs regardless.
+  const HAS_RIG = !!(rig && line);
 
   const src = (i)=> 'products/part-' + String(i+1).padStart(2,'0') + '.webp';
 
-  // ---- build the rig ----
+  // ---- build the rig (only if the procession is present) ----
   const parts = [];
-  for(let i=0;i<N;i++){
-    const d = document.createElement('div');
-    d.className = 'ppart';
-    const im = document.createElement('img');
-    im.src = src(i);
-    im.alt = 'Raysons Shell Cast iron casting, part ' + String(i+1).padStart(2,'0') + ' of ' + N;
-    im.decoding = 'async';
-    if(i > 1) im.loading = 'lazy';              // the first two carry the entry; rest stream in
-    d.appendChild(im); rig.appendChild(d); parts.push(d);
+  if(HAS_RIG){
+    for(let i=0;i<N;i++){
+      const d = document.createElement('div');
+      d.className = 'ppart';
+      const im = document.createElement('img');
+      im.src = src(i);
+      im.alt = 'Raysons Shell Cast iron casting, part ' + String(i+1).padStart(2,'0') + ' of ' + N;
+      im.decoding = 'async';
+      if(i > 1) im.loading = 'lazy';              // the first two carry the entry; rest stream in
+      d.appendChild(im); rig.appendChild(d); parts.push(d);
+    }
   }
 
   // ---- sectored product grids: staggered reveal ----
@@ -72,6 +80,7 @@
 
   // ---- the rig: place each part relative to the lit position ----
   //  d = i - f  → 0 is dead centre in the light; ±1 is one step away, receding.
+  if(HAS_RIG){
   function place(f){
     for(let i=0;i<N;i++){
       const p = parts[i], d = i - f, ad = Math.abs(d);
@@ -130,7 +139,13 @@
   }
   if('IntersectionObserver' in window){
     new IntersectionObserver((es)=> chrome(es[0].isIntersecting), { rootMargin:'-10% 0px -10% 0px' }).observe(line);
-    // grade: which section owns the frame (hero → line → index → close)
+  } else chrome(true);
+  }   // ── end HAS_RIG ──────────────────────────────────────────────────────────
+
+  // ---- the environmental grade: which section owns the frame ----
+  // Deliberately OUTSIDE the rig guard. It was nested inside the procession's observer
+  // block, so with the rack gone the page would have lost its lighting entirely.
+  if('IntersectionObserver' in window){
     const secs = Array.from(document.querySelectorAll('[data-psec]'));
     const io = new IntersectionObserver((es)=>{
       es.forEach((e)=>{ if(e.isIntersecting){
@@ -139,7 +154,7 @@
       }});
     }, { rootMargin:'-45% 0px -45% 0px' });
     secs.forEach((s)=> io.observe(s));
-  } else chrome(true);
+  }
 
   // ---- mobile nav burger (same behaviour as the other pages) ----
   const burger = document.getElementById('navBurger');

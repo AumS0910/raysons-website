@@ -800,8 +800,8 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
    and would have hidden Products' molten pool the same way. The dark ground belongs on the
    fixed backdrops (kept at #0a0807 below); these sections only need the dark TOKENS so
    their copy stays bone over the scene. */
-[data-theme="light"] :is(.film,.kinetic,.journey,.tl,.fhero,.furnace,.fchap,.finvite,
-  .phero,.pline,.pclose,.fobj){
+[data-theme="light"] :is(.film,.kinetic,.journey,.tl,
+  .phero,.pline,.pclose){
   --bg:#0a0807; --ink:#f3ecdf; --ink-dim:#9a9081; --ink-faint:#b0a48f;
   --molten:#c9a24e; --molten-hot:#e6c483; --molten-deep:#8a6a2e;
   --bronze:#a6822e; --bronze-lite:#dcbd82; --bronze-deep:#6e561c;
@@ -871,3 +871,118 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
   border-color:rgba(22,18,14,.22)}
 [data-theme="light"] .bracket-next span{color:#8a5a12}
 [data-theme="light"] body.bracket-on .grain{opacity:.03}
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   FOUNDRY — the whole page goes light
+   ------------------------------------------------------------------------------
+   Foundry can do what About's corridor could not, for one concrete reason: nothing
+   here renders through a post-processing composer. The casting (foundry-object.js)
+   uses alpha:true with no passes, so it composites over any ground; the heat field
+   (foundry-heat.js) is a 2D canvas whose blend mode I control, and it now draws
+   'multiply' ochre on light instead of additive fire. That leaves only scrims —
+   and a scrim is just a colour.
+   ══════════════════════════════════════════════════════════════════════════════ */
+[data-theme="light"] body:has(.fheat){background:#f4efe6}
+[data-theme="light"] body:has(.fheat) :is(.stage,.stage__glow){background:#f4efe6}
+[data-theme="light"] body:has(.fheat) .stage__vig{
+  background:radial-gradient(125% 100% at 50% 42%, transparent 54%, rgba(22,18,14,.09) 100%)}
+/* the environmental grade walks the process in ink, not in fire */
+[data-theme="light"] body:has(.fheat) .stage__grade{mix-blend-mode:multiply;opacity:.22}
+[data-theme="light"] body:has(.fheat) .stage__embers{opacity:.18}
+[data-theme="light"] body:has(.fheat) .grain{opacity:.028;mix-blend-mode:multiply}
+
+/* the four cinema sections take the document tokens */
+[data-theme="light"] :is(.fhero,.furnace,.fchap,.finvite){
+  --bg:#f4efe6;
+  --ink:#16120e; --ink-dim:#4c443a; --ink-faint:#6d6357;
+  --molten:#8a5a12; --molten-hot:#a06713; --molten-deep:#5d3d08;
+  --bronze:#7a5c14; --bronze-lite:#634c11; --bronze-deep:#b39a6d;
+  --line:rgba(22,18,14,.15); --line-strong:rgba(22,18,14,.30);
+  color:#16120e}
+[data-theme="light"] :is(.fhero,.furnace,.fchap,.finvite) :is(h1,h2,h3,h4,p,span,a,li,div,em,b,small){text-shadow:none}
+
+/* every scrim on the page was built to darken a black frame — inverted, they lift a
+   bone one instead of smearing grey over it */
+[data-theme="light"] .fhero__bg::after{background:
+  radial-gradient(88% 68% at 50% 46%, transparent 52%, rgba(244,239,230,.55) 100%),
+  linear-gradient(180deg, rgba(244,239,230,.62), transparent 26%, transparent 74%, rgba(244,239,230,.5))}
+[data-theme="light"] .furnace__grad{background:
+  radial-gradient(92% 82% at 50% 60%, transparent 44%, rgba(244,239,230,.5) 100%),
+  linear-gradient(180deg, rgba(244,239,230,.72) 0%, transparent 24%, transparent 72%, rgba(244,239,230,.8) 100%)}
+[data-theme="light"] .finvite::before{
+  background:radial-gradient(90% 80% at 50% 58%, rgba(200,120,30,.13), transparent 68%)}
+[data-theme="light"] .fchap__bg{background:
+  radial-gradient(120% 90% at 50% 50%, rgba(200,140,60,.07), transparent 70%), #f4efe6}
+
+/* the furnace figures: molten numerals become deep gold on bone, and the burn keeps
+   pulsing without the black halo it needed on film */
+[data-theme="light"] .furnace__num{color:#8a5a12;text-shadow:0 3px 26px rgba(138,90,18,.20)}
+[data-theme="light"] .furnace__num small{color:#4c443a}
+[data-theme="light"] .furnace__lbl{color:#4c443a}
+[data-theme="light"] .furnace__hud-k{color:#8a5a12}
+[data-theme="light"] .furnace__hud-i{color:#6d6357}
+@keyframes furnaceBurnLight{0%,100%{text-shadow:0 3px 26px rgba(138,90,18,.20)}
+  50%{text-shadow:0 5px 40px rgba(160,103,19,.34)}}
+[data-theme="light"] .furnace__fig.on .furnace__num{animation-name:furnaceBurnLight}
+/* hero + invitation type */
+[data-theme="light"] :is(.fhero__title,.finvite__t){color:#16120e}
+[data-theme="light"] :is(.fhero__title em,.finvite__t em,.fchap__title em){color:#8a5a12}
+[data-theme="light"] :is(.fhero__sub,.finvite__meta,.finvite__trust){color:#4c443a}
+[data-theme="light"] .finvite__b{color:#4c443a}
+[data-theme="light"] .finvite__k{color:#8a5a12}
+[data-theme="light"] :is(.fchap__title,.fprog__k,.fprog__v,.fscope__l){color:#16120e}
+[data-theme="light"] :is(.fchap__lede,.fprog__d,.fscope__col li){color:#4c443a}
+[data-theme="light"] :is(.fchap__hud-k,.fscope__g){color:#8a5a12}
+[data-theme="light"] .fchap__hud-i{color:#6d6357}
+[data-theme="light"] .fobj-hint{color:#6d6357;text-shadow:none}
+[data-theme="light"] .eyebrow-badge{color:#8a5a12;border-color:rgba(22,18,14,.24);text-shadow:none}
+
+/* the filled CTA measured 3.25:1 on light — champagne fill with bone text. On a light page
+   the fill is the bright element, so the label has to be the dark one. */
+[data-theme="light"] .btn--fill{background:#8a5a12;color:#f7f2e8;border-color:#8a5a12}
+[data-theme="light"] .btn--fill:hover{background:#6f480d;color:#fff}
+[data-theme="light"] .btn--text{color:#16120e}
+[data-theme="light"] .btn__arrow,[data-theme="light"] .btn--text .btn__arrow{color:#8a5a12}
+[data-theme="light"] .pillar__spec-strip span{color:#4c443a}
+[data-theme="light"] .pillar__spec-sep{background:rgba(22,18,14,.24)}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   PRODUCTS — the whole page goes light
+   The procession is gone, so the only "cinema" left was the hero and the close —
+   both pure type over a fixed gradient stage. Nothing here renders through a
+   composer or blends additively, so the page flips cleanly.
+   ══════════════════════════════════════════════════════════════════════════════ */
+[data-theme="light"] body:has(.pstage){background:#f4efe6}
+[data-theme="light"] .pstage{background:#f4efe6}
+[data-theme="light"] .pstage__vig{background:
+  linear-gradient(180deg, rgba(244,239,230,.7) 0%, transparent 22%, transparent 78%, rgba(244,239,230,.75) 100%),
+  radial-gradient(125% 95% at 50% 50%, transparent 52%, rgba(22,18,14,.08) 100%)}
+/* the grade walks the sectors in ink rather than fire */
+[data-theme="light"] .pstage__grade{mix-blend-mode:multiply;opacity:.20}
+[data-theme="light"] body[data-psec="close"] .pstage__grade{opacity:.26}
+
+[data-theme="light"] :is(.phero,.pclose){
+  --bg:#f4efe6;
+  --ink:#16120e; --ink-dim:#4c443a; --ink-faint:#6d6357;
+  --molten:#8a5a12; --molten-hot:#a06713; --molten-deep:#5d3d08;
+  --bronze:#7a5c14; --bronze-lite:#634c11; --bronze-deep:#b39a6d;
+  --line:rgba(22,18,14,.15); --line-strong:rgba(22,18,14,.30);
+  color:#16120e}
+[data-theme="light"] :is(.phero,.pclose) :is(h1,h2,p,span,a,em,b,small){text-shadow:none}
+[data-theme="light"] :is(.phero__t,.pclose__t){color:#16120e}
+[data-theme="light"] :is(.phero__t em,.pclose__t em){color:#8a5a12}
+[data-theme="light"] :is(.phero__k,.phero__s){color:#4c443a}
+[data-theme="light"] .pclose__b{color:#4c443a}
+[data-theme="light"] .pclose__meta{color:#6d6357}
+
+/* The scroll cue is FIXED chrome — it lives outside every light container, so it kept the
+   dark theme's bone and measured 2.14:1 on the pages that went light. It cannot simply be
+   darkened: on the Overview and About it still sits over the film and the corridor, where
+   bone is correct. So it is scoped to the two pages whose ground actually turned light. */
+[data-theme="light"] body:has(.fheat) .cue,
+[data-theme="light"] body:has(.pstage) .cue{color:#4c443a;text-shadow:none}
+[data-theme="light"] body:has(.fheat) .cue span,
+[data-theme="light"] body:has(.pstage) .cue span{color:#4c443a}
+[data-theme="light"] body:has(.fheat) .cue .line,
+[data-theme="light"] body:has(.pstage) .cue .line{background:linear-gradient(rgba(22,18,14,.42),transparent)}

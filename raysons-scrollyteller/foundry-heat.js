@@ -45,17 +45,35 @@
     }
     for(let i=0;i<N;i++){ const p={}; spawn(p,true); plumes.push(p); }
 
+    // THEME. The field is drawn ADDITIVELY ('lighter'), which is how fire works: it only
+    // exists as light ADDED to darkness. On a bone page that same maths drives every pixel
+    // to white and the furnace disappears into the paper. So light mode inverts the model —
+    // 'multiply' with warm ochre, which SUBTRACTS toward amber instead of adding toward
+    // white. Same plumes, same motion, same furnace mouth; it reads as heat haze and hot
+    // sand over bone rather than flame in a dark room.
+    const themeNow = () => (document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
+    let LIGHT = themeNow() === 'light';
+    new MutationObserver(() => { LIGHT = themeNow() === 'light'; if (REDUCED) draw(0); })
+      .observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
+
     function draw(dt){
       ctx.clearRect(0,0,W,H);
-      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalCompositeOperation = LIGHT ? 'multiply' : 'lighter';
 
       // furnace mouth — a molten glow low in the frame that breathes
       const pulse = REDUCED ? 0.5 : 0.5 + Math.sin(t*0.0011)*0.5;
       const gy = H*0.94, gr = Math.max(W,H) * (0.42 + pulse*0.05);
       const mouth = ctx.createRadialGradient(W*0.5, gy, 0, W*0.5, gy, gr);
-      mouth.addColorStop(0,   'rgba(255,150,60,'  + (0.48 + pulse*0.12).toFixed(3) + ')');
-      mouth.addColorStop(0.32,'rgba(214,84,20,'   + (0.24 + pulse*0.06).toFixed(3) + ')');
-      mouth.addColorStop(1,   'rgba(120,30,6,0)');
+      if(LIGHT){
+        // multiply: these SUBTRACT toward amber, so they must be warm mid-tones, not fire
+        mouth.addColorStop(0,   'rgba(226,176,116,' + (0.40 + pulse*0.10).toFixed(3) + ')');
+        mouth.addColorStop(0.32,'rgba(198,132,72,'  + (0.26 + pulse*0.06).toFixed(3) + ')');
+        mouth.addColorStop(1,   'rgba(214,178,132,0)');
+      } else {
+        mouth.addColorStop(0,   'rgba(255,150,60,'  + (0.48 + pulse*0.12).toFixed(3) + ')');
+        mouth.addColorStop(0.32,'rgba(214,84,20,'   + (0.24 + pulse*0.06).toFixed(3) + ')');
+        mouth.addColorStop(1,   'rgba(120,30,6,0)');
+      }
       ctx.fillStyle = mouth;
       ctx.fillRect(0,0,W,H);
 
@@ -74,9 +92,15 @@
         const a = Math.max(0, climb * fade * p.heat * 0.26);
         if(a <= 0.002) continue;
         const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-        g.addColorStop(0,   'rgba(255,' + (120 + climb*70|0) + ',' + (40 + climb*30|0) + ',' + a.toFixed(3) + ')');
-        g.addColorStop(0.5, 'rgba(196,74,18,' + (a*0.45).toFixed(3) + ')');
-        g.addColorStop(1,   'rgba(90,24,4,0)');
+        if(LIGHT){
+          g.addColorStop(0,   'rgba(' + (222 - climb*18|0) + ',' + (172 - climb*22|0) + ',' + (118 - climb*20|0) + ',' + (a*1.15).toFixed(3) + ')');
+          g.addColorStop(0.5, 'rgba(198,140,86,' + (a*0.55).toFixed(3) + ')');
+          g.addColorStop(1,   'rgba(214,178,132,0)');
+        } else {
+          g.addColorStop(0,   'rgba(255,' + (120 + climb*70|0) + ',' + (40 + climb*30|0) + ',' + a.toFixed(3) + ')');
+          g.addColorStop(0.5, 'rgba(196,74,18,' + (a*0.45).toFixed(3) + ')');
+          g.addColorStop(1,   'rgba(90,24,4,0)');
+        }
         ctx.fillStyle = g;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.2832); ctx.fill();
       }

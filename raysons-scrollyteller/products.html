@@ -250,36 +250,24 @@
   <a class="cta-quote mag" href="enquire.html">Request a Quote <span class="arrow">→</span></a>
 </div>
 
-<!-- HUD + rail: which part you're on, how far through the rack -->
-<div class="phud" id="phud" aria-hidden="true">
-  <span class="phud__k" id="phudK">The Catalogue</span>
-  <span class="phud__i"><b id="phudN">01</b> / 23</span>
-</div>
-<div class="prail" id="prail" aria-hidden="true"><span class="prail__fill" id="prailFill"></span></div>
-
 <!-- ===================== HERO ===================== -->
 <section class="phero" data-psec="hero">
   <div>
     <p class="phero__k rv">The Catalogue</p>
     <!-- Cut 04 weld: Foundry closes on "Some things don't photograph." This page opens by
          answering it — the process is invisible, the results aren't — turning the
-         contradiction into the hook before the procession of 23 parts begins. -->
+         contradiction into the hook before the sectored catalogue. -->
     <h1 class="phero__t rv" data-split>The process doesn't<br/>photograph. <em>The parts do.</em></h1>
     <p class="phero__s rv">Automobile · Hydraulic · Oil&nbsp;&amp;&nbsp;Gas — shell moulded &amp; no-bake · 0.5&nbsp;kg – 500&nbsp;kg · machined to drawing</p>
   </div>
 </section>
 
-<!-- ===================== THE PROCESSION — every part, through the light ==================
-     23 real castings on a pinned rig. products.js drives it. -->
-<section class="pline" id="line" data-psec="line">
-  <div class="pline__pin">
-    <div class="pline__pool" aria-hidden="true"></div>
-    <div class="pline__rig" id="rig" aria-label="Twenty-three real iron castings from the Raysons floor">
-      <!-- parts injected by products.js from products/part-01..23.webp -->
-    </div>
-    <div class="pline__floor" aria-hidden="true"></div>
-  </div>
-</section>
+<!-- The pinned 23-part procession was removed at the client's request. It gave every
+     casting 28vh of identical scroll before the sectored catalogue — the page's actual
+     payoff — and made this the longest page on the site. The hero now hands straight to
+     the sectors. products.js keeps the rig code behind a HAS_RIG guard so the catalogue
+     reveals and the environmental grade still run without it; .pline/.phud/.prail styling
+     is left in place so restoring the rack is markup-only. -->
 
 <!-- ===================== SECTOR NAV ===================== -->
 <section class="psectors" data-psec="index">
