@@ -316,9 +316,27 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
   // ── the verb they arrive holding: turn it — and turning it puts it back together ──
   let dragAz = 0, dragEl = 0, velAz = 0, velEl = 0, dragging = false, px = 0, py = 0;
   const hintEl = document.getElementById('fobjHint');
-  const ASSEMBLE_PX = 1100;                 // pointer travel needed to fully reassemble
+  // SCROLL ASSEMBLES IT. This was pointer travel — you had to grab the casting and drag
+  // roughly 1100px to put it back together, which is a lot to ask of someone who does not
+  // yet know the object is interactive, and impossible to discover on a phone without
+  // trying. Scrolling is the one gesture every visitor is already making, so the part now
+  // reassembles as the hero scrolls past: arrive, watch it come apart, keep scrolling and
+  // it builds itself. Reversible too — scroll back up and it opens again, which a
+  // monotonic drag counter could never do.
+  const heroEl = holder.closest('.fhero');
   let openT = -0.45;                        // <0 = the beat where it is still whole (the catch lands first)
-  let dragProg = 0, assembled = false;
+  let hinted = false;
+  let asm = 0;                              // the SHOWN assembly, lagging the scroll target
+  function scrollProgress(){
+    if(!heroEl) return 0;
+    const r = heroEl.getBoundingClientRect();
+    // The full hero height, not two-thirds of it: at 0.66 the part snapped together inside
+    // about half a screen of scroll and the whole beat was over before it registered. Now
+    // it takes essentially the entire hero to build, and the LAG below keeps it from
+    // tracking the wheel 1:1 — the metal has weight, so it should arrive a moment after
+    // you ask rather than pinned to the scrollbar.
+    return clamp(-r.top / Math.max(1, heroEl.offsetHeight * 1.0), 0, 1);
+  }
   const ac = new AbortController();
   const sig = { signal: ac.signal, passive: true };
 
@@ -334,12 +352,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     const dx = rawX * 0.006, dy = rawY * 0.005;
     dragAz += dx; dragEl = clamp(dragEl + dy, -0.5, 0.7); velAz = dx; velEl = dy;
     px = e.clientX; py = e.clientY;
-    // the same drag that turns the part also pulls it together. Monotonic: it never falls
-    // back apart, so the visitor is always making progress rather than fighting a decay.
-    if (!assembled) {
-      dragProg = clamp(dragProg + (Math.abs(rawX) + Math.abs(rawY)) / ASSEMBLE_PX, 0, 1);
-      if (hintEl && dragProg > 0.02) hintEl.classList.add('gone');
-    }
+    // dragging only TURNS the part now; scrolling is what assembles it.
   }, sig);
   const drop = () => { dragging = false; holder.classList.remove('grabbing'); };
   addEventListener('pointerup', drop, sig);
@@ -379,12 +392,13 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     // THE DISMANTLE. The catch lands whole — it has to, or the handoff from the finale means
     // nothing — and only then does the casting come apart, which is also what teaches the
     // visitor that it can go back. From there their drag owns it.
-    if (!assembled) {
-      openT = Math.min(1, openT + dt / 1.15);
-      const o = openT <= 0 ? 0 : openT * openT * (3 - 2 * openT);
-      uni.uAssemble.value = Math.max(1 - o, dragProg);
-      if (dragProg >= 1) assembled = true;
-    }
+    openT = Math.min(1, openT + dt / 1.15);
+    const o = openT <= 0 ? 0 : openT * openT * (3 - 2 * openT);
+    const sp = scrollProgress();
+    asm += (sp - asm) * (1 - Math.exp(-dt * 4.2));      // time-based, so the weight is the
+    if (Math.abs(sp - asm) < 0.002) asm = sp;           // same on any framerate
+    uni.uAssemble.value = Math.max(1 - o, asm);
+    if (hintEl && !hinted && sp > 0.04) { hinted = true; hintEl.classList.add('gone'); }
 
     // release inertia settles and the pose HOLDS — the finale's behaviour, continued
     if (!dragging) { dragAz += velAz; dragEl = clamp(dragEl + velEl, -0.5, 0.7); velAz *= 0.90; velEl *= 0.90; }

@@ -1070,3 +1070,30 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 [data-theme="light"] .discipline-grid{border-top-color:rgba(138,90,18,.45)}
 [data-theme="light"] :is(.discipline__title,.certs .c h4,.client__name){color:#16120e;text-shadow:none}
 [data-theme="light"] :is(.discipline__desc,.certs .c p,.client__meta){color:#4c443a;text-shadow:none}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   AFFORDANCE HINTS
+   Every interactive moment on the site now states its gesture in the same voice and
+   the same instrument: mono caps, and — where the gesture is SCROLL — the site's own
+   falling-dot rail borrowed from .cue, so "scroll" always looks like the same thing
+   whether it appears under the scroll cue, the casting or the timeline.
+   Each hint retires once the visitor performs the gesture; a hint that stays after
+   you have obeyed it reads as an error message.
+   ══════════════════════════════════════════════════════════════════════════════ */
+:is(.fobj-hint,.journey-hint) i{
+  display:inline-block;width:1px;height:15px;margin:0 3px -3px 10px;vertical-align:middle;
+  background:linear-gradient(var(--molten),transparent);position:relative;overflow:hidden}
+:is(.fobj-hint,.journey-hint) i::after{content:"";position:absolute;top:-50%;left:0;
+  width:100%;height:50%;background:var(--ink);animation:drop 1.8s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){:is(.fobj-hint,.journey-hint) i::after{animation:none;top:25%}}
+
+/* the journey timeline is grabbable (.journey__scrub) and said so nowhere — the only
+   interaction on the site with no instruction at all. It sits under the rail it describes. */
+.journey-hint{position:absolute;left:clamp(20px,6vw,110px);bottom:clamp(18px,3.4vh,34px);z-index:5;
+  font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--ink-faint);pointer-events:none;white-space:nowrap;
+  text-shadow:0 1px 12px rgba(7,5,4,.9);transition:opacity .7s ease}
+.journey-hint.gone{opacity:0}
+[data-theme="light"] .journey-hint{color:#6d6357;text-shadow:none}
+@media(max-width:760px){.journey-hint{font-size:9px;letter-spacing:.14em;
+  left:50%;transform:translateX(-50%);bottom:clamp(12px,2.4vh,22px)}}

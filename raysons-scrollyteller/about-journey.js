@@ -110,3 +110,27 @@
 
   kick();
 })();
+
+/* ── the timeline's instruction retires once it has been obeyed ──
+   The distance is measured from when the journey ENTERS VIEW, not from page load. Measuring
+   from load looked right and was useless: the journey sits ~2500px down, so every real
+   visitor had already scrolled far past any sensible threshold before they got here and the
+   hint was always retired before it could be read. It now starts counting when the section
+   arrives, and also clears the moment the rail is grabbed. */
+(function(){
+  var hint = document.querySelector('.journey-hint');
+  var sec  = document.getElementById('tl') || document.querySelector('.journey');
+  if(!hint || !sec) return;
+  var done = false, start = null;
+  function retire(){ if(done) return; done = true; hint.classList.add('gone'); }
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(es){
+      if(es[0].isIntersecting && start === null) start = scrollY;      // the clock starts here
+    }, { rootMargin:'-25% 0px -25% 0px' }).observe(sec);
+  } else { start = scrollY; }
+  addEventListener('scroll', function(){
+    if(start !== null && Math.abs(scrollY - start) > 420) retire();
+  }, { passive:true });
+  var rail = document.querySelector('.journey__scrub') || document.querySelector('.journey__rail');
+  if(rail) rail.addEventListener('pointerdown', retire, { passive:true });
+})();
