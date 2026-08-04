@@ -250,6 +250,11 @@
 
 <!-- ===================== HERO ===================== -->
 <section class="fhero" id="hero">
+  <!-- PINNED. The hero used to be exactly one viewport, so the casting scrolled out of
+       frame before it had finished assembling — you left the beat mid-build. The section
+       is now taller than the screen and its contents are sticky, so the page holds while
+       the part comes together and only then releases into the furnace. -->
+  <div class="fhero__pin">
   <!-- PROCEDURAL HERO — Foundry owns no footage of its own, and every clip/still in this
        project belongs to Overview or About. Rather than borrow the Overview's pour (a frozen
        or replayed frame of a film the visitor just watched), this hero is GENERATED: a molten
@@ -292,6 +297,7 @@
   <!-- the one instruction the beat needs. Scroll, not drag: it is the gesture every
        visitor is already making, and it works on a phone without discovering anything. -->
   <span class="fobj-hint" id="fobjHint" aria-hidden="true">Scroll to assemble<i></i></span>
+  </div>
 </section>
 
 <!-- ===================== THE FURNACE — Power's sustained beat ==========================

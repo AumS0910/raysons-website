@@ -335,7 +335,11 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     // it takes essentially the entire hero to build, and the LAG below keeps it from
     // tracking the wheel 1:1 — the metal has weight, so it should arrive a moment after
     // you ask rather than pinned to the scrollbar.
-    return clamp(-r.top / Math.max(1, heroEl.offsetHeight * 1.0), 0, 1);
+    // measured against the hero's SCROLLABLE range (its height minus the viewport it pins
+    // against), so the assembly is spread across exactly the runway the pin provides —
+    // it finishes as the section releases, never after the part has left the frame.
+    const runway = Math.max(1, heroEl.offsetHeight - innerHeight);
+    return clamp(-r.top / runway, 0, 1);
   }
   const ac = new AbortController();
   const sig = { signal: ac.signal, passive: true };
