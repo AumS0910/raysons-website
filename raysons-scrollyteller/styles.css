@@ -1051,3 +1051,22 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
    that same position lands squarely on a jacket, so it drops below the cutout instead. */
 [data-theme="light"] .purpose__figure figcaption{bottom:-52px}
 @media(max-width:900px){[data-theme="light"] .purpose__figure figcaption{bottom:-44px}}
+
+/* ---------- About's glass panels, on a light ground ----------
+   When the WebGL corridor is live (body.journey-gl — i.e. always, on desktop) a family of
+   panels switches to DARK GLASS so they read against the molten scene behind them:
+   .discipline, .certs .c, .client and the .ji era cards, plus gold-tinted containers on
+   .discipline-grid / .certs / .clients. Those are hardcoded rgba(10,7,5,…) literals, so
+   they ignored the light tokens entirely — the Metallurgy / Quality / Dispatch cards came
+   out as dark brown slabs with ink text on them, illegible. On light they become bone
+   glass with the same warm tint on the containers. */
+[data-theme="light"] :is(.journey-gl .certs .c,.journey-gl .discipline,.journey-gl .client){
+  background:rgba(255,255,255,.82);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+[data-theme="light"] .journey-gl .client:hover{background:rgba(255,255,255,.94)}
+[data-theme="light"] :is(.journey-gl .discipline-grid,.journey-gl .clients,.journey-gl .certs){
+  background:rgba(138,90,18,.13);border-color:rgba(138,90,18,.22)}
+/* and the same panels when the corridor is NOT live (mobile / no-WebGL fallback) */
+[data-theme="light"] :is(.discipline,.certs .c,.client){background:#faf6ef}
+[data-theme="light"] .discipline-grid{border-top-color:rgba(138,90,18,.45)}
+[data-theme="light"] :is(.discipline__title,.certs .c h4,.client__name){color:#16120e;text-shadow:none}
+[data-theme="light"] :is(.discipline__desc,.certs .c p,.client__meta){color:#4c443a;text-shadow:none}

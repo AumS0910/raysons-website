@@ -352,9 +352,13 @@
       <h2 class="pcat__title" data-split>Oil &amp; Gas</h2>
       <p class="pcat__lede">Heavy-walled housings and pump components for oil &amp; gas applications — built for extreme conditions, verified to international standards.</p>
     </div>
-    <div class="pgrid pgrid--wide" id="pgrid-oilgas">
-      <div class="pgrid__item pgrid__item--feat" data-i="0"><div class="pgrid__frame"><img src="images/products/oil-gas/pump-housing.png" alt="Pump Housing" loading="lazy" decoding="async" /></div><div class="pgrid__info"><span class="pgrid__name">Pump Housing</span><span class="pgrid__tag">No-Bake</span></div></div>
-      <div class="pgrid__item pgrid__item--feat" data-i="1"><div class="pgrid__frame"><img src="images/products/oil-gas/industrial-housing.jpeg" alt="Industrial Housing" loading="lazy" decoding="async" /></div><div class="pgrid__info"><span class="pgrid__name">Industrial Housing</span><span class="pgrid__tag">No-Bake</span></div></div>
+    <!-- Oil & Gas sits on the SAME 4-column grid as Automobile and Hydraulic. It used to be
+         a 2-column .pgrid--wide of two 2:1 feature cards, so its two castings rendered at
+         roughly four times the area of every other product on the page for no reason other
+         than that there were only two of them. -->
+    <div class="pgrid" id="pgrid-oilgas">
+      <div class="pgrid__item" data-i="0"><div class="pgrid__frame"><img src="images/products/oil-gas/pump-housing.png" alt="Pump Housing" loading="lazy" decoding="async" /></div><div class="pgrid__info"><span class="pgrid__name">Pump Housing</span><span class="pgrid__tag">No-Bake</span></div></div>
+      <div class="pgrid__item" data-i="1"><div class="pgrid__frame"><img src="images/products/oil-gas/industrial-housing.jpeg" alt="Industrial Housing" loading="lazy" decoding="async" /></div><div class="pgrid__info"><span class="pgrid__name">Industrial Housing</span><span class="pgrid__tag">No-Bake</span></div></div>
     </div>
   </div>
 </section>
