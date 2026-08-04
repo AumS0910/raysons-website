@@ -399,8 +399,19 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 }
 
 /* centred, with room reserved on the RIGHT for Sujar (far right of Vision) */
+/* LEFT-ALIGNED to the section, not centred. `margin:… auto` with a reduced max-width
+   (the room reserved on the right for Sujal) was pulling the whole block ~114px in from
+   the left, so "Our Mission" and "Our Vision" started well inside the heading and the
+   lede above them and the column never lined up with anything. The right-hand reserve is
+   kept — it is what the portrait stands in — but it now comes off the RIGHT edge only. */
+/* LEFT-ALIGNED, same box. `margin:… auto` centred the block, and because its max-width is
+   reduced to reserve room for Sujal on the right, centring split that reserve in half and
+   pushed the whole thing ~115px in from the left — so "Our Mission" never lined up with
+   the heading or the lede above it. Only the margin changes: the WIDTH is identical, which
+   matters because both portraits are absolutely positioned against this box (a first
+   attempt widened it instead and put Satish straight through the Vision copy). */
 .mvv{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,64px);
-  margin:clamp(40px,6vh,72px) auto 0;max-width:calc(100% - clamp(140px,16vw,240px))}
+  margin:clamp(40px,6vh,72px) auto 0 0;max-width:calc(100% - clamp(140px,16vw,240px))}
 /* BOTH columns carry the same right inset so the Mission and Vision text measure the
    same width — Mission's clears Satish, Vision's keeps it symmetric (Sujal sits in the
    block's right margin beyond it). Equal padding = equal text width. */

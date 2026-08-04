@@ -1020,3 +1020,34 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
    bar — taken to the deeper gold anyway so the whole page clears 4.5:1 on one standard */
 [data-theme="light"] .journey__hud-year{color:#8a5a12}
 [data-theme="light"] .journey__hud-k{color:#6d6357}
+
+/* ---------- no vignettes in light mode ----------
+   Every vignette on this site is edge-darkening: it exists to focus a bright subject
+   inside a dark frame. On a bone page the same layer just puts grey in the corners and
+   makes the page look dirty rather than lit, so they are removed outright rather than
+   inverted. The legibility scrims that DO work (the corridor's left-hand wash behind the
+   era copy) are kept — those hold text readable, which is a different job. */
+[data-theme="light"] :is(.stage__vig,.pstage__vig,.cine-vig){display:none}
+[data-theme="light"] .journey-gl .journey__pin::after{background:none}
+[data-theme="light"] .fhero__bg::after{background:none}
+[data-theme="light"] .furnace__grad{background:none}
+[data-theme="light"] .fchap__bg{background:#f4efe6}
+[data-theme="light"] #bracketFx{background:none}
+[data-theme="light"] .finvite::before{background:none}
+
+/* ---------- the MD / Director portraits, on a light ground ----------
+   NO MASK IN LIGHT MODE. The feathered edges exist to blend a photo into black; both
+   portraits are already transparent PNG cutouts (colour-type 6), so there is no backdrop
+   to hide in the first place. On bone the side fade and the vignette only ate into the
+   subjects — a soft grey bite out of a shoulder and a jaw — which is exactly the thing
+   that looked wrong. Unmasked, the cutout simply sits on the page. */
+[data-theme="light"] :is(.purpose__figure--left,.purpose__figure--right) img{
+  -webkit-mask-image:none;mask-image:none;filter:none}
+[data-theme="light"] .purpose__figure::before{background:none}
+[data-theme="light"] .purpose__figure figcaption b{color:#16120e;text-shadow:none}
+[data-theme="light"] .purpose__figure figcaption span{color:#6d6357;text-shadow:none}
+/* the caption sat at the figure's bottom edge, which the old mask had already faded to
+   nothing — so it read as floating under the portrait. With the mask gone in light mode
+   that same position lands squarely on a jacket, so it drops below the cutout instead. */
+[data-theme="light"] .purpose__figure figcaption{bottom:-52px}
+@media(max-width:900px){[data-theme="light"] .purpose__figure figcaption{bottom:-44px}}
