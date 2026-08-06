@@ -219,7 +219,8 @@ html.reentry #loader,html.reentry #cloader{transition:none!important;opacity:0!i
 .sound{
   display:inline-flex;align-items:center;gap:9px;cursor:none;pointer-events:auto;
   font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--ink-dim);text-transform:uppercase;
-  background:rgba(10,7,5,.4);border:1px solid var(--line);padding:7px 13px;border-radius:40px;backdrop-filter:blur(6px);
+  background:rgba(10,7,5,.4);border:1px solid var(--line);padding:7px 13px;border-radius:40px;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
   transition:color .3s,border-color .3s;
 }
 /* consolidated bottom-left instrument cluster */
@@ -504,7 +505,7 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
   .nav-burger{display:flex}
   /* override styles.css display:none on .nav-links at 860px */
   .nav-links{display:flex;position:fixed;inset:0;z-index:39;
-    background:rgba(7,5,4,.97);backdrop-filter:blur(8px);
+    background:rgba(7,5,4,.97);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
     flex-direction:column;align-items:center;justify-content:center;
     gap:32px;font-size:18px;letter-spacing:.08em;
     opacity:0;visibility:hidden;
