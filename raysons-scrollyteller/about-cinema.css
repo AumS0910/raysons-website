@@ -638,3 +638,65 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 @media(max-width:480px){
   .sec{padding:clamp(72px,13vh,120px) clamp(16px,5vw,28px)}
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE CERTIFICATE — the one claim on this page a buyer can independently check
+   ══════════════════════════════════════════════════════════════════════════════ */
+.cert{display:grid;grid-template-columns:minmax(280px,.85fr) 1fr;gap:clamp(28px,4vw,64px);
+  align-items:center;margin-top:clamp(24px,4vh,44px)}
+.cert__doc{position:relative;display:block;border:1px solid var(--line-strong);border-radius:4px;
+  overflow:hidden;background:#fff;box-shadow:0 30px 70px rgba(0,0,0,.42);
+  transition:transform .5s cubic-bezier(.2,.7,.2,1),box-shadow .5s ease,border-color .4s ease}
+.cert__doc img{width:100%;height:auto;display:block}
+.cert__doc:hover{transform:translateY(-4px);border-color:var(--molten);
+  box-shadow:0 40px 90px rgba(0,0,0,.5)}
+/* the document is a real link, so it says so — appearing on hover and on keyboard focus */
+.cert__open{position:absolute;left:0;right:0;bottom:0;padding:14px 16px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:#fff;background:linear-gradient(0deg,rgba(7,5,4,.88),transparent);
+  opacity:0;transform:translateY(6px);transition:opacity .35s ease,transform .35s ease}
+.cert__doc:hover .cert__open,.cert__doc:focus-visible .cert__open{opacity:1;transform:none}
+.cert__open i{font-style:normal;color:var(--molten-hot);margin-left:6px}
+
+.cert__h{font-family:var(--serif);font-weight:600;line-height:1;letter-spacing:-.015em;
+  font-size:clamp(34px,4.6vw,64px);color:var(--ink)}
+.cert__h em{font-style:italic;font-weight:500;color:var(--bronze-lite)}
+.cert__scope{margin-top:14px;font-size:clamp(15px,1.5vw,19px);line-height:1.6;
+  color:#c9beb1;font-weight:300;font-style:italic;max-width:44ch}
+.cert__dl{margin-top:clamp(22px,3vh,32px);display:grid;grid-template-columns:1fr 1fr;
+  gap:1px;background:var(--line);border:1px solid var(--line)}
+.cert__dl > div{background:var(--bg);padding:16px 18px}
+.cert__dl dt{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ink-faint);margin-bottom:7px}
+.cert__dl dd{font-family:var(--mono);font-size:13px;letter-spacing:.04em;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.cert__verify{margin-top:20px;font-size:13.5px;line-height:1.65;color:var(--ink-dim);
+  font-weight:300;max-width:52ch}
+
+/* the supporting standards — deliberately quieter than the certificate above them */
+.stds__k{margin-top:clamp(40px,6vh,70px);font-family:var(--mono);font-size:10px;
+  letter-spacing:.24em;text-transform:uppercase;color:var(--ink-faint)}
+.stds{margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:var(--line);border:1px solid var(--line)}
+.std{background:var(--bg);padding:22px 20px;display:flex;flex-direction:column;gap:9px}
+.std b{font-family:var(--serif);font-size:clamp(17px,1.7vw,22px);font-weight:600;
+  color:var(--bronze-lite);letter-spacing:-.01em}
+.std span{font-size:12.5px;line-height:1.55;color:var(--ink-dim);font-weight:300}
+
+@media(max-width:900px){
+  .cert{grid-template-columns:1fr;gap:28px}
+  .cert__doc{max-width:min(420px,86vw);margin:0 auto}
+  .stds{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:520px){.stds{grid-template-columns:1fr}.cert__dl{grid-template-columns:1fr}}
+/* the certificate is a white document — it needs no theming, but its frame and the
+   panels around it do (the .certs family it replaced carried dark glass on journey-gl) */
+[data-theme="light"] .cert__doc{border-color:rgba(22,18,14,.18);box-shadow:0 24px 60px rgba(22,18,14,.14)}
+[data-theme="light"] :is(.cert__dl > div,.std){background:#faf6ef}
+[data-theme="light"] :is(.cert__dl,.stds){background:rgba(22,18,14,.14);border-color:rgba(22,18,14,.14)}
+[data-theme="light"] .cert__scope{color:#4c443a}
+[data-theme="light"] :is(.cert__h,.cert__dl dd){color:#16120e}
+[data-theme="light"] :is(.cert__verify,.std span){color:#4c443a}
+[data-theme="light"] :is(.cert__h em,.std b){color:#8a5a12}
+[data-theme="light"] :is(.cert__dl dt,.stds__k){color:#6d6357}
+[data-theme="light"] :is(.journey-gl .cert__dl > div,.journey-gl .std){background:rgba(255,255,255,.82)}
