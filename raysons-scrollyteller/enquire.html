@@ -161,6 +161,19 @@
     background:linear-gradient(180deg,var(--molten-hot),var(--molten));color:#180c03}
   .eq-success .tick svg{width:26px;height:26px}
   .eq-success h3{font-family:var(--serif);font-size:clamp(26px,3.4vw,32px);font-weight:500;letter-spacing:-.02em}
+  /* copy-and-paste fallback, only for visitors whose mail client never opened */
+  #rfq-copy{margin-top:22px;text-align:left}
+  #rfq-copy-btn{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--bronze-lite);color:#1a1206;border:0;border-radius:40px;padding:11px 20px;cursor:pointer;
+    transition:filter .25s}
+  #rfq-copy-btn:hover{filter:brightness(1.12)}
+  #rfq-copy-to{font-family:var(--mono);font-size:12px;color:var(--bronze-lite);margin-left:14px;
+    text-decoration:underline;text-underline-offset:3px}
+  #rfq-copy-text{margin-top:14px;max-height:190px;overflow:auto;white-space:pre-wrap;word-break:break-word;
+    font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--ink-dim);
+    background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  [data-theme="light"] #rfq-copy-text{background:#fff;color:#4c443a;border-color:rgba(22,18,14,.16)}
+  @media(max-width:520px){#rfq-copy-to{display:block;margin:12px 0 0}}
   .eq-success p{color:var(--ink-dim);margin-top:12px;font-size:15px;line-height:1.6;max-width:40ch;margin-left:auto;margin-right:auto}
 
   .eq-foot{position:relative;z-index:5;text-align:center;padding:26px 14px;
@@ -487,6 +500,14 @@
       <div class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5 11-11"/></svg></div>
       <h3 id="rfq-success-h">The drawing is on the floor.</h3>
       <p id="rfq-success-p">Received. An engineer is reviewing your brief now — you'll hear back <em>within 48 hours</em>.</p>
+      <!-- Shown ONLY on the mail-client fallback. Someone reading mail in a browser
+           tab sees nothing happen when a mailto fires, and their enquiry is lost in
+           silence. This gives them the whole thing to copy and paste. -->
+      <div id="rfq-copy" hidden>
+        <button type="button" id="rfq-copy-btn">Copy the enquiry</button>
+        <a id="rfq-copy-to" href="mailto:industries@raysonsgroup.com">industries@raysonsgroup.com</a>
+        <pre id="rfq-copy-text"></pre>
+      </div>
     </div>
   </div>
 </div>
@@ -543,6 +564,8 @@
   // set true when the enquiry was handed to the visitor's mail client rather than
   // POSTed, so the confirmation can tell them the truth about what still has to happen
   let viaMail = false;
+  // the full, untruncated enquiry text, kept for the copy-and-paste fallback
+  let mailFallbackText = '';
 
   const form    = document.getElementById('rfq');
   const success = document.getElementById('rfq-success');
@@ -569,10 +592,14 @@
     if (g('message')) lines.push('', 'Details:', g('message'));
 
     const subject = 'RFQ — ' + (g('company') || g('name') || 'New enquiry');
-    // mailto URLs are length-limited in some clients; keep well inside it
+    const full = lines.join('\n');
+    // Keep the untruncated text so the panel can offer the whole thing to copy —
+    // mailto has to be cut short, and the part that gets cut is the technical
+    // brief at the end, which is the part actually worth reading.
+    mailFallbackText = subject + '\n\n' + full;
     const href = 'mailto:industries@raysonsgroup.com'
                + '?subject=' + encodeURIComponent(subject)
-               + '&body='    + encodeURIComponent(lines.join('\n').slice(0, 1600));
+               + '&body='    + encodeURIComponent(full.slice(0, 1600));
     viaMail = true;
     try { window.location.href = href; } catch (_) { viaMail = false; }
   }
@@ -658,7 +685,28 @@
       const h = document.getElementById('rfq-success-h');
       const t = document.getElementById('rfq-success-p');
       if(h) h.textContent = 'Your email is ready to send.';
-      if(t) t.innerHTML = 'We’ve opened your mail app with the enquiry filled in — <em>press send</em> and an engineer replies within 48 hours. Nothing arrived? Write to <a href="mailto:industries@raysonsgroup.com" style="color:var(--bronze-lite)">industries@raysonsgroup.com</a>.';
+      if(t) t.innerHTML = 'We’ve opened your mail app with the enquiry filled in — <em>press send</em> and an engineer replies within 48 hours. <strong>Nothing opened?</strong> You read mail in a browser — copy the enquiry below and send it to us.';
+      // hand over the full text, so a webmail user loses nothing
+      const box = document.getElementById('rfq-copy');
+      const pre = document.getElementById('rfq-copy-text');
+      const cbtn = document.getElementById('rfq-copy-btn');
+      if(box && pre && mailFallbackText){
+        pre.textContent = mailFallbackText;
+        box.hidden = false;
+        if(cbtn && !cbtn.dataset.wired){
+          cbtn.dataset.wired = '1';
+          cbtn.addEventListener('click', async ()=>{
+            try{ await navigator.clipboard.writeText(mailFallbackText); }
+            catch(_){
+              // clipboard API needs a secure context and permission; select it instead
+              const r = document.createRange(); r.selectNodeContents(pre);
+              const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+            }
+            cbtn.textContent = 'Copied — now paste it into an email';
+            setTimeout(()=>{ cbtn.textContent = 'Copy the enquiry'; }, 4000);
+          });
+        }
+      }
     }
     const card = document.getElementById('eqForm');
     const rect = document.getElementById('eqSealRect');
