@@ -674,30 +674,19 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 .cert__verify{margin-top:20px;font-size:13.5px;line-height:1.65;color:var(--ink-dim);
   font-weight:300;max-width:52ch}
 
-/* the supporting standards — deliberately quieter than the certificate above them */
-.stds__k{margin-top:clamp(40px,6vh,70px);font-family:var(--mono);font-size:10px;
-  letter-spacing:.24em;text-transform:uppercase;color:var(--ink-faint)}
-.stds{margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
-  background:var(--line);border:1px solid var(--line)}
-.std{background:var(--bg);padding:22px 20px;display:flex;flex-direction:column;gap:9px}
-.std b{font-family:var(--serif);font-size:clamp(17px,1.7vw,22px);font-weight:600;
-  color:var(--bronze-lite);letter-spacing:-.01em}
-.std span{font-size:12.5px;line-height:1.55;color:var(--ink-dim);font-weight:300}
-
 @media(max-width:900px){
   .cert{grid-template-columns:1fr;gap:28px}
   .cert__doc{max-width:min(420px,86vw);margin:0 auto}
-  .stds{grid-template-columns:repeat(2,1fr)}
 }
-@media(max-width:520px){.stds{grid-template-columns:1fr}.cert__dl{grid-template-columns:1fr}}
+@media(max-width:520px){.cert__dl{grid-template-columns:1fr}}
 /* the certificate is a white document — it needs no theming, but its frame and the
    panels around it do (the .certs family it replaced carried dark glass on journey-gl) */
 [data-theme="light"] .cert__doc{border-color:rgba(22,18,14,.18);box-shadow:0 24px 60px rgba(22,18,14,.14)}
-[data-theme="light"] :is(.cert__dl > div,.std){background:#faf6ef}
-[data-theme="light"] :is(.cert__dl,.stds){background:rgba(22,18,14,.14);border-color:rgba(22,18,14,.14)}
+[data-theme="light"] .cert__dl > div{background:#faf6ef}
+[data-theme="light"] .cert__dl{background:rgba(22,18,14,.14);border-color:rgba(22,18,14,.14)}
 [data-theme="light"] .cert__scope{color:#4c443a}
 [data-theme="light"] :is(.cert__h,.cert__dl dd){color:#16120e}
-[data-theme="light"] :is(.cert__verify,.std span){color:#4c443a}
-[data-theme="light"] :is(.cert__h em,.std b){color:#8a5a12}
-[data-theme="light"] :is(.cert__dl dt,.stds__k){color:#6d6357}
-[data-theme="light"] :is(.journey-gl .cert__dl > div,.journey-gl .std){background:rgba(255,255,255,.82)}
+[data-theme="light"] .cert__verify{color:#4c443a}
+[data-theme="light"] .cert__h em{color:#8a5a12}
+[data-theme="light"] .cert__dl dt{color:#6d6357}
+[data-theme="light"] .journey-gl .cert__dl > div{background:rgba(255,255,255,.82)}
