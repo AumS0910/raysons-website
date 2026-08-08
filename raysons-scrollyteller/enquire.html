@@ -386,6 +386,11 @@
       <span class="tag" id="eqTag">New</span>
     </div>
     <form id="rfq" novalidate>
+      <!-- Spam honeypot. Invisible and off the tab order, so no human ever fills
+           it; bots fill every field they find and get silently discarded. This is
+           what keeps a public RFQ address from drowning once it is indexed. -->
+      <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off"
+             aria-hidden="true" style="display:none !important" />
       <fieldset class="eq-set">
         <legend><span class="no">01</span> Who's commissioning</legend>
         <div class="eq-grid">
@@ -517,16 +522,24 @@
 
 <script>
 (function(){
-  // ────────────────────────────────────────────────────────────────
-  //  RFQ submit handler.
-  //  TODO (wire backend): set ENDPOINT to a Formspree/Basin/Getform URL
-  //  (POST, JSON). While it's empty the form validates and shows the
-  //  success state locally so the UX is complete — no submissions are
-  //  sent yet. To go live, e.g.:
-  //    const ENDPOINT = 'https://formspree.io/f/XXXXXXX';
-  //  (Formspree accepts the FormData below as-is and emails it to you.)
-  // ────────────────────────────────────────────────────────────────
-  const ENDPOINT = '';
+  // ══════════════════════════════════════════════════════════════════
+  //  RFQ delivery.  ONE THING LEFT TO DO: paste the access key below.
+  //
+  //  Get it at https://web3forms.com — enter industries@raysonsgroup.com,
+  //  and they email the key straight back. No account, no card, no
+  //  dashboard. Free for 250 enquiries a month.
+  //
+  //  Paste it here and enquiries start arriving in that inbox:
+  const ACCESS_KEY = '';
+  //
+  //  While it is blank the form falls back to opening the visitor's mail
+  //  client (below), which works but loses anyone reading mail in a
+  //  browser tab — so this is not a place to leave things.
+  //
+  //  Any service taking a FormData POST works the same way; only the URL
+  //  changes. Formspree: 'https://formspree.io/f/XXXXXXX', key not needed.
+  // ══════════════════════════════════════════════════════════════════
+  const ENDPOINT = ACCESS_KEY ? 'https://api.web3forms.com/submit' : '';
   // set true when the enquiry was handed to the visitor's mail client rather than
   // POSTed, so the confirmation can tell them the truth about what still has to happen
   let viaMail = false;
@@ -567,9 +580,17 @@
 
     if(ENDPOINT){
       btn.disabled = true; btn.textContent = 'Sending…';
+      // what the enquiry looks like when it lands in the inbox — without this
+      // every RFQ arrives titled "New Submission" and they all look identical
+      if(ACCESS_KEY) data.append('access_key', ACCESS_KEY);
+      data.append('subject', 'RFQ — ' + ((data.get('company')||data.get('name')||'New enquiry').toString().trim()));
+      data.append('from_name', 'Raysons Shell Cast website');
       try{
         const res = await fetch(ENDPOINT, { method:'POST', body:data, headers:{ Accept:'application/json' } });
         if(!res.ok) throw new Error('bad status');
+        // the service can answer 200 and still refuse the submission
+        const out = await res.json().catch(()=>({success:true}));
+        if(out && out.success === false) throw new Error(out.message || 'rejected');
       }catch(err){
         btn.disabled = false; btn.innerHTML = 'Try again <span>→</span>';
         alert('Sorry — something went wrong sending your enquiry. Please email industries@raysonsgroup.com directly.');
