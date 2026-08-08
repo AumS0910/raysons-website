@@ -551,6 +551,32 @@
 
   function setInvalid(field, bad){ field.classList.toggle('invalid', bad); }
 
+  // Last resort when the enquiry cannot be POSTed: compose it as an email and
+  // open the visitor's mail client. Sets viaMail so the confirmation tells them
+  // they still have to press send, rather than claiming we received it.
+  function handToMailClient(data){
+    const g = k => (data.get(k) || '').toString().trim();
+    const lines = [
+      ['Name',            g('name')],
+      ['Company',         g('company')],
+      ['Email',           g('email')],
+      ['Phone',           g('phone')],
+      ['Material',        g('material')],
+      ['Process',         g('process')],
+      ['Weight',          g('weight')],
+      ['Annual quantity', g('quantity')],
+    ].filter(([, v]) => v).map(([k, v]) => k + ': ' + v);
+    if (g('message')) lines.push('', 'Details:', g('message'));
+
+    const subject = 'RFQ — ' + (g('company') || g('name') || 'New enquiry');
+    // mailto URLs are length-limited in some clients; keep well inside it
+    const href = 'mailto:industries@raysonsgroup.com'
+               + '?subject=' + encodeURIComponent(subject)
+               + '&body='    + encodeURIComponent(lines.join('\n').slice(0, 1600));
+    viaMail = true;
+    try { window.location.href = href; } catch (_) { viaMail = false; }
+  }
+
   function validate(){
     let ok = true;
     form.querySelectorAll('.field').forEach(f=>{
@@ -592,8 +618,14 @@
         const out = await res.json().catch(()=>({success:true}));
         if(out && out.success === false) throw new Error(out.message || 'rejected');
       }catch(err){
-        btn.disabled = false; btn.innerHTML = 'Try again <span>→</span>';
-        alert('Sorry — something went wrong sending your enquiry. Please email industries@raysonsgroup.com directly.');
+        // The POST failed — expired key, CORS, the service down, or the visitor
+        // is offline. Do NOT dead-end here: a buyer who typed out a full brief
+        // and hit an error message is a lost job. Hand it to their mail client
+        // instead, which is the same fallback used when no endpoint is set, and
+        // the confirmation copy will tell them to press send.
+        btn.disabled = false; btn.innerHTML = 'Send the enquiry <span>→</span>';
+        handToMailClient(data);
+        seal();
         return;
       }
     } else {
@@ -604,30 +636,10 @@
       // browser console. Silent lost business, and worse, they do not chase it
       // because as far as they know they already made contact.
       //
-      // Until a real endpoint exists, compose the enquiry as an email and open it.
-      // The visitor still has to press send in their client, so the confirmation
-      // copy below says exactly that rather than claiming it is already delivered.
-      const g = k => (data.get(k) || '').toString().trim();
-      const lines = [
-        ['Name',            g('name')],
-        ['Company',         g('company')],
-        ['Email',           g('email')],
-        ['Phone',           g('phone')],
-        ['Material',        g('material')],
-        ['Process',         g('process')],
-        ['Weight',          g('weight')],
-        ['Annual quantity', g('quantity')],
-      ].filter(([, v]) => v).map(([k, v]) => k + ': ' + v);
-      if (g('message')) lines.push('', 'Details:', g('message'));
-
-      const subject = 'RFQ — ' + (g('company') || g('name') || 'New enquiry');
-      const body = lines.join('\n');
-      // mailto URLs are length-limited in some clients; keep well inside it
-      const href = 'mailto:industries@raysonsgroup.com'
-                 + '?subject=' + encodeURIComponent(subject)
-                 + '&body='    + encodeURIComponent(body.slice(0, 1600));
-      viaMail = true;
-      try { window.location.href = href; } catch (_) { viaMail = false; }
+      // Compose the enquiry as an email and open it. The visitor still has to
+      // press send in their client, so the confirmation copy says exactly that
+      // rather than claiming it is already delivered.
+      handToMailClient(data);
     }
 
     seal();
