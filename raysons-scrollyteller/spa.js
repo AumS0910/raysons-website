@@ -94,7 +94,16 @@
       const swap = () => {
         reconcileHead(doc);
         document.title = doc.title;
+        // The incoming class comes from parsed SOURCE, so it cannot carry anything
+        // added at runtime — above all `reentry`, which each page's boot script sets
+        // from sessionStorage to mean "this visitor has already had their opening
+        // title, skip the loader". Copying the source class wiped it, so every hop
+        // replayed the full ritual: About -> Foundry showed "FIRING THE FURNACE 000"
+        // counting up in front of a page that was already fetched and ready.
+        // Following a link mid-session is the definition of re-entry, so assert it.
+        const runtime = ['reentry', 'pc-on'].filter((c) => document.documentElement.classList.contains(c));
         document.documentElement.className = doc.documentElement.className;
+        document.documentElement.classList.add('reentry', ...runtime);
         document.body.replaceWith(doc.body);
         window.scrollTo(0, 0);
         if (push) history.pushState({ spa: true }, '', url);
