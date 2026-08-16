@@ -129,6 +129,23 @@
     return new Promise((resolve)=>{
       const v = document.createElement('video');
       v.muted = true; v.playsInline = true; v.preload = 'auto'; v.crossOrigin = 'anonymous'; v.src = src;
+      // SAFARI WILL NOT PAINT A DETACHED VIDEO. drawImage() from a <video> that was
+      // never added to the document returns transparent black on WebKit — the clip
+      // plays, currentTime advances, videoWidth is correct, and every captured frame
+      // is still empty. That is exactly what shipped: on iPhone the whole film was
+      // 27 black WebP frames, so the canvas stayed black however far you scrolled.
+      // Chromium paints a detached video happily, which is why it never showed here.
+      //
+      // So put it in the document. It has to stay in the layout tree and be rendered
+      // — display:none and visibility:hidden both bring the black frames back — hence
+      // offscreen with a real size rather than hidden.
+      // Sized 1280x720 rather than a token 2px because WebKit reports videoWidth as the
+      // element's RENDERED width, and captureClip scales the frame buffer from it — at
+      // 160px the film came out as a 160-wide image stretched over the whole screen.
+      // Offscreen, so the size costs nothing but the number this hands to the sizer.
+      v.setAttribute('aria-hidden', 'true');
+      v.style.cssText = 'position:fixed;left:-9999px;top:0;width:1280px;height:720px;opacity:0.01;pointer-events:none;z-index:-1';
+      document.body.appendChild(v);
       const arr = [];           // Image objects for painting
       const blobArr = [];       // WebP Blobs for persisting to IndexedDB
       const cap = document.createElement('canvas');
@@ -143,6 +160,9 @@
       const finish = ()=>{
         if(done) return; done=true; frames[key]=arr; capturedClips++;
         maybePersist();
+        // the offscreen element has done its job — stop it decoding and take it out
+        try{ v.pause(); v.removeAttribute('src'); v.load(); }catch(e){}
+        try{ v.remove(); }catch(e){}
         resolve(arr);
       };
       function grab(){
@@ -166,9 +186,16 @@
           // Capture at high playback speed so each clip is ready in ~1.5s instead
           // of real-time (~5s). The video is muted, so a high rate is allowed; the
           // compositor still presents frames to requestVideoFrameCallback.
-          try{ v.playbackRate = MOBILE ? 3 : 4; }catch(e){}
-          if(v.requestVideoFrameCallback) v.requestVideoFrameCallback(grab);
-          else { const iv=setInterval(()=>{ if(done){clearInterval(iv);return;} grab(); if(v.ended){ended=true;clearInterval(iv);finish();} }, 1000/24); }
+          //
+          // Safari has no requestVideoFrameCallback, so it falls back to polling —
+          // and polling at 24Hz while the video runs at 3x samples only 8 frames per
+          // SECOND OF FOOTAGE. That is why iOS ended up with a handful of frames per
+          // clip and the film played as a slideshow. When we have to poll, run the
+          // clip at normal speed so every poll lands on a distinct frame.
+          const RVFC = !!v.requestVideoFrameCallback;
+          try{ v.playbackRate = RVFC ? (MOBILE ? 3 : 4) : 1; }catch(e){}
+          if(RVFC) v.requestVideoFrameCallback(grab);
+          else { const iv=setInterval(()=>{ if(done){clearInterval(iv);return;} grab(); if(v.ended){ended=true;clearInterval(iv);finish();} }, 1000/30); }
         }).catch(finish);
       }, { once:true });
     });
@@ -386,6 +413,7 @@
   //  SCROLL LOOP (lerped — buttery)
   // ============================================================
   let sy=scrollY, target=scrollY, prevP=0, autoplay=false, autoT=0;
+  let lastT = performance.now();   // for frame-rate-independent scroll smoothing
   const POUR_FRAC = SEGMENTS[0].span / TOTAL;   // scroll fraction the pour clip occupies
   addEventListener('scroll', ()=>{ if(scrollY>2) autoplay=false; target=scrollY; settledFrames=0; }, {passive:true});
   function loop(){
@@ -404,7 +432,17 @@
       prevP = p; return;
     }
     const prev=sy;
-    sy += (target-sy) * (REDUCED?1:0.09);
+    // FRAME-RATE INDEPENDENT SMOOTHING. This was `sy += (target-sy) * 0.09`, which
+    // moves 9% of the remaining distance PER FRAME and so silently assumes 60fps.
+    // Safari renders this page far slower than Chrome, and at ~2fps the film crawled
+    // toward wherever you had scrolled to — on an iPhone the scroll appeared dead,
+    // stuck on the opening act while the page underneath had already moved on.
+    // Converge against real elapsed time instead: k chosen so that at 60fps this is
+    // the original 0.09 per frame, but now 10fps covers the same ground per second.
+    const _now = performance.now();
+    const dt = Math.min(0.1, (_now - lastT) / 1000) || 0.016;   // clamp tab-switch spikes
+    lastT = _now;
+    sy += (target-sy) * (REDUCED ? 1 : (1 - Math.exp(-dt * 5.7)));
     const moving = Math.abs(target-sy) > 0.4 || Math.abs(sy-prev) > 0.1;
     // Idle: once the scroll has settled and the breathing has been painted a
     // few frames, stop the full-screen canvas repaint entirely (battery/GPU).
