@@ -229,7 +229,7 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
   letter-spacing:-.015em;margin:14px 0 30px;color:var(--ink);text-shadow:0 2px 30px rgba(7,5,4,.6);max-width:16ch}
 .journey__h em{font-style:italic;font-weight:500;color:var(--molten-hot)}
 /* milestone card grid (matches the reference .era: hairline-bordered cells on the dark stage) */
-.journey__items{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);max-width:1000px}
+.journey__items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);max-width:1000px}
 .journey__items.two{grid-template-columns:1fr 1fr;max-width:760px}
 .ji{background:#0b0806;padding:24px 22px;min-height:172px;display:flex;flex-direction:column;
   opacity:0;transform:translateY(16px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
@@ -431,26 +431,26 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
   .mvv{display:flex;flex-direction:column;max-width:100%;gap:10px}
   .mvv .m{padding-right:0;padding-top:22px}
 }
-.values{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:clamp(34px,5vh,56px)}
+.values{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:clamp(34px,5vh,56px)}
 .values .v{background:var(--bg);padding:28px 22px;min-height:180px;display:flex;flex-direction:column}
 .values .v .ix{font-family:var(--mono);font-size:11px;color:var(--molten);letter-spacing:.1em}
 .values .v h5{font-family:var(--serif);font-size:21px;font-weight:600;margin:16px 0 10px;letter-spacing:-.01em}
 .values .v p{font-size:12.5px;line-height:1.55;color:var(--ink-dim);font-weight:300}
-@media(max-width:900px){.values{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.values{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.values{grid-template-columns:1fr}.values .v{min-height:0}}
 
-.certs{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);
+.certs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);
   border-top:1px solid rgba(166,121,46,.5);margin-top:clamp(34px,5vh,56px)}
 .certs .c{background:var(--bg);padding:32px 22px;min-height:160px;display:flex;flex-direction:column;justify-content:flex-end}
 .certs .c h4{font-family:var(--serif);font-size:clamp(20px,1.8vw,26px);font-weight:600;color:var(--bronze-lite);letter-spacing:-.01em}
 .certs .c p{font-size:12px;line-height:1.45;color:var(--ink-dim);margin-top:10px;font-weight:300}
-@media(max-width:900px){.certs{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.certs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.certs{grid-template-columns:1fr}.certs .c{min-height:0}}
 
 .people{display:flex;flex-direction:column;gap:clamp(28px,5vw,48px);margin-top:clamp(36px,5vh,60px)}
 .people .copy p{font-size:clamp(15px,1.4vw,18px);line-height:1.7;color:#c9beb1;font-weight:300;margin-bottom:20px}
 .people .copy p b{color:var(--ink);font-weight:600}
-.discipline-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-top:1px solid rgba(166,121,46,.5);margin-top:clamp(20px,3vh,36px)}
+.discipline-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-top:1px solid rgba(166,121,46,.5);margin-top:clamp(20px,3vh,36px)}
 .discipline{background:var(--bg);padding:clamp(28px,4vh,44px) clamp(18px,2vw,28px);display:flex;flex-direction:column;gap:12px}
 .discipline__title{font-family:var(--serif);font-size:clamp(26px,3vw,42px);font-weight:600;letter-spacing:.02em;color:var(--ink);text-transform:uppercase}
 .discipline__desc{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--ink-dim);line-height:1.7;font-weight:300}
@@ -462,7 +462,7 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 /* ---------- finale CLIENT GRID (replaces the marquee) ---------- */
 /* stationary, deliberate, readable — hover/touch reveals country + application.
    hairline grid matches the certs/values language but the hover reveal is the story. */
-.clients{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+.clients{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);
   border:1px solid var(--line);border-top:1px solid rgba(166,121,46,.5);
   margin-top:clamp(40px,6vh,72px);text-align:left}
 .client{background:var(--bg);padding:clamp(26px,3.4vh,40px) clamp(16px,1.6vw,24px);
@@ -476,7 +476,7 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
   transition:opacity .45s cubic-bezier(.2,.7,.2,1),transform .45s cubic-bezier(.2,.7,.2,1)}
 .client:hover .client__meta{opacity:1;transform:none}
 @media(hover:none){.client__meta{opacity:.92;transform:none}}   /* touch: no hover, so show it */
-@media(max-width:900px){.clients{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.clients{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.clients{grid-template-columns:1fr}.client{min-height:0}}
 .finale-contact{pointer-events:auto;display:flex;gap:clamp(18px,3vw,40px);justify-content:center;flex-wrap:wrap;align-items:center;
   margin-top:36px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase}

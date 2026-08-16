@@ -182,8 +182,13 @@
      backgrounds, and flattening emblems like John Deere or TEL would destroy the mark. The
      plate keeps every logo exactly as the brand issues it, and echoes the .pillar__plate
      language already on this page. */
+  /* minmax(0,1fr), not 1fr. A bare 1fr is minmax(AUTO,1fr), and that auto floor is the
+     track's min-content — here the intrinsic pixel width of a logo. WebKit honours that
+     floor where Chromium shrinks anyway, so on iPhone the second column was pushed off
+     the side of the page and Foundry scrolled sideways by 199px. A zero floor lets the
+     tracks shrink to whatever the viewport actually has. */
   .foems__row{margin:clamp(34px,5vw,54px) auto 0;max-width:960px;display:grid;
-    grid-template-columns:repeat(4,1fr);gap:clamp(10px,1.4vw,18px)}
+    grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(10px,1.4vw,18px)}
   /* 5/3 (not a wide 16/7) so the SQUARE emblems — John Deere, TATA, TEL — get real height.
      On a wide plate they were height-constrained to ~50px while the wordmarks filled theirs;
      a taller plate gives every mark similar optical weight. */
@@ -193,8 +198,8 @@
     transition:background .3s ease, transform .35s cubic-bezier(.2,.7,.2,1), border-color .3s ease}
   .foems__logo img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
   .foems__logo:hover{background:#fbf7ef;border-color:var(--bronze-deep);transform:translateY(-3px)}
-  @media(max-width:820px){.foems__row{grid-template-columns:repeat(3,1fr)}}
-  @media(max-width:560px){.foems__row{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:820px){.foems__row{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media(max-width:560px){.foems__row{grid-template-columns:repeat(2,minmax(0,1fr))}}
   .foems__meta{margin-top:clamp(28px,4vw,44px);font-family:var(--mono);font-size:10px;letter-spacing:.18em;
     text-transform:uppercase;color:var(--ink-faint)}
 </style>

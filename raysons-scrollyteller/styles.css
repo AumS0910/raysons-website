@@ -309,14 +309,14 @@ html.reentry #loader,html.reentry #cloader{transition:none!important;opacity:0!i
 }
 
 /* stat strip */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-top:1px solid rgba(166,121,46,.5);margin-top:8px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-top:1px solid rgba(166,121,46,.5);margin-top:8px}
 .stats .s{background:var(--bg);padding:30px 26px}
 .stats .s .n{font-family:var(--serif);font-size:clamp(30px,3.6vw,52px);font-weight:500;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .stats .s .n b{color:var(--molten-hot);font-weight:500}
 .stats .s .l{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-top:8px}
 /* tabular figures on the live readouts so counters don't jitter the layout */
 .prog .cur,#hud-temp{font-variant-numeric:tabular-nums}
-@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* feature callouts (casting) */
 .feat{display:flex;flex-direction:column;gap:18px;max-width:360px}
@@ -326,7 +326,7 @@ html.reentry #loader,html.reentry #cloader{transition:none!important;opacity:0!i
 .feat .f .t span{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:5px;letter-spacing:.05em}
 
 /* process steps */
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);width:100%;margin-top:34px}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);width:100%;margin-top:34px}
 .steps .st{background:var(--bg);padding:26px 24px;min-height:160px}
 .steps .st .num{font-family:var(--mono);font-size:11px;color:var(--molten);letter-spacing:.1em}
 .steps .st h4{font-size:18px;font-weight:600;margin:14px 0 10px;letter-spacing:-.01em}
@@ -428,7 +428,7 @@ html.reentry #loader,html.reentry #cloader{transition:none!important;opacity:0!i
 }
 
 /* group company cards (about) */
-.groupgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);width:100%;margin-top:34px}
+.groupgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);width:100%;margin-top:34px}
 .groupgrid .g{background:var(--bg);padding:24px 22px;min-height:150px;display:flex;flex-direction:column;justify-content:space-between}
 .groupgrid .g .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--molten);margin-bottom:18px}
 .groupgrid .g h4{font-size:17px;font-weight:600;letter-spacing:-.01em;line-height:1.15}
@@ -583,7 +583,7 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 :is(.about-footer,.foundry-footer,.site-footer) .ft-logo{font-weight:700;letter-spacing:.02em;font-size:17px}
 :is(.about-footer,.foundry-footer,.site-footer) .ft-logo span{color:var(--molten)}
 :is(.about-footer,.foundry-footer,.site-footer) .ft-iso{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--bronze-lite);border:1px solid var(--bronze-deep);padding:7px 13px;border-radius:3px}
-:is(.about-footer,.foundry-footer,.site-footer) .ft-mid{display:grid;grid-template-columns:repeat(3,1fr);gap:34px;padding:34px 0;max-width:1280px;margin:0 auto}
+:is(.about-footer,.foundry-footer,.site-footer) .ft-mid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:34px;padding:34px 0;max-width:1280px;margin:0 auto}
 :is(.about-footer,.foundry-footer,.site-footer) .ft-col h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:14px}
 :is(.about-footer,.foundry-footer,.site-footer) .ft-col li{list-style:none;font-size:13.5px;color:var(--ink-dim);line-height:2;font-weight:300}
 :is(.about-footer,.foundry-footer,.site-footer) .ft-col a:hover{color:var(--molten-hot)}
