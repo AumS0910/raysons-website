@@ -230,6 +230,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
   const REST = { az: 0.42, el: 0.30 };              // where the hero wants the part to end up
   let restRad = 4.0, fitR = 0.95;                   // fitR = the part's bounding-sphere radius
+  let fitY = 0.55, fitXZ = 0.8;                     // its real half-height and half-width
   const pose = { az: REST.az, el: REST.el, rad: restRad };
   const from = { az: REST.az, el: REST.el, rad: restRad };
   let settle = 1, SETTLE_MS = 1900;                 // 1 = at rest
@@ -272,6 +273,18 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     // the frame. Fragments may drift past the edge while it is open; the canvas edges are
     // masked, so they dissolve out rather than clip.
     fitR = sph.radius;
+    // The sphere alone cannot frame this part. It is flat and elongated, so its radius is
+    // set by the long axis and badly over-states the height — which is why the fit needed a
+    // hand-tuned divisor, and why the casting clipped through the bottom of the hero as soon
+    // as that band got shorter. Keep the part's real half-extents and fit to those instead.
+    // Under the azimuth spin the vertical half-extent stays halfY, while the horizontal one
+    // sweeps out to hypot(halfX, halfZ) at 45°, so those are the two numbers that matter.
+    {
+      const sb = new THREE.Box3().setFromObject(obj);
+      const ss = new THREE.Vector3(); sb.getSize(ss);
+      fitY  = ss.y / 2;
+      fitXZ = Math.hypot(ss.x / 2, ss.z / 2);
+    }
     resize();
 
     // start where the finale left it — same angles, and a distance corrected for the fact
@@ -313,10 +326,15 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     // instead of a hand-tuned distance that crops on one shape and floats on another
     const halfV = FOV * Math.PI / 360;
     const halfH = Math.atan(Math.tan(halfV) * camera.aspect);
-    // >1 deliberately: fitR is the BOUNDING SPHERE, and this casting is flat and elongated,
-    // so its silhouette never fills that sphere. Framing the sphere conservatively left a
-    // wide dead margin on every side. 1.15 sizes to the part you can actually see.
-    restRad = Math.max(fitR / Math.sin(halfV), fitR / Math.sin(halfH)) / 1.45;
+    // Fit the part's ACTUAL extents, not its bounding sphere. The old line framed the
+    // sphere and then divided by 1.45 to claw back the dead margin a sphere leaves around
+    // a flat part — a number tuned against one band height, which is why the casting hung
+    // out through the bottom of the hero the moment that band got shorter.
+    // 1.22 on the vertical leaves room for the elevation tilt, which lifts the silhouette
+    // slightly past halfY; 1.10 on the horizontal is plain breathing room.
+    const distV = (fitY  * 1.22) / Math.tan(halfV);
+    const distH = (fitXZ * 1.10) / Math.tan(halfH);
+    restRad = Math.max(distV, distH);
     if (settle >= 1) pose.rad = restRad;
   }
 
