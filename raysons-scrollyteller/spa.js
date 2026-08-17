@@ -162,7 +162,7 @@
   // PREFETCH the next page in sequence once the current one is idle, so the fetch on
   // auto-advance (or a nav click) is served from cache instead of a cold round-trip —
   // this is most of the felt lag on a slow connection.
-  function prefetchNext() {
+  async function prefetchNext() {
     const i = order();
     if (i < 0 || i >= SEQ.length - 1) return;
     const href = new URL(SEQ[i + 1], location.href).href;
@@ -170,6 +170,27 @@
     const l = document.createElement('link');
     l.rel = 'prefetch'; l.href = href; l.setAttribute('data-prefetch', href);
     document.head.appendChild(l);
+
+    // WARM ITS STYLESHEET TOO. Prefetching only the HTML meant the hop painted before
+    // the arriving page's CSS had landed: reconcileHead appends the <link> at swap time
+    // and it is a cold round-trip from there. On Foundry that showed as the hero canvas
+    // sitting at its unstyled default of opacity 1 for the better part of a second —
+    // a blank black rectangle — until foundry.css arrived and set it back to 0.
+    // Fetching the page here also puts the document itself in cache, so the hop's own
+    // fetch is served locally.
+    try {
+      const res = await fetch(href, { headers: { 'X-SPA': 'prefetch' } });
+      if (!res.ok) return;
+      const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+      doc.head.querySelectorAll('link[rel="stylesheet"]').forEach((s) => {
+        const cssHref = new URL(s.getAttribute('href'), href).href;
+        if (document.querySelector('link[data-prewarm="' + cssHref + '"]')) return;
+        const p = document.createElement('link');
+        p.rel = 'preload'; p.as = 'style'; p.href = cssHref;
+        p.setAttribute('data-prewarm', cssHref);
+        document.head.appendChild(p);
+      });
+    } catch (_) { /* prefetch is an optimisation; never let it break navigation */ }
   }
   if ('requestIdleCallback' in window) requestIdleCallback(prefetchNext, { timeout: 3000 });
   else setTimeout(prefetchNext, 1500);
