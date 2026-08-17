@@ -1098,3 +1098,28 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 [data-theme="light"] .journey-hint{color:#6d6357;text-shadow:none}
 @media(max-width:760px){.journey-hint{font-size:9px;letter-spacing:.14em;
   left:50%;transform:translateX(-50%);bottom:clamp(12px,2.4vh,22px)}}
+
+/* ============================================================
+   FOUNDRY'S HERO STILL — cold arrivals only.
+
+   images/casting-hero.png holds the Foundry hero while the 150 KB live casting
+   downloads, so a slow first visit never lands on an empty stage. But it is a
+   DIFFERENT image from the live object — a finished part, at another angle — and
+   on an in-session hop it sat at full opacity for about a second before being
+   replaced. Coming from About you watched a static casting appear, hold, then cut
+   to a different one. That was "the old thing in between".
+
+   On a hop the model is already cached and arrives almost at once, so there is
+   nothing left to cover. html.reentry means we have been somewhere already this
+   session (spa.js asserts it on every hop), so the still stays out of the way and
+   the hero belongs to the live object from its first frame.
+
+   This lives in styles.css DELIBERATELY. foundry.css is still in flight during the
+   hop, and a rule cannot hide anything until its own stylesheet has landed — in
+   foundry.css this same rule left a 300ms flash of the still. styles.css is already
+   parsed on every page, so it applies the instant the new body is swapped in.
+   ============================================================ */
+html.reentry .fhero__object{opacity:0}
+/* unless there will BE no live object — reduced motion, or no WebGL, where the still
+   is the design rather than a placeholder. foundry-object.js sets .fobj-none there. */
+html.reentry.fobj-none .fhero__object{opacity:1}

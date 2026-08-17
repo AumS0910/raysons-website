@@ -34,11 +34,18 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const MOBILE  = matchMedia('(pointer:coarse)').matches || innerWidth < 760;
-  if (REDUCED) return;                       // the still poster IS the reduced-motion design
+
+  // Say so when there will be no live casting. foundry.css hides the still on in-session
+  // hops — the model is cached by then, so the still only flashed a different part in the
+  // visitor's face — but that is only safe while a live object is actually coming. On these
+  // two paths it is not, and the still has to stay: it IS the design here, not a placeholder.
+  const noLiveObject = () => document.documentElement.classList.add('fobj-none');
+
+  if (REDUCED) { noLiveObject(); return; }    // the still poster IS the reduced-motion design
 
   let hasGL = false;
   try { hasGL = !!(window.WebGLRenderingContext && (canvas.getContext('webgl2') || canvas.getContext('webgl'))); } catch (_) {}
-  if (!hasGL) return;
+  if (!hasGL) { noLiveObject(); return; }
 
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
   const lerp  = (a, b, t) => a + (b - a) * t;

@@ -116,7 +116,16 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 body.fobj-live .fobj{opacity:1;pointer-events:auto;view-transition-name:casting}
 body.fobj-live .fhero__object{opacity:0;view-transition-name:none}
 body.fobj-swapped .fhero__object{display:none}
-.fhero__object{transition:opacity .9s ease}
+/* .5s, not .9s. foundry-object.js sets .fobj-swapped 700ms after .fobj-live, and that rule
+   is display:none — which does not wait for a transition. A .9s fade was therefore cut off
+   at 700ms with 200ms of opacity still on screen, so the poster did not dissolve into the
+   live casting, it vanished mid-fade. Finishing well inside the 700ms means the swap is a
+   real crossfade and the still is gone before the class lands. */
+.fhero__object{transition:opacity .5s ease}
+
+/* NOTE: the rule that hides this still on in-session hops lives in styles.css, not here.
+   It has to be in the shared sheet — foundry.css is still being fetched during the hop,
+   and a rule cannot hide anything until its stylesheet has landed. */
 .fobj__gl{position:absolute;inset:0;width:100%;height:100%;display:block;
   cursor:grab;touch-action:pan-y;                      /* turn it sideways; vertical still scrolls */
   /* same two-mask feather as the poster — the base dissolves into the stage so the part
