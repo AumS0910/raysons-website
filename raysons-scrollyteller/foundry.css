@@ -51,9 +51,14 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
    ~1.9 screens tall and its contents stick to the top, so the whole assembly plays out
    while the page holds still, then releases into the furnace beat. */
 .fhero{position:relative;z-index:10;height:190svh;display:block;overflow:visible}
+/* The pin sticks to top:0, so once you scroll a little its contents sit directly under
+   the fixed navbar. Top padding was clamp(64px,9vh,104px) — 64px on a phone against a
+   96px bar — so the eyebrow badge was tucked behind the nav at every width but one, and
+   the title sat right against it. Clearing --nav-h first, THEN breathing room, means the
+   gap is deliberate rather than whatever the viewport happened to produce. */
 .fhero__pin{position:sticky;top:0;height:100svh;min-height:600px;display:flex;flex-direction:column;
   align-items:center;justify-content:flex-start;text-align:center;
-  padding:clamp(64px,9vh,104px) 6vw 0;overflow:hidden}
+  padding:calc(var(--nav-h) + clamp(16px,3vh,40px)) 6vw 0;overflow:hidden}
 @media(max-width:760px){.fhero{height:180svh}}
 .fhero__bg{position:absolute;inset:0;z-index:-1;overflow:hidden}
 

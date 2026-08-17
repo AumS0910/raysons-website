@@ -5,6 +5,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Montserrat:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
 :root{
+  /* How much room the fixed navbar occupies. It was never written down, so anything
+     top-aligned under it had to guess — and the Foundry hero guessed low, sliding its
+     eyebrow badge under the bar at every width but one. Stated once here so nothing
+     has to guess again. .nav is 26px padding top and bottom around ~40px of brand. */
+  --nav-h:96px;
+
   /* CHAMPAGNE NOIR — refined warm-luxury accent (the neon orange retired to the
      fire footage only). The "--molten" names are kept so nothing downstream
      breaks; they now hold champagne-gold values, not hot orange. */
