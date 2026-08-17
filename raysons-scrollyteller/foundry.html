@@ -179,7 +179,7 @@
   .foems__t em{font-style:italic;color:var(--molten-hot)}
   /* Real OEM logos supplied by the client (Website file 3). They sit on warm bone plates
      rather than being recoloured to silhouettes: several arrived as JPEGs with white
-     backgrounds, and flattening emblems like John Deere or TEL would destroy the mark. The
+     backgrounds, and flattening emblems like TATA or TEL would destroy the mark. The
      plate keeps every logo exactly as the brand issues it, and echoes the .pillar__plate
      language already on this page. */
   /* minmax(0,1fr), not 1fr. A bare 1fr is minmax(AUTO,1fr), and that auto floor is the
@@ -189,14 +189,19 @@
      tracks shrink to whatever the viewport actually has. */
   .foems__row{margin:clamp(34px,5vw,54px) auto 0;max-width:960px;display:grid;
     grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(10px,1.4vw,18px)}
-  /* 5/3 (not a wide 16/7) so the SQUARE emblems — John Deere, TATA, TEL — get real height.
+  /* 5/3 (not a wide 16/7) so the SQUARE emblems — TATA, TEL — get real height.
      On a wide plate they were height-constrained to ~50px while the wordmarks filled theirs;
      a taller plate gives every mark similar optical weight. */
   .foems__logo{display:flex;align-items:center;justify-content:center;aspect-ratio:5/3;
     padding:clamp(12px,1.5vw,20px);border-radius:5px;border:1px solid var(--line);
     background:rgba(243,236,223,.93);
     transition:background .3s ease, transform .35s cubic-bezier(.2,.7,.2,1), border-color .3s ease}
-  .foems__logo img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
+  /* width/height 100% + object-fit, NOT max-height with auto sizing. A percentage max-height
+     resolves against a height this box never declares — it comes from aspect-ratio — so the
+     taller marks (TATA) ignored the cap, used their natural size and stretched their grid row,
+     leaving one plate deeper than the rest with the logo clipped off its bottom edge.
+     Filling the padded box and letting object-fit letterbox inside it cannot overflow. */
+  .foems__logo img{width:100%;height:100%;object-fit:contain;object-position:center;display:block}
   .foems__logo:hover{background:#fbf7ef;border-color:var(--bronze-deep);transform:translateY(-3px)}
   @media(max-width:820px){.foems__row{grid-template-columns:repeat(3,minmax(0,1fr))}}
   @media(max-width:560px){.foems__row{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -496,7 +501,7 @@
     <h2 class="foems__t rv" data-split>On the floor at <em>these OEMs.</em></h2>
     <div class="foems__row rv" aria-label="OEMs Raysons Shell Cast supplies">
       <div class="foems__logo"><img src="images/oem/caterpillar.png" alt="Caterpillar" loading="lazy" decoding="async" /></div>
-      <div class="foems__logo"><img src="images/oem/john-deere.png" alt="John Deere" loading="lazy" decoding="async" /></div>
+      <div class="foems__logo"><img src="images/oem/vanaz.png" alt="Vanaz Engineers Limited" loading="lazy" decoding="async" /></div>
       <div class="foems__logo"><img src="images/oem/halliburton.png" alt="Halliburton" loading="lazy" decoding="async" /></div>
       <div class="foems__logo"><img src="images/oem/ingersoll-rand.jpg" alt="Ingersoll Rand" loading="lazy" decoding="async" /></div>
       <div class="foems__logo"><img src="images/oem/schwing-stetter.png" alt="Schwing Stetter" loading="lazy" decoding="async" /></div>
