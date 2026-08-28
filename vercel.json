@@ -1,11 +1,37 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "node build-site.mjs",
+  "outputDirectory": "dist",
   "redirects": [
-    { "source": "/", "destination": "/raysons-scrollyteller/", "permanent": true },
-    { "source": "/index.html", "destination": "/raysons-scrollyteller/", "permanent": true },
-    { "source": "/about.html", "destination": "/raysons-scrollyteller/About%20Us.html", "permanent": true },
-    { "source": "/technology.html", "destination": "/raysons-scrollyteller/foundry.html", "permanent": true },
-    { "source": "/products.html", "destination": "/raysons-scrollyteller/products.html", "permanent": true },
-    { "source": "/enquire.html", "destination": "/raysons-scrollyteller/enquire.html", "permanent": true }
+    {
+      "source": "/",
+      "destination": "/raysons-scrollyteller/",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "destination": "/raysons-scrollyteller/",
+      "permanent": true
+    },
+    {
+      "source": "/about.html",
+      "destination": "/raysons-scrollyteller/About%20Us.html",
+      "permanent": true
+    },
+    {
+      "source": "/technology.html",
+      "destination": "/raysons-scrollyteller/foundry.html",
+      "permanent": true
+    },
+    {
+      "source": "/products.html",
+      "destination": "/raysons-scrollyteller/products.html",
+      "permanent": true
+    },
+    {
+      "source": "/enquire.html",
+      "destination": "/raysons-scrollyteller/enquire.html",
+      "permanent": true
+    }
   ]
 }

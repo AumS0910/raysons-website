@@ -1,0 +1,80 @@
+/* ============================================================
+   RAYSONS — About · Timeline Journey
+   Extends styles.css · adds Direction B (Steel) accent shift
+   ============================================================ */
+
+/* Direction B — Forged Steel atmosphere */
+body[data-dir="steel"]{
+  --bg:#04070b;
+  --molten:#5fa8ff;
+  --molten-hot:#a8d2ff;
+  --molten-deep:#1a4ea8;
+}
+body[data-dir="steel"] ::selection{background:#5fa8ff;color:#04101f}
+
+/* values list */
+.values{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);width:100%;margin-top:34px}
+.values .v{background:var(--bg);padding:22px 20px;min-height:130px}
+.values .v h5{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.values .v p{font-size:12px;line-height:1.5;color:var(--ink-dim);font-weight:300;margin-top:8px}
+.values .v .ix{font-family:var(--mono);font-size:10px;color:var(--molten);letter-spacing:.14em;display:block;margin-bottom:14px}
+@media(max-width:900px){.values{grid-template-columns:1fr 1fr}}
+
+/* mission / vision split */
+.mv{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:36px;width:100%}
+.mv .m h4{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--molten);margin-bottom:14px}
+.mv .m p{font-size:clamp(14.5px,1.25vw,17px);line-height:1.6;color:var(--ink-dim);font-weight:300;max-width:52ch}
+@media(max-width:860px){.mv{grid-template-columns:1fr;gap:26px}}
+
+/* era milestones — large year + entries */
+.era{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);width:100%;margin-top:36px}
+.era.two{grid-template-columns:1fr 1fr;max-width:880px}
+.era .e{background:var(--bg);padding:26px 24px;min-height:170px}
+.era .e .yr{font-family:var(--serif);font-size:clamp(30px,3.2vw,44px);font-weight:600;color:var(--molten-hot);letter-spacing:-.02em}
+.era .e h4{font-size:16px;font-weight:600;margin:12px 0 9px;letter-spacing:-.01em}
+.era .e p{font-size:13px;line-height:1.55;color:var(--ink-dim);font-weight:300}
+@media(max-width:860px){.era,.era.two{grid-template-columns:1fr}.era .e{min-height:0}}
+
+/* people paragraphs */
+.people-copy{display:grid;grid-template-columns:1fr 1fr 1fr;gap:34px;margin-top:36px;width:100%}
+.people-copy p{font-size:clamp(13.5px,1.15vw,16px);line-height:1.65;color:var(--ink-dim);font-weight:300}
+.people-copy p b{color:var(--ink);font-weight:600}
+@media(max-width:860px){.people-copy{grid-template-columns:1fr}}
+
+/* certification seals */
+.certs{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);width:100%;margin-top:36px}
+.certs .c{background:var(--bg);padding:24px 20px;min-height:140px;display:flex;flex-direction:column;justify-content:space-between}
+.certs .c h4{font-family:var(--serif);font-size:clamp(17px,1.6vw,22px);font-weight:600;letter-spacing:-.01em}
+.certs .c p{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);line-height:1.6;margin-top:14px}
+@media(max-width:900px){.certs{grid-template-columns:1fr 1fr}}
+
+/* ---- product showroom cards (Products page) ---- */
+.prod{display:flex;width:100%;justify-content:flex-end}
+.prod.right{justify-content:flex-start}
+.prod-meta{
+  width:min(440px,42vw);
+  background:linear-gradient(180deg,rgba(8,5,3,.62),rgba(8,5,3,.42));
+  backdrop-filter:blur(7px);
+  border:1px solid var(--line);
+  padding:34px 32px;border-radius:3px;
+}
+.prod-meta .px{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--molten);margin-bottom:18px}
+.prod-meta .display{margin-bottom:4px}
+.prod-lede{font-size:clamp(13.5px,1.1vw,15.5px);line-height:1.6;color:var(--ink-dim);font-weight:300;margin-top:14px;max-width:40ch}
+.prod-meta .specs{border-top:1px solid var(--line)}
+.prod-meta .specs .sp{padding:13px 2px}
+.prod-meta .specs .sp .k{font-size:13.5px}
+@media(max-width:760px){
+  .prod,.prod.right{justify-content:center}
+  .prod-meta{width:min(520px,92vw);background:linear-gradient(180deg,rgba(8,5,3,.78),rgba(8,5,3,.6))}
+}
+
+/* big era year watermark */
+.era-mark{
+  font-family:var(--serif);font-weight:700;letter-spacing:-.04em;line-height:1;
+  font-size:clamp(90px,16vw,240px);color:transparent;
+  -webkit-text-stroke:1px var(--line-strong);
+  position:absolute;right:clamp(10px,4vw,70px);bottom:clamp(60px,9vh,110px);
+  pointer-events:none;opacity:.55;
+}
+@media(max-width:760px){.era-mark{display:none}}
