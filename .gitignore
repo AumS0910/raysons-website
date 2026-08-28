@@ -21,3 +21,8 @@ _*.mjs
 _*.cjs
 _*.png
 *.log
+
+# local scratch, never part of the deliverable
+.agents/
+example/
+public/
