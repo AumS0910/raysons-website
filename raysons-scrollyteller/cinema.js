@@ -290,7 +290,9 @@
   function stepCam(act, local){
     const t = camTarget(act, local);
     if(REDUCED){ smCam = t; }
-    else smCam = { scale: lerp(smCam.scale,t.scale,0.18), x: lerp(smCam.x,t.x,0.18), y: lerp(smCam.y,t.y,0.18) };
+    // per-frame 0.18 assumed 60fps; k=11.9 is that same feel measured against real time
+    else { const a = 1 - Math.exp(-11.9 * frameDt);
+      smCam = { scale: lerp(smCam.scale,t.scale,a), x: lerp(smCam.x,t.x,a), y: lerp(smCam.y,t.y,a) }; }
     curCam = smCam; return smCam;
   }
 
@@ -454,6 +456,7 @@
   // ============================================================
   let sy=scrollY, target=scrollY, prevP=0, autoplay=false, autoT=0;
   let lastT = performance.now();   // for frame-rate-independent scroll smoothing
+  let frameDt = 0.016;             // last frame's elapsed time, shared with stepCam
   const POUR_FRAC = SEGMENTS[0].span / TOTAL;   // scroll fraction the pour clip occupies
   addEventListener('scroll', ()=>{ if(scrollY>2) autoplay=false; target=scrollY; settledFrames=0; }, {passive:true});
   function loop(){
@@ -482,6 +485,7 @@
     const _now = performance.now();
     const dt = Math.min(0.1, (_now - lastT) / 1000) || 0.016;   // clamp tab-switch spikes
     lastT = _now;
+    frameDt = dt;                       // stepCam smooths against real time too
     sy += (target-sy) * (REDUCED ? 1 : (1 - Math.exp(-dt * 5.7)));
     const moving = Math.abs(target-sy) > 0.4 || Math.abs(sy-prev) > 0.1;
     // Idle: once the scroll has settled and the breathing has been painted a

@@ -246,12 +246,13 @@ function boot(){
   let sy=scrollY, target=scrollY;
   addEventListener('scroll', ()=>{ target=scrollY; }, { passive:true });
 
+  let camDt = 0.016;
   function applyCamera(u, et){
     const f=clamp(u,0,NS), i=Math.min(NS-1,Math.floor(f)), t=smooth(f-i), a=KF[i], b=KF[i+1];
     _p.set(a.p[0]+(b.p[0]-a.p[0])*t, a.p[1]+(b.p[1]-a.p[1])*t, a.p[2]+(b.p[2]-a.p[2])*t);
     _l.set(a.l[0]+(b.l[0]-a.l[0])*t, a.l[1]+(b.l[1]-a.l[1])*t, a.l[2]+(b.l[2]-a.l[2])*t);
     _p.x += Math.sin(et*0.3)*0.22; _p.y += Math.cos(et*0.24)*0.16;   // hand-held drift
-    camera.position.lerp(_p, 0.08); camera.lookAt(_l);
+    camera.position.lerp(_p, 1 - Math.exp(-5.0 * camDt)); camera.lookAt(_l);
     key.position.set(camera.position.x, camera.position.y+2.5, camera.position.z-12);
     flare.intensity = 7*Math.max(0, 1-Math.abs(f-2)/1.1);
     monoliths.forEach(m=>{ const d=Math.abs(m.position.z-camera.position.z), near=clamp(1-d/46,0.12,1);
@@ -278,9 +279,14 @@ function boot(){
   addEventListener('orientationchange', sizeAll);
   if('ResizeObserver' in window){ new ResizeObserver(sizeAll).observe(canvas); }
 
+  let _last = performance.now();
+  // Frame-rate independent. A fixed per-frame fraction assumes 60fps, and this
+  // corridor is the heaviest scene on the site — exactly where frames are scarce.
   function tick(){
     requestAnimationFrame(tick);
-    sy += (target-sy)*0.11;
+    const _n = performance.now();
+    const _dt = Math.min(0.1, (_n - _last) / 1000) || 0.016; _last = _n;
+    sy += (target-sy) * (1 - Math.exp(-7.0 * _dt));
     // canvas opacity: off before the journey, on through the finale
     const op = clamp((sy-fadeIn0)/420, 0, 1) * clamp((fadeOut0-sy)/420, 0, 1);
     canvas.style.opacity = op.toFixed(3);
@@ -294,7 +300,7 @@ function boot(){
     let u;
     if(sy < tailStart) u = (window.__journeyP||0)*3;
     else u = 3 + clamp((sy-tailStart)/(tailEnd-tailStart), 0, 1)*3;
-    applyCamera(u, et);
+    camDt = dt; applyCamera(u, et);
     composer.render();
   }
   document.body.classList.add('journey-gl');
