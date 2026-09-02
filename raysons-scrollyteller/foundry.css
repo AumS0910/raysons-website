@@ -220,8 +220,12 @@ body.fobj-live .fobj-hint.gone{opacity:0}
 .pillar__cta-stack .btn--text:hover .btn__arrow{transform:translateX(5px)}
 
 /* gradient headline (export pillar) */
-.pillar__name--grad{background:linear-gradient(135deg, var(--bronze-lite), var(--molten-hot));
-  -webkit-background-clip:text;background-clip:text;color:transparent}
+/* .pillar__name--grad removed. It clipped a gradient to the text of the Export-Ready
+   heading, while the split-word reveal transforms each word inside overflow:hidden — so
+   the browser re-rasterised gradient-clipped text every frame of the animation. Measured
+   on the iPhone engine, the reveal ran at half the frame rate of the identical headings
+   without it, which is the stutter that got reported. The other three pillar headings
+   were never gradient-filled; this one now matches them. */
 
 @media(max-width:860px){
   .pillar__inner{grid-template-columns:1fr;gap:30px}

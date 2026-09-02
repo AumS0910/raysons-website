@@ -30,9 +30,16 @@
   addEventListener('scroll', ()=>{ target = scrollY; kick(); }, { passive:true });
   addEventListener('resize', kick);
 
+  // Frame-rate independent damping. A fixed per-frame fraction silently assumes
+  // 60fps; Safari runs these pages far slower, so the motion crawled behind the
+  // scroll on iPhone. k is chosen so the feel at 60fps is exactly what it was.
+  const damp = (k, dt) => 1 - Math.exp(-k * dt);
+  let _last = performance.now();
   function frame(){
     raf = null;
-    sy += (target - sy) * 0.11;                          // buttery damp — the whole feel
+    const _n = performance.now();
+    const _dt = Math.min(0.1, (_n - _last) / 1000) || 0.016; _last = _n;
+    sy += (target - sy) * damp(7.0, _dt);                // buttery damp — the whole feel
     const total  = sec.offsetHeight - innerHeight;
     const docTop = sec.getBoundingClientRect().top + scrollY;
     const p = total > 0 ? clamp(sy - docTop, 0, total) / total : 0;

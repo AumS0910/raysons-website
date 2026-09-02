@@ -70,10 +70,17 @@
   function measure(){ const max = Math.max(1, film.offsetHeight - innerHeight);
     return Math.max(0, Math.min(1, -film.getBoundingClientRect().top / max)); }
   function kick(){ if(!raf && visible) raf = requestAnimationFrame(loop); }
+  // Frame-rate independent damping. A fixed per-frame fraction silently assumes
+  // 60fps; Safari runs these pages far slower, so the motion crawled behind the
+  // scroll on iPhone. k is chosen so the feel at 60fps is exactly what it was.
+  const damp = (k, dt) => 1 - Math.exp(-k * dt);
+  let _last = performance.now();
   function loop(){
     raf = null;
     target = measure();
-    cur += (target - cur) * (REDUCED ? 1 : 0.12);
+    const _n = performance.now();
+    const _dt = Math.min(0.1, (_n - _last) / 1000) || 0.016; _last = _n;
+    cur += (target - cur) * (REDUCED ? 1 : damp(7.7, _dt));
     render(cur);
     if(visible && Math.abs(target - cur) > 0.0005) kick();
   }
