@@ -1,0 +1,87 @@
+# Publish the site to raysonsgroup.com on every push to main.
+#
+# Why this exists: the site was copied onto Hostinger by hand, so it froze at
+# whatever the files looked like that day while Vercel kept moving. Anything
+# fixed here never reached the people actually visiting raysonsgroup.com.
+#
+# ONE-TIME SETUP — add these under
+#   GitHub repo -> Settings -> Secrets and variables -> Actions -> New repository secret
+#
+#   FTP_SERVER    the FTP host from Hostinger (hPanel -> Files -> FTP Accounts),
+#                 e.g. ftp.raysonsgroup.com   — host only, no ftp:// prefix
+#   FTP_USERNAME  the FTP account username
+#   FTP_PASSWORD  its password
+#   FTP_DIR       where the site lives on the server, WITH a trailing slash.
+#                 The pages currently sit at the web root, so this is almost
+#                 certainly:  public_html/
+#                 Check in hPanel -> File Manager: the folder containing
+#                 index.html and the valve/ folder is the right one.
+#
+# Until those four exist the job stops with a clear message instead of failing.
+
+name: Deploy to raysonsgroup.com
+
+on:
+  push:
+    branches: [main]
+    paths: ['raysons-scrollyteller/**', '.github/workflows/deploy-raysonsgroup.yml']
+  workflow_dispatch:        # lets you run it by hand from the Actions tab
+
+concurrency:
+  group: deploy-raysonsgroup     # never let two uploads overlap
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the secrets are set
+        env:
+          S: ${{ secrets.FTP_SERVER }}
+          U: ${{ secrets.FTP_USERNAME }}
+          P: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          missing=""
+          [ -z "$S" ] && missing="$missing FTP_SERVER"
+          [ -z "$U" ] && missing="$missing FTP_USERNAME"
+          [ -z "$P" ] && missing="$missing FTP_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secret(s):$missing"
+            echo "Add them under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          echo "secrets present"
+
+      - name: Sanity-check the site before uploading anything
+        run: |
+          test -f raysons-scrollyteller/index.html || { echo "::error::index.html missing — refusing to upload"; exit 1; }
+          test -d raysons-scrollyteller/valve     || { echo "::error::valve/ missing — refusing to upload a partial site"; exit 1; }
+          echo "site looks complete: $(find raysons-scrollyteller -type f | wc -l) files"
+
+      # Uploads only what changed, tracked by a state file on the server.
+      # It will not touch their PHP pages, agnis_webkit/, or anything else it
+      # did not put there — dangerous-clean-slate stays false deliberately.
+      - name: Upload over FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./raysons-scrollyteller/
+          server-dir: ${{ secrets.FTP_DIR || 'public_html/' }}
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/*.docx
+            **/*.mov
+
+      - name: Confirm the live site picked it up
+        run: |
+          sleep 20
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://www.raysonsgroup.com/)
+          echo "raysonsgroup.com returned $code"
+          [ "$code" = "200" ] || { echo "::error::site did not return 200 after deploy"; exit 1; }

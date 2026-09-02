@@ -48,6 +48,31 @@ npm run package -- https://www.raysonsgroup.com/shell-cast
 Upload the **contents** of `deploy/` to that path. Every reference in the site is
 relative, so it runs from any subfolder without changes.
 
+## Deploying to raysonsgroup.com
+
+The live site at `raysonsgroup.com` is served from Hostinger, not from Vercel.
+It was first put there by copying the files across by hand, which meant it froze
+at that day's version while everything here kept moving — fixes never reached
+actual visitors.
+
+`.github/workflows/deploy-raysonsgroup.yml` now uploads it on every push to
+`main`. It needs four repository secrets, added once under
+**Settings -> Secrets and variables -> Actions**:
+
+| Secret | Value |
+|---|---|
+| `FTP_SERVER` | FTP host from hPanel -> Files -> FTP Accounts (host only, no `ftp://`) |
+| `FTP_USERNAME` | that account's username |
+| `FTP_PASSWORD` | its password |
+| `FTP_DIR` | folder holding `index.html` and `valve/` — almost certainly `public_html/` |
+
+Until they exist the job stops with a clear message rather than half-deploying.
+It uploads only changed files and will not delete anything it did not put there,
+so the remaining PHP pages on that server are left alone. You can also run it by
+hand from the Actions tab.
+
+Vercel deploys independently from the same branch, so the two stay in step.
+
 ## Things worth knowing before you change anything
 
 **It is a single-page application.** `spa.js` intercepts internal links, fetches the
