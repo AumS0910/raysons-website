@@ -10,6 +10,8 @@
 (function(){
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const MOBILE  = matchMedia('(pointer:coarse)').matches || innerWidth < 760;
+  // No codec in the capture path where the browser gives us bitmaps. See grab().
+  const HAS_BITMAP = typeof createImageBitmap === 'function';
   const clamp = (v,a,b)=> v<a?a : v>b?b : v;
 
   const canvas = document.getElementById('stage');
@@ -150,7 +152,7 @@
       const blobArr = [];       // WebP Blobs for persisting to IndexedDB
       const cap = document.createElement('canvas');
       const cx  = cap.getContext('2d');
-      let sized = false, done = false, ended = false, persisted = false;
+      let sized = false, done = false, ended = false, persisted = false, lastT = -1;
       // toBlob is async — only persist a clean, fully-decoded clip once EVERY
       // frame's WebP blob has actually landed (never a stalled / mid-encode partial).
       const maybePersist = ()=>{
@@ -172,9 +174,28 @@
           const scale = Math.min(1, needW / v.videoWidth);
           cap.width = Math.round(v.videoWidth*scale); cap.height = Math.round(v.videoHeight*scale); sized=true;
         }
+        // Only grab when the clip has actually MOVED. A blind timer samples whatever
+        // the decoder happens to have — and when playback outruns it, that is the
+        // previous frame again, or nothing at all. Requiring currentTime to advance
+        // means every captured frame is a real, distinct one, and a slow decoder
+        // costs us frame count rather than a reel of black.
+        if(v.currentTime <= lastT) return;
+        lastT = v.currentTime;
         cx.drawImage(v, 0,0, cap.width, cap.height);
         const idx = arr.length; arr.push(null); blobArr.push(null);
-        cap.toBlob(b=>{ if(!b) return; blobArr[idx]=b; const im=new Image(); im.src=URL.createObjectURL(b); arr[idx]=im; maybePersist(); }, 'image/webp', 0.95);
+        // A PAINTABLE FRAME, IMMEDIATELY — no encoding.
+        // This used to be canvas.toBlob('image/webp'), and that encode was the whole
+        // problem on iPhone: measured on a real device profile, Safari manages about
+        // 2.1 WebP encodes a second. The film is 48 seconds of footage; capturing it at
+        // a usable frame density needs ~1440 frames, so encoding alone was ELEVEN
+        // MINUTES of work. The film never finished capturing, which is why scrolling
+        // stayed sticky on a phone until 'everything loaded' — it never fully did.
+        // createImageBitmap is a GPU-side copy with no codec in the path at all.
+        if(HAS_BITMAP){
+          createImageBitmap(cap).then(bm=>{ arr[idx]=bm; }).catch(()=>{});
+        } else {
+          cap.toBlob(b=>{ if(!b) return; blobArr[idx]=b; const im=new Image(); im.src=URL.createObjectURL(b); arr[idx]=im; maybePersist(); }, 'image/webp', 0.95);
+        }
         updateLoader();
         if(v.ended){ ended=true; finish(); }
         else if(v.requestVideoFrameCallback) v.requestVideoFrameCallback(grab);
@@ -193,8 +214,21 @@
           // clip and the film played as a slideshow. When we have to poll, run the
           // clip at normal speed so every poll lands on a distinct frame.
           const RVFC = !!v.requestVideoFrameCallback;
-          try{ v.playbackRate = RVFC ? (MOBILE ? 3 : 4) : 1; }catch(e){}
+          // Back to full speed on both paths. The polling path was dropped to 1x only
+          // because 24Hz polling against a 3x clip sampled 8 frames per second of
+          // footage — but that was a workaround for a frame budget the WebP encode was
+          // eating. With bitmaps there is no encode, so we can play fast AND sample
+          // every presented frame: rAF polls at the display rate (60Hz, 120Hz on newer
+          // iPhones) instead of a fixed timer.
+          try{ v.playbackRate = MOBILE ? 2 : 4; }catch(e){}
           if(RVFC) v.requestVideoFrameCallback(grab);
+          // A TIMER, not rAF: rAF is gated by the compositor, so on a page already
+          // painting a full-screen canvas it samples at whatever the render loop
+          // manages — exactly when frames matter most. 30Hz, not 60: sampled swept
+          // against capture completeness, 60Hz and 40Hz both starved the decode so
+          // badly that the last two clips never captured and the closing acts went
+          // black. 30Hz at 3x is the only setting where the film paints at every
+          // scroll position.
           else { const iv=setInterval(()=>{ if(done){clearInterval(iv);return;} grab(); if(v.ended){ended=true;clearInterval(iv);finish();} }, 1000/30); }
         }).catch(finish);
       }, { once:true });
@@ -260,29 +294,35 @@
     curCam = smCam; return smCam;
   }
 
+  // Frames are ImageBitmaps where the browser has them and <img> otherwise (the
+  // IndexedDB cache still restores <img>). These read either without caring which.
+  const fw = im => im.naturalWidth  || im.width  || 0;
+  const fh = im => im.naturalHeight || im.height || 0;
+  const fready = im => !!im && (im.complete === undefined || im.complete) && fw(im) > 0;
+
   function paint(im, vel, cam){
-    if(!im || !im.complete || !im.naturalWidth) return false;
+    if(!fready(im)) return false;
     const cw=canvas.width, ch=canvas.height;
     ctx.clearRect(0,0,cw,ch);
     breathT += 0.016;
     const breathe = 1 + (REDUCED?0:Math.sin(breathT*0.6)*0.012);
     const blur = REDUCED ? 0 : Math.min(4, vel*4);
     ctx.filter = _grade + (blur>0.2? ` blur(${blur.toFixed(1)}px)`:'');
-    const s = Math.max(cw/im.naturalWidth, ch/im.naturalHeight) * breathe * (cam?cam.scale:1);
-    const w = im.naturalWidth*s, h = im.naturalHeight*s;
+    const s = Math.max(cw/fw(im), ch/fh(im)) * breathe * (cam?cam.scale:1);
+    const w = fw(im)*s, h = fh(im)*s;
     ctx.drawImage(im, (cw-w)/2 + (cam?cam.x*cw:0), (ch-h)/2 + (cam?cam.y*ch:0), w, h);
     ctx.filter = 'none';
     lastGood = im;
     return true;
   }
   function paintFallback(){
-    const im = lastGood || (posterImg.complete && posterImg.naturalWidth ? posterImg : null);
+    const im = lastGood || (fready(posterImg) ? posterImg : null);
     if(!im) return;
     const cw=canvas.width, ch=canvas.height;
     ctx.clearRect(0,0,cw,ch);
     ctx.filter = _grade;
-    const s=Math.max(cw/im.naturalWidth,ch/im.naturalHeight)*(curCam?curCam.scale:1);
-    const w=im.naturalWidth*s, h=im.naturalHeight*s;
+    const s=Math.max(cw/fw(im),ch/fh(im))*(curCam?curCam.scale:1);
+    const w=fw(im)*s, h=fh(im)*s;
     ctx.drawImage(im,(cw-w)/2+(curCam?curCam.x*cw:0),(ch-h)/2+(curCam?curCam.y*ch:0),w,h);
     ctx.filter='none';
   }
