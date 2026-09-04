@@ -67,7 +67,7 @@
 ### INDEX (the film) — keep engine, raise craft
 | Act | Now | Redesign |
 |---|---|---|
-| 0 Hero | centered, eyebrow+H1+valueprop | SplitText "We are *precision*"; eyebrow bronze; add **3 hard numbers** strip (40+ yrs · 500 MT · ISO 9001) so a buyer qualifies you in 5s |
+| 0 Hero | centered, eyebrow+H1+valueprop | SplitText "We are *precision*"; eyebrow bronze; add **3 hard numbers** strip (40+ yrs · 6000 MT/yr · ISO 9001) so a buyer qualifies you in 5s |
 | 1 Pour→part | center | keep; accent word molten→bronze on scroll |
 | 2–3 Apart/back | bottom | add a real **materials fact card** (CI·DI·SiMo·ADI + tolerances) |
 | 4 Orbit | bottom-left chips | keep; chips → hover-lift |
