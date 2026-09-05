@@ -110,7 +110,7 @@
      The lit one is full scale and full brightness; its neighbours recede above and below
      in depth. Scroll drives it, a lerp smooths it, so it reads as a slow dolly down a
      rack of castings rather than a slideshow. ── */
-  /* 640vh gave all 23 castings 28vh of scroll each — the longest page on the site and the
+  /* 640vh gave all 25 castings 28vh of scroll each — the longest page on the site and the
      flattest rhythm on it, because a catalogue is not a democracy and every part was
      weighted the same. 440vh keeps the same pinned rig (products.js derives its progress
      from offsetHeight, so nothing else changes) and moves the reel along at a pace that
@@ -169,6 +169,10 @@
   /* product grid */
   .pgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,1.6vw,22px)}
   .pgrid--wide{grid-template-columns:repeat(2,minmax(0,1fr))}
+  /* A grid holding ONE card stretched four tracks wide and left-aligned it, so the
+     lone Oil & Gas casting sat in the corner of an empty row and read as a section
+     that had failed to load. Collapse to a single centred track instead. */
+  .pgrid:has(> .pgrid__item:only-child){grid-template-columns:minmax(0,340px);justify-content:center}
   .pgrid__item{position:relative;opacity:0;transform:translateY(30px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
   .pgrid__item.in{opacity:1;transform:none}
   .pgrid__frame{position:relative;aspect-ratio:1;border:1px solid var(--line);border-radius:6px;
@@ -289,7 +293,7 @@
     <a href="#oil-gas" class="psector-card">
       <span class="psector-card__num">03</span>
       <span class="psector-card__name">Oil &amp; Gas</span>
-      <span class="psector-card__count">2 castings</span>
+      <span class="psector-card__count">1 casting</span>
       <span class="psector-card__arrow">→</span>
     </a>
   </div>
@@ -351,15 +355,14 @@
     <div class="pcat__header rv">
       <span class="pcat__num">03 · Oil &amp; Gas</span>
       <h2 class="pcat__title" data-split>Oil &amp; Gas</h2>
-      <p class="pcat__lede">Heavy-walled housings and pump components for oil &amp; gas applications — built for extreme conditions, verified to international standards.</p>
+      <p class="pcat__lede">Heavy-walled housings for oil &amp; gas applications — built for extreme conditions, verified to international standards.</p>
     </div>
     <!-- Oil & Gas sits on the SAME 4-column grid as Automobile and Hydraulic. It used to be
          a 2-column .pgrid--wide of two 2:1 feature cards, so its two castings rendered at
          roughly four times the area of every other product on the page for no reason other
          than that there were only two of them. -->
     <div class="pgrid" id="pgrid-oilgas">
-      <div class="pgrid__item" data-i="0"><div class="pgrid__frame"><img src="images/products/oil-gas/pump-housing.webp" alt="Pump Housing" loading="lazy" decoding="async" /></div><div class="pgrid__info"><span class="pgrid__name">Pump Housing</span><span class="pgrid__tag">Shell Moulded</span></div></div>
-      <div class="pgrid__item" data-i="1"><div class="pgrid__frame"><img src="images/products/oil-gas/industrial-housing.webp" alt="Industrial Housing" loading="lazy" decoding="async" /></div><div class="pgrid__info"><span class="pgrid__name">Industrial Housing</span><span class="pgrid__tag">Shell Moulded</span></div></div>
+      <div class="pgrid__item" data-i="0"><div class="pgrid__frame"><img src="images/products/oil-gas/industrial-housing.webp" alt="Industrial Housing" loading="lazy" decoding="async" /></div><div class="pgrid__info"><span class="pgrid__name">Industrial Housing</span><span class="pgrid__tag">Shell Moulded</span></div></div>
     </div>
   </div>
 </section>
