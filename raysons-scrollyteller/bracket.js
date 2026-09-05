@@ -1,5 +1,5 @@
 // ============================================================
-//  RAYSONS — "The Object" · WebGL finale  ·  "Your drawing, our fire."
+//  RAYSONS — "The Object" · WebGL finale  ·  "Your drawing, our machining."
 //  The real Raysons casting (11CX065C01) in true 3D, as the film's closing chapter.
 //  It opens literally on the copy: the part is first a glowing TECHNICAL DRAWING
 //  (feature-edge wireframe), then it CASTS — molten-hot iron floods in, glows, and
@@ -85,7 +85,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   const capEl = { k: cap && cap.querySelector('.k'), h: cap && cap.querySelector('h2'), p: cap && cap.querySelector('p') };
   const COPY = {
     drawing: { k:'The Drawing · 0050-351-2000-000', h:'Your <em>drawing.</em>', p:'Your part, in our language' },
-    object:  { k:'The Object · 0050-351-2000-000',  h:'Our <em>fire.</em>',     p:'Shell moulded · machined to drawing' },
+    object:  { k:'The Object · 0050-351-2000-000',  h:'Our <em>machining.</em>', p:'Shell moulded · machined to drawing' },
     section: { k:'Section · 0050-351-2000-000',     h:'Every <em>wall.</em>',   p:'Sectioned to the drawing · wall thickness held' }
   };
   let capPhase = '';

@@ -671,8 +671,6 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
   color:var(--ink-faint);margin-bottom:7px}
 .cert__dl dd{font-family:var(--mono);font-size:13px;letter-spacing:.04em;color:var(--ink);
   font-variant-numeric:tabular-nums}
-.cert__verify{margin-top:20px;font-size:13.5px;line-height:1.65;color:var(--ink-dim);
-  font-weight:300;max-width:52ch}
 
 @media(max-width:900px){
   .cert{grid-template-columns:1fr;gap:28px}
@@ -686,7 +684,6 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 [data-theme="light"] .cert__dl{background:rgba(22,18,14,.14);border-color:rgba(22,18,14,.14)}
 [data-theme="light"] .cert__scope{color:#4c443a}
 [data-theme="light"] :is(.cert__h,.cert__dl dd){color:#16120e}
-[data-theme="light"] .cert__verify{color:#4c443a}
-[data-theme="light"] .cert__h em{color:#8a5a12}
+[data-theme="light"] [data-theme="light"] .cert__h em{color:#8a5a12}
 [data-theme="light"] .cert__dl dt{color:#6d6357}
 [data-theme="light"] .journey-gl .cert__dl > div{background:rgba(255,255,255,.82)}
