@@ -1,0 +1,29 @@
+# Raysons Shell Cast — cache policy
+#
+# WHY THIS EXISTS
+# The server sent no Cache-Control for .html, so browsers fell back to HEURISTIC
+# caching: they keep a page for roughly a tenth of its age since Last-Modified,
+# with no request to the server at all. Copy that was deleted and deployed kept
+# appearing for people who had visited before, and no amount of redeploying could
+# reach them, because their browser never asked.
+#
+# HTML now always revalidates. That is one cheap conditional request per page —
+# the server answers 304 Not Modified and sends no body when nothing changed.
+# It matters more than it costs: every page carries ?v= content hashes for its own
+# CSS and JS, so a stale page pins stale assets to it. Fresh HTML, fresh everything.
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# Correct types for the 3D and media the site serves. The casting model was being
+# sent as text/plain, which browsers are entitled to refuse.
+<IfModule mod_mime.c>
+  AddType model/gltf-binary .glb
+  AddType model/gltf+json  .gltf
+  AddType image/webp       .webp
+  AddType font/woff2       .woff2
+  AddType video/mp4        .mp4
+</IfModule>

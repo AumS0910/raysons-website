@@ -48,18 +48,39 @@
   // Each .pgrid__item starts opacity:0 translateY(30px) and gets .in when visible.
   const gridItems = document.querySelectorAll('.pgrid__item');
   if('IntersectionObserver' in window && gridItems.length){
+    function showItem(el){
+      if(el.classList.contains('in')) return;
+      const idx = parseInt(el.getAttribute('data-i') || '0', 10);
+      el.style.transitionDelay = (idx * 0.08) + 's';    // stagger within each grid
+      el.classList.add('in');
+    }
+    // threshold 0, not 0.1. At 0.1 a card had to get a TENTH of itself inside the
+    // shrunken root before it counted — and these cards carry lazy images, so one
+    // loading reflows its row mid-scroll, the crossing is missed, and because the
+    // element is unobserved on the only path that reveals it, that card stays invisible
+    // for good. Whole rows of products were vanishing, intermittently, in production.
     const gio = new IntersectionObserver(function(es){
-      es.forEach(function(e){
-        if(e.isIntersecting){
-          // stagger: delay based on data-i within each grid
-          const idx = parseInt(e.target.getAttribute('data-i') || '0', 10);
-          e.target.style.transitionDelay = (idx * 0.08) + 's';
-          e.target.classList.add('in');
-          gio.unobserve(e.target);
-        }
-      });
-    }, { rootMargin:'0px 0px -8% 0px', threshold:0.1 });
+      es.forEach(function(e){ if(e.isIntersecting){ showItem(e.target); gio.unobserve(e.target); } });
+    }, { rootMargin:'0px 0px -8% 0px', threshold:0 });
     gridItems.forEach(function(el){ gio.observe(el); });
+
+    // SAFETY NET. An observer is only ever as reliable as the layout it measures, and a
+    // product that never appears is worse than one that appears without ceremony. Anything
+    // already scrolled past gets shown regardless of what the observer did or did not see.
+    var sweepPending = false;
+    function sweep(){
+      sweepPending = false;
+      var left = 0;
+      gridItems.forEach(function(el){
+        if(el.classList.contains('in')) return;
+        if(el.getBoundingClientRect().top < innerHeight * 0.98){ gio.unobserve(el); showItem(el); }
+        else left++;
+      });
+      if(!left){ removeEventListener('scroll', onScroll); removeEventListener('resize', onScroll); }
+    }
+    function onScroll(){ if(!sweepPending){ sweepPending = true; requestAnimationFrame(sweep); } }
+    addEventListener('scroll', onScroll, { passive:true });
+    addEventListener('resize', onScroll, { passive:true });
   } else {
     // no IO → show all immediately
     gridItems.forEach(function(el){ el.classList.add('in'); });
@@ -72,8 +93,16 @@
       es.forEach(function(e){
         if(e.isIntersecting){ e.target.classList.add('in'); rio.unobserve(e.target); }
       });
-    }, { rootMargin:'0px 0px -12% 0px', threshold:0.05 });
+    }, { rootMargin:'0px 0px -12% 0px', threshold:0 });
     rvs.forEach(function(el){ rio.observe(el); });
+    // the same net for the section headers, for the same reason
+    addEventListener('scroll', function(){
+      rvs.forEach(function(el){
+        if(!el.classList.contains('in') && el.getBoundingClientRect().top < innerHeight * 0.98){
+          rio.unobserve(el); el.classList.add('in');
+        }
+      });
+    }, { passive:true });
   } else {
     rvs.forEach(function(el){ el.classList.add('in'); });
   }
