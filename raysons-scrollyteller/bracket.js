@@ -135,9 +135,24 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   // instead: a drawing on paper is dark line-work, so the edges go deep sepia and the mesh
   // behind them goes graphite. Same geometry, same reveal, correct medium for the ground.
   const WIRE = { dark: { edge:0xff8a3a, mesh:0xcf8a48 }, light: { edge:0x3d2a06, mesh:0x6f6252 } };
+
+  // BLOOM HAS TO MOVE WITH THE GROUND, and it never did — which is why the drawing looked
+  // washed out on the light theme. UnrealBloomPass blooms everything above a luminance
+  // threshold, and that threshold was a fixed 0.82. The light ground (0xefe9df) has a
+  // luminance of about 0.92, so THE BACKGROUND ITSELF was over the line: the whole frame
+  // bloomed into a bright haze and the dark sepia line-work sat under it, barely there.
+  // Light mode lifts the threshold clear of the paper and takes the strength down, so only
+  // the molten flash blooms — which is the one thing that should.
+  const BLOOM = { dark: { s:0.55, t:0.82 }, light: { s:0.22, t:0.97 } };
+
+  // Dark line-work on paper needs more weight than glowing line-work on black: at 0.16 the
+  // mesh behind the outline was a rumour. These scale the reveal's opacities per theme.
+  const INK = { dark: { mesh:0.16, ghost:0.14 }, light: { mesh:0.42, ghost:0.05 } };
+
   function paintTheme(t) {
     scene.background.setHex(GROUND[t]);
     scene.fog.color.setHex(HAZE[t]);
+    if (typeof bloom !== 'undefined' && bloom) { bloom.strength = BLOOM[t].s; bloom.threshold = BLOOM[t].t; }
     if (typeof wireMat !== 'undefined' && wireMat) wireMat.color.setHex(WIRE[t].edge);
     if (typeof meshWireMat !== 'undefined' && meshWireMat) meshWireMat.color.setHex(WIRE[t].mesh);
     if (floor && floor.material && floor.material.uniforms && floor.material.uniforms.color) {
@@ -330,6 +345,10 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight), 0.55, 0.5, 0.82);
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
+    // paintTheme ran before this existed (it has to — it inks the wires, which are built
+    // earlier), so its bloom branch was skipped. Run it again now the pass is real,
+    // otherwise the light theme keeps the dark theme's threshold and blooms the paper.
+    paintTheme(curTheme);
   }
 
   // ============================================================
@@ -397,16 +416,19 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
     const wire  = smooth(0.02,0.10,zp) * (1 - smooth(0.26,0.44,zp));     // in, then out
     const solid = smooth(0.26,0.46,zp);                                  // iron floods in
     const heat  = smooth(0.24,0.34,zp) * (1 - smooth(0.38,0.58,zp));     // molten flash, then cools
+    const ink = INK[curTheme];
     wireMat.opacity = wire;
-    meshWireMat.opacity = wire * 0.16;                                   // faint full mesh behind the outline
-    uni.uGhost.value = wire * 0.14;                                      // faint volume fill → the drawing has volume
+    meshWireMat.opacity = wire * ink.mesh;                               // full mesh behind the outline
+    // The ghost is a pale volume fill. On black it reads as the drawing having body; on
+    // bone it is near-white on near-white and just fogs the line-work, so it is barely used.
+    uni.uGhost.value = wire * ink.ghost;
     uni.uSolid.value = solid;                                            // per-fragment: metal exists up to the fill line
     uni.uFill.value  = smooth(0.24,0.42,zp) * 1.18;                      // the pour rises bottom-up and crests PAST the top
                                                                          // fast — the flat top face all sits at one height, so
                                                                          // a lingering front would light the whole face at once
     uni.uHeat.value  = heat;                                             // blackbody ramp: white-hot → orange → dull red
     iron.roughness = lerp(0.42, 0.55, smooth(0.36,0.7,zp)) + surf().rough;   // shiny-hot → matte cast-cool (+ light-mode damping)
-    if(bloom) bloom.strength = 0.55 + heat * 0.35;                       // the flash blooms; the cooled iron doesn't
+    if(bloom) bloom.strength = BLOOM[curTheme].s + heat * 0.35;          // the flash blooms; the cooled iron doesn't
     if(floor) floor.visible = solid > 0.02;                              // reflection only once it's cast — a drawing has none
     if(shadowPlane) shadowPlane.material.opacity = 0.66 * solid;         // shadow fades in with the solid
     // atmosphere: sparks ride the heat; dust hangs in the light once the object is real
