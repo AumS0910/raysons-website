@@ -144,6 +144,11 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   // Light mode lifts the threshold clear of the paper and takes the strength down, so only
   // the molten flash blooms — which is the one thing that should.
   const BLOOM = { dark: { s:0.55, t:0.82 }, light: { s:0.22, t:0.97 } };
+  // Declared HERE, not beside the composer further down, because paintTheme reads it
+  // and paintTheme runs long before the post chain is built. `typeof bloom` does not
+  // save you: on a `let` still in its temporal dead zone typeof THROWS rather than
+  // returning 'undefined' — the same trap this file already documents for `floor`.
+  let composer = null, bloom = null;
 
   // Dark line-work on paper needs more weight than glowing line-work on black: at 0.16 the
   // mesh behind the outline was a rumour. These scale the reveal's opacities per theme.
@@ -152,7 +157,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   function paintTheme(t) {
     scene.background.setHex(GROUND[t]);
     scene.fog.color.setHex(HAZE[t]);
-    if (typeof bloom !== 'undefined' && bloom) { bloom.strength = BLOOM[t].s; bloom.threshold = BLOOM[t].t; }
+    if (bloom) { bloom.strength = BLOOM[t].s; bloom.threshold = BLOOM[t].t; }
     if (typeof wireMat !== 'undefined' && wireMat) wireMat.color.setHex(WIRE[t].edge);
     if (typeof meshWireMat !== 'undefined' && meshWireMat) meshWireMat.color.setHex(WIRE[t].mesh);
     if (floor && floor.material && floor.material.uniforms && floor.material.uniforms.color) {
@@ -338,7 +343,6 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   });
 
   // ---- post: subtle bloom for the molten heat-flash + bright metal specular ----
-  let composer=null, bloom=null;
   if(!MOBILE){
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));

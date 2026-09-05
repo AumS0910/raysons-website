@@ -49,7 +49,7 @@
 }
 </script>
 <script>try{var _t=localStorage.getItem('rc_theme');if(_t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
-<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="styles.css?v=2c696dba" />
 <!-- three.js import map — present on EVERY page so module engines (bracket.js,
      about-corridor.js) resolve "three" no matter which page you entered on and then
      flow to via the seamless router (spa.js). Harmless on pages that do not use it. -->
@@ -59,7 +59,7 @@
   "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
 }}
 </script>
-<link rel="stylesheet" href="foundry.css" />
+<link rel="stylesheet" href="foundry.css?v=2a5d4f6c" />
 <!-- (No hero preload: the hero is generated in canvas, not fetched. Foundry deliberately
      borrows no imagery from the Overview/About films — see foundry-heat.js.) -->
 <style>
@@ -554,13 +554,13 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="foundry.js"></script>
-<script src="foundry-heat.js"></script>
-<script src="foundry-chapters.js"></script>
+<script src="foundry.js?v=3b6b40cc"></script>
+<script src="foundry-heat.js?v=8f3d6109"></script>
+<script src="foundry-chapters.js?v=46695a1c"></script>
 <!-- the live hero casting (module: needs the importmap in <head>). Loads three.js + the
      150 KB casting only after the page's own engines are up, and bails silently on no-WebGL
      or reduced motion, leaving the poster in place. -->
-<script type="module" src="foundry-object.js"></script>
+<script type="module" src="foundry-object.js?v=1348b944"></script>
 <script>
 /* ── Environmental grade: the light walks the process ──
    Marks which section owns the frame so .stage__grade can crossfade under it —
@@ -606,9 +606,9 @@
   addEventListener('resize', upd); upd();
 })();
 </script>
-<script src="premium.js"></script>
-<script src="nav-transition.js"></script>
-<script src="theme.js"></script>
-<script src="spa.js"></script>
+<script src="premium.js?v=fa7b4d4b"></script>
+<script src="nav-transition.js?v=2da77911"></script>
+<script src="theme.js?v=ee040546"></script>
+<script src="spa.js?v=673aa644"></script>
 </body>
 </html>
