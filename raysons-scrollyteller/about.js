@@ -89,3 +89,25 @@
   // refresh after the hero image + fonts settle
   addEventListener('load', ()=> ScrollTrigger.refresh());
 })();
+
+/* ── THE LEADERSHIP RAIL — retire its instruction once it has been obeyed ──
+   Same contract as the journey and casting hints: an instruction that stays on screen
+   after you have followed it stops being help and becomes clutter. Retires on the first
+   real scroll of the rail, and never appears at all where every card already fits. ── */
+(function(){
+  var rail = document.querySelector(".leaders");
+  var hint = document.getElementById("leadersHint");
+  if(!rail || !hint) return;
+  function fits(){ return rail.scrollWidth <= rail.clientWidth + 4; }
+  function retire(){ hint.classList.add("gone"); rail.removeEventListener("scroll", onScroll); }
+  function onScroll(){ if(rail.scrollLeft > 12) retire(); }
+  if(fits()) hint.classList.add("gone");
+  rail.addEventListener("scroll", onScroll, { passive:true });
+  addEventListener("resize", function(){ if(fits()) hint.classList.add("gone"); }, { passive:true });
+  // arrow keys are how a keyboard reaches a scroll container that has no focusable children
+  rail.addEventListener("keydown", function(e){
+    var step = rail.clientWidth * 0.8;
+    if(e.key === "ArrowRight"){ rail.scrollBy({ left: step, behavior:"smooth" }); e.preventDefault(); retire(); }
+    if(e.key === "ArrowLeft"){  rail.scrollBy({ left:-step, behavior:"smooth" }); e.preventDefault(); retire(); }
+  });
+})();

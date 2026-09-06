@@ -45,7 +45,7 @@
 </script>
 <script>try{var _t=localStorage.getItem('rc_theme');if(_t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
 <link rel="stylesheet" href="styles.css?v=2c696dba" />
-<link rel="stylesheet" href="about-cinema.css?v=d4cdd4b4" />
+<link rel="stylesheet" href="about-cinema.css?v=1701ad94" />
 <!-- three.js for the "Our Journey" WebGL pillar corridor (desktop only; see about-corridor.js) -->
 <script type="importmap">
 { "imports": {
@@ -313,29 +313,39 @@
   <!-- The portrait sits INSIDE .mvv so it anchors to the vision column itself: it begins
        exactly where that column ends and stands exactly as tall as it. Anchored to the
        section instead, it sat far right with a gap and read as unrelated to the words. -->
+  <!-- Mission, Vision and Values as three equal statements. The two portraits that used to
+       flank this block were absolutely positioned against specific column edges and needed
+       re-tuning at nearly every breakpoint; all three leaders now live in the rail below,
+       which weighs them equally and cannot collide with the words. -->
   <div class="mvv">
-    <!-- Two statements, the two people who hold them: MD beside the Mission (left),
-         Director beside the Vision (right). Each portrait removes itself if its file
-         is missing, so the section is never broken while an image is pending. -->
-    <figure class="purpose__figure purpose__figure--left rv">
-      <picture>
-        <source srcset="images/mission.webp" type="image/webp" />
-        <img src="images/mission.webp" alt="Satish Raibage" loading="lazy" decoding="async"
-             onerror="this.closest('.purpose__figure').style.display='none'" />
-      </picture>
-      <figcaption><b>Satish Raibage</b><span>Managing Director</span></figcaption>
-    </figure>
     <div class="m rv"><h4>Our Mission</h4><p>To produce superior castings through advanced technologies, long-term partnerships, and a culture of excellence, safety, and continuous improvement.</p></div>
     <div class="m rv"><h4>Our Vision</h4><p>To be a globally recognised, trusted partner delivering innovative, sustainable, and high-quality casting solutions.</p></div>
-    <figure class="purpose__figure purpose__figure--right rv">
-      <picture>
-        <source srcset="images/leadership.webp" type="image/webp" />
-        <img src="images/leadership.webp" alt="Sujal Raibage" loading="lazy" decoding="async"
-             onerror="this.closest('.purpose__figure').style.display='none'" />
-      </picture>
+    <div class="m rv"><h4>Our Values</h4><p>Integrity in what we promise, discipline in what we pour, and responsibility for what leaves the floor. We would rather lose an order than ship a casting we could not stand behind.</p></div>
+  </div>
+
+  <!-- THE LEADERSHIP RAIL — horizontal scroll.
+       Native overflow scrolling with scroll-snap rather than a carousel library: it already
+       works with a finger, a trackpad, a wheel and the keyboard, it costs no JavaScript, and
+       where there is room for all three it simply reads as a row. Each portrait removes its
+       own card if the file is missing, so the rail is never broken while an image is pending. -->
+  <div class="leaders rv" role="group" aria-label="Raysons Shell Cast leadership" tabindex="0">
+    <figure class="leader">
+      <picture><img src="images/founder.webp" alt="Bhanudas Raibage" loading="lazy" decoding="async"
+           onerror="this.closest('.leader').remove()" /></picture>
+      <figcaption><b>Mr. Bhanudas Raibage</b><span>Founder</span></figcaption>
+    </figure>
+    <figure class="leader">
+      <picture><img src="images/mission.webp" alt="Satish Raibage" loading="lazy" decoding="async"
+           onerror="this.closest('.leader').remove()" /></picture>
+      <figcaption><b>Satish Raibage</b><span>Managing Director</span></figcaption>
+    </figure>
+    <figure class="leader">
+      <picture><img src="images/leadership.webp" alt="Sujal Raibage" loading="lazy" decoding="async"
+           onerror="this.closest('.leader').remove()" /></picture>
       <figcaption><b>Sujal Raibage</b><span>Director</span></figcaption>
     </figure>
   </div>
+  <p class="leaders__hint" id="leadersHint" aria-hidden="true">Scroll sideways for more</p>
 </div></section>
 
 <!-- ===================== PEOPLE ===================== -->
@@ -457,7 +467,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <!-- Lenis removed from About: the film + timeline lerp scroll themselves; Lenis on top
      was the double-smoothing that caused the reported lag. -->
-<script src="about.js?v=e3be34ea"></script>
+<script src="about.js?v=13852dc5"></script>
 <script src="about-film.js?v=1f554584"></script>
 <script src="about-journey.js?v=af73f5a4"></script>
 <script type="module" src="about-corridor.js?v=737751aa"></script>
