@@ -16,7 +16,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0807'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23c9a24e'/%3E%3C/svg%3E" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="About Raysons Shell Cast — Forged over forty years" />
-<meta property="og:description" content="Forged over forty years — from the first resin-coated sand in Maharashtra to a precision foundry trusted by OEMs on four continents." />
+<meta property="og:description" content="Forged over forty years — from the first resin-coated sand in Maharashtra to a precision foundry trusted by OEMs in Europe, the UK and the USA." />
 <meta property="og:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/valve/era-1987-poster.jpg" />
 <meta property="og:site_name" content="Raysons Shell Cast" />
 <meta property="og:url" content="https://raysons-website.vercel.app/raysons-scrollyteller/About%20Us.html" />
@@ -25,7 +25,7 @@
 <meta name="geo.placename" content="Kolhapur, Maharashtra" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="About Raysons Shell Cast — Forged over forty years" />
-<meta name="twitter:description" content="Forged over forty years — from the first resin-coated sand in Maharashtra to a precision foundry trusted by OEMs on four continents." />
+<meta name="twitter:description" content="Forged over forty years — from the first resin-coated sand in Maharashtra to a precision foundry trusted by OEMs in Europe, the UK and the USA." />
 <meta name="twitter:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/valve/era-1987-poster.jpg" />
 <script type="application/ld+json">
 {
@@ -87,7 +87,7 @@
   }
 
   /* MOBILE — the trust row had no phone rule: .kicker is a fixed 12px/.2em, so the long
-     "Italy · United Kingdom · Japan · USA — shipped from Kolhapur" line ran edge-to-edge
+     "Europe · United Kingdom · USA — shipped from Kolhapur" line ran edge-to-edge
      and wrapped mid-word. Tighten it, shrink the seal, and let the contact row breathe. */
   @media(max-width:640px){
     .trust-row{gap:14px;margin-top:26px}
@@ -196,9 +196,11 @@
            line further down, after the foundry story (see Purpose). PRD: highest-priority fix. -->
       <div class="fact on" data-fact="0"><div class="inner">
         <div class="eyebrow-badge"><span class="dot"></span> About Us · Precision Iron Foundry</div>
-        <!-- long editorial headline: sized well below the display clamp so it never overflows,
-             and each customer name is its own <em> so the split-reveal wraps them independently. -->
-        <h1 class="ahero__title" data-split style="font-size:clamp(28px,4.6vw,68px);line-height:1.05;letter-spacing:-.01em;max-width:16ch">The foundry behind machines at <em>Caterpillar,</em> <em>Halliburton</em> &amp; <em>Schwing&nbsp;Stetter.</em></h1>
+        <!-- Named customers were replaced with "multiple OEMs" at the client's request.
+             The headline is now short, so the tight clamp and 16ch cap that existed to stop
+             three brand names overflowing have been relaxed rather than removed: unclamped it
+             rendered at 158px, which shoved the sub-line onto the film's burned-in caption. -->
+        <h1 class="ahero__title" data-split style="font-size:clamp(34px,6vw,92px);line-height:1.05;letter-spacing:-.01em;max-width:15ch">The foundry behind machines at <em>multiple OEMs.</em></h1>
         <p class="ahero__sub">Kolhapur, Maharashtra · Since 1987 · ISO&nbsp;9001:2015</p>
       </div></div>
     </div>
