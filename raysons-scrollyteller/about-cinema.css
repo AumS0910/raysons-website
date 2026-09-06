@@ -319,67 +319,121 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 /* ============================================================
    MVV / VALUES / CERTS / PEOPLE / FINALE / FOOTER
    ============================================================ */
-/* ── PURPOSE + PORTRAIT ──────────────────────────────────────────────────────
-   The mission and vision now sit beside the person who holds them. The portrait is
-   a cut-out on transparent background, so the work is making it belong to the page
-   instead of sitting on top of it:
-     · it BLEEDS off the bottom edge rather than floating as a complete rectangle
-     · a mask fades the lower third and the inner edge into the page, so there is
-       no cut line where the subject stops
-     · the site's warm grade + a slight desaturation pull it into the film's palette
-   He faces slightly toward camera-left, so placing him on the RIGHT turns him
-   into the text — he reads as speaking it, which is the whole point. */
-/* STRETCH, so the portrait is measured by the copy beside it. The grid row is defined
-   by the Mission/Vision block; the figure fills that row and the image caps at 100% of
-   it. He is therefore always exactly as tall as the purpose text — no magic numbers,
-   and it stays true at any viewport because it is a relationship, not a fixed size.
-   (Sizing by column WIDTH made him 720px tall at 900x1440 and pushed his head out
-   through the top of the section.) */
-/* the inner edge — the side nearest the text — dissolves so the figure fades INTO the
-   words rather than ending in a hard line beside them. Mirrored per side. Both keep the
-   same bottom fade. */
+/* ── PURPOSE — A PINNED HORIZONTAL RUN ─────────────────────────────
+   Three statements, each with the person accountable for it standing beside it, one
+   per screen; vertical scroll drives the track sideways, then the page releases.
 
-@media(max-width:900px){
-  /* stack in reading order: Mission → Satish → Vision → Sujal */
-  .mvv{max-width:100%;display:flex;flex-direction:column}
-  .mvv .m:first-of-type{order:1}
-    .mvv .m:last-of-type{order:3}
-        }
+   The portrait is a cut-out on a transparent ground, so the whole job is making it
+   BELONG to the page rather than sit on top of it:
+     · it bleeds off the bottom edge instead of floating as a complete rectangle
+     · a mask dissolves the lower third and the inner edge, so there is no cut line
+       where the subject stops — he fades INTO the words rather than ending beside them
+     · the site's warm grade + a slight desaturation pull him into the film's palette
+   No border, no plate, no background: a card would make three men into three products.
 
-/* centred, with room reserved on the RIGHT for Sujar (far right of Vision) */
-/* LEFT-ALIGNED to the section, not centred. `margin:… auto` with a reduced max-width
-   (the room reserved on the right for Sujal) was pulling the whole block ~114px in from
-   the left, so "Our Mission" and "Our Vision" started well inside the heading and the
-   lede above them and the column never lined up with anything. The right-hand reserve is
-   kept — it is what the portrait stands in — but it now comes off the RIGHT edge only. */
-/* LEFT-ALIGNED, same box. `margin:… auto` centred the block, and because its max-width is
-   reduced to reserve room for Sujal on the right, centring split that reserve in half and
-   pushed the whole thing ~115px in from the left — so "Our Mission" never lined up with
-   the heading or the lede above it. Only the margin changes: the WIDTH is identical, which
-   matters because both portraits are absolutely positioned against this box (a first
-   attempt widened it instead and put Satish straight through the Vision copy). */
-.mvv{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(24px,4vw,64px);
-  margin:clamp(40px,6vh,72px) 0 0;max-width:100%}
-/* BOTH columns carry the same right inset so the Mission and Vision text measure the
-   same width — Mission's clears Satish, Vision's keeps it symmetric (Sujal sits in the
-   block's right margin beyond it). Equal padding = equal text width. */
-/* the right gutter existed to clear a portrait that no longer stands there */
-.mvv .m{padding-right:clamp(0px,2vw,28px)}
-.mvv .m{padding-top:30px}   /* (glowing top hairlines removed per user) */
-.mvv .m h4{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--bronze-lite);margin-bottom:18px}
-.mvv .m p{font-size:clamp(16px,1.5vw,20px);line-height:1.6;color:#c9beb1;font-weight:300}
-@media(max-width:1000px){.mvv{grid-template-columns:1fr;gap:10px}}
-/* ── SMALL SCREENS — restated HERE, after the desktop rules, because they were losing to
-   them. The 900px block further up already stacks these columns and takes the portraits
-   out of position, but it sits EARLIER in the file and a media query adds no specificity:
-   the plain .mvv rules above overrode it at every width. The result was a phone still
-   holding a right-hand gutter reserved for a portrait that is no longer there —
-   max-width minus 140px, plus 96px of padding-right per column — which squeezed the
-   Mission/Vision text into ~115px and pushed the block's own content outside its box. */
+   EVERYTHING BELOW IS THE STATIC FALLBACK. It is a plain vertical stack and it is what
+   renders with no JS, under reduced-motion, and on a phone. The pin is layered on top of
+   it under body.hpin-live, which only script adds — so a failure anywhere in about.js
+   costs the motion and nothing else. Never move a word or a face into a .hpin-live rule. */
+.purpose{margin:clamp(40px,6vh,72px) 0 0;position:relative}
+.purpose__track{display:grid;gap:clamp(44px,7vh,86px)}
+.purpose__rail{display:none}
+
+.ppanel{display:grid;grid-template-columns:minmax(0,1fr) clamp(190px,26%,330px);
+  gap:clamp(20px,4vw,70px);align-items:end}
+.ppanel--nofig{grid-template-columns:minmax(0,1fr)}
+.ppanel__copy{align-self:center;max-width:34ch}
+.ppanel__ix{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--ink-faint);margin-bottom:14px}
+.ppanel__copy h4{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--bronze-lite);margin-bottom:18px}
+.ppanel__copy p{font-size:clamp(17px,1.9vw,26px);line-height:1.5;color:#c9beb1;font-weight:300}
+
+/* <picture> is inline by default and has no height of its own, so max-height:100% on the
+   img would resolve against nothing. It has to carry the height through. */
+.ppanel__fig{margin:0;position:relative;display:flex;align-items:flex-end;justify-content:center;
+  height:100%;min-height:0;pointer-events:none}
+.ppanel__fig picture{display:flex;align-items:flex-end;justify-content:center;height:100%;width:100%}
+/* contain, not cover — a full-length portrait is never cropped at the knees;
+   object-position:bottom keeps him standing on the baseline rather than floating. */
+.ppanel__fig img{width:auto;max-width:100%;height:auto;display:block;
+  object-fit:contain;object-position:bottom;max-height:min(58svh,520px);
+  filter:saturate(.84) contrast(1.04) brightness(.95);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 62%,rgba(0,0,0,.5) 84%,transparent 100%),
+                     linear-gradient(90deg,transparent 0%,rgba(0,0,0,.5) 8%,#000 19%,#000 100%);
+  mask-image:linear-gradient(180deg,#000 0%,#000 62%,rgba(0,0,0,.5) 84%,transparent 100%),
+             linear-gradient(90deg,transparent 0%,rgba(0,0,0,.5) 8%,#000 19%,#000 100%);
+  -webkit-mask-composite:source-in;mask-composite:intersect}
+/* a soft warm pool behind him, so he is lit BY the page rather than pasted onto it */
+.ppanel__fig::before{content:"";position:absolute;inset:auto 0 0 0;height:78%;z-index:-1;
+  background:radial-gradient(60% 70% at 50% 78%, rgba(201,162,78,.13), transparent 72%)}
+/* CREDIT — a statement beside a real person reads as his, so he is named. Sits at his
+   feet, in the same mono the section labels use. */
+.ppanel__fig figcaption{position:absolute;left:0;right:0;bottom:0;text-align:center;
+  font-family:var(--mono);line-height:1.5;pointer-events:none}
+.ppanel__fig figcaption b{display:block;font-weight:500;font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink);text-shadow:0 1px 12px rgba(7,5,4,.95)}
+.ppanel__fig figcaption span{display:block;margin-top:4px;font-size:10px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--bronze-lite);text-shadow:0 1px 12px rgba(7,5,4,.95)}
+[data-theme="light"] .ppanel__copy p{color:#4a4239}
+[data-theme="light"] .ppanel__fig figcaption b{color:#16120e;text-shadow:0 1px 12px rgba(239,233,223,.95)}
+[data-theme="light"] .ppanel__fig figcaption span{text-shadow:0 1px 12px rgba(239,233,223,.95)}
+/* LIGHT THEME KEEPS ONLY THE BOTTOM FADE. The inner-edge dissolve works on the dark
+   ground because a dark suit fading into a dark page reads as atmosphere; on the light
+   ground the same gradient turns his left arm into a grey smear and his legs into a
+   white void — it reads as a printing fault, not a treatment. On a pale page the cutout
+   needs no help: there is no rectangle to hide, so only the feet are softened. */
+[data-theme="light"] .ppanel__fig img{filter:saturate(.9) contrast(1.02) brightness(1.02);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 82%,rgba(0,0,0,.55) 94%,transparent 100%);
+  mask-image:linear-gradient(180deg,#000 0%,#000 82%,rgba(0,0,0,.55) 94%,transparent 100%);
+  -webkit-mask-composite:source-over;mask-composite:add}
+[data-theme="light"] .ppanel__fig::before{background:radial-gradient(58% 62% at 50% 82%, rgba(166,121,46,.10), transparent 74%)}
+
+/* stack under the copy on phones; the side dissolve becomes a bottom-only fade because
+   nothing sits to its left any more */
 @media(max-width:900px){
-  .mvv{display:flex;flex-direction:column;max-width:100%;gap:10px}
-  .mvv .m{padding-right:0;padding-top:22px}
+  .ppanel{grid-template-columns:1fr;gap:22px;align-items:start}
+  .ppanel__copy{max-width:none}
+  .ppanel__fig{width:min(260px,62vw);margin:4px auto 0;opacity:.94}
+  .ppanel__fig img{max-height:300px;
+    -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 70%,transparent 100%);
+    mask-image:linear-gradient(180deg,#000 0%,#000 70%,transparent 100%)}
 }
+
+/* ── THE PIN (script-only) ─────────────────────────────────────
+   The tall block is the scroll budget: one screen to hold the pin, plus 82svh of travel
+   per extra panel. --pan is written by about.js from the panel count, so adding a fourth
+   statement lengthens the run on its own. svh, not vh: on iOS Safari vh is the LARGE
+   viewport, so with the URL bar showing, a 100vh pin is taller than the screen and the
+   last panel never fully arrives before the pin lets go. */
+body.hpin-live .purpose{height:calc(100svh + (var(--pan,3) - 1) * 82svh)}
+body.hpin-live .purpose__stage{position:sticky;top:0;height:100svh;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:center}
+/* grid-auto-columns:100% resolves against the STAGE width, and the items overflow the
+   track to the right where the stage clips them. Sizing the panels with a flex-basis
+   percentage instead was circular — the track is as wide as its contents, and its
+   contents were asking how wide the track was. */
+body.hpin-live .purpose__track{display:grid;grid-auto-flow:column;grid-auto-columns:100%;
+  gap:0;width:100%;will-change:transform}
+/* The COLUMNS carry the measure, not a max-width on the copy. Capping the text at 26ch
+   inside a 1fr column left ~600px of dead space between the last word and the man, which
+   read as two unrelated things on one screen rather than one composition. */
+body.hpin-live .ppanel{height:min(76svh,700px);
+  grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(30px,6vw,90px);
+  padding-right:clamp(0px,3vw,44px)}   /* breathing room before the next panel's copy */
+body.hpin-live .ppanel__copy{max-width:none}
+/* A DEFINITE cap, never a percentage: max-height:100% resolved against a containing
+   block that was itself sized by this image, so it never applied and the portrait grew
+   to the column's width-driven height — 870px in a 684px panel, feet below the fold. */
+body.hpin-live .ppanel__fig img{max-height:min(70svh,632px)}
+body.hpin-live .ppanel__copy p{font-size:clamp(19px,2.1vw,30px);line-height:1.45}
+/* BOTTOM-LEFT and short, under the statement it belongs to — full width would run
+   straight through the fixed "Request a quote" pill that sits centred on every page. */
+body.hpin-live .purpose__rail{display:block;position:absolute;left:0;width:min(300px,34%);
+  bottom:clamp(18px,4.5vh,44px);height:1px;background:var(--line)}
+body.hpin-live .purpose__rail-fill{display:block;height:100%;transform:scaleX(0);
+  transform-origin:0 50%;background:linear-gradient(90deg,var(--bronze-deep),var(--molten))}
+
 .values{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:clamp(34px,5vh,56px)}
 .values .v{background:var(--bg);padding:28px 22px;min-height:180px;display:flex;flex-direction:column}
 .values .v .ix{font-family:var(--mono);font-size:11px;color:var(--molten);letter-spacing:.1em}
@@ -637,40 +691,3 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 [data-theme="light"] .cert__dl dt{color:#6d6357}
 [data-theme="light"] .journey-gl .cert__dl > div{background:rgba(255,255,255,.82)}
 
-/* ============================================================
-   THE LEADERSHIP RAIL — a horizontal scroller, not a carousel widget.
-   Native overflow-x with scroll-snap gets touch, trackpad, wheel and keyboard for
-   free, needs no JavaScript and cannot break; where three cards fit, it is just a row.
-   ============================================================ */
-.leaders{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(210px,26vw,300px);
-  gap:clamp(16px,2.4vw,34px);margin-top:clamp(36px,5vh,60px);
-  overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;
-  /* the cards can bleed to the section edge while scrolling, so pad the track, not the page */
-  padding:0 4px 6px;scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
-.leaders:focus-visible{outline:2px solid var(--bronze-lite);outline-offset:6px;border-radius:6px}
-.leaders::-webkit-scrollbar{height:3px}
-.leaders::-webkit-scrollbar-track{background:var(--line)}
-.leaders::-webkit-scrollbar-thumb{background:var(--bronze-deep);border-radius:3px}
-.leader{scroll-snap-align:start;margin:0;display:flex;flex-direction:column;
-  border:1px solid var(--line);border-radius:6px;overflow:hidden;background:rgba(255,255,255,.02)}
-.leader picture{display:block;aspect-ratio:3/4;overflow:hidden;
-  background:radial-gradient(70% 60% at 50% 100%, rgba(201,162,78,.14), transparent 72%)}
-/* object-position:bottom keeps them standing on the card edge rather than floating, and
-   contain (not cover) means a full-length portrait is never cropped at the knees. */
-.leader img{width:100%;height:100%;object-fit:contain;object-position:bottom;display:block;
-  filter:saturate(.86) contrast(1.04) brightness(.96)}
-.leader figcaption{padding:16px 18px 18px;border-top:1px solid var(--line)}
-.leader figcaption b{display:block;font-weight:500;font-size:13px;letter-spacing:.1em;color:var(--ink)}
-.leader figcaption span{display:block;margin-top:5px;font-family:var(--mono);font-size:10px;
-  letter-spacing:.2em;text-transform:uppercase;color:var(--bronze-lite)}
-.leaders__hint{margin-top:14px;font-family:var(--mono);font-size:10px;letter-spacing:.22em;
-  text-transform:uppercase;color:var(--ink-faint);transition:opacity .6s ease}
-.leaders__hint.gone{opacity:0}
-/* Once every card fits there is nothing to scroll, so the instruction would be a lie. */
-@media(min-width:1080px){.leaders__hint{display:none}}
-@media(max-width:520px){.leaders{grid-auto-columns:74vw}}
-[data-theme="light"] .leader{background:rgba(22,18,14,.03);border-color:rgba(22,18,14,.14)}
-[data-theme="light"] .leader figcaption{border-top-color:rgba(22,18,14,.14)}
-[data-theme="light"] .leader figcaption b{color:#16120e}
-[data-theme="light"] .leaders__hint{color:#6d6357}
-@media(prefers-reduced-motion:reduce){.leaders{scroll-behavior:auto}}

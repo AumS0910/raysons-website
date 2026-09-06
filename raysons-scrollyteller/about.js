@@ -90,24 +90,163 @@
   addEventListener('load', ()=> ScrollTrigger.refresh());
 })();
 
-/* ── THE LEADERSHIP RAIL — retire its instruction once it has been obeyed ──
-   Same contract as the journey and casting hints: an instruction that stays on screen
-   after you have followed it stops being help and becomes clutter. Retires on the first
-   real scroll of the rail, and never appears at all where every card already fits. ── */
+/* ============================================================
+   PURPOSE — the pinned horizontal run (Mission / Vision / Values)
+
+   The section is tall; a sticky stage holds it on screen; the page's own vertical scroll
+   position drives the track sideways. When the third statement lands, the pin releases and
+   the page carries on down. Nothing is intercepted — no wheel or touch handler, no
+   preventDefault — so momentum, the scrollbar, Find-in-page, deep links and the keyboard
+   all keep working, and there is no way for the page to get stuck if this script throws.
+
+   Off on phones and under reduced-motion: a horizontal jack on a 390px screen turns three
+   readable statements into a trap. The CSS static stack is the truth; .hpin-live is a
+   layer on top of it, so everything here can fail and the words are still there.
+   ============================================================ */
 (function(){
-  var rail = document.querySelector(".leaders");
-  var hint = document.getElementById("leadersHint");
-  if(!rail || !hint) return;
-  function fits(){ return rail.scrollWidth <= rail.clientWidth + 4; }
-  function retire(){ hint.classList.add("gone"); rail.removeEventListener("scroll", onScroll); }
-  function onScroll(){ if(rail.scrollLeft > 12) retire(); }
-  if(fits()) hint.classList.add("gone");
-  rail.addEventListener("scroll", onScroll, { passive:true });
-  addEventListener("resize", function(){ if(fits()) hint.classList.add("gone"); }, { passive:true });
-  // arrow keys are how a keyboard reaches a scroll container that has no focusable children
-  rail.addEventListener("keydown", function(e){
-    var step = rail.clientWidth * 0.8;
-    if(e.key === "ArrowRight"){ rail.scrollBy({ left: step, behavior:"smooth" }); e.preventDefault(); retire(); }
-    if(e.key === "ArrowLeft"){  rail.scrollBy({ left:-step, behavior:"smooth" }); e.preventDefault(); retire(); }
-  });
+  // The SPA re-runs every body script on each entry (spa.js rebuilds them so they
+  // execute), and this file is one. Without this, hopping Overview -> About -> Overview
+  // -> About leaves the earlier instances alive, still listening on window and still
+  // holding a detached #purposePin. They agree with the live instance about whether the
+  // pin should run, but not about who owns the class: on the next resize a stale
+  // sync() -> disable() strips .hpin-live off the body and the real pin dies flat.
+  if(window.__purposeTeardown) window.__purposeTeardown();
+
+  var pin = document.getElementById('purposePin');
+  if(!pin) return;
+  var stage  = pin.querySelector('.purpose__stage');
+  var track  = pin.querySelector('.purpose__track');
+  var fill   = pin.querySelector('.purpose__rail-fill');
+  var panels = Array.prototype.slice.call(pin.querySelectorAll('.ppanel'));
+  if(!stage || !track || panels.length < 2) return;
+
+  // the scroll budget is written from the panel count, so a fourth statement
+  // lengthens the run without anyone remembering to retune a magic number
+  pin.style.setProperty('--pan', panels.length);
+
+  var mqReduce = matchMedia('(prefers-reduced-motion: reduce)');
+  var mqNarrow = matchMedia('(max-width: 900px)');
+
+  var live = false, cur = 0, target = 0, raf = null, onScreen = true, travel = 0;
+  var last = performance.now();
+
+  // Frame-rate independent damping. A fixed per-frame fraction silently assumes 60fps;
+  // Safari runs these pages far slower and the track crawled behind the scroll on iPhone.
+  // k is chosen so the feel at 60fps is exactly what it was.
+  function damp(k, dt){ return 1 - Math.exp(-k * dt); }
+
+  function measureTravel(){ travel = Math.max(0, track.scrollWidth - stage.clientWidth); }
+
+  // A short hold at each end. Without it the track is already moving the instant the pin
+  // catches and still moving when it lets go, which reads as a slip rather than a stop.
+  var LEAD = 0.07, TAIL = 0.07;
+  function progress(){
+    var max = pin.offsetHeight - innerHeight;
+    if(max <= 0) return 0;
+    var raw = -pin.getBoundingClientRect().top / max;
+    var p = (raw - LEAD) / (1 - LEAD - TAIL);
+    return p < 0 ? 0 : p > 1 ? 1 : dwell(p);
+  }
+
+  // DWELL. A linear scrub means the track is always moving, so stopping anywhere leaves
+  // two half-statements side by side and nothing to read. This holds each panel still for
+  // the first and last 22% of its segment and eases across the middle, so the run reads as
+  // three deliberate statements rather than one long strip — and wherever you stop, you
+  // have almost certainly stopped on one of them.
+  var HOLD = 0.22;
+  function dwell(p){
+    var seg = panels.length - 1;
+    var f = p * seg, i = Math.floor(f);
+    if(i >= seg) return 1;                       // the last panel, already landed
+    var t = (f - i - HOLD) / (1 - 2 * HOLD);
+    t = t < 0 ? 0 : t > 1 ? 1 : t;
+    return (i + t * t * (3 - 2 * t)) / seg;      // smoothstep
+  }
+
+  function apply(p){
+    track.style.transform = 'translate3d(' + (-p * travel).toFixed(2) + 'px,0,0)';
+    if(fill) fill.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+    // the statement being read is the lit one; the others recede rather than disappear,
+    // so the run still reads as one continuous strip and not as three slides
+    var f = p * (panels.length - 1);
+    for(var i = 0; i < panels.length; i++){
+      var d = Math.abs(i - f); if(d > 1) d = 1;
+      panels[i].style.opacity = (1 - d * 0.7).toFixed(3);
+    }
+  }
+
+  function kick(){ if(!raf && live && onScreen) raf = requestAnimationFrame(loop); }
+  function loop(){
+    raf = null;
+    target = progress();
+    var now = performance.now();
+    var dt = Math.min(0.1, (now - last) / 1000) || 0.016; last = now;
+    cur += (target - cur) * damp(11.9, dt);
+    // LAND EXACTLY. The lerp only approaches its target, and the loop gives up at a
+    // threshold — which across 2535px of travel left the first panel resting 1-2px
+    // off the stage edge, enough to show a sliver of the next one. Snap the last step.
+    if(Math.abs(target - cur) <= 0.0006) cur = target;
+    apply(cur);
+    if(live && onScreen && cur !== target) kick();
+  }
+
+  function enable(){
+    if(live) return;
+    live = true;
+    document.body.classList.add('hpin-live');
+    // the class changes the layout, so travel can only be read after it has applied
+    requestAnimationFrame(function(){ measureTravel(); cur = target = progress(); apply(cur); kick(); });
+  }
+  function disable(){
+    if(!live) return;
+    live = false;
+    document.body.classList.remove('hpin-live');
+    if(raf){ cancelAnimationFrame(raf); raf = null; }
+    track.style.transform = '';
+    if(fill) fill.style.transform = '';
+    for(var i = 0; i < panels.length; i++) panels[i].style.opacity = '';
+  }
+  function sync(){ (mqReduce.matches || mqNarrow.matches) ? disable() : enable(); }
+
+  var dead = false, io = null, off = [];
+  function on(t, ev, fn, opt){ t.addEventListener(ev, fn, opt); off.push(function(){ t.removeEventListener(ev, fn, opt); }); }
+
+  function onScroll(){ if(!dead) kick(); }
+  function onResize(){ if(dead) return; sync(); if(live){ measureTravel(); kick(); } }
+  function onLoad(){ if(!dead && live){ measureTravel(); kick(); } }
+  function onMQ(){ if(!dead) sync(); }
+
+  on(window, 'scroll', onScroll, { passive:true });
+  on(window, 'resize', onResize, { passive:true });
+  // a lazily-decoded portrait changes the track's height, not its width, but the pin's own
+  // height is viewport-based — re-measure anyway, it is one read and it costs nothing
+  on(window, 'load', onLoad);
+  if(mqReduce.addEventListener){ on(mqReduce, 'change', onMQ); on(mqNarrow, 'change', onMQ); }
+  else { mqReduce.addListener(onMQ); mqNarrow.addListener(onMQ); }   // Safari < 14
+
+  // stop the rAF entirely when the section is nowhere near the viewport
+  if('IntersectionObserver' in window){
+    io = new IntersectionObserver(function(es){
+      if(dead) return;
+      onScreen = es[0].isIntersecting; if(onScreen) kick();
+    }, { rootMargin:'20% 0px' });
+    io.observe(pin);
+  }
+
+  // Hand the next instance a way to silence this one. It deliberately does NOT touch
+  // body.hpin-live: the incoming instance owns that class and sets it a moment later,
+  // and clearing it here would flash the static stack through the view transition.
+  var self = function(){
+    dead = true;
+    for(var i = 0; i < off.length; i++) off[i]();
+    off.length = 0;
+    if(io) io.disconnect();
+    if(raf){ cancelAnimationFrame(raf); raf = null; }
+    // drop the global's hold on this closure, or navigating away from About and staying
+    // away leaves a whole detached section (three portraits included) reachable forever
+    if(window.__purposeTeardown === self) window.__purposeTeardown = null;
+  };
+  window.__purposeTeardown = self;
+
+  sync();
 })();
