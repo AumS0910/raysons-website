@@ -26,3 +26,6 @@ _*.png
 .agents/
 example/
 public/
+
+# FTP credentials for the raysonsgroup.com deploy — never commit
+.deploy-credentials
