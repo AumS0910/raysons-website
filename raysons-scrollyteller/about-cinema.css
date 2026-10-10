@@ -391,15 +391,20 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
 [data-theme="light"] .ppanel__fig img{filter:saturate(.9) contrast(1.02) brightness(1.02)}
 [data-theme="light"] .ppanel__fig::before{background:radial-gradient(58% 62% at 50% 82%, rgba(166,121,46,.10), transparent 74%)}
 
-/* stack under the copy on phones; the side dissolve becomes a bottom-only fade because
-   nothing sits to its left any more */
+/* stack under the copy on phones */
 @media(max-width:900px){
   .ppanel{grid-template-columns:1fr;gap:22px;align-items:start}
   .ppanel__copy{max-width:none}
-  .ppanel__fig{width:min(260px,62vw);margin:4px auto 0;opacity:.94}
-  .ppanel__fig img{max-height:300px;
-    -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 70%,transparent 100%);
-    mask-image:linear-gradient(180deg,#000 0%,#000 70%,transparent 100%)}
+  /* opacity:.94 was dimming him for no reason — on a phone he is already small, and
+     taking 6% off a dark suit on a dark page just makes him look washed out. */
+  .ppanel__fig{width:min(300px,70vw);margin:4px auto 0}
+  /* THE SAME GENTLE FADE AS EVERYWHERE ELSE. This block carried its own mask starting
+     at 70%, so fixing the desktop one left phones untouched: a third of the man still
+     dissolved into the page and he still read as blurry on the device most people
+     actually use. A per-breakpoint copy of a value is a second place to forget. */
+  .ppanel__fig img{max-height:340px;
+    -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 88%,rgba(0,0,0,.55) 96%,transparent 100%);
+    mask-image:linear-gradient(180deg,#000 0%,#000 88%,rgba(0,0,0,.55) 96%,transparent 100%)}
 }
 
 /* ── THE PIN (script-only) ─────────────────────────────────────
