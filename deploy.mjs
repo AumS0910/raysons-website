@@ -133,10 +133,20 @@ async function verify(c, f) {
         sharp(fs.readFileSync(tmp)).metadata(),
         sharp(fs.readFileSync(f.abs)).metadata(),
       ]);
-      if (live.width !== local.width || live.height !== local.height) {
-        return { ok: false, why: `${live.width}x${live.height} live vs ${local.width}x${local.height} local` };
+      // The CDN does not only re-encode, it also CAPS dimensions — a 1920x1080 poster
+      // comes back 1600x900. That is the same picture, correctly uploaded, so demanding
+      // identical dimensions cried wolf on a clean deploy. What actually proves the file
+      // landed is that it decodes, keeps its aspect ratio, and is not LARGER than source
+      // (the CDN only ever shrinks). A truncated upload fails to decode at all.
+      const ar = (m) => m.width / m.height;
+      if (live.width > local.width || live.height > local.height) {
+        return { ok: false, why: `${live.width}x${live.height} live exceeds ${local.width}x${local.height} local` };
       }
-      return { ok: true, note: size === f.size ? '' : 'CDN re-encoded' };
+      if (Math.abs(ar(live) - ar(local)) > 0.01) {
+        return { ok: false, why: `aspect ${ar(live).toFixed(3)} live vs ${ar(local).toFixed(3)} local` };
+      }
+      const shrunk = live.width !== local.width;
+      return { ok: true, note: shrunk ? `CDN resized to ${live.width}x${live.height}` : (size === f.size ? '' : 'CDN re-encoded') };
     }
     if (size !== f.size) return { ok: false, why: `${size}b served, ${f.size}b local` };
     return { ok: true };
