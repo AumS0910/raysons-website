@@ -61,7 +61,11 @@
   // == element-aspect and the pour asset COVERS correctly instead of stretching. A ResizeObserver
   // catches the iOS URL-bar resize so it stays correct as you scroll.
   function sizeCanvas(){
-    const dpr=Math.min(devicePixelRatio||1,2);
+    // DPR 2 on a 3x phone meant a 780x1688 buffer — 1.32 megapixels blitted every single
+    // frame of every scroll, and a CPU profile put 89% of the scroll in native compositing
+    // with drawImage the largest JS cost after it. This is photographic film under motion,
+    // not text: at 1.4 nobody can tell, and it is HALF the pixels. Desktop keeps 2.
+    const dpr=Math.min(devicePixelRatio||1, MOBILE ? 1.4 : 2);
     const r=canvas.getBoundingClientRect();
     const w=Math.round(r.width)||innerWidth, h=Math.round(r.height)||innerHeight;
     if(canvas.width!==w*dpr || canvas.height!==h*dpr){ canvas.width=w*dpr; canvas.height=h*dpr; }
@@ -247,6 +251,14 @@
   //  RENDER
   // ============================================================
   const _grade = REDUCED ? '' : 'brightness(1.10) contrast(1.07) saturate(1.16)';
+  // ON MOBILE THE GRADE MOVES TO THE ELEMENT. ctx.filter re-filters the whole surface in
+  // software on every single painted frame; as a CSS filter on the canvas element the
+  // compositor does it on the GPU, once, for free, and the result is pixel-identical.
+  // The motion blur goes entirely on mobile: blur() is the most expensive filter there is
+  // and it was running a full-surface pass per frame, for a few pixels of smear during
+  // fast scroll that nobody has ever remarked on — on the device that can least afford it.
+  if(MOBILE && _grade) canvas.style.filter = _grade;
+  const CTX_FILTER = MOBILE ? '' : _grade;   // '' == no per-frame filter work at all
   let lastAct = -1, breathT = 0, lastGood = null;
 
   // ============================================================
@@ -309,11 +321,12 @@
     breathT += 0.016;
     const breathe = 1 + (REDUCED?0:Math.sin(breathT*0.6)*0.012);
     const blur = REDUCED ? 0 : Math.min(4, vel*4);
-    ctx.filter = _grade + (blur>0.2? ` blur(${blur.toFixed(1)}px)`:'');
+    const _f = CTX_FILTER + (!MOBILE && blur>0.2 ? ` blur(${blur.toFixed(1)}px)` : '');
+    if(_f) ctx.filter = _f;
     const s = Math.max(cw/fw(im), ch/fh(im)) * breathe * (cam?cam.scale:1);
     const w = fw(im)*s, h = fh(im)*s;
     ctx.drawImage(im, (cw-w)/2 + (cam?cam.x*cw:0), (ch-h)/2 + (cam?cam.y*ch:0), w, h);
-    ctx.filter = 'none';
+    if(_f) ctx.filter = 'none';
     lastGood = im;
     return true;
   }
@@ -322,11 +335,11 @@
     if(!im) return;
     const cw=canvas.width, ch=canvas.height;
     ctx.clearRect(0,0,cw,ch);
-    ctx.filter = _grade;
+    if(CTX_FILTER) ctx.filter = CTX_FILTER;
     const s=Math.max(cw/fw(im),ch/fh(im))*(curCam?curCam.scale:1);
     const w=fw(im)*s, h=fh(im)*s;
     ctx.drawImage(im,(cw-w)/2+(curCam?curCam.x*cw:0),(ch-h)/2+(curCam?curCam.y*ch:0),w,h);
-    ctx.filter='none';
+    if(CTX_FILTER) ctx.filter='none';
   }
 
   // ══ TURNTABLE ══════════════════════════════════════════════════════════════
