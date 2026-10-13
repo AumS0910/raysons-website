@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="build" content="1fe02437da2b">
+<meta name="build" content="22d7a83ff101">
 <script>
 /* SELF-HEAL. iOS Safari restores a suspended tab from a snapshot without re-fetching,
    so a phone can sit on a build from days ago no matter what the server sends or what
@@ -28,6 +28,20 @@
       })
       .catch(function(){});
   }catch(e){}
+  /* And again when Safari hands back a restored tab. pageshow with persisted=true means
+     the page came from the back/forward cache rather than the network, so nothing above
+     ran for this view — it is the exact path that leaves a phone on an old build. */
+  addEventListener('pageshow', function(e){
+    if(!e.persisted) return;
+    try{
+      var m = document.querySelector('meta[name="build"]');
+      if(!m || !window.fetch) return;
+      fetch('version.json?t=' + Date.now(), { cache:'no-store' })
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(v){ if(v && v.build && v.build !== m.getAttribute('content')) location.reload(); })
+        .catch(function(){});
+    }catch(_){}
+  });
 })();
 </script>
 <meta charset="UTF-8" />

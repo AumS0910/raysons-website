@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="build" content="1fe02437da2b">
+<meta name="build" content="22d7a83ff101">
 <script>
 /* SELF-HEAL. iOS Safari restores a suspended tab from a snapshot without re-fetching,
    so a phone can sit on a build from days ago no matter what the server sends or what
@@ -28,6 +28,20 @@
       })
       .catch(function(){});
   }catch(e){}
+  /* And again when Safari hands back a restored tab. pageshow with persisted=true means
+     the page came from the back/forward cache rather than the network, so nothing above
+     ran for this view — it is the exact path that leaves a phone on an old build. */
+  addEventListener('pageshow', function(e){
+    if(!e.persisted) return;
+    try{
+      var m = document.querySelector('meta[name="build"]');
+      if(!m || !window.fetch) return;
+      fetch('version.json?t=' + Date.now(), { cache:'no-store' })
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(v){ if(v && v.build && v.build !== m.getAttribute('content')) location.reload(); })
+        .catch(function(){});
+    }catch(_){}
+  });
 })();
 </script>
 <meta charset="UTF-8" />
@@ -426,7 +440,7 @@
     <span class="ft-next__t">Send the drawing<em>&rarr;</em></span>
   </a>
 
-  <div class="ft-bot"><span>© 2026 Raysons Shell Cast · All rights reserved</span><span>Precision Foundry · Kolhapur, India</span></div>
+  <div class="ft-bot"><span>© 2026 Raysons Shell Cast · All rights reserved</span><span>Precision Foundry · Kolhapur, India <i id="buildTag" style="font-style:normal;opacity:.45"></i></span></div>
 </footer>
 
 <script src="products.js?v=36d8b808"></script>
@@ -434,5 +448,6 @@
 <script src="nav-transition.js?v=2da77911"></script>
 <script src="theme.js?v=ee040546"></script>
 <script src="spa.js?v=673aa644"></script>
+<script>(function(){var m=document.querySelector('meta[name="build"]'),t=document.getElementById('buildTag');if(m&&t)t.textContent='· b'+m.getAttribute('content').slice(0,6);})();</script>
 </body>
 </html>
