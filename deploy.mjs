@@ -40,6 +40,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import crypto from 'node:crypto';
 import sharp from 'sharp';
 
 const execFileAsync = promisify(execFile);
@@ -148,7 +149,13 @@ async function verify(c, f) {
       const shrunk = live.width !== local.width;
       return { ok: true, note: shrunk ? `CDN resized to ${live.width}x${live.height}` : (size === f.size ? '' : 'CDN re-encoded') };
     }
-    if (size !== f.size) return { ok: false, why: `${size}b served, ${f.size}b local` };
+    // HASH THE BYTES, do not trust the byte COUNT. curl's size_download reported three
+    // different values for one unchanged file (50696 / 51235 / 51565) because the CDN
+    // keeps gzip variants and Vary: Accept-Encoding decides which one answers. The
+    // content is what matters, so compare the content.
+    const liveHash  = crypto.createHash('sha1').update(fs.readFileSync(tmp)).digest('hex');
+    const localHash = crypto.createHash('sha1').update(fs.readFileSync(f.abs)).digest('hex');
+    if (liveHash !== localHash) return { ok: false, why: `content differs (${size}b served, ${f.size}b local)` };
     return { ok: true };
   } catch (e) {
     return { ok: false, why: String(e).replace(/\s+/g, ' ').slice(0, 100) };
@@ -199,7 +206,15 @@ const queue = [...files];
 await Promise.all(Array.from({ length: 6 }, async () => {
   while (queue.length) {
     const f = queue.shift();
-    const r = await verify(creds, f);
+    // CDN propagation lags the upload by a second or two, so the first read after a
+    // write can legitimately return the previous file. Re-check once before calling it
+    // a failure — a verifier that reports phantom problems gets ignored, and then it
+    // misses the real one.
+    let r = await verify(creds, f);
+    if (!r.ok) {
+      await new Promise((res) => setTimeout(res, 4000));
+      r = await verify(creds, f);
+    }
     if (!r.ok) wrong.push({ rel: f.rel, why: r.why });
     checked++;
     if (checked % 10 === 0) process.stdout.write(`  checked ${checked}/${files.length}\r`);

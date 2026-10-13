@@ -397,12 +397,23 @@ body{cursor:auto;background:var(--bg);overflow-x:hidden}
   .ppanel__copy{max-width:none}
   /* opacity:.94 was dimming him for no reason — on a phone he is already small, and
      taking 6% off a dark suit on a dark page just makes him look washed out. */
-  .ppanel__fig{width:min(300px,70vw);margin:4px auto 0}
+  /* Bottom clearance for the fixed 'Request a quote' dock (82px tall). Now that the
+     portrait fills the width, his caption lands exactly where the dock floats and the
+     founder's name was being covered by it. The dock is fixed, so only the scrolling
+     content can move out of its way. */
+  .ppanel__fig{width:min(340px,82vw);margin:6px auto 0}
+  .ppanel{padding-bottom:150px}
   /* THE SAME GENTLE FADE AS EVERYWHERE ELSE. This block carried its own mask starting
      at 70%, so fixing the desktop one left phones untouched: a third of the man still
      dissolved into the page and he still read as blurry on the device most people
      actually use. A per-breakpoint copy of a value is a second place to forget. */
-  .ppanel__fig img{max-height:340px;
+  /* SIZE, not resolution, was why he looked blurry on a phone. Capped at 340px tall he
+     rendered 176px wide — 45% of the screen — and a head about 55px across. There is no
+     amount of sharpening that makes a 55px face legible; it just reads as mush. The file
+     was never the problem: at that size it was supplying 1.6 source pixels per device
+     pixel, SHARPER than the desktop layout gets. Let width lead and cap height against
+     the viewport so he stays large on a big phone and still fits a short one. */
+  .ppanel__fig img{max-height:min(64svh,600px);
     -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 88%,rgba(0,0,0,.55) 96%,transparent 100%);
     mask-image:linear-gradient(180deg,#000 0%,#000 88%,rgba(0,0,0,.55) 96%,transparent 100%)}
 }
