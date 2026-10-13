@@ -1,12 +1,10 @@
 // ============================================================
 //  RAYSONS — About Us · "Forged over forty years"
-//  GSAP ScrollTrigger + Lenis. Building plates parallax with
-//  scroll; copy + sections reveal. Degrades gracefully if the
-//  CDN libs fail or reduced-motion is on.
+//  Native scroll throughout. Reveals run on IntersectionObserver — no GSAP, no
+//  ScrollTrigger, no CDN dependency (see initReveals for why).
 // ============================================================
 (function(){
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const hasGSAP = !!(window.gsap && window.ScrollTrigger);
 
   // ---- loader: light page, reveal fast ----
   const loader = document.getElementById('cloader');
@@ -50,44 +48,64 @@
     links.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=>{ document.body.classList.remove('nav-open'); burger.setAttribute('aria-expanded','false'); }));
   }
 
-  // ---- reveals fallback (no GSAP or reduced motion) ----
-  function revealAllNow(){ document.querySelectorAll('.rv').forEach(el=>el.classList.add('in')); }
-
-  if(REDUCED || !hasGSAP){
-    document.body.classList.add(REDUCED?'reduced':'no-gsap');
-    // still reveal on scroll with IntersectionObserver so it's not all-at-once
-    if('IntersectionObserver' in window && !REDUCED){
-      const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{rootMargin:'0px 0px -10% 0px',threshold:.15});
-      document.querySelectorAll('.rv').forEach(el=>io.observe(el));
-    } else { revealAllNow(); }
+  // Reduced motion gets everything at once — no reveal choreography at all. Everything
+  // else goes through initReveals() below. There is no longer a GSAP branch to pick:
+  // the reveals never needed a library, and the one they had broke them on Safari.
+  if(REDUCED){
+    document.body.classList.add('reduced');
+    document.querySelectorAll('.rv').forEach(el=>el.classList.add('in'));
     return;
   }
 
   // ============================================================
-  //  GSAP + Lenis
+  //  REVEALS — IntersectionObserver, not GSAP ScrollTrigger
+  //
+  //  ScrollTrigger.batch did this before and SILENTLY FAILED ON SAFARI: measured on
+  //  WebKit at iPhone size, 14 of Foundry's 33 .rv elements never received their reveal
+  //  and sat at opacity 0 for the whole visit. Not slow — gone. Nearly half the page was
+  //  invisible to every iPhone visitor while Chrome showed all 33. The models and canvases
+  //  were fine throughout; only the ScrollTrigger-driven reveals died.
+  //
+  //  IntersectionObserver is what products.js has always used, it is native, it costs no
+  //  layout read per scroll event, and it does not need 116KB of CDN JavaScript. The CSS
+  //  (.rv -> .rv.in) already existed; only the thing toggling the class has changed.
+  //
+  //  Three layers, because invisible content is the worst failure mode there is:
+  //    1. the observer
+  //    2. a scroll/resize sweep, for anything the observer's crossing missed
+  //    3. a hard timer that reveals everything regardless, so a bug here can cost the
+  //       animation but can never cost the words.
   // ============================================================
-  const { gsap } = window;
-  gsap.registerPlugin(ScrollTrigger);
+  function initReveals(){
+    var rvs = Array.prototype.slice.call(document.querySelectorAll('.rv'));
+    if(!rvs.length) return;
+    function show(el, i){
+      if(el.classList.contains('in')) return;
+      el.style.transitionDelay = ((i % 6) * 0.07) + 's';   // stagger without a timeline
+      el.classList.add('in');
+    }
+    if(!('IntersectionObserver' in window)){ rvs.forEach(function(el){ show(el,0); }); return; }
+    // threshold 0, not 0.15: a lazily-decoded image reflows the row mid-scroll and the
+    // crossing is missed, and an element unobserved on the only path that reveals it is
+    // then invisible for good.
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e, i){ if(e.isIntersecting){ show(e.target, i); io.unobserve(e.target); } });
+    }, { rootMargin:'0px 0px -8% 0px', threshold:0 });
+    rvs.forEach(function(el){ io.observe(el); });
 
-  // NO Lenis on About. The film engine (about-film.js) and the monument timeline already
-  // lerp scroll→scrub; stacking Lenis's smoothing on top double-filtered every input and
-  // WAS the "lag" the user felt. Native scroll + the single per-engine lerp matches
-  // index.html's tight feel. ScrollTrigger runs fine on native scroll.
-
-  // staggered reveals
-  ScrollTrigger.batch('.rv', {
-    start: 'top 86%',
-    onEnter: (els)=> gsap.to(els, { opacity:1, y:0, duration:1, ease:'power3.out', stagger:0.08, overwrite:true }),
-  });
-  gsap.set('.rv', { opacity:0, y:38 });
-
-  // (Removed dead [data-chapter] / [data-num] parallax triggers — those belonged to the
-  // retired building-chapters + .era timeline layout and no longer exist in the DOM. They
-  // measured nothing yet still recalculated on every ScrollTrigger.refresh.)
-
-  ScrollTrigger.refresh();
-  // refresh after the hero image + fonts settle
-  addEventListener('load', ()=> ScrollTrigger.refresh());
+    function sweep(){
+      for(var i=0;i<rvs.length;i++){
+        var el = rvs[i];
+        if(el.classList.contains('in')) continue;
+        if(el.getBoundingClientRect().top < innerHeight * 0.98){ io.unobserve(el); show(el, i); }
+      }
+    }
+    addEventListener('scroll', sweep, { passive:true });
+    addEventListener('resize', sweep, { passive:true });
+    sweep();                                   // anything already on screen at boot
+    setTimeout(function(){ rvs.forEach(function(el,i){ show(el,i); }); }, 8000);
+  }
+  initReveals();
 })();
 
 /* ============================================================

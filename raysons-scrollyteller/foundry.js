@@ -7,7 +7,6 @@
 // ============================================================
 (function(){
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const hasGSAP = !!(window.gsap && window.ScrollTrigger);
 
   // ---- loader ----
   const loader = document.getElementById('cloader');
@@ -75,75 +74,63 @@
   }
 
   // ---- reveals fallback (no GSAP or reduced motion) ----
-  function revealAllNow(){ document.querySelectorAll('.rv').forEach(el => el.classList.add('in')); }
-
-  if(REDUCED || !hasGSAP){
-    document.body.classList.add(REDUCED ? 'reduced' : 'no-gsap');
-    if('IntersectionObserver' in window && !REDUCED){
-      const io = new IntersectionObserver((es)=>{
-        es.forEach(e =>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }});
-      }, {rootMargin:'0px 0px -10% 0px', threshold:.15});
-      document.querySelectorAll('.rv').forEach(el => io.observe(el));
-    } else {
-      revealAllNow();
-    }
-    // process steps still need click interactivity even without GSAP
+  // Reduced motion gets everything at once. Everything else goes through initReveals()
+  // below — there is no GSAP branch to choose any more, because the reveals never
+  // needed a library and the one they had broke them on Safari.
+  if(REDUCED){
+    document.body.classList.add('reduced');
+    document.querySelectorAll('.rv').forEach(el => el.classList.add('in'));
     initProcessSteps();
     return;
   }
-
   // ============================================================
-  //  GSAP reveals (native scroll)
+  //  REVEALS AND PILLAR EFFECTS — IntersectionObserver, not ScrollTrigger
+  //
+  //  ScrollTrigger.batch SILENTLY FAILED ON SAFARI here. Measured on WebKit at iPhone
+  //  size: 14 of this page's 33 .rv elements never got their reveal and stayed at
+  //  opacity 0 for the entire visit — the pillar rows, pills and plates among them.
+  //  Chrome revealed all 33. So nearly half of Foundry was INVISIBLE to every iPhone
+  //  visitor, and because the canvases and the GLB model kept working it read as
+  //  "the page is fine, the scroll animations are broken" rather than as missing content.
+  //
+  //  The scrub effects are deleted, not ported, because they animated NOTHING: the
+  //  parallax targeted .pillar__visual, the staggers targeted .specs-sec__card and
+  //  .caps-sec__col, and none of those three selectors matches a single element in this
+  //  page any more. They were dead triggers that still made ScrollTrigger.refresh()
+  //  measure them on every resize and load.
   // ============================================================
-  const { gsap } = window;
-  gsap.registerPlugin(ScrollTrigger);
+  function initReveals(){
+    var rvs = Array.prototype.slice.call(document.querySelectorAll('.rv'));
+    if(!rvs.length) return;
+    function show(el, i){
+      if(el.classList.contains('in')) return;
+      el.style.transitionDelay = ((i % 6) * 0.07) + 's';
+      el.classList.add('in');
+    }
+    if(!('IntersectionObserver' in window)){ rvs.forEach(function(el){ show(el,0); }); return; }
+    // threshold 0: a lazily-decoded image reflows the row mid-scroll, the crossing is
+    // missed, and an element unobserved on the only path that reveals it is gone for good.
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e,i){ if(e.isIntersecting){ show(e.target,i); io.unobserve(e.target); } });
+    }, { rootMargin:'0px 0px -8% 0px', threshold:0 });
+    rvs.forEach(function(el){ io.observe(el); });
 
-  // NO Lenis. foundry-chapters.js already lerps scroll→scrub for the pinned chapters;
-  // stacking Lenis's smoothing on top double-filtered every input — the same double-smooth
-  // that WAS the reported "lag" on About, where it was removed for exactly this reason.
-  // Native scroll + the single per-engine lerp matches index.html's tight feel.
-
-  // staggered reveals
-  ScrollTrigger.batch('.rv', {
-    start: 'top 86%',
-    onEnter: (els) => gsap.to(els, { opacity:1, y:0, duration:1, ease:'power3.out', stagger:0.08, overwrite:true }),
-  });
-  gsap.set('.rv', { opacity:0, y:38 });
-
-  // pillar image parallax
-  document.querySelectorAll('.pillar__visual img').forEach(img => {
-    gsap.fromTo(img, { yPercent:-6 }, { yPercent:6, ease:'none',
-      scrollTrigger:{ trigger:img.closest('.pillar'), start:'top bottom', end:'bottom top', scrub:true }
-    });
-  });
-
-  // pillar visual scale-in
-  document.querySelectorAll('.pillar__visual').forEach(plate => {
-    gsap.fromTo(plate, { scale:0.92, opacity:0.4 }, { scale:1, opacity:1, ease:'power2.out',
-      scrollTrigger:{ trigger:plate.closest('.pillar'), start:'top 80%', end:'top 40%', scrub:true }
-    });
-  });
-
-  // spec cards stagger
-  const specCards = document.querySelectorAll('.specs-sec__card');
-  if(specCards.length){
-    gsap.fromTo(specCards, { y:30, opacity:0 }, {
-      y:0, opacity:1, duration:0.7, ease:'power3.out', stagger:0.08,
-      scrollTrigger:{ trigger:'.specs-sec__grid', start:'top 82%' }
-    });
+    function sweep(){
+      for(var i=0;i<rvs.length;i++){
+        var el=rvs[i];
+        if(el.classList.contains('in')) continue;
+        if(el.getBoundingClientRect().top < innerHeight*0.98){ io.unobserve(el); show(el,i); }
+      }
+    }
+    addEventListener('scroll', sweep, { passive:true });
+    addEventListener('resize', sweep, { passive:true });
+    sweep();
+    // Last line of defence. A bug in the reveal logic may cost the animation; it must
+    // never cost the words. Anything still hidden after 8s is shown unconditionally.
+    setTimeout(function(){ rvs.forEach(function(el,i){ show(el,i); }); }, 8000);
   }
+  initReveals();
 
-  // capabilities columns stagger
-  const capsCols = document.querySelectorAll('.caps-sec__col');
-  if(capsCols.length){
-    gsap.fromTo(capsCols, { y:30, opacity:0 }, {
-      y:0, opacity:1, duration:0.7, ease:'power3.out', stagger:0.1,
-      scrollTrigger:{ trigger:'.caps-sec__grid', start:'top 82%' }
-    });
-  }
-
-  ScrollTrigger.refresh();
-  addEventListener('load', () => ScrollTrigger.refresh());
 
   // ============================================================
   //  PROCESS — interactive timeline with image crossfade
@@ -167,30 +154,19 @@
       step.addEventListener('click', () => activate(i));
     });
 
-    // scroll-driven activation (GSAP)
-    if(hasGSAP && !REDUCED){
-      steps.forEach((step, i) => {
-        ScrollTrigger.create({
-          trigger: step,
-          start: 'top 60%',
-          end: 'bottom 40%',
-          onEnter: () => activate(i),
-          onEnterBack: () => activate(i),
+    // scroll-driven activation. This was a ScrollTrigger per step with an
+    // IntersectionObserver fallback behind it; the fallback is now the only path, since
+    // it is the one that works on Safari and needs no library.
+    if(!REDUCED && 'IntersectionObserver' in window){
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if(e.isIntersecting){
+            const idx = parseInt(e.target.dataset.step);
+            if(!isNaN(idx)) activate(idx);
+          }
         });
-      });
-    } else {
-      // fallback: IntersectionObserver
-      if('IntersectionObserver' in window){
-        const io = new IntersectionObserver((entries) => {
-          entries.forEach(e => {
-            if(e.isIntersecting){
-              const idx = parseInt(e.target.dataset.step);
-              if(!isNaN(idx)) activate(idx);
-            }
-          });
-        }, { rootMargin:'-30% 0px -30% 0px' });
-        steps.forEach(s => io.observe(s));
-      }
+      }, { rootMargin:'-30% 0px -30% 0px' });
+      steps.forEach(s => io.observe(s));
     }
 
     // initialise first step
