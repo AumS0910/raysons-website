@@ -13,6 +13,12 @@
 # CSS and JS, so a stale page pins stale assets to it. Fresh HTML, fresh everything.
 
 <IfModule mod_headers.c>
+  # version.json is the one thing that must NEVER come from a cache — it is what a
+  # stale page asks in order to find out it is stale.
+  <FilesMatch "^version\.json$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+  </FilesMatch>
+
   <FilesMatch "\.html$">
     Header set Cache-Control "no-cache, must-revalidate"
   </FilesMatch>

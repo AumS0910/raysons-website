@@ -89,7 +89,13 @@ function collect(dir, base = '') {
 }
 
 const ftpUrl = (c, rel) => `ftp://${c.FTP_HOST}${c.FTP_DIR}${rel.split('/').map(encodeURIComponent).join('/')}`;
-const httpUrl = (c, rel) => `${c.SITE_URL}/${rel.split('/').map(encodeURIComponent).join('/')}`;
+// A UNIQUE QUERY ON EVERY CHECK. The CDN keeps a cached object for the BARE url and will
+// serve a week-old copy from it (max-age=604800), while any query string reaches the
+// current file. Verifying the bare url therefore tested a URL no visitor ever requests —
+// the pages always ask for asset?v=<hash> — and reported phantom "content differs" on
+// files that were correctly deployed. Bust it so this checks the server, not the edge.
+const httpUrl = (c, rel) =>
+  `${c.SITE_URL}/${rel.split('/').map(encodeURIComponent).join('/')}?_vfy=${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
 
 async function upload(c, f) {
   // --ftp-create-dirs so images/products/hydraulic/ appears on its own

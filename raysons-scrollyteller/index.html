@@ -1,6 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta name="build" content="1fe02437da2b">
+<script>
+/* SELF-HEAL. iOS Safari restores a suspended tab from a snapshot without re-fetching,
+   so a phone can sit on a build from days ago no matter what the server sends or what
+   Cache-Control says — which is exactly what happened here: a footer with no Follow
+   column and a portrait cropped at the thighs, a combination that only existed for one
+   deploy. Asking a client to clear their cache is not a fix; this is.
+
+   Ask the server which build is current (no-store, so this one request can never be the
+   stale thing), and if the page in front of the visitor is not it, reload once. The
+   sessionStorage guard means a genuinely broken deploy cannot put the browser in a
+   reload loop: we only ever reload once per build, per tab. */
+(function(){
+  try{
+    var meta = document.querySelector('meta[name="build"]');
+    if(!meta || !window.fetch) return;
+    var mine = meta.getAttribute('content');
+    fetch('version.json?t=' + Date.now(), { cache:'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(v){
+        if(!v || !v.build || v.build === mine) return;
+        if(sessionStorage.getItem('rc_reloaded') === v.build) return;  // already tried
+        sessionStorage.setItem('rc_reloaded', v.build);
+        location.reload();
+      })
+      .catch(function(){});
+  }catch(e){}
+})();
+</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <!-- One opening title per session: flag re-entries so the loader is skipped instantly
