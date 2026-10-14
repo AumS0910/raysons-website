@@ -94,6 +94,15 @@
   // ============================================================
   const DB_NAME = 'raysons-cinema', STORE = 'frames', CACHE_VER = 'v2';  // bump = invalidate any stale cached captures
   const cacheKey = (key)=> `${CACHE_VER}|${key}|${MOBILE?'m':'d'}`;
+  // NO IndexedDB CALL MAY BLOCK THE CAPTURE QUEUE. The clips are restored/captured in a
+  // sequential await loop, so anything that never settles stops the film dead at
+  // whichever clip it happened on. Measured on WebKit: pour captures in 1.5s, then
+  // nothing for 90 seconds — six of eight acts left with no footage on every iPhone.
+  // Opening the database succeeds there; it is the read that never calls back. A cache
+  // miss is cheap (we re-capture); a hung promise costs the entire rest of the film.
+  const settle = (p, ms, fallback)=> Promise.race([
+    p, new Promise(res=> setTimeout(()=> res(fallback), ms))
+  ]);
   let dbP = null;
   function openDB(){
     if(dbP) return dbP;
@@ -106,11 +115,11 @@
     return dbP;
   }
   async function idbGet(key){
-    const db = await openDB(); if(!db) return null;
-    return new Promise((res)=>{ try{
+    const db = await settle(openDB(), 2000, null); if(!db) return null;
+    return settle(new Promise((res)=>{ try{
       const r = db.transaction(STORE,'readonly').objectStore(STORE).get(cacheKey(key));
       r.onsuccess = ()=> res(r.result || null); r.onerror = ()=> res(null);
-    }catch(e){ res(null); } });
+    }catch(e){ res(null); } }), 2000, null);
   }
   async function idbSet(key, blobs){
     const db = await openDB(); if(!db) return;
@@ -163,8 +172,18 @@
         if(persisted || !ended) return;
         if(blobArr.length && blobArr.every(Boolean)){ persisted=true; idbSet(key, blobArr.slice()); }
       };
+      // WATCHDOG. The clips are captured in a sequential await loop, so a clip that
+      // never finishes does not fail alone — it blocks every clip behind it forever.
+      // Measured: Chromium captures all six in 21s, one every ~4s; WebKit captures pour
+      // at 1.5s and then nothing at all for 90s, which left six of the eight acts with
+      // no footage to scrub to on every iPhone. Whatever decoder state causes that, no
+      // single clip may be allowed to hold the queue, so one gives up after 14s with
+      // whatever frames it managed and the next one starts.
+      // 24s, not 14: on the polling path a clip now runs at 1x, so the watchdog has to
+      // outlast an ~8s clip plus decode overhead or it would truncate every capture.
+      const WATCHDOG = setTimeout(()=>{ if(!done) finish(); }, 24000);
       const finish = ()=>{
-        if(done) return; done=true; frames[key]=arr; capturedClips++;
+        if(done) return; done=true; clearTimeout(WATCHDOG); frames[key]=arr; capturedClips++;
         maybePersist();
         // the offscreen element has done its job — stop it decoding and take it out
         try{ v.pause(); v.removeAttribute('src'); v.load(); }catch(e){}
@@ -224,15 +243,27 @@
           // eating. With bitmaps there is no encode, so we can play fast AND sample
           // every presented frame: rAF polls at the display rate (60Hz, 120Hz on newer
           // iPhones) instead of a fixed timer.
-          try{ v.playbackRate = MOBILE ? 2 : 4; }catch(e){}
+          // SPEED ONLY WHERE THE FRAMES ARE GUARANTEED. With requestVideoFrameCallback
+          // the browser hands us every presented frame, so playing fast costs nothing.
+          // WebKit has no rVFC and must poll on a 30Hz timer: at 2x that samples ~15
+          // frames per second of footage and simply misses the rest. Measured over a
+          // full scroll — WebKit 10 distinct film frames against Chromium's 27, which
+          // is why the film steps in jumps on an iPhone while it glides on a desktop.
+          // On the polling path, run the clip at normal speed so a 30Hz poll lands on
+          // roughly every source frame. It costs capture time, not frames.
+          try{ v.playbackRate = RVFC ? (MOBILE ? 2 : 4) : 1; }catch(e){}
           if(RVFC) v.requestVideoFrameCallback(grab);
           // A TIMER, not rAF: rAF is gated by the compositor, so on a page already
           // painting a full-screen canvas it samples at whatever the render loop
-          // manages — exactly when frames matter most. 30Hz, not 60: sampled swept
-          // against capture completeness, 60Hz and 40Hz both starved the decode so
-          // badly that the last two clips never captured and the closing acts went
-          // black. 30Hz at 3x is the only setting where the film paints at every
-          // scroll position.
+          // manages — exactly when frames matter most. 30Hz, not 60: swept against
+          // capture completeness on real devices, 60Hz and 40Hz both starved the decode
+          // until the last clips never captured and the closing acts went black.
+          //
+          // Retried at 60Hz once the paint cost dropped to ~25ms and the polling path
+          // moved to 1x, on the theory that the original budget no longer applied. It
+          // changed nothing measurable (WebKit held at 30 distinct film states across
+          // the runway, Chromium at 60), so the empirical 30 stands rather than carry a
+          // value that contradicts device testing for no benefit.
           else { const iv=setInterval(()=>{ if(done){clearInterval(iv);return;} grab(); if(v.ended){ended=true;clearInterval(iv);finish();} }, 1000/30); }
         }).catch(finish);
       }, { once:true });
