@@ -156,6 +156,48 @@
     }, 220);
   }, { passive:true });
 
+  // ============================================================
+  //  PRE-RENDERED FRAMES (phones)
+  //
+  //  A phone does not decode video for this film any more. Capture needed ~45 seconds
+  //  of video decoding before it had frames to scrub, and a visitor starts scrolling
+  //  immediately — so what they actually saw was a poster that would not move, no
+  //  matter how fast the page scrolled or how cheap each paint had become. Frame time
+  //  was never the complaint. A stuck ladle was.
+  //
+  //  So the frames ship already made: 32 per clip, 512px wide, 1.5MB for the whole film
+  //  against 21MB of video it replaces. The browser decodes images off the main thread,
+  //  there is nothing to capture, nothing to hold in GPU memory, and the first act is
+  //  scrubbable as soon as its images arrive rather than 45 seconds later.
+  //
+  //  Desktop keeps the capture path: it has the budget, it finishes in ~21s, and it
+  //  gets the full-resolution film. This is not a downgrade applied everywhere — it is
+  //  the right trade on the device that could not afford the other one.
+  // ============================================================
+  const SEQ_FRAMES = 32;
+  function loadSequence(key){
+    return new Promise((resolve)=>{
+      const arr = new Array(SEQ_FRAMES);
+      let settled = 0;
+      // Published immediately, not when the last frame lands: paint() skips any image
+      // that is not ready yet, so the act becomes scrubbable as its frames arrive.
+      frames[key] = arr;
+      for(let i = 0; i < SEQ_FRAMES; i++){
+        const im = new Image();
+        im.decoding = 'async';
+        arr[i] = im;
+        const onSettle = ()=>{
+          settled++;
+          updateLoader();
+          if(settled === SEQ_FRAMES){ capturedClips++; resolve(arr); }
+        };
+        im.onload = onSettle;
+        im.onerror = onSettle;                 // a missing frame must not stall the film
+        im.src = 'images/film/' + key + '/' + String(i + 1).padStart(2, '0') + '.webp';
+      }
+    });
+  }
+
   function captureClip(key, src){
     return new Promise((resolve)=>{
       const v = document.createElement('video');
@@ -554,7 +596,15 @@
   addEventListener('scroll', ()=>{
     if(scrollY>2) autoplay=false;
     target=scrollY; settledFrames=0;
-    if(performance.now() - lastLoopAt > 40) paintFromScroll();
+    // ON A PHONE THE SCROLL HANDLER OWNS THE FILM OUTRIGHT.
+    // Waiting for rAF to stall before painting still leaves the film at the mercy of a
+    // loop iOS is free to starve, and measured frame indices while scrubbing the pour
+    // showed exactly that: one frame held for the better part of a second, then a jump.
+    // Scroll events are the one signal that keeps firing throughout a flick, so on
+    // mobile every one of them paints, capped near 70fps. A frame costs ~5ms there now,
+    // which is what makes this affordable; at the 224ms it cost this morning it would
+    // have been unthinkable. Desktop keeps the stall-detection path and its easing.
+    if(performance.now() - lastLoopAt > (MOBILE ? 14 : 40)) paintFromScroll();
   }, {passive:true});
   function loop(){
     requestAnimationFrame(loop);
@@ -584,7 +634,17 @@
     lastT = _now;
     lastLoopAt = _now;        // tell the scroll path the loop is alive
     frameDt = dt;                       // stepCam smooths against real time too
-    sy += (target-sy) * (REDUCED ? 1 : (1 - Math.exp(-dt * 5.7)));
+    // NO EASING ON A PHONE. The lerp exists to make a mouse wheel feel buttery: it
+    // eases the film toward where you scrolled to. But it only advances when the loop
+    // runs, and iOS starves rAF during momentum scrolling — so the film held one frame
+    // for about a second and then jumped. Measured as frame indices while scrubbing the
+    // pour: 0,0,0,0,0,0,0,0,20,20,20,20... The ladle was not pouring, it was stepping.
+    //
+    // A phone's own scrolling is already smooth, and the film has nothing to smooth out:
+    // it should sit exactly where the finger is. Track the scroll position directly and
+    // the frame follows every pixel of it. Desktop keeps the easing, which is where the
+    // feel was tuned and where rAF is not fighting the scroller.
+    sy = (REDUCED || MOBILE) ? target : sy + (target-sy) * (1 - Math.exp(-dt * 5.7));
     const moving = Math.abs(target-sy) > 0.4 || Math.abs(sy-prev) > 0.1;
     // Idle: once the scroll has settled and the breathing has been painted a
     // few frames, stop the full-screen canvas repaint entirely (battery/GPU).
@@ -628,7 +688,16 @@
     // Each clip restores from IndexedDB if cached (instant, decode-free);
     // only a cache miss falls through to the one-time video capture.
     (async ()=>{
-      for(const key of ['pour','forge','deconstruct','orbit','bridge','macro']){
+      const KEYS = ['pour','forge','deconstruct','orbit','bridge','macro'];
+      if(MOBILE){
+        // The opening act first and on its own, so the pour is scrubbable as early as
+        // possible; the rest in parallel, because image decoding is off-thread and does
+        // not compete with the scroll the way video capture did.
+        await loadSequence(KEYS[0]);
+        KEYS.slice(1).forEach(loadSequence);
+        return;
+      }
+      for(const key of KEYS){
         if(!(await loadCached(key))) await captureClip(key, CLIPS[key]);
       }
     })();
