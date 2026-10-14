@@ -370,8 +370,14 @@
     // this a vertical swipe would fight the page scroll and the film would feel
     // broken on a phone.
     if(tAxis === 0){
-      if(Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
-      tAxis = Math.abs(dx) > Math.abs(dy) ? 1 : -1;
+      // A thumb swipe is never perfectly vertical. Deciding on 4px with a bare
+      // |dx| > |dy| meant a slightly diagonal scroll could be claimed as a turn, and
+      // then preventDefault() held the page still for the rest of that gesture — the
+      // scroll simply not working, intermittently, in this one act. Claim the gesture
+      // only on a clear and deliberate horizontal intent: 10px travelled and a 1.5x
+      // bias. Anything else is released to the page immediately.
+      if(Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+      tAxis = (Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) >= 10) ? 1 : -1;
       if(tAxis === -1){ turning = false; document.body.classList.remove('turning'); return; }
     }
     if(e.cancelable) e.preventDefault();

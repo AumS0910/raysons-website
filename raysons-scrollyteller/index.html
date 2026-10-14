@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="build" content="f63cbc7c8916">
+<meta name="build" content="c8fbc6f21c1e">
 <script>
 /* SELF-HEAL. iOS Safari restores a suspended tab from a snapshot without re-fetching,
    so a phone can sit on a build from days ago no matter what the server sends or what
@@ -134,6 +134,12 @@
      affordance: nothing else on the film invites a hand, so when it changes here
      it reads as "this one you can hold". touch-action keeps vertical scrolling
      working on a phone while horizontal drags turn the part. */
+  /* pan-y on the BODY, not just the canvas. The turn listeners are bound to window, so
+     a swipe beginning over a caption reached them while the caption had no touch-action
+     of its own — and preventDefault() in that path can swallow a scroll. Declaring pan-y
+     here hands vertical panning to the browser for the whole act, which means no script
+     of ours is able to block it however the axis test is tuned. */
+  body.turntable{touch-action:pan-y}
   body.turntable #stage{cursor:grab;touch-action:pan-y}
   body.turntable.turning #stage{cursor:grabbing}
   .turn-hint{position:fixed;left:50%;bottom:clamp(86px,15vh,150px);transform:translateX(-50%) translateY(10px);
@@ -533,7 +539,7 @@
      zone drives the bracket orbit. bracket.js removes it when WebGL/motion isn't available. -->
 <div id="bracketScroll"></div>
 
-<script src="cinema.js?v=a4d014d4"></script>
+<script src="cinema.js?v=f4ea339a"></script>
 <script src="premium.js?v=fa7b4d4b"></script>
 <script>
 /* ── Film instruments: atmospheric grade + chapter HUD + progress rail ──
