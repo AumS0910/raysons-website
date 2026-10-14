@@ -477,7 +477,31 @@
   let lastT = performance.now();   // for frame-rate-independent scroll smoothing
   let frameDt = 0.016;             // last frame's elapsed time, shared with stepCam
   const POUR_FRAC = SEGMENTS[0].span / TOTAL;   // scroll fraction the pour clip occupies
-  addEventListener('scroll', ()=>{ if(scrollY>2) autoplay=false; target=scrollY; settledFrames=0; }, {passive:true});
+  // iOS SAFARI THROTTLES requestAnimationFrame DURING MOMENTUM SCROLL. It gives the
+  // scroll thread priority and our rAF callback simply does not run — so the lerped
+  // loop below stalls, the fixed canvas keeps whatever frame it last painted, and the
+  // film sits frozen behind text that is still moving. Reported exactly as it looks:
+  // "everything is scrolling except the background."
+  //
+  // Scroll events DO keep firing throughout. So when rAF has clearly stalled, paint
+  // from the scroll event instead. The 40ms gate means this only engages when the loop
+  // is genuinely not running, and it self-limits to ~25 paints a second; the rest of the
+  // time the lerped loop owns the canvas and this costs one subtraction per event.
+  // Painting here is only affordable because the frame now costs ~25ms rather than 224.
+  let lastLoopAt = performance.now();
+  function paintFromScroll(){
+    lastLoopAt = performance.now();
+    sy = target;                       // no time to ease — land on where the page IS
+    const max = Math.max(1, scrollSpace.offsetHeight - innerHeight);
+    const p = clamp(sy / max, 0, 1);
+    const vel = Math.min(1, Math.abs(p - prevP) * 60); prevP = p;
+    render(p, vel);
+  }
+  addEventListener('scroll', ()=>{
+    if(scrollY>2) autoplay=false;
+    target=scrollY; settledFrames=0;
+    if(performance.now() - lastLoopAt > 40) paintFromScroll();
+  }, {passive:true});
   function loop(){
     requestAnimationFrame(loop);
     // HERO AUTO-PLAY: until the user scrolls, the pour flows on its own (looping)
@@ -504,6 +528,7 @@
     const _now = performance.now();
     const dt = Math.min(0.1, (_now - lastT) / 1000) || 0.016;   // clamp tab-switch spikes
     lastT = _now;
+    lastLoopAt = _now;        // tell the scroll path the loop is alive
     frameDt = dt;                       // stepCam smooths against real time too
     sy += (target-sy) * (REDUCED ? 1 : (1 - Math.exp(-dt * 5.7)));
     const moving = Math.abs(target-sy) > 0.4 || Math.abs(sy-prev) > 0.1;
