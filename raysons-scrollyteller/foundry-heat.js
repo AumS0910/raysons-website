@@ -21,7 +21,12 @@
     let W=0, H=0, dpr=1, raf=null, visible=true, t=0;
 
     function size(){
-      dpr = Math.min(devicePixelRatio||1, MOBILE?1.5:2);
+      // A full-screen backdrop at devicePixelRatio 2 is 5.18 megapixels on a 1440x900
+      // screen, and this page composites more than one of them. Profiling put 96% of a
+      // scroll in native painting with JavaScript at nothing, so the cost IS the pixel
+      // count. These are soft gradient fields and a slowly-turning object, not text:
+      // the resolution is not buying detail anyone can see, it is buying stutter.
+      dpr = Math.min(devicePixelRatio||1, MOBILE ? 1 : 1.25);
       const r = canvas.getBoundingClientRect();
       W = Math.max(1, Math.round(r.width)); H = Math.max(1, Math.round(r.height));
       canvas.width = W*dpr; canvas.height = H*dpr;

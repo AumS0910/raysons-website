@@ -96,7 +96,9 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   //  RENDERER + SCENE
   // ============================================================
   const renderer = new THREE.WebGLRenderer({ canvas, antialias:!MOBILE, alpha:false, powerPreference:'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE?1.6:2));
+  // shares the Overview with cinema.js's full-screen film canvas; together they were
+  // 10.4 megapixels a frame at the old ratios
+  renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE ? 1.3 : 1.5));
   renderer.setSize(innerWidth, innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;

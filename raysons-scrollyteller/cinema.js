@@ -65,7 +65,7 @@
     // frame of every scroll, and a CPU profile put 89% of the scroll in native compositing
     // with drawImage the largest JS cost after it. This is photographic film under motion,
     // not text: at 1.4 nobody can tell, and it is HALF the pixels. Desktop keeps 2.
-    const dpr=Math.min(devicePixelRatio||1, MOBILE ? 1.4 : 2);
+    const dpr=Math.min(devicePixelRatio||1, MOBILE ? 1.4 : 1.5);
     const r=canvas.getBoundingClientRect();
     const w=Math.round(r.width)||innerWidth, h=Math.round(r.height)||innerHeight;
     if(canvas.width!==w*dpr || canvas.height!==h*dpr){ canvas.width=w*dpr; canvas.height=h*dpr; }
@@ -140,6 +140,22 @@
     return true;
   }
 
+  // SCROLLING WINS. Capture decodes six clips and builds hundreds of bitmaps; on a
+  // phone that work lands on the same main thread and GPU the scroll needs, for the
+  // ~45s it takes. The film arriving a few seconds later costs nothing anyone notices;
+  // a scroll that stutters for 45 seconds is the whole experience. So the clips pause
+  // the moment the page moves and resume once it has been still for a beat.
+  let scrolling = false, scrollIdle = null;
+  const capturing = new Set();
+  addEventListener('scroll', ()=>{
+    if(!scrolling){ scrolling = true; capturing.forEach(v=>{ try{ v.pause(); }catch(e){} }); }
+    clearTimeout(scrollIdle);
+    scrollIdle = setTimeout(()=>{
+      scrolling = false;
+      capturing.forEach(v=>{ try{ v.play().catch(()=>{}); }catch(e){} });
+    }, 220);
+  }, { passive:true });
+
   function captureClip(key, src){
     return new Promise((resolve)=>{
       const v = document.createElement('video');
@@ -161,6 +177,7 @@
       v.setAttribute('aria-hidden', 'true');
       v.style.cssText = 'position:fixed;left:-9999px;top:0;width:1280px;height:720px;opacity:0.01;pointer-events:none;z-index:-1';
       document.body.appendChild(v);
+      if(MOBILE) capturing.add(v);          // so the scroll can pause it
       const arr = [];           // Image objects for painting
       const blobArr = [];       // WebP Blobs for persisting to IndexedDB
       const cap = document.createElement('canvas');
@@ -186,6 +203,7 @@
         if(done) return; done=true; clearTimeout(WATCHDOG); frames[key]=arr; capturedClips++;
         maybePersist();
         // the offscreen element has done its job — stop it decoding and take it out
+        capturing.delete(v);
         try{ v.pause(); v.removeAttribute('src'); v.load(); }catch(e){}
         try{ v.remove(); }catch(e){}
         resolve(arr);
@@ -193,7 +211,12 @@
       function grab(){
         if(!v.videoWidth){ if(v.requestVideoFrameCallback) v.requestVideoFrameCallback(grab); return; }
         if(!sized){
-          const needW = Math.min(3840, Math.max(MOBILE?900:1920, innerWidth*(devicePixelRatio||1)));
+          // CAPTURE NO LARGER THAN WE WILL EVER PAINT. The canvas buffer is capped at
+          // 1.4x CSS on a phone, so on a 390px screen it paints 546px wide — capturing
+          // at 900+ was decoding, scaling and holding bitmaps nearly twice the size they
+          // can ever be shown at, for every frame of six clips. Memory and decode time
+          // both scale with this number, and both are what the scroll is competing with.
+          const needW = Math.min(3840, Math.max(MOBILE ? 640 : 1920, innerWidth*(devicePixelRatio||1) * (MOBILE ? 0.6 : 1)));
           const scale = Math.min(1, needW / v.videoWidth);
           cap.width = Math.round(v.videoWidth*scale); cap.height = Math.round(v.videoHeight*scale); sized=true;
         }

@@ -91,7 +91,8 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
   // alpha:true and no postprocessing: the hero's procedural heat-field (foundry-heat.js) has
   // to stay visible BEHIND the casting, and an opaque canvas would black it out.
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: !MOBILE, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE ? 1.5 : 2));
+  // sits beside two full-screen heat canvases on this page — see foundry-heat.js
+  renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE ? 1.1 : 1.4));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.12;
