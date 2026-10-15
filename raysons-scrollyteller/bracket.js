@@ -96,9 +96,16 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
   //  RENDERER + SCENE
   // ============================================================
   const renderer = new THREE.WebGLRenderer({ canvas, antialias:!MOBILE, alpha:false, powerPreference:'high-performance' });
-  // shares the Overview with cinema.js's full-screen film canvas; together they were
-  // 10.4 megapixels a frame at the old ratios
-  renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE ? 1.3 : 1.5));
+  // LINE ART NEEDS THE PIXELS. This was cut to 1.3/1.5 in a pass that lowered every
+  // canvas on the site, which was right for the film — photographic frames in motion
+  // hide a lower ratio completely. The drawing is the opposite case: it is hairline
+  // wireframe, and a thin line is the first thing to break up when you take resolution
+  // away from it. The client saw it immediately as "less detailed", and they were
+  // describing a real regression rather than a preference.
+  //
+  // Back to 2, which is what hairlines need to stay hairlines. It is the one canvas on
+  // this page that cannot pay for its performance in resolution.
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setSize(innerWidth, innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;

@@ -370,10 +370,24 @@ body.nav-open .nav-burger span:nth-child(2){opacity:0}
 body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
 @media(max-width:860px){
   .nav-burger{display:flex}
-  .nav-links{position:fixed;inset:0;z-index:39;background:rgba(7,5,4,.97);
-    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  /* OPAQUE, AND THE SAME IN ALL THREE PLACES THIS RULE IS WRITTEN.
+     rgba(7,5,4,.97) with a backdrop-filter composites as solid in Chromium and does
+     not in Safari: the hero headline and the header ghosted straight through the open
+     menu on an iPhone. var(--bg) is flat and follows the theme, so the panel is cream
+     in light mode where var(--ink) is dark — the previous fixed dark panel would have
+     put dark text on a dark ground there. Dropping the backdrop-filter also stops the
+     compositor blurring a full-screen backdrop for as long as the menu is open. */
+  .nav-links{position:fixed;inset:0;z-index:39;background:var(--bg);
     flex-direction:column;align-items:center;justify-content:center;gap:30px;font-size:18px;
     opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;mix-blend-mode:normal}
+  .nav-links a{opacity:1;color:var(--ink)}
+  /* The light tokens are scoped to a list of page containers (.sec, .pillar, the
+     footers) and never reach a fixed full-screen overlay, so var(--bg) inside the menu
+     stays the dark value while var(--ink) resolves light elsewhere — dark text on a
+     dark panel. State the menu's own light surface explicitly instead of inheriting
+     one that was never meant to reach here. */
+  [data-theme="light"] .nav-links{background:#f4efe6}
+  [data-theme="light"] .nav-links a{color:#16120e}
   body.nav-open .nav-links{display:flex;opacity:1;visibility:visible}
   .nav-links a{padding:12px 28px}   /* ≥44px touch targets in the mobile menu */
 }

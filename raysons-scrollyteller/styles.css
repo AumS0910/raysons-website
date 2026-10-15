@@ -510,12 +510,31 @@ body.nav-open .nav-burger span:nth-child(3){transform:translateY(-6.5px) rotate(
 @media(max-width:860px){
   .nav-burger{display:flex}
   /* override styles.css display:none on .nav-links at 860px */
+  /* AN OPAQUE PANEL, NOT A TRANSLUCENT ONE.
+     rgba(7,5,4,.97) plus backdrop-filter reads as solid in Chromium and does not in
+     Safari: the hero headline, the eyebrow and the header all ghosted straight through
+     the open menu on an iPhone, over menu labels that were themselves held at
+     opacity .85. Three transparencies stacked on a dark page, and the whole thing
+     turned to mud.
+     var(--bg) is flat and follows the theme, so the menu is legible in both and the
+     panel owes nothing to a backdrop filter — which also stops the compositor blurring
+     a full-screen backdrop every frame the menu is open. */
   .nav-links{display:flex;position:fixed;inset:0;z-index:39;
-    background:rgba(7,5,4,.97);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    background:var(--bg);
     flex-direction:column;align-items:center;justify-content:center;
     gap:32px;font-size:18px;letter-spacing:.08em;
     opacity:0;visibility:hidden;
     transition:opacity .4s,visibility .4s;mix-blend-mode:normal;pointer-events:none}
+  /* full strength in the menu: .85 is a hover affordance on a desktop nav bar, not
+     something to read a five-item menu through on a phone */
+  .nav-links a{opacity:1;color:var(--ink)}
+  /* The light tokens are scoped to a list of page containers (.sec, .pillar, the
+     footers) and never reach a fixed full-screen overlay, so var(--bg) inside the menu
+     stays the dark value while var(--ink) resolves light elsewhere — dark text on a
+     dark panel. State the menu's own light surface explicitly instead of inheriting
+     one that was never meant to reach here. */
+  [data-theme="light"] .nav-links{background:#f4efe6}
+  [data-theme="light"] .nav-links a{color:#16120e}
   body.nav-open .nav-links{opacity:1;visibility:visible;pointer-events:auto}
   .nav-links a{padding:12px 28px}   /* ≥44px touch targets in the mobile menu */
 }

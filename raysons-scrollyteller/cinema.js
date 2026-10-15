@@ -204,7 +204,12 @@
         };
         im.onload = onSettle;
         im.onerror = onSettle;                 // a missing frame must not stall the film
-        im.src = 'images/film/' + key + '/' + String(i + 1).padStart(2, '0') + '.webp';
+        // The directory carries the frame width. These are cached immutable for a year
+        // by our own .htaccess, so replacing the CONTENTS of images/film/ left every
+        // phone that had already loaded the 512px set holding it — the film came back
+        // sharp on a cold cache and stayed soft on the client's actual device. A new
+        // resolution is a new path from now on.
+        im.src = 'images/film-1024/' + key + '/' + String(i + 1).padStart(2, '0') + '.webp';
       }
     });
   }
@@ -426,7 +431,12 @@
     const cw=canvas.width, ch=canvas.height;
     ctx.clearRect(0,0,cw,ch);
     breathT += 0.016;
-    const breathe = 1 + (REDUCED?0:Math.sin(breathT*0.6)*0.012);
+    // The breathing zoom is a 1.2% drift that keeps a held frame feeling alive on a
+    // desktop. On a phone it costs far more than it gives: it changes the scale on
+    // every single frame, so a full-screen image is resampled afresh even when the
+    // film has not advanced a frame and the camera has not moved. Dropping it on
+    // mobile is what makes the skip below possible at all.
+    const breathe = (REDUCED || MOBILE) ? 1 : (1 + Math.sin(breathT*0.6)*0.012);
     const blur = REDUCED ? 0 : Math.min(4, vel*4);
     const _f = CTX_FILTER + (!MOBILE && blur>0.2 ? ` blur(${blur.toFixed(1)}px)` : '');
     if(_f) ctx.filter = _f;
@@ -505,7 +515,7 @@
   // offset. Screenshot diffing cannot verify this — the breathing zoom changes pixels
   // every frame whether or not the drag is connected.
   window.__cine = ()=>({ act: curAct, off: +turnOff.toFixed(2), v: +turnV.toFixed(3), fi: lastFi });
-  let lastFi = -1;
+  let lastFi = -1, lastCamKey = '';
 
   function render(progress, vel){
     const t = progress * TOTAL;
@@ -530,8 +540,19 @@
       } else {
         fi = clamp(Math.round(u*(arr.length-1)), 0, arr.length-1);
       }
+      // NOTHING CHANGED, NOTHING TO DRAW. Scrolling slowly, many frames land on the
+      // same film frame with the camera barely moving, and every one of them was
+      // repainting a full-screen image for an identical result. Skipping those is the
+      // difference between painting on every scroll event and painting when the
+      // picture actually differs.
+      const camKey = cam ? ((cam.x*1e3|0)+','+(cam.y*1e3|0)+','+(cam.scale*1e3|0)) : '-';
+      if(MOBILE && fi === lastFi && camKey === lastCamKey && lastGood === arr[fi]){
+        drew = true;                        // the canvas already shows exactly this
+      } else {
+        lastCamKey = camKey;
+        drew = paint(arr[fi], vel, cam);
+      }
       lastFi = fi;
-      drew = paint(arr[fi], vel, cam);
     }
     if(!drew) paintFallback();
 
