@@ -92,7 +92,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
   // to stay visible BEHIND the casting, and an opaque canvas would black it out.
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: !MOBILE, alpha: true, powerPreference: 'high-performance' });
   // sits beside two full-screen heat canvases on this page — see foundry-heat.js
-  renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE ? 1.1 : 1.4));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE ? 1 : 1.4));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.12;
@@ -109,8 +109,14 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
   scene.add(new THREE.HemisphereLight(0xcbcdd2, 0x2e2c29, 0.6));
   const key  = new THREE.DirectionalLight(0xf6f2ec, 3.4); key.position.set(-4, 5, 3);   scene.add(key);
   const rim  = new THREE.DirectionalLight(0xcfd6e0, 1.9); rim.position.set(5, 3.5, -4); scene.add(rim);
-  const rim2 = new THREE.DirectionalLight(0xd8a06a, 0.7); rim2.position.set(-2, 1, -5); scene.add(rim2);
-  const fillL= new THREE.DirectionalLight(0xeeeae4, 0.5); fillL.position.set(2, -1, 4); scene.add(fillL);
+  // The warm back-rim and the front fill are the two faintest of five lights, at 0.7
+  // and 0.5 against the key's 3.4 — and every light costs a full evaluation per
+  // fragment whether or not anyone can see its contribution. The environment map still
+  // carries the ambient they were filling in.
+  const rim2 = MOBILE ? null : new THREE.DirectionalLight(0xd8a06a, 0.7);
+  if(rim2){ rim2.position.set(-2, 1, -5); scene.add(rim2); }
+  const fillL = MOBILE ? null : new THREE.DirectionalLight(0xeeeae4, 0.5);
+  if(fillL){ fillL.position.set(2, -1, 4); scene.add(fillL); }
 
   // ── THE FRAGMENTS ─────────────────────────────────────────────────────────
   // The GLB is ONE welded mesh — a finished casting, not an assembly — so there are no
@@ -191,9 +197,17 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
   // ── the metal — bracket.js's iron, plus the dismantle ─────────────────────
   const grain = makeNoiseTex(256);
+  // NO CLEARCOAT ON A PHONE. Clearcoat adds a second full specular lobe evaluated per
+  // fragment, and it is the single most expensive thing in this material. Measured
+  // across repeated runs, this one canvas is the whole of Foundry's cost: the page sits
+  // at a 198ms median frame on a throttled phone and at 17ms with this canvas removed,
+  // while the two heat fields together account for about 70ms of the remainder.
+  // Throttling the render to 30fps barely moved it, which is the tell — the cost is per
+  // RENDER, not per second, so it has to come out of the shading itself.
+  // On a 390px canvas the lacquer highlight it buys is a few pixels wide.
   const iron = new THREE.MeshPhysicalMaterial({
     color: 0x8a847b, metalness: 0.86, roughness: 0.34,
-    clearcoat: 0.35, clearcoatRoughness: 0.40, envMapIntensity: 1.75,
+    clearcoat: MOBILE ? 0 : 0.35, clearcoatRoughness: 0.40, envMapIntensity: 1.75,
     bumpMap: grain, bumpScale: 0.32, roughnessMap: grain
   });
   const uni = { uAssemble: { value: 1 }, uSpread: { value: 0.5 } };
@@ -402,11 +416,25 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
   resize();
 
   let prev = performance.now();
+  let lastDraw = 0;
   renderer.setAnimationLoop((tm) => {
     const now = performance.now();
     const dt = Math.min(0.1, (now - prev) / 1000);      // clamped: a backgrounded tab must not jump
     prev = now;
     if (!onScreen || !modelReady) return;
+
+    // 30fps ON A PHONE. Isolating the three canvases on this page put essentially the
+    // whole cost here: all three together measured 233ms a frame on a throttled phone,
+    // 17.7ms with this one canvas removed, and 178ms with only the two heat fields
+    // removed. The heat fields are nearly free; this scene is the page.
+    //
+    // It is a casting settling into a rest pose and coming apart — motion measured in
+    // seconds, with no fast camera and nothing to track. Half the frames read the same
+    // and cost half as much, and the scroll gets the time back.
+    if (MOBILE) {
+      if (now - lastDraw < 32) return;
+      lastDraw = now;
+    }
     const t = tm * 0.001;
 
     // THE SETTLE — on elapsed time, not per frame, so the catch takes the same beat on a

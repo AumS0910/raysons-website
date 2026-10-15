@@ -33,6 +33,10 @@ async function run(page,vp,cpu,label){
 }
 console.log('DESKTOP (1440x900, no throttle)');
 for(const p of PAGES) await run(p,{w:1440,h:900,d:2},1,'desktop');
-console.log('\nPHONE (390x844, 4x CPU throttle)');
-for(const p of PAGES) await run(p,{w:390,h:844,d:3},4,'phone 4x');
+console.log('');
+console.log('iPHONE (390x844 dpr3, 4x CPU throttle)');
+for(const p of PAGES) await run(p,{w:390,h:844,d:3},4,'iphone 4x');
+console.log('');
+console.log('ANDROID (412x915 dpr2.6, 4x CPU throttle)');
+for(const p of PAGES) await run(p,{w:412,h:915,d:2.6},4,'android 4x');
 await b.close();
