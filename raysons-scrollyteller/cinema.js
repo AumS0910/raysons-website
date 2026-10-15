@@ -16,6 +16,11 @@
 
   const canvas = document.getElementById('stage');
   const ctx = canvas.getContext('2d');
+  // The film is scaled on every painted frame (1024px source into a 780px buffer, plus
+  // the breathing zoom). 'high' smoothing asks for a multi-tap resample of a full-screen
+  // image sixty times a second; on photographic footage in motion the difference from
+  // 'low' is invisible and the cost is not. Set once, here, rather than per frame.
+  try{ ctx.imageSmoothingQuality = 'low'; }catch(e){}
   const overlays = Array.from(document.querySelectorAll('.act'));
   const loader = document.getElementById('cloader');
   const lbar   = document.querySelector('#cloader .cbar i');
@@ -65,7 +70,13 @@
     // frame of every scroll, and a CPU profile put 89% of the scroll in native compositing
     // with drawImage the largest JS cost after it. This is photographic film under motion,
     // not text: at 1.4 nobody can tell, and it is HALF the pixels. Desktop keeps 2.
-    const dpr=Math.min(devicePixelRatio||1, MOBILE ? 1.4 : 1.5);
+    // 1.4 was chosen when every frame of this canvas was a scroll-time cost worth
+    // halving. The film is pre-rendered images on a phone now and a paint costs ~5ms,
+    // so that economy had stopped paying for itself and was only costing sharpness: a
+    // 546px buffer stretched across a 1170px screen is a 2.1x upscale, which is exactly
+    // as soft as it sounds. 2 is the ordinary retina treatment — 780px here, downscaled
+    // from 1024px source frames rather than magnified from 512.
+    const dpr=Math.min(devicePixelRatio||1, MOBILE ? 2 : 1.5);
     const r=canvas.getBoundingClientRect();
     const w=Math.round(r.width)||innerWidth, h=Math.round(r.height)||innerHeight;
     if(canvas.width!==w*dpr || canvas.height!==h*dpr){ canvas.width=w*dpr; canvas.height=h*dpr; }
