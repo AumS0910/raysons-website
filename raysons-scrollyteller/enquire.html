@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="build" content="7b21d3ad123e">
+<meta name="build" content="0255e4f98330">
 <script>
 /* SELF-HEAL. iOS Safari restores a suspended tab from a snapshot without re-fetching,
    so a phone can sit on a build from days ago no matter what the server sends or what
@@ -59,7 +59,11 @@
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Request a Quote — Raysons Shell Cast" />
 <meta name="twitter:image" content="https://raysons-website.vercel.app/raysons-scrollyteller/valve/hero.jpg" />
-<script>try{var _t=localStorage.getItem('rc_theme');if(_t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+<script>/* LIGHT ONLY. The theme switch is gone at the client's request, so this sets
+   the attribute every page already styles against rather than removing the whole
+   [data-theme="light"] layer — which keeps the change one line to undo and avoids
+   touching 167 light rules spread over three stylesheets. Runs before first paint. */
+document.documentElement.setAttribute('data-theme','light');</script>
 <link rel="stylesheet" href="styles.css?v=c2f11225" />
 <!-- three.js import map — present on EVERY page so module engines (bracket.js,
      about-corridor.js) resolve "three" no matter which page you entered on and then
@@ -390,10 +394,6 @@
     <a href="products.html">Products</a>
     <a href="enquire.html" aria-current="page">Enquire</a>
   </div>
-  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
-    <svg class="tt-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.1"/><path d="M12 2.2v2.5M12 19.3v2.5M21.8 12h-2.5M4.7 12H2.2M18.9 5.1l-1.8 1.8M6.9 17.1l-1.8 1.8M18.9 18.9l-1.8-1.8M6.9 6.9 5.1 5.1"/></svg>
-    <svg class="tt-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.7 13.2A8.6 8.6 0 1 1 10.8 3.3a6.8 6.8 0 0 0 9.9 9.9Z"/></svg>
-  </button>
   <a class="eq-back" href="index.html">← Back to the foundry</a>
 </nav>
 
@@ -826,7 +826,6 @@
 </script>
 <script src="premium.js?v=fa7b4d4b"></script>
 <script src="nav-transition.js?v=2da77911"></script>
-<script src="theme.js?v=ee040546"></script>
 <script src="spa.js?v=673aa644"></script>
 <script>(function(){var m=document.querySelector('meta[name="build"]'),t=document.getElementById("buildTag");if(m&&t)t.textContent="· b"+m.getAttribute("content").slice(0,6);})();</script>
 </body>
